@@ -7,6 +7,8 @@ Récupérer les archives :
 * `mtd.zip` à extraire dans `montages/mtd` ;
 * `images.zip` à extraire dans `montages/images`.
 
+Lien : [ici](https://francetransfert.numerique.gouv.fr/download/download-info-public?enclosure=de8b65e2-116e-4a61-87b9-ce99efeacbcc&lang=fr), mdp : `ensgTSI2025!!!`
+
 Si vous êtes sous GNU/Linux, lancez depuis ce dossier :
 * `unzip geoserver.zip -d montages/geoserver/` ;
 * `unzip mtd.zip -d montages/mtd/` ;
