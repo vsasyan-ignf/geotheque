@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted, nextTick } from "vue";
 
-const center = ref([40, 40]);
+const center = ref([260000, 6000000]);
 const projection = ref("EPSG:3857");
-const zoom = ref(8);
+const zoom = ref(6);
 const rotation = ref(0);
 
 const activeTab = ref(null);
@@ -39,7 +39,6 @@ onMounted(() => {
 <template>
   <div class="map-container">
     <div class="sidebar-container">
-      <!-- Tab buttons -->
       <div class="sidebar-tabs">
         <button 
           v-for="tab in tabs" 
@@ -52,7 +51,6 @@ onMounted(() => {
         </button>
       </div>
       
-      <!-- Sidebar content -->
       <div class="sidebar-content" :class="{ open: isSidebarOpen }">
         <div v-if="activeTab === 'param1'" class="tab-content">
           <h3>Layers</h3>
