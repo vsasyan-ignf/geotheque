@@ -1,9 +1,9 @@
-<script setup>
-import TheWelcome from '../components/TheWelcome.vue'
-</script>
-
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <HeaderApp />
+  <MapBox />
 </template>
+
+<script setup>
+import HeaderApp from '@/components/HeaderApp.vue'
+import MapBox from '@/components/MapBox.vue'
+</script>
