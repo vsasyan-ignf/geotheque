@@ -6,16 +6,15 @@ const projection = ref("EPSG:3857");
 const zoom = ref(6);
 const rotation = ref(0);
 
-const activeTab = ref(null);
-const isSidebarOpen = ref(false);
+const activeTab = ref('carthotheque');
+const isSidebarOpen = ref(true);
 
 const tabs = [
-  { id: 'param1', icon: 'layers', title: 'Param1' },
-  { id: 'param2', icon: 'file', title: 'Param2' },
-  { id: 'param3', icon: 'database', title: 'Param3' },
-  { id: 'param4', icon: 'database', title: 'Param4' },
-  { id: 'param5', icon: 'database', title: 'Param5' },
-  { id: 'param6', icon: 'database', title: 'Param5'}
+  { id: 'carthotheque', icon: 'layers', title: 'Cartothèque France' },
+  { id: 'carthotheque_etranger', icon: 'file', title: 'Cartothèque Étranger' },
+  { id: 'phototheque', icon: 'database', title: 'Photothèque France' },
+  { id: 'phototheque_etranger', icon: 'database', title: 'Photothèque Étranger' },
+  { id: 'aide', icon: 'database', title: 'Aide' },
 ];
 
 function toggleTab(tabId) {
@@ -48,33 +47,27 @@ onMounted(() => {
           :title="tab.title"
         >
           <i :class="'mdi mdi-' + tab.icon"></i>
+          <div class="tooltip" v-show="!isSidebarOpen">{{ tab.title }}</div>
+
         </button>
       </div>
       
       <div class="sidebar-content" :class="{ open: isSidebarOpen }">
-        <div v-if="activeTab === 'param1'" class="tab-content">
-          <h3>Layers</h3>
-          <p>Layer management content goes here</p>
+        <div v-if="activeTab === 'carthotheque'" class="tab-content">
+          <h3>{{ tabs.find(tab => tab.id === activeTab)?.title }}</h3>
+          <!-- exemple <p>Layer management content goes here</p> -->
         </div>
-        <div v-if="activeTab === 'param2'" class="tab-content">
-          <h3>Files</h3>
-          <p>File management content goes here</p>
+        <div v-if="activeTab === 'carthotheque_etranger'" class="tab-content">
+          <h3>{{ tabs.find(tab => tab.id === activeTab)?.title }}</h3>
         </div>
-        <div v-if="activeTab === 'param3'" class="tab-content">
-          <h3>Location</h3>
-          <p>Location settings content goes here</p>
+        <div v-if="activeTab === 'phototheque'" class="tab-content">
+          <h3>{{ tabs.find(tab => tab.id === activeTab)?.title }}</h3>
         </div>
-        <div v-if="activeTab === 'param4'" class="tab-content">
-          <h3>Tools</h3>
-          <p>Map tools content goes here</p>
+        <div v-if="activeTab === 'phototheque_etranger'" class="tab-content">
+          <h3>{{ tabs.find(tab => tab.id === activeTab)?.title }}</h3>
         </div>
-        <div v-if="activeTab === 'param5'" class="tab-content">
-          <h3>Settings</h3>
-          <p>Settings content goes here</p>
-        </div>
-        <div v-if="activeTab === 'param6'" class="tab-content">
-          <h3>Info</h3>
-          <p>Map information content goes here</p>
+        <div v-if="activeTab === 'aide'" class="tab-content">
+          <h3>{{ tabs.find(tab => tab.id === activeTab)?.title }}</h3>
         </div>
       </div>
     </div>
@@ -167,11 +160,60 @@ onMounted(() => {
   padding: 15px;
 }
 
-.icon-layers:before { content: "\25A2"; }
+.tab-content h3 {
+  background-color: #911515;
+  color: white;
+  padding: 12px;
+  margin: -15px -15px 15px -15px;
+  font-size: 16px;
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.tab-content h3::after {
+  content: "x";
+  position: absolute;
+  right: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.tooltip {
+  position: absolute;
+  left: 50px;
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.tooltip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -5px;
+  margin-top: -5px;
+  border-width: 5px 5px 5px 0;
+  border-style: solid;
+  border-color: transparent #333 transparent transparent;
+}
+
+.tab-button:hover .tooltip {
+  opacity: 1;
+}
+
+/* .icon-layers:before { content: "\25A2"; }
 .icon-file:before { content: "\1F4C4"; }
 .icon-map-pin:before { content: "\1F4CD"; }
 .icon-tool:before { content: "\1F527"; }
 .icon-settings:before { content: "\2699"; }
-.icon-info:before { content: "\2139"; }
+.icon-info:before { content: "\2139"; } */
 
 </style>
