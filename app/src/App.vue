@@ -6,32 +6,30 @@ const projection = ref("EPSG:4326");
 const zoom = ref(8);
 const rotation = ref(0);
 
-const currentCenter = ref(center.value);
-const currentZoom = ref(zoom.value);
-const currentRotation = ref(rotation.value);
-const currentResolution = ref(0);
-
+const activeTab = ref(null);
 const isSidebarOpen = ref(false);
 
-function toggleSidebar() {
-  isSidebarOpen.value = !isSidebarOpen.value;
-}
+const tabs = [
+  { id: 'param1', icon: 'layers', title: 'Param1' },
+  { id: 'param2', icon: 'file', title: 'Param2' },
+  { id: 'param3', icon: 'database', title: 'Param3' },
+  { id: 'param4', icon: 'database', title: 'Param4' },
+  { id: 'param5', icon: 'database', title: 'Param5' },
+  { id: 'param6', icon: 'database', title: 'Param5'}
+];
 
-function resolutionChanged(event) {
-  currentResolution.value = event.target.getResolution();
-  currentZoom.value = event.target.getZoom();
-}
-
-function centerChanged(event) {
-  currentCenter.value = event.target.getCenter();
-}
-
-function rotationChanged(event) {
-  currentRotation.value = event.target.getRotation();
+function toggleTab(tabId) {
+  if (activeTab.value === tabId) {
+    activeTab.value = null;
+    isSidebarOpen.value = false;
+  } else {
+    activeTab.value = tabId;
+    isSidebarOpen.value = true;
+  }
 }
 
 onMounted(() => {
-  // refresh le state pour le resize de la map
+  // refresh pour le changement de state
   nextTick(() => {
     window.dispatchEvent(new Event("resize"));
   });
@@ -39,19 +37,50 @@ onMounted(() => {
 </script>
 
 <template>
-<button
-    class="toggle-button"
-    :class="{ 'button-shift': isSidebarOpen }"
-    @click="toggleSidebar"
-  >    ☰
-  </button>
+  <div class="map-container">
+    <div class="sidebar-container">
+      <!-- Tab buttons -->
+      <div class="sidebar-tabs">
+        <button 
+          v-for="tab in tabs" 
+          :key="tab.id"
+          :class="['tab-button', { active: activeTab === tab.id }]"
+          @click="toggleTab(tab.id)"
+          :title="tab.title"
+        >
+          <i :class="'mdi mdi-' + tab.icon"></i>
+        </button>
+      </div>
+      
+      <!-- Sidebar content -->
+      <div class="sidebar-content" :class="{ open: isSidebarOpen }">
+        <div v-if="activeTab === 'param1'" class="tab-content">
+          <h3>Layers</h3>
+          <p>Layer management content goes here</p>
+        </div>
+        <div v-if="activeTab === 'param2'" class="tab-content">
+          <h3>Files</h3>
+          <p>File management content goes here</p>
+        </div>
+        <div v-if="activeTab === 'param3'" class="tab-content">
+          <h3>Location</h3>
+          <p>Location settings content goes here</p>
+        </div>
+        <div v-if="activeTab === 'param4'" class="tab-content">
+          <h3>Tools</h3>
+          <p>Map tools content goes here</p>
+        </div>
+        <div v-if="activeTab === 'param5'" class="tab-content">
+          <h3>Settings</h3>
+          <p>Settings content goes here</p>
+        </div>
+        <div v-if="activeTab === 'param6'" class="tab-content">
+          <h3>Info</h3>
+          <p>Map information content goes here</p>
+        </div>
+      </div>
+    </div>
 
-  <div :class="['sidebar', { open: isSidebarOpen }]">
-    <h2>Ecureil Force</h2>
-    <p>Mon contenue info</p>
-  </div>
-
-  <div class="map-container" :class="{ 'map-shift': isSidebarOpen }">
     <ol-map class="ol-map">
       <ol-view
         ref="view"
@@ -59,10 +88,8 @@ onMounted(() => {
         :rotation="rotation"
         :zoom="zoom"
         :projection="projection"
-        @change:center="centerChanged"
-        @change:resolution="resolutionChanged"
-        @change:rotation="rotationChanged"
       />
+
       <ol-tile-layer>
         <ol-source-osm />
       </ol-tile-layer>
@@ -71,61 +98,75 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
-.toggle-button {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background-color: #333;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  z-index: 10;
-  transition: transform 0.3s ease;
-}
-
-.toggle-button.button-shift {
-  transform: translateX(250px);
-}
-
-.sidebar {
-  position: absolute;
-  top: 0;
-  left: -250px;
-  width: 250px;
-  height: 100vh;
-  background-color: #444;
-  color: white;
-  padding: 20px;
-  transition: left 0.3s ease;
-  z-index: 5;
-}
-
-.sidebar.open {
-  left: 0;
-}
-
 .map-container {
   position: absolute;
   top: 0;
   left: 0;
-  height: 100vh;
-  transition: width 0.3s ease;
-}
-
-.map-container.map-shift {
-  width: calc(100vw);
-}
-
-.map-container:not(.map-shift) {
   width: 100vw;
+  height: 100vh;
 }
 
 .ol-map {
   width: 100%;
   height: 100%;
 }
-</style>
 
+.sidebar-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+}
+
+.sidebar-tabs {
+  width: 50px;
+  height: 100%;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ddd;
+}
+
+.tab-button {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #555;
+  transition: background-color 0.3s;
+}
+
+.tab-button:hover {
+  background-color: #e0e0e0;
+}
+
+.tab-button.active {
+  background-color: #ddd;
+  color: #2196F3;
+}
+
+.sidebar-content {
+  width: 0;
+  height: 100%;
+  background-color: white;
+  transition: width 0.3s;
+  overflow: hidden;
+  border-right: 1px solid #ddd;
+}
+
+.sidebar-content.open {
+  width: 300px;
+}
+
+.tab-content {
+  padding: 15px;
+}
+
+</style>
