@@ -26,7 +26,9 @@ function toggleTab(tabId) {
     isSidebarOpen.value = true;
   }
 }
-
+function hideTooltip(tab) {
+  tab.showTooltip = false;
+}
 onMounted(() => {
   // refresh pour le changement de state
   nextTick(() => {
@@ -44,10 +46,13 @@ onMounted(() => {
           :key="tab.id"
           :class="['tab-button', { active: activeTab === tab.id }]"
           @click="toggleTab(tab.id)"
+          @mousedown="hideTooltip(tab)"
+          @mouseenter="tab.showTooltip = true"
+          @mouseleave="tab.showTooltip = false"
           :title="tab.title"
         >
-          <i :class="'mdi mdi-' + tab.icon"></i>
-          <div class="tooltip" v-show="!isSidebarOpen">{{ tab.title }}</div>
+          <i :class="'mdi mdi-' + tab.icon + ' icon-large'"></i>
+          <div class="tooltip" v-show="activeTab !== tab.id">{{ tab.title }}</div>
 
         </button>
       </div>
@@ -127,6 +132,7 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   border: none;
+  border-bottom: 1px solid rgb(206, 206, 206);
   background: none;
   cursor: pointer;
   font-size: 20px;
@@ -139,12 +145,13 @@ onMounted(() => {
 }
 
 .tab-button.active {
-  background-color: #ddd;
-  color: #2196F3;
+  background-color: #739614;
+  color: #ffffff;
 }
 
 .sidebar-content {
   width: 0;
+  min-width: 0;
   height: 100%;
   background-color: white;
   transition: width 0.3s;
@@ -153,19 +160,24 @@ onMounted(() => {
 }
 
 .sidebar-content.open {
-  width: 300px;
+  width: 400px;
+}
+
+.icon-large {
+    font-size: 27px;
 }
 
 .tab-content {
   padding: 15px;
+  width: 400px;
 }
 
 .tab-content h3 {
-  background-color: #911515;
+  background-color: #739614;
   color: white;
-  padding: 12px;
+  padding: 11px;
   margin: -15px -15px 15px -15px;
-  font-size: 16px;
+  font-size: 18;
   font-weight: normal;
   display: flex;
   align-items: center;
@@ -182,31 +194,26 @@ onMounted(() => {
 
 .tooltip {
   position: absolute;
-  left: 50px;
-  background-color: #333;
+  left: 55px;
+  background-color: #739614;
   color: white;
-  padding: 5px 10px;
+  padding: 14px 10px;
   border-radius: 4px;
   font-size: 14px;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.1s;
   pointer-events: none;
+  z-index: 99999;
 }
 
-.tooltip::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -5px;
-  margin-top: -5px;
-  border-width: 5px 5px 5px 0;
-  border-style: solid;
-  border-color: transparent #333 transparent transparent;
-}
 
 .tab-button:hover .tooltip {
   opacity: 1;
+}
+
+.tab-button.active .tooltip {
+  opacity: 0;
 }
 
 /* .icon-layers:before { content: "\25A2"; }
