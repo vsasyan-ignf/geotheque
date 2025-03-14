@@ -26,6 +26,7 @@ function toggleTab(tabId) {
     isSidebarOpen.value = true;
   }
 }
+
 function hideTooltip(tab) {
   tab.showTooltip = false;
 }
@@ -100,15 +101,20 @@ onMounted(() => {
   left: 0;
   width: 100vw;
   height: 100vh;
+
+  /* à enlever si on veut une superposition de la map */
+  display: flex; 
+
 }
 
 .ol-map {
   width: 100%;
   height: 100%;
+  flex:1;
 }
 
 .sidebar-container {
-  position: absolute;
+  /* position: absolute; */
   top: 0;
   left: 0;
   height: 100%;
@@ -151,7 +157,6 @@ onMounted(() => {
 
 .sidebar-content {
   width: 0;
-  min-width: 0;
   height: 100%;
   background-color: white;
   transition: width 0.3s;
