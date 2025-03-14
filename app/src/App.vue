@@ -2,7 +2,7 @@
 import { ref, onMounted, nextTick } from "vue";
 
 const center = ref([40, 40]);
-const projection = ref("EPSG:4326");
+const projection = ref("EPSG:3857");
 const zoom = ref(8);
 const rotation = ref(0);
 
@@ -168,5 +168,12 @@ onMounted(() => {
 .tab-content {
   padding: 15px;
 }
+
+.icon-layers:before { content: "\25A2"; }
+.icon-file:before { content: "\1F4C4"; }
+.icon-map-pin:before { content: "\1F4CD"; }
+.icon-tool:before { content: "\1F527"; }
+.icon-settings:before { content: "\2699"; }
+.icon-info:before { content: "\2139"; }
 
 </style>
