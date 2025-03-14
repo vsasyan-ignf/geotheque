@@ -17,6 +17,12 @@ const tabs = [
   { id: 'aide', icon: 'database', title: 'Aide' },
 ];
 
+const subCategories = [
+  { id: 'commune', icon: 'city', title: 'Commune' },
+  { id: 'departement', icon: 'map', title: 'Département' },
+  { id: 'point', icon: 'crosshairs-gps', title: 'Point coordonnée' },
+];
+
 function toggleTab(tabId) {
   if (activeTab.value === tabId) {
     activeTab.value = null;
@@ -39,22 +45,14 @@ onMounted(() => {
 </script>
 
 <template>
-
-<header class="header">
+  <header class="header">
     <div class="logo">
-
       <!-- mon nouveau logo ici -->
       <i class="mdi mdi-map"></i>
       <span>Géothèque</span>
     </div>
-    
+
     <nav class="header-nav">
-      <!-- <button class="header-button" title="Recherche">
-        <i class="mdi mdi-magnify"></i>
-      </button>
-      <button class="header-button" title="Profil">
-        <i class="mdi mdi-account"></i>
-      </button> -->
       <button class="header-button" title="Paramètres">
         <i class="mdi mdi-cog"></i>
       </button>
@@ -64,8 +62,8 @@ onMounted(() => {
   <div class="map-container">
     <div class="sidebar-container">
       <div class="sidebar-tabs">
-        <button 
-          v-for="tab in tabs" 
+        <button
+          v-for="tab in tabs"
           :key="tab.id"
           :class="['tab-button', { active: activeTab === tab.id }]"
           @click="toggleTab(tab.id)"
@@ -76,14 +74,78 @@ onMounted(() => {
         >
           <i :class="'mdi mdi-' + tab.icon + ' icon-large'"></i>
           <div class="tooltip" v-show="activeTab !== tab.id">{{ tab.title }}</div>
-
         </button>
       </div>
-      
+
       <div class="sidebar-content" :class="{ open: isSidebarOpen }">
         <div v-if="activeTab === 'carthotheque'" class="tab-content">
           <h3>{{ tabs.find(tab => tab.id === activeTab)?.title }}</h3>
-          <!-- exemple <p>Layer management content goes here</p> -->
+          <form>
+            <div class="form-example">
+              <h1>critere de selec</h1>
+
+              <label for="name">adresse </label>
+              <input type="text" name="name" id="name"/>
+              <br>
+
+              <label for="name">min </label>
+              <input type="text" name="min" id="min"/>
+              <br>
+
+              <label for="name">max </label>
+              <input type="text" name="max" id="max"/>
+              <br>
+
+              <label for="name">echelle </label>
+              <select name="pets" id="pet-select">
+                <option value="">--option--</option>
+                <option value="dog">Dog</option>
+                <option value="cat">Cat</option>
+                <option value="hamster">Hamster</option>
+                <option value="parrot">Parrot</option>
+                <option value="spider">Spider</option>
+                <option value="goldfish">Goldfish</option>
+              </select>
+              <br>
+
+              <label for="name">collection </label>
+              <select name="pets" id="pet-select">
+                <option value="">--option--</option>
+                <option value="dog">Dog</option>
+                <option value="cat">Cat</option>
+                <option value="hamster">Hamster</option>
+                <option value="parrot">Parrot</option>
+                <option value="spider">Spider</option>
+                <option value="goldfish">Goldfish</option>
+                <br>
+              </select>
+              <br>
+              <button type="submit">valider</button>
+              <br>
+              <h1>afficher les scans</h1>
+              <label for="name">scan </label>
+              <select name="pets" id="pet-select">
+                <option value="">--option--</option>
+                <option value="dog">Dog</option>
+                <option value="cat">Cat</option>
+                <option value="hamster">Hamster</option>
+                <option value="parrot">Parrot</option>
+                <option value="spider">Spider</option>
+                <option value="goldfish">Goldfish</option>
+                <br>
+              </select>
+
+              <br>
+              <button type="submit">valider</button>
+            </div>
+            
+          </form>
+          <div class="sub-categories">
+            <div v-for="sub in subCategories" :key="sub.id" class="sub-category">
+              <i :class="'mdi mdi-' + sub.icon"></i>
+              <span>{{ sub.title }}</span>
+            </div>
+          </div>
         </div>
         <div v-if="activeTab === 'carthotheque_etranger'" class="tab-content">
           <h3>{{ tabs.find(tab => tab.id === activeTab)?.title }}</h3>
@@ -181,7 +243,7 @@ onMounted(() => {
   position: absolute;
   top: 8px;
   left: 0;
-  height: calc(100% - 8px);;
+  height: calc(100% - 8px);
   z-index: 1000;
   display: flex;
 }
@@ -284,11 +346,33 @@ onMounted(() => {
   opacity: 0;
 }
 
-/* .icon-layers:before { content: "\25A2"; }
-.icon-file:before { content: "\1F4C4"; }
-.icon-map-pin:before { content: "\1F4CD"; }
-.icon-tool:before { content: "\1F527"; }
-.icon-settings:before { content: "\2699"; }
-.icon-info:before { content: "\2139"; } */
+.sub-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
 
+.sub-category {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.sub-category i {
+  font-size: 24px;
+  color: #739614;
+  width: 100%;
+  text-align: center;
+}
+
+.sub-category span {
+  font-size: 18px;
+  color: #333;
+  width: 100%;
+  text-align: center;
+}
 </style>
