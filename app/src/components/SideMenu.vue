@@ -1,13 +1,8 @@
 <!-- gestion globale de la side barre -->
 
-
 <template>
   <div class="sidebar-container">
-    <SidebarTabs
-      :tabs="tabs"
-      :activeTab="activeTab"
-      @toggle-tab="toggleTab"
-    />
+    <SidebarTabs :tabs="tabs" :activeTab="activeTab" @toggle-tab="toggleTab" />
 
     <div class="sidebar-content" :class="{ open: isSidebarOpen }">
       <component
@@ -17,7 +12,7 @@
         @close="closeTab"
       >
         <template v-if="activeTab === 'carthotheque'">
-          <CartothequeFrance 
+          <CartothequeFrance
             :activeSubCategory="activeSubCategory"
             :subCategories="subCategories"
             @select-sub-category="selectSubCategory"
@@ -26,9 +21,8 @@
         </template>
 
         <template v-else-if="activeTab === 'aide'">
-          <Aide/>
+          <Aide />
         </template>
-        
       </component>
     </div>
   </div>
@@ -47,10 +41,10 @@ const activeSubCategory = ref(null)
 
 const tabs = [
   { id: 'carthotheque', icon: 'layers', title: 'Cartothèque France' },
-  { id: 'carthotheque_etranger', icon: 'file', title: 'Cartothèque Étranger' },
-  { id: 'phototheque', icon: 'database', title: 'Photothèque France' },
-  { id: 'phototheque_etranger', icon: 'database', title: 'Photothèque Étranger' },
-  { id: 'aide', icon: 'database', title: 'Aide' },
+  { id: 'carthotheque_etranger', icon: 'layers', title: 'Cartothèque Étranger' },
+  { id: 'phototheque', icon: 'camera', title: 'Photothèque France' },
+  { id: 'phototheque_etranger', icon: 'camera', title: 'Photothèque Étranger' },
+  { id: 'aide', icon: 'lightbulb-on', title: 'Aide' },
 ]
 
 const subCategories = [
@@ -60,7 +54,7 @@ const subCategories = [
 ]
 
 const activeTabTitle = computed(() => {
-  return tabs.find(tab => tab.id === activeTab.value)?.title || ''
+  return tabs.find((tab) => tab.id === activeTab.value)?.title || ''
 })
 
 function getActiveComponent() {
