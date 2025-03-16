@@ -1,15 +1,14 @@
 <!-- recherche par commune -->
- 
 
 <template>
   <div class="sub-category-content">
     <SubCategoryHeader title="Recherche par commune" @close="$emit('close')" />
-  
+
     <div class="search-form">
       <div class="form-group">
         <label for="commune-search">Nom ou code postal</label>
         <div class="input-group">
-           <input
+          <input
             id="commune-search"
             v-model="searchCommune"
             type="text"
@@ -21,7 +20,7 @@
           </button>
         </div>
       </div>
-  
+
       <div class="results-container" v-if="communeResults.length > 0">
         <h5>Résultats ({{ communeResults.length }})</h5>
         <div class="results-list">
@@ -36,21 +35,24 @@
           </div>
         </div>
       </div>
-  
+
       <div class="no-results" v-else-if="searchCommune">Aucune commune trouvée</div>
     </div>
+
+    <CritereSelection />
   </div>
 </template>
-  
+
 <script setup>
 import { ref } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-  
+import CritereSelection from './CritereSelection.vue'
+
 defineEmits(['close', 'select-commune'])
-  
+
 const searchCommune = ref('')
 const communeResults = ref([])
-  
+
 const communes = [
   { nom: 'Paris', code: '75000', departement: 'Paris' },
   { nom: 'Lyon', code: '69000', departement: 'Rhône' },
@@ -58,20 +60,20 @@ const communes = [
   { nom: 'Toulouse', code: '31000', departement: 'Haute-Garonne' },
   { nom: 'Nice', code: '06000', departement: 'Alpes-Maritimes' },
 ]
-  
+
 function searchCommunes() {
   const query = searchCommune.value.toLowerCase()
   communeResults.value = communes.filter(
-    (commune) => commune.nom.toLowerCase().includes(query) || commune.code.includes(query)
+    (commune) => commune.nom.toLowerCase().includes(query) || commune.code.includes(query),
   )
 }
 </script>
-  
+
 <style scoped>
 .sub-category-content {
   animation: fadeIn 0.3s ease;
 }
-  
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -80,28 +82,28 @@ function searchCommunes() {
     opacity: 1;
   }
 }
-  
+
 .search-form {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
-  
+
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
-  
+
 .form-group label {
   font-size: 14px;
   color: #555;
 }
-  
+
 .input-group {
   display: flex;
 }
-  
+
 .input-group input {
   flex: 1;
   padding: 10px;
@@ -111,7 +113,7 @@ function searchCommunes() {
   border-bottom-left-radius: 4px;
   font-size: 14px;
 }
-  
+
 .input-group button {
   padding: 0 15px;
   background-color: #739614;
@@ -122,22 +124,22 @@ function searchCommunes() {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-  
+
 .input-group button:hover {
   background-color: #5e7a10;
 }
-  
+
 .results-container {
   margin-top: 10px;
 }
-  
+
 .results-container h5 {
   font-size: 14px;
   color: #555;
   margin-bottom: 10px;
 }
-  
-  .results-list {
+
+.results-list {
   max-height: 300px;
   overflow-y: auto;
   border: 1px solid #ddd;
