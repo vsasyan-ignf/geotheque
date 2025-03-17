@@ -1,156 +1,173 @@
+
 <style scoped>
-.container {
-  border: solid 1px #ddd;
-  padding: 20px;
+.critere-selection {
   margin-top: 20px;
-  border-radius: 20px;
-  background-color: #fff;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.container .heading {
-  font-size: 1.3rem;
-  margin-bottom: 15px;
-  font-weight: bolder;
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
   color: #333;
+  margin-bottom: 15px;
 }
 
-.form {
-  max-width: 300px;
+.criteria-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
+  width: 100%;
 }
 
-.form .btn-container {
+.form-row {
+  display: flex;
+  gap: 10px;
   width: 100%;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group.half {
+  flex: 1;
+  min-width: calc(50% - 5px);
+  max-width: calc(50% - 5px);
+}
+
+.form-group label {
+  font-size: 14px;
+  color: #555;
+}
+
+.form-group input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  border-color: #739614;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(115, 150, 20, 0.2);
+}
+
+.button-group {
+  margin-top: 5px;
+}
+
+.search-button {
   display: flex;
   align-items: center;
-  gap: 20px;
-}
-
-.form .btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  border-radius: 10px;
-  border: solid 1px #739614;
-  border-bottom: solid 1px #90c2ff;
-  background: linear-gradient(135deg, #739614, #739614);
-  color: #fff;
-  font-weight: bolder;
-  transition: all 0.2s ease;
-  box-shadow:
-    0px 2px 3px #000d3848,
-    inset 0px 4px 5px #739614,
-    inset 0px -4px 5px #739614;
-}
-
-.form .btn:active {
-  box-shadow:
-    inset 0px 4px 5px #739614,
-    inset 0px -4px 5px #739614;
-  transform: scale(0.995);
-}
-
-.input-field {
-  position: relative;
-}
-
-.input-field label {
-  position: absolute;
-  color: #8d8d8d;
-  pointer-events: none;
-  background-color: transparent;
-  left: 15px;
-  transform: translateY(0.6rem);
-  transition: all 0.3s ease;
-}
-
-.input-field input {
+  justify-content: center;
+  gap: 8px;
   padding: 10px 15px;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: solid 1px #8d8d8d;
-  letter-spacing: 1px;
-  width: 100%;
-}
-
-.input-field input:focus,
-.input-field input:valid {
-  outline: none;
-  border: solid 1px #0ea11c;
-}
-
-.input-field input:focus ~ label,
-.input-field input:valid ~ label {
-  transform: translateY(-51%) translateX(-10px) scale(0.8);
-  background-color: #fff;
-  padding: 0px 5px;
-  color: #0ea11c;
-  font-weight: bold;
-  letter-spacing: 1px;
+  background-color: #739614;
+  color: white;
   border: none;
-  border-radius: 100px;
-}
-
-.input-pair {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.input-pair .input-field {
-  flex: 1;
-}
-
-.form .passicon {
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 1.3rem;
-  position: absolute;
-  top: 6px;
-  right: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
-.form .close {
-  display: none;
+.search-button:hover {
+  background-color: #5e7a10;
+}
+
+.search-button:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 500px) {
+  .form-row {
+	flex-direction: column;
+	gap: 15px;
+  }
+ 
+  .form-group.half {
+	min-width: 100%;
+	max-width: 100%;
+  }
 }
 </style>
 
 <template>
-  <div class="container">
-    <div class="heading">Critères de sélection</div>
-    <form class="form" action="">
-      <div class="input-pair">
-        <div class="input-field">
-          <input required autocomplete="off" type="text" name="text" id="yearMin" />
-          <label for="yearMin">Année min.</label>
-        </div>
-        <div class="input-field">
-          <input required autocomplete="off" type="text" name="text" id="yearMax" />
-          <label for="yearMax">Année max.</label>
-        </div>
-      </div>
-
-      <div class="input-pair">
-        <div class="input-field">
-          <input required autocomplete="off" type="text" name="text" id="scaleMin" />
-          <label for="scaleMin">Echelle min.</label>
-        </div>
-        <div class="input-field">
-          <input required autocomplete="off" type="text" name="text" id="scaleMax" />
-          <label for="scaleMax">Echelle max.</label>
-        </div>
-      </div>
-
-      <div class="input-field">
-        <input required autocomplete="off" type="text" name="text" id="collection" />
-        <label for="collection">Collection</label>
-      </div>
-
-      <div class="btn-container">
-        <button class="btn">Rechercher</button>
-      </div>
-    </form>
+  <div class="critere-selection">
+	<h4 class="section-title">Critères de sélection</h4>
+	<form class="criteria-form" action="">
+  	<div class="form-row">
+    	<div class="form-group half">
+      	<label for="yearMin">Année min.</label>
+      	<input
+        	id="yearMin"
+        	type="text"
+        	autocomplete="off"
+        	required
+      	/>
+    	</div>
+    	<div class="form-group half">
+      	<label for="yearMax">Année max.</label>
+      	<input
+        	id="yearMax"
+        	type="text"
+        	autocomplete="off"
+        	required
+      	/>
+    	</div>
+  	</div>
+ 	 
+  	<div class="form-row">
+    	<div class="form-group half">
+      	<label for="scaleMin">Echelle min.</label>
+      	<input
+        	id="scaleMin"
+        	type="text"
+        	autocomplete="off"
+        	required
+      	/>
+    	</div>
+    	<div class="form-group half">
+      	<label for="scaleMax">Echelle max.</label>
+      	<input
+        	id="scaleMax"
+        	type="text"
+        	autocomplete="off"
+        	required
+      	/>
+    	</div>
+  	</div>
+ 	 
+  	<div class="form-group">
+    	<label for="collection">Collection</label>
+    	<input
+      	id="collection"
+      	type="text"
+      	autocomplete="off"
+      	required
+    	/>
+  	</div>
+ 	 
+  	<div class="button-group">
+    	<button type="submit" class="search-button">
+      	<i class="mdi mdi-magnify"></i>
+      	<span>Rechercher</span>
+    	</button>
+  	</div>
+	</form>
   </div>
 </template>
+
