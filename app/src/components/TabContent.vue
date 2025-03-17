@@ -23,7 +23,7 @@ defineEmits(['close'])
 .tab-content {
   padding: 15px;
   width: 400px;
-  height: calc(100vh-40px);
+  height: calc(100vh - 40px);
   overflow: auto;
 }
 
