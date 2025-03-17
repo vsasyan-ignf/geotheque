@@ -42,7 +42,7 @@
 <style scoped>
 .critere-selection {
   margin-top: 20px;
-  padding-top: 20px;
+  padding-top: 10px;
   border-top: 1px solid #eee;
   width: 100%;
   box-sizing: border-box;

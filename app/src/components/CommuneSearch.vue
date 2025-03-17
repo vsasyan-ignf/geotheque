@@ -40,6 +40,7 @@
     </div>
 
     <CritereSelection />
+    <AfficherScans />
   </div>
 </template>
 
@@ -47,6 +48,7 @@
 import { ref } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CritereSelection from './CritereSelection.vue'
+import AfficherScans from './AfficherScans.vue'
 
 defineEmits(['close', 'select-commune'])
 

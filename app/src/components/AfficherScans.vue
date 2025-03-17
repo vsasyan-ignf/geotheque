@@ -1,48 +1,33 @@
 <template>
-  <div class="critere-selection">
-    <h4 class="section-title">Critères de sélection</h4>
+  <div class="scan-box">
+    <h4 class="section-title">Afficher les scans</h4>
     <form class="criteria-form" action="">
-      <div class="form-row">
-        <div class="form-group half">
-          <label for="yearMin">Année min.</label>
-          <input id="yearMin" type="text" autocomplete="off" required />
-        </div>
-        <div class="form-group half">
-          <label for="yearMax">Année max.</label>
-          <input id="yearMax" type="text" autocomplete="off" required />
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group half">
-          <label for="scaleMin">Echelle min.</label>
-          <input id="scaleMin" type="text" autocomplete="off" required />
-        </div>
-        <div class="form-group half">
-          <label for="scaleMax">Echelle max.</label>
-          <input id="scaleMax" type="text" autocomplete="off" required />
-        </div>
-      </div>
-
       <div class="form-group">
-        <label for="collection">Collection</label>
         <input id="collection" type="text" autocomplete="off" required />
       </div>
 
       <div class="button-group">
-        <button type="submit" class="search-button">
-          <i class="mdi mdi-magnify"></i>
-          <span>Rechercher</span>
-        </button>
+        <ShakingButton nameButton="Visualiser">
+          <template #icon><i class="mdi mdi-eye"></i></template>
+        </ShakingButton>
+        <ShakingButton nameButton="Télécharger">
+          <template #icon><i class="mdi mdi-briefcase-download"></i></template>
+        </ShakingButton>
+        <ShakingButton nameButton="XML" />
       </div>
     </form>
   </div>
 </template>
 
+<script setup>
+import ShakingButton from './ShakingButton.vue'
+import SelectDropDown from './SelectDropDown.vue'
+</script>
+
 <style scoped>
-.critere-selection {
+.scan-box {
   margin-top: 20px;
-  padding-top: 20px;
+  padding-top: 10px;
   border-top: 1px solid #eee;
   width: 100%;
   box-sizing: border-box;
@@ -70,11 +55,7 @@
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
   width: 100%;
-  box-sizing: border-box;
 }
 
 .form-group.half {
@@ -108,6 +89,8 @@
 
 .button-group {
   margin-top: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .search-button {
