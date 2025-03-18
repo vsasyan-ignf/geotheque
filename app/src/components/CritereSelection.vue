@@ -24,10 +24,7 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="collection">Collection</label>
-        <input id="collection" type="text" autocomplete="off" required />
-      </div>
+      <Dropdown nameDropdown='Collections'/>
 
       <div class="button-group">
         <button type="submit" class="search-button">
@@ -38,6 +35,10 @@
     </form>
   </div>
 </template>
+
+<script setup>
+import Dropdown from './material/Dropdown.vue';
+</script>
 
 <style scoped>
 .critere-selection {
