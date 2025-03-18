@@ -36,11 +36,13 @@
 </template>
   
 <script setup>
+import { watch } from 'vue'
 import CommuneSearch from './CommuneSearch.vue'
 import DepartementSearch from './DepartementSearch.vue'
 import PointSearch from './PointSearch.vue'
-  
-defineProps({
+import { eventBus } from './eventBus'
+
+const props = defineProps({
   activeSubCategory: {
     type: String,
     default: null
@@ -50,21 +52,29 @@ defineProps({
     required: true
   }
 })
-  
+
 defineEmits(['select-sub-category', 'close-sub-category'])
-  
+
 function goToCommune(commune) {
   console.log(`com: ${commune.nom}`)
 }
-  
+
 function goToDepartement(departement) {
   console.log(`dep: ${departement.nom}`)
 }
-  
+
 function goToPoint(point) {
   console.log(`x:${point.x}, y:${point.y} en ${point.projection}`)
 }
+
+watch(
+  () => props.activeSubCategory,
+  (newVal) => {
+    eventBus.emit('toggle-pin', newVal === 'point')
+  }
+)
 </script>
+
   
 <style scoped>
 .sub-categories {

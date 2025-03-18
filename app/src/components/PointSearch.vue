@@ -27,43 +27,88 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject, onUnmounted } from 'vue'
-import SubCategoryHeader from './SubCategoryHeader.vue'
-import { eventBus } from './eventBus'
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import SubCategoryHeader from './SubCategoryHeader.vue';
+import { eventBus } from './eventBus';
+import proj4 from 'proj4';
 
-const emit = defineEmits(['close', 'go-to-point'])
+// définit les systèmes de projection
+proj4.defs([
+  ['EPSG:3857', '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs'],
+  ['EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs'],
+  ['EPSG:2154', '+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs']
+]);
 
-const pointX = ref('')
-const pointY = ref('')
-const selectedProjection = ref('EPSG:3857')
+const emit = defineEmits(['close', 'go-to-point']);
+
+const pointX = ref('');
+const pointY = ref('');
+const selectedProjection = ref('EPSG:3857');
 const projections = [
   { id: 'EPSG:3857', name: 'Web Mercator' },
   { id: 'EPSG:4326', name: 'WGS 84' },
   { id: 'EPSG:2154', name: 'Lambert 93' },
-]
+];
 
+// converti les x et y en fonction du système de proj en entré et en sortie
+function convertCoordinates(x, y, fromProjection, toProjection) {
+  return proj4(fromProjection, toProjection, [x, y]);
+}
+
+// gestion du clique sur le bouton submit
 function handleGoToPoint() {
+  if (!pointX.value || !pointY.value) return;
+
   const point = {
     x: parseFloat(pointX.value),
     y: parseFloat(pointY.value),
     projection: selectedProjection.value
+  };
+
+  // convertion des x et y et affichage sur le form
+  if (selectedProjection.value !== 'EPSG:3857') {
+    const convertedCoords = convertCoordinates(point.x, point.y, selectedProjection.value, 'EPSG:3857');
+    point.x = convertedCoords[0];
+    point.y = convertedCoords[1];
+    point.projection = 'EPSG:3857';
   }
-  emit('go-to-point', point)
+
+  emit('go-to-point', point);
 }
 
+// gestion du clique sur la carte
 function handleMapClick(coords) {
-  pointX.value = Math.round(coords.x * 100) / 100
-  pointY.value = Math.round(coords.y * 100) / 100
-  selectedProjection.value = coords.projection
+  // converti le x et y dans le bon système de proj sélectionné
+  if (coords.projection !== selectedProjection.value) {
+    const convertedCoords = convertCoordinates(coords.x, coords.y, coords.projection, selectedProjection.value);
+    coords.x = convertedCoords[0];
+    coords.y = convertedCoords[1];
+    coords.projection = selectedProjection.value;
+  }
+
+  pointX.value = Math.round(coords.x * 100) / 100;
+  pointY.value = Math.round(coords.y * 100) / 100;
+  selectedProjection.value = coords.projection;
 }
 
-onMounted(() => {
-  eventBus.on('map-clicked', handleMapClick)
-})
+// mise à jour des x et y lorsque le système de proj change
+watch(selectedProjection, (newProjection, oldProjection) => {
+  if (pointX.value && pointY.value && newProjection !== oldProjection) {
+    const convertedCoords = convertCoordinates(pointX.value, pointY.value, oldProjection, newProjection);
+    pointX.value = Math.round(convertedCoords[0] * 100) / 100;
+    pointY.value = Math.round(convertedCoords[1] * 100) / 100;
+  }
+});
 
+// monte le bus d'événement
+onMounted(() => {
+  eventBus.on('map-clicked', handleMapClick);
+});
+
+// démonte le bus d'évenement pour eviter les fuites de mémoire
 onUnmounted(() => {
-  eventBus.off('map-clicked', handleMapClick)
-})
+  eventBus.off('map-clicked', handleMapClick);
+});
 </script>
 
 <style scoped>
