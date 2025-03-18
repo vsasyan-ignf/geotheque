@@ -29,24 +29,22 @@
             <div class="result-main">{{ commune.nom }}</div>
             <div class="result-secondary">{{ commune.code }} - {{ commune.departement }}</div>
           </div>
-
         </div>
       </div>
       <div class="no-results" v-else-if="searchCommune">Aucune commune trouvée</div>
     </div>
 
-    <CartothequeSubMenu/>
-
+    <CartothequeSubMenu />
   </div>
 </template>
-  
+
 <script setup>
 import { ref } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-  
+
 defineEmits(['close', 'select-commune'])
-  
+
 const searchCommune = ref('')
 const communeResults = ref([])
 
@@ -56,17 +54,16 @@ function getcommune(q) {
   communeResults.value = []
 
   fetch(`https://geo.api.gouv.fr/communes?nom=${q}&fields=nom,codesPostaux,departement`)
-    .then(response => response.json())
-    .then(data => {
-      communeResults.value = data.map(commune => ({
+    .then((response) => response.json())
+    .then((data) => {
+      communeResults.value = data.map((commune) => ({
         nom: commune.nom,
         code: commune.codesPostaux[0],
         departement: commune.departement.nom,
       }))
     })
-    .catch(error => console.error("Erreur lors de la récupération des communes:", error))
+    .catch((error) => console.error('Erreur lors de la récupération des communes:', error))
 }
-
 
 function searchCommunes() {
   const query = searchCommune.value.toLowerCase().trim()
@@ -76,9 +73,8 @@ function searchCommunes() {
   }
   getcommune(query)
 }
-
 </script>
-  
+
 <style scoped>
 .sub-category-content {
   animation: fadeIn 0.3s ease;

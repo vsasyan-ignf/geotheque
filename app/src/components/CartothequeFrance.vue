@@ -1,6 +1,5 @@
 <!-- contenu specifique a cartothequeFrance -->
 
-
 <template>
   <div>
     <div v-if="!activeSubCategory" class="sub-categories">
@@ -14,27 +13,27 @@
         <span>{{ sub.title }}</span>
       </div>
     </div>
-  
-    <CommuneSearch 
+
+    <CommuneSearch
       v-if="activeSubCategory === 'commune'"
       @close="$emit('close-sub-category')"
       @select-commune="goToCommune"
     />
-  
-    <DepartementSearch 
+
+    <DepartementSearch
       v-if="activeSubCategory === 'departement'"
       @close="$emit('close-sub-category')"
       @select-departement="goToDepartement"
     />
-  
-    <PointSearch 
+
+    <PointSearch
       v-if="activeSubCategory === 'point'"
       @close="$emit('close-sub-category')"
       @go-to-point="goToPoint"
     />
   </div>
 </template>
-  
+
 <script setup>
 import { watch } from 'vue'
 import CommuneSearch from './CommuneSearch.vue'
@@ -45,12 +44,12 @@ import { eventBus } from './eventBus'
 const props = defineProps({
   activeSubCategory: {
     type: String,
-    default: null
+    default: null,
   },
   subCategories: {
     type: Array,
-    required: true
-  }
+    required: true,
+  },
 })
 
 defineEmits(['select-sub-category', 'close-sub-category'])
@@ -71,11 +70,10 @@ watch(
   () => props.activeSubCategory,
   (newVal) => {
     eventBus.emit('toggle-pin', newVal === 'point')
-  }
+  },
 )
 </script>
 
-  
 <style scoped>
 .sub-categories {
   display: grid;
@@ -83,7 +81,7 @@ watch(
   gap: 20px;
   margin-top: 20px;
 }
-  
+
 .sub-category {
   display: flex;
   flex-direction: column;
@@ -96,12 +94,12 @@ watch(
     background-color 0.3s,
     transform 0.3s;
 }
-  
+
 .sub-category:hover {
   background-color: #f0f0f0;
   transform: scale(1.05);
 }
-  
+
 .sub-category i {
   font-size: 24px;
   color: #739614;
@@ -109,18 +107,18 @@ watch(
     color 0.3s,
     font-size 0.3s;
 }
-  
+
 .sub-category:hover i {
   color: #4caf50;
   font-size: 28px;
 }
-  
+
 .sub-category span {
   font-size: 15px;
   color: #333;
   transition: color 0.3s;
 }
-  
+
 .sub-category:hover span {
   color: #4caf50;
 }

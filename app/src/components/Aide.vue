@@ -1,31 +1,33 @@
 <!-- contenue de l'aide utilisateur -->
 
 <template>
-<div class="aide-content">
-  <h4 class="aide-title">Comment utiliser Geothèque ?</h4>
-  
-  <div class="aide-section">
-    <h5>Navigation dans la Geothèque</h5>
-    <p>Utilisez les onglets latéraux pour naviguer entre les différentes sections de l'application :</p>
-    <ul>
-      <li><b>Cartothèque France</b> : Cartes du territoire français</li>
-      <li><b>Cartothèque Étranger</b> : Cartes des territoires étrangers</li>
-      <li><b>Photothèque France</b> : Photos aériennes de France</li>
-      <li><b>Photothèque Étranger</b> : Photos aériennes de l'étranger</li>
-    </ul>
-  </div>
-  
-  <div class="aide-section">
-    <h5>Besoin d'aide supplémentaire ?</h5>
-    <p>Pour toute question ou assistance complémentaire, contactez notre support technique :</p>
-    <div class="contact-info">
-      <p><i class="mdi mdi-email"></i> tsi24@ensg.eu</p>
-      <p><i class="mdi mdi-phone"></i> 01 23 45 67 89</p>
+  <div class="aide-content">
+    <h4 class="aide-title">Comment utiliser Geothèque ?</h4>
+
+    <div class="aide-section">
+      <h5>Navigation dans la Geothèque</h5>
+      <p>
+        Utilisez les onglets latéraux pour naviguer entre les différentes sections de l'application
+        :
+      </p>
+      <ul>
+        <li><b>Cartothèque France</b> : Cartes du territoire français</li>
+        <li><b>Cartothèque Étranger</b> : Cartes des territoires étrangers</li>
+        <li><b>Photothèque France</b> : Photos aériennes de France</li>
+        <li><b>Photothèque Étranger</b> : Photos aériennes de l'étranger</li>
+      </ul>
+    </div>
+
+    <div class="aide-section">
+      <h5>Besoin d'aide supplémentaire ?</h5>
+      <p>Pour toute question ou assistance complémentaire, contactez notre support technique :</p>
+      <div class="contact-info">
+        <p><i class="mdi mdi-email"></i> tsi24@ensg.eu</p>
+        <p><i class="mdi mdi-phone"></i> 01 23 45 67 89</p>
+      </div>
     </div>
   </div>
-</div>
 </template>
-
 
 <style scoped>
 .aide-content {
@@ -55,7 +57,8 @@
   line-height: 1.5;
 }
 
-.aide-section ul, .aide-section ol {
+.aide-section ul,
+.aide-section ol {
   padding-left: 20px;
   margin-bottom: 10px;
 }

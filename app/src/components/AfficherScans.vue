@@ -1,7 +1,7 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" action="">
-      <Dropdown/>
+      <Dropdown />
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser">
@@ -18,8 +18,7 @@
 
 <script setup>
 import ShakingButton from './material/ShakingButton.vue'
-import Dropdown from './material/Dropdown.vue';
-
+import Dropdown from './material/Dropdown.vue'
 </script>
 
 <style scoped>

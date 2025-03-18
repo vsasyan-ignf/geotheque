@@ -1,6 +1,5 @@
 <!-- gestion de l'affichage des onglets et interactions -->
 
-
 <template>
   <div class="sidebar-tabs">
     <button
@@ -18,26 +17,26 @@
     </button>
   </div>
 </template>
-  
+
 <script setup>
 defineProps({
   tabs: {
     type: Array,
-    required: true
+    required: true,
   },
   activeTab: {
     type: String,
-    default: null
-  }
+    default: null,
+  },
 })
-  
+
 defineEmits(['toggle-tab'])
-  
+
 function hideTooltip(tab) {
   tab.showTooltip = false
 }
 </script>
-  
+
 <style scoped>
 .sidebar-tabs {
   width: 50px;
@@ -47,7 +46,7 @@ function hideTooltip(tab) {
   flex-direction: column;
   border-right: 1px solid #ddd;
 }
-  
+
 .tab-button {
   width: 100%;
   height: 50px;
@@ -62,20 +61,20 @@ function hideTooltip(tab) {
   color: #555;
   transition: background-color 0.3s;
 }
-  
+
 .tab-button:hover {
   background-color: #e0e0e0;
 }
-  
+
 .tab-button.active {
   background-color: #739614;
   color: #ffffff;
 }
 
 .icon-large {
-   font-size: 27px;
+  font-size: 27px;
 }
-  
+
 .tooltip {
   position: absolute;
   left: 55px;
@@ -90,7 +89,7 @@ function hideTooltip(tab) {
   pointer-events: none;
   z-index: 99999;
 }
-  
+
 .tab-button:hover .tooltip {
   opacity: 1;
 }
