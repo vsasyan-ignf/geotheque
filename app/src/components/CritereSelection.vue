@@ -48,47 +48,40 @@ import Dropdown from './material/Dropdown.vue';
   width: 100%;
   box-sizing: border-box;
 }
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 15px;
-}
-
+  
 .criteria-form {
   display: flex;
   flex-direction: column;
   gap: 5px;
   width: 100%;
 }
-
+  
 .form-row {
-  display: flex;
-  gap: 10px;
-  width: 100%;
-  flex-wrap: wrap;
+	display: flex;
+	gap: 10px;
+	width: 100%;
+	flex-wrap: wrap;
 }
-
+  
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  width: 100%;
-  box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	width: 100%;
+	box-sizing: border-box;
 }
-
+  
 .form-group.half {
-  flex: 1;
-  min-width: calc(50% - 5px);
-  max-width: calc(50% - 5px);
+	flex: 1;
+	min-width: calc(50% - 5px);
+	max-width: calc(50% - 5px);
 }
-
+  
 .form-group label {
-  font-size: 14px;
-  color: #555;
+	font-size: 14px;
+	color: #555;
 }
-
+  
 .form-group input {
   padding: 10px;
   border: 1px solid #ddd;
@@ -100,17 +93,17 @@ import Dropdown from './material/Dropdown.vue';
   width: 100%;
   box-sizing: border-box;
 }
-
+  
 .form-group input:focus {
-  border-color: #739614;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(115, 150, 20, 0.2);
+	border-color: #739614;
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(115, 150, 20, 0.2);
 }
-
+  
 .button-group {
   margin-top: 10px;
 }
-
+  
 .search-button {
   display: flex;
   align-items: center;
@@ -128,9 +121,9 @@ import Dropdown from './material/Dropdown.vue';
     background-color 0.3s,
     transform 0.2s;
 }
-
+  
 .search-button:hover {
-  background-color: #5e7a10;
+	background-color: #5e7a10;
 }
 
 .search-button:active {
