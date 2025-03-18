@@ -2,9 +2,7 @@
   <div class="scan-box">
     <h4 class="section-title">Afficher les scans</h4>
     <form class="criteria-form" action="">
-      <div class="form-group">
-        <input id="collection" type="text" autocomplete="off" required />
-      </div>
+      <Dropdown/>
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser">
