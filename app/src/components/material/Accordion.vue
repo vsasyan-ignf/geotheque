@@ -27,8 +27,10 @@
 </template>
 
 <script setup>
-import Dropdown from './Dropdown.vue';
+
 import ShakingButton from './ShakingButton.vue';
+
+
 </script>
 
 <style scoped>
@@ -66,7 +68,7 @@ ul li i{
     margin-top: 16px;
     right: 0;
 } 
-ul li input[type=checkbox]:checked ~ .content {
+ul li input[type=checkbox]:checked ~ p {
   margin-top: 0;
   max-height: 0;
   opacity: 0;

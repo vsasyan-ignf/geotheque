@@ -5,5 +5,5 @@ import Accordion from './components/material/Accordion.vue';
 </script>
 
 <template>
-  <RouterView />
+  <Accordion />
 </template>

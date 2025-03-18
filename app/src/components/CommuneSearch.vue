@@ -49,6 +49,7 @@ import { ref } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CritereSelection from './CritereSelection.vue'
 import AfficherScans from './AfficherScans.vue'
+import Accordion from './material/Accordion.vue'
 
 defineEmits(['close', 'select-commune'])
 
