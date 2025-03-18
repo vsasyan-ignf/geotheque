@@ -12,6 +12,7 @@ services:
         target: /usr/local/tomcat/webapps/geoserver/data
     environment:
       RECREATE_DATADIR: "false"
+      CORS_ENABLED: "true"
 
   iipsrv:
     # build:
