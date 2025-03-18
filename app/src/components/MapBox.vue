@@ -35,7 +35,9 @@ const projection = ref('EPSG:3857')
 const projection2 = ref('EPSG:2154')
 const zoom = ref(6)
 const rotation = ref(0)
-const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter=BBOX(the_geom,541049.9501,6324734.1323,559394.8369,6334584.9543)%20AND%20DATE_PUB%3E2015"
+const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0"+
+ "&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter=BBOX(the_geom,541049.9501,6324734.1323,559394.8369,6334584.9543)" +
+ "%20AND%20DATE_PUB%3E2015"
 
 
 const strategy = inject("ol-loadingstrategy");
