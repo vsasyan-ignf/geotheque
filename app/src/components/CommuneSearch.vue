@@ -25,14 +25,15 @@
         <h5>Résultats ({{ communeResults.length }})</h5>
         <div class="results-list">
           <div
-            v-for="commune in communeResults"
-            :key="commune.code"
+            v-for="(commune, index) in communeResults"
+            :key="commune.code + '-' + commune.nom"
             class="result-item"
             @click="$emit('select-commune', commune)"
           >
             <div class="result-main">{{ commune.nom }}</div>
             <div class="result-secondary">{{ commune.code }} - {{ commune.departement }}</div>
           </div>
+
         </div>
       </div>
 
@@ -55,20 +56,33 @@ defineEmits(['close', 'select-commune'])
 const searchCommune = ref('')
 const communeResults = ref([])
 
-const communes = [
-  { nom: 'Paris', code: '75000', departement: 'Paris' },
-  { nom: 'Lyon', code: '69000', departement: 'Rhône' },
-  { nom: 'Marseille', code: '13000', departement: 'Bouches-du-Rhône' },
-  { nom: 'Toulouse', code: '31000', departement: 'Haute-Garonne' },
-  { nom: 'Nice', code: '06000', departement: 'Alpes-Maritimes' },
-]
+const communes = []
+
+function getcommune(q) {
+  communeResults.value = []
+
+  fetch(`https://geo.api.gouv.fr/communes?nom=${q}&fields=nom,codesPostaux,departement`)
+    .then(response => response.json())
+    .then(data => {
+      communeResults.value = data.map(commune => ({
+        nom: commune.nom,
+        code: commune.codesPostaux[0],
+        departement: commune.departement.nom,
+      }))
+    })
+    .catch(error => console.error("Erreur lors de la récupération des communes:", error))
+}
+
 
 function searchCommunes() {
-  const query = searchCommune.value.toLowerCase()
-  communeResults.value = communes.filter(
-    (commune) => commune.nom.toLowerCase().includes(query) || commune.code.includes(query),
-  )
+  const query = searchCommune.value.toLowerCase().trim()
+  if (!query) {
+    communeResults.value = []
+    return
+  }
+  getcommune(query)
 }
+
 </script>
 
 <style scoped>
