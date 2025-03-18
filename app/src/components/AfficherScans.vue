@@ -20,8 +20,9 @@
 </template>
 
 <script setup>
-import ShakingButton from './ShakingButton.vue'
-import SelectDropDown from './SelectDropDown.vue'
+import ShakingButton from './material/ShakingButton.vue'
+import Dropdown from './material/Dropdown.vue';
+
 </script>
 
 <style scoped>
