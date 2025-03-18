@@ -1,12 +1,9 @@
 <style scoped>
 button {
-  /* height: 3em;
-  width: 8em; */
   padding: 10px 15px;
   border: none;
   display: flex;
   gap: 8px;
-  /* border-radius: 10em; */
   border-radius: 4px;
   background: #739614;
   font-size: 14px;

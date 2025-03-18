@@ -18,11 +18,7 @@
           <ol-feature v-for="(pin, index) in pins" :key="index">
             <ol-geom-point :coordinates="pin" />
             <ol-style>
-              <ol-style-icon
-                src="https://cdn-icons-png.flaticon.com/512/684/684908.png"
-                :scale="0.05"
-                :anchor="[0.5, 1]"
-              />
+              <ol-style-icon :src="markerIcon" :scale="0.05" :anchor="[0.5, 1]" />
             </ol-style>
           </ol-feature>
         </ol-source-vector>
@@ -31,11 +27,11 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted, nextTick, provide } from 'vue'
 import SideMenu from './SideMenu.vue'
 import { eventBus } from './eventBus'
+import markerIcon from '@/assets/marker-icon.svg'
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -78,8 +74,6 @@ onMounted(() => {
 
 provide('eventBus', eventBus)
 </script>
-
-
 
 <style scoped>
 .map-container {
