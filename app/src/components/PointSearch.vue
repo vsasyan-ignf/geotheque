@@ -23,6 +23,8 @@
         Centrer sur ce point
       </button>
     </div>
+
+    <CartothequeSubMenu/>
   </div>
 </template>
 
@@ -31,6 +33,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import SubCategoryHeader from './SubCategoryHeader.vue';
 import { eventBus } from './eventBus';
 import proj4 from 'proj4';
+import CartothequeSubMenu from './CartothequeSubMenu.vue';
 
 // définit les systèmes de projection
 proj4.defs([

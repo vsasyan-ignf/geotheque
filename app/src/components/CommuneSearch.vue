@@ -33,18 +33,8 @@
       </div>
       <div class="no-results" v-else-if="searchCommune">Aucune commune trouvée</div>
     </div>
-    
-    <Accordeon title="Critères de sélection">
-      <CritereSelection />
-    </Accordeon>
-    
-    <!-- exemple accordéon ouvert par defaut -->
-    <Accordeon title="Mes autres composant accordé" :defaultOpen="true">
-      <!-- <AfficherScans />  -->
-      <div style="color: black;">
-      <p>C'est mon exemple zebi</p>
-    </div>
-    </Accordeon>
+
+    <CartothequeSubMenu/>
 
   </div>
 </template>
@@ -52,9 +42,7 @@
 <script setup>
 import { ref } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import CritereSelection from './CritereSelection.vue'
-// import AfficherScans from './AfficherScans.vue'
-import Accordeon from './Accordeon.vue'
+import CartothequeSubMenu from './CartothequeSubMenu.vue'
   
 defineEmits(['close', 'select-commune'])
   

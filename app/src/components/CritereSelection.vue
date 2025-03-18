@@ -1,6 +1,5 @@
 <template>
   <div class="critere-selection">
-    <h4 class="section-title">Critères de sélection</h4>
     <form class="criteria-form" action="">
       <div class="form-row">
         <div class="form-group half">
@@ -42,9 +41,7 @@ import Dropdown from './material/Dropdown.vue';
 
 <style scoped>
 .critere-selection {
-  margin-top: 20px;
   padding-top: 10px;
-  border-top: 1px solid #eee;
   width: 100%;
   box-sizing: border-box;
 }
