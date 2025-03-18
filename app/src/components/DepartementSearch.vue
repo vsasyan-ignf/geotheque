@@ -39,12 +39,15 @@
   
       <div class="no-results" v-else-if="searchDepartement">Aucun département trouvé</div>
     </div>
+
+    <CartothequeSubMenu/>
   </div>
 </template>
   
 <script setup>
 import { ref } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
+import CartothequeSubMenu from './CartothequeSubMenu.vue'
   
 defineEmits(['close', 'select-departement'])
   

@@ -1,6 +1,5 @@
 <template>
   <div class="scan-box">
-    <h4 class="section-title">Afficher les scans</h4>
     <form class="criteria-form" action="">
       <Dropdown/>
 
@@ -27,7 +26,6 @@ import Dropdown from './material/Dropdown.vue';
 .scan-box {
   margin-top: 20px;
   padding-top: 10px;
-  border-top: 1px solid #eee;
   width: 100%;
   box-sizing: border-box;
 }
