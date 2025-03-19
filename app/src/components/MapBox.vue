@@ -18,7 +18,7 @@
           :url="url_test"
           :strategy="bbox"
           :format="GeoJSON"
-          :projection="projection2"
+          :projection="projection"
           >
         </ol-source-vector>
       </ol-vector-layer>
@@ -34,8 +34,6 @@ import SideMenu from './SideMenu.vue'
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
-
-const projection2 = ref('EPSG:2154')
 const zoom = ref(6)
 const rotation = ref(0)
 const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0"+
