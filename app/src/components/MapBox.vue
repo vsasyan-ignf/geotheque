@@ -10,9 +10,21 @@
         :projection="projection"
       />
 
-      <ol-tile-layer v-for="(layer, index) in layers" :key="layer.id" :visible="index === activeLayerIndex">
+      <!-- <ol-tile-layer v-for="(layer, index) in layers" :key="layer.id" :visible="index === activeLayerIndex">
         <ol-source-osm />
+      </ol-tile-layer> -->
+
+      <ol-tile-layer v-for="(layer, index) in layers" :key="layer.id" :visible="index === activeLayerIndex">
+        <ol-source-wmts
+          :url= "getWmtsUrl(layer.id)"
+          :matrixSet="matrixSet"
+          :format="getFormatWmtsLayer(layer.id)"
+          :layer="getWmtsLayerName(layer.id)"
+          :projection="projection_wmts"
+          crossOrigin="anonymous"
+        />
       </ol-tile-layer>
+
       <ol-vector-layer>
         <ol-source-vector ref="pinSource">
           <ol-feature v-for="(pin, index) in pins" :key="index">
@@ -81,10 +93,61 @@ const layers = ref([
   }
 ])
 
-const activeLayerIndex = ref(0)
+const activeLayerIndex = ref(1)
 
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
+
+  // refresh la map en le settant en visible
+  const olMap = mapRef.value?.map;
+  if (olMap) {
+    olMap.getLayers().forEach((layer, idx) => {
+      layer.setVisible(idx === index);
+    });
+  }
+}
+
+const matrixSet=ref("PM")
+const projection_wmts=ref('EPSG:3857')
+
+function getWmtsUrl(layerId) {
+  if (layerId === 'cartesign' || layerId === 'scan25') {
+    return `https://data.geopf.fr/private/wmts?apikey=ign_scan_ws&SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
+  }
+  return `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
+  
+}
+
+function getWmtsLayerName(layerId) {
+
+  switch (layerId) {
+    case 'plan':
+      return 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2';
+    case 'ortho':
+      return 'ORTHOIMAGERY.ORTHOPHOTOS';
+    case 'bdparcellaire':
+      return 'CADASTRALPARCELS.PARCELS';
+    case 'cartesign':
+      return 'GEOGRAPHICALGRIDSYSTEMS.MAPS';
+    case 'scan25':
+      return 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR';
+    default:
+      return '';
+  }
+}
+
+function getFormatWmtsLayer(layerId) {
+  switch (layerId) {
+    case 'cartesign':
+    case 'ortho':
+    case 'scan25':
+      return 'image/jpeg';
+    case 'plan':
+    case 'bdparcellaire':
+      return 'image/png';
+    default:
+      return 'image/jpeg';
+  }
 }
 
 onMounted(() => {

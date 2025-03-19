@@ -65,10 +65,9 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
-
 </script>
   
-<style scoped>
+  <style scoped>
 .layer-switcher {
   position: absolute;
   bottom: 30px;
