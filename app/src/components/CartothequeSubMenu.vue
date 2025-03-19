@@ -32,9 +32,7 @@ function toggleAccordeon(ind) {
 <style scoped>
 .accordeon {
   width: 100%;
-
   margin-top: 30px;
-  padding-top: 15px;
 }
 
 .accordeon-header {
