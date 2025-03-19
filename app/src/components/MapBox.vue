@@ -12,6 +12,13 @@
       <ol-tile-layer>
         <ol-source-osm />
       </ol-tile-layer>
+      <ol-vector-layer>
+        <ol-source-vector
+          :url="url_test"
+          :strategy="bbox"
+          :format="GeoJSON"
+          :projection="projection"
+          >
 
       <ol-vector-layer>
         <ol-source-vector ref="pinSource">
@@ -28,18 +35,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, provide } from 'vue'
+
+import { ref, onMounted, nextTick, provide,inject } from 'vue'
 import SideMenu from './SideMenu.vue'
 import { eventBus } from './eventBus'
 import markerIcon from '@/assets/marker-icon.svg'
+
+
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
 const zoom = ref(6)
 const rotation = ref(0)
+
+const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0"+
+ "&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter="+
+ "BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)" +
+ "%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857"
+
+const strategy = inject("ol-loadingstrategy");
+const bbox = strategy.bbox;
+const format = inject("ol-format");
+const GeoJSON = new format.GeoJSON();
+
 const mapRef = ref(null)
 const pins = ref([])
 const showPin = ref(false)
+
 
 onMounted(() => {
   nextTick(() => {
