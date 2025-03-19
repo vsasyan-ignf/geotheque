@@ -44,14 +44,19 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 
-defineEmits(['close', 'select-departement'])
+
+
+const emit =(['close', 'select-departement'])
 
 const searchDepartement = ref('')
 const departementResults = ref([])
+const showResults = ref(false)
+let searchTimeout = null
+
 
 const departements = [
   { nom: 'Paris', code: '75', region: 'Île-de-France' },
@@ -61,12 +66,60 @@ const departements = [
   { nom: 'Alpes-Maritimes', code: '06', region: "Provence-Alpes-Côte d'Azur" },
 ]
 
-function searchDepartements() {
-  const query = searchDepartement.value.toLowerCase()
-  departementResults.value = departements.filter(
-    (dept) => dept.nom.toLowerCase().includes(query) || dept.code.includes(query),
-  )
+const handleClickOutside = (event) => {
+  const resultsWrapper = document.querySelector('.results-wrapper')
+  const searchInput = document.getElementById('departement-search')
+  
+  if (resultsWrapper && 
+      !resultsWrapper.contains(event.target) && 
+      event.target !== searchInput) {
+    showResults.value = false
+  }
 }
+
+
+onMounted(() => {
+  document.addEventListener('click', searchDepartements)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', searchDepartements)
+  if (searchTimeout) clearTimeout(searchTimeout)
+})
+
+function searchDepartements() {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+}
+
+const query = searchDepartements.value.toLowerCase().trim()
+
+// ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes 
+searchTimeout = setTimeout(() => {
+  fetch(`https://geo.api.gouv.fr/departement?nom=${query}&fields=nom,codesPostaux,departement`)
+    .then(response => response.json())
+    .then(data => {
+      const newResults = data.map(departement => ({
+        nom: departement.nom,
+        code: departement.codesPostaux[0],
+        departement: departement.departement.nom,
+      }))
+        
+      departementResults.value = newResults
+    })
+    .catch(error => {
+      console.error("Erreur lors de la récupération des departements:", error)
+      departementResults.value = []
+    })
+  }, 300)
+}
+
+
+function selectDepartement(departement) {
+  emit('select-departement', departement)
+  showResults.value = false
+}
+
 </script>
 
 <style scoped>
