@@ -66,13 +66,15 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
+import { useConvertCoordinates } from './composables/convertCoord'
   
 const emit = defineEmits(['close', 'select-commune'])
   
-const searchCommune = ref('')
+let searchCommune = ref('')
 const communeResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
+let resBbox = null
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
@@ -110,13 +112,14 @@ showResults.value = true
 
 // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes 
 searchTimeout = setTimeout(() => {
-  fetch(`https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement`)
+  fetch(`https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox`)
     .then(response => response.json())
     .then(data => {
       const newResults = data.map(commune => ({
         nom: commune.nom,
         code: commune.codesPostaux[0],
         departement: commune.departement.nom,
+        bbox: commune.bbox
       }))
         
       communeResults.value = newResults
@@ -130,8 +133,21 @@ searchTimeout = setTimeout(() => {
 
 function selectCommune(commune) {
   emit('select-commune', commune)
+  searchCommune = commune.nom
+
+  const bbox = commune.bbox.coordinates[0]
+  const bboxMercator = [bbox[0], bbox[2]]
+
+  console.log(bboxMercator)
+
+  resBbox = bboxMercator.map( point => useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154') )
+
+  console.log(resBbox)
+
   showResults.value = false
 }
+
+
 </script>
 
 <style scoped>
