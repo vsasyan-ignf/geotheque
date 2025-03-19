@@ -2,14 +2,14 @@
   <div class="accordeon">
     <div class="accordeon-header" @click="toggleAccordeon(0)">
       <h4 class="accordeon-title">Critères de sélection</h4>
-      <i class="mdi" :class="isOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"></i>
+      <i class="mdi" :class="isOpen[0] ? 'mdi-chevron-up' : 'mdi-chevron-down'"></i>
     </div>
     <div class="accordeon-content" :class="{ open: isOpen[0] }">
       <CritereSelection />
     </div>
     <div class="accordeon-header" @click="toggleAccordeon(1)">
       <h4 class="accordeon-title">Afficher les scans</h4>
-      <i class="mdi" :class="isOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"></i>
+      <i class="mdi" :class="isOpen[1] ? 'mdi-chevron-up' : 'mdi-chevron-down'"></i>
     </div>
     <div class="accordeon-content" :class="{ open: isOpen[1] }">
       <AfficherScans />
