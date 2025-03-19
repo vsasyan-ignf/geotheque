@@ -77,12 +77,16 @@ const rotation = ref(0)
 //  "BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)" +
 //  "%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857"
 
-
- const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter=BBOX(the_geom,643034.1296608746,6857556.9896223815,661135.2805584644,6867035.571724237)"
+// dijon
+ let url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter=BBOX(the_geom,843140.35,%206685531.64,867110.33%20,%206698674.47)"
  +"&srsName=EPSG:3857"
 
+//   let url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter=BBOX(the_geom,377195.39545374265, 6263514.003382056,380823.61150917073, 6266613.639401344)"
+// +"&srsName=EPSG:3857"
 
 console.log(url_test)
+
+console.log("dddddddddddd")
 
 const strategy = inject("ol-loadingstrategy");
 const bbox = strategy.bbox;
