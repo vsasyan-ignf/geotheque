@@ -51,14 +51,14 @@ const rotation = ref(0)
 const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0"+
  "&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter="+
  "BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)" +
- "%20AND%20DATE_PUB%3E2015"
+ "%20AND%20DATE_PUB%3E2015&targetCRS=EPSG:3857"
+
 
 
 
 
 const strategy = inject("ol-loadingstrategy");
 const bbox = strategy.bbox;
-bbox = bbox.proj4(projection,projection2);
 const format = inject("ol-format");
 const GeoJSON = new format.GeoJSON();
 
