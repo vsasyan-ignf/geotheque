@@ -19,7 +19,8 @@
           :format="GeoJSON"
           :projection="projection"
           >
-
+        </ol-source-vector>
+      </ol-vector-layer>
       <ol-vector-layer>
         <ol-source-vector ref="pinSource">
           <ol-feature v-for="(pin, index) in pins" :key="index">
