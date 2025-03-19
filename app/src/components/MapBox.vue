@@ -72,10 +72,17 @@ const projection = ref('EPSG:3857')
 const zoom = ref(6)
 const rotation = ref(0)
 
-const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0"+
- "&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter="+
- "BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)" +
- "%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857"
+// const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0"+
+//  "&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter="+
+//  "BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)" +
+//  "%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857"
+
+
+ const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter=BBOX(the_geom,643034.1296608746,6857556.9896223815,661135.2805584644,6867035.571724237)"
+ +"&srsName=EPSG:3857"
+
+
+console.log(url_test)
 
 const strategy = inject("ol-loadingstrategy");
 const bbox = strategy.bbox;
