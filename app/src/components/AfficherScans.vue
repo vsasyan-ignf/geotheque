@@ -1,10 +1,7 @@
 <template>
   <div class="scan-box">
-    <h4 class="section-title">Afficher les scans</h4>
     <form class="criteria-form" action="">
-      <div class="form-group">
-        <input id="collection" type="text" autocomplete="off" required />
-      </div>
+      <Dropdown />
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser">
@@ -21,15 +18,13 @@
 
 <script setup>
 import ShakingButton from './material/ShakingButton.vue'
-import Dropdown from './material/Dropdown.vue';
-
+import Dropdown from './material/Dropdown.vue'
 </script>
 
 <style scoped>
 .scan-box {
   margin-top: 20px;
   padding-top: 10px;
-  border-top: 1px solid #eee;
   width: 100%;
   box-sizing: border-box;
 }

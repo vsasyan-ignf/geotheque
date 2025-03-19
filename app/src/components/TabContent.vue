@@ -1,6 +1,5 @@
 <!-- défini la structure de chaque tabs -->
 
-
 <template>
   <div class="tab-content">
     <h3>{{ title }} <span class="close-button" @click="$emit('close')">×</span></h3>
@@ -12,10 +11,10 @@
 defineProps({
   title: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
-  
+
 defineEmits(['close'])
 </script>
 

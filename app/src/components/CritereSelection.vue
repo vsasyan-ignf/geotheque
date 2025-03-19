@@ -1,6 +1,5 @@
 <template>
   <div class="critere-selection">
-    <h4 class="section-title">Critères de sélection</h4>
     <form class="criteria-form" action="">
       <div class="form-row">
         <div class="form-group half">
@@ -24,10 +23,7 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="collection">Collection</label>
-        <input id="collection" type="text" autocomplete="off" required />
-      </div>
+      <Dropdown nameDropdown="Collections" />
 
       <div class="button-group">
         <button type="submit" class="search-button">
@@ -39,20 +35,15 @@
   </div>
 </template>
 
+<script setup>
+import Dropdown from './material/Dropdown.vue'
+</script>
+
 <style scoped>
 .critere-selection {
-  margin-top: 20px;
   padding-top: 10px;
-  border-top: 1px solid #eee;
   width: 100%;
   box-sizing: border-box;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 15px;
 }
 
 .criteria-form {
