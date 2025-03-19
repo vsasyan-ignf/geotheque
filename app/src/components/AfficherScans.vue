@@ -1,7 +1,7 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" action="">
-      <Dropdown />
+      <Dropdown :options="tab_scans"/>
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser">
@@ -17,8 +17,24 @@
 </template>
 
 <script setup>
+
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
+
+const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0"+
+ "&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter="+
+ "BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)" +
+ "%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857"
+
+const tab_scans = []
+function get_tab_scans(){
+  fetch(url_test).then(response =>response.json()).then(data =>{
+    const newResults = data.features.map(feature =>({id:feature.id, nom:feature.id}))
+    tab_scans.values = newResults;
+    console.log(tab_scans.values[0])
+  })
+}
+get_tab_scans();
 </script>
 
 <style scoped>

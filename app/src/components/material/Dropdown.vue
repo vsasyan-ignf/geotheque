@@ -13,7 +13,7 @@
 import { ref } from 'vue'
 import { defineProps } from 'vue'
 
-defineProps({
+const props = defineProps({
   nameDropdown: {
     type: String,
     default: '',
