@@ -72,11 +72,6 @@ const projection = ref('EPSG:3857')
 const zoom = ref(6)
 const rotation = ref(0)
 
-const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0"+
- "&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter="+
- "BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)" +
- "%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857"
-
 const strategy = inject("ol-loadingstrategy");
 const bbox = strategy.bbox;
 const format = inject("ol-format");
@@ -85,6 +80,8 @@ const GeoJSON = new format.GeoJSON();
 const mapRef = ref(null)
 const pins = ref([])
 const showPin = ref(false)
+
+const wfsSource = ref(null);
 
 const layers = ref([
   {
@@ -119,10 +116,12 @@ const activeLayerIndex = ref(0)
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
 
-  // refresh la map en le settant en visible
   const olMap = mapRef.value?.map;
   if (olMap) {
-    olMap.getLayers().forEach((layer, idx) => {
+
+    // changement des couches wmts uniquement
+    const wmtsLayers = olMap.getLayers().getArray().slice(0, layers.value.length);
+    wmtsLayers.forEach((layer, idx) => {
       layer.setVisible(idx === index);
     });
   }
@@ -153,7 +152,7 @@ function getWmtsLayerName(layerId) {
     case 'scan25':
       return 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR';
     default:
-      return '';
+      return 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2';
   }
 }
 
@@ -176,6 +175,7 @@ onMounted(() => {
     window.dispatchEvent(new Event('resize'))
     if (mapRef.value) {
       const olMap = mapRef.value.map
+      
       olMap.on('click', (event) => {
         const clickedCoord = olMap.getCoordinateFromPixel(event.pixel)
         if (showPin.value) {
@@ -195,6 +195,17 @@ onMounted(() => {
         pins.value = []
       }
     })
+
+    eventBus.on('bbox-updated', (bbox) => {
+      console.log('BBOX reçue :', bbox);
+      const [minX, minY, maxX, maxY] = bbox;
+      const url_test = ref(`http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
+        `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
+        `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
+        `%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857`);
+      
+        console.log(url_test.value)
+    });
   })
 })
 

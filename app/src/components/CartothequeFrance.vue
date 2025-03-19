@@ -63,7 +63,13 @@ function goToDepartement(departement) {
 }
 
 function goToPoint(point) {
-  console.log(`x:${point.x}, y:${point.y} en ${point.projection}`)
+  console.log(`x:${point.x}, y:${point.y}`)
+  
+  if (point.bboxLambert93) {
+    console.log(point.bboxLambert93)
+
+    eventBus.emit('bbox-updated', point.bboxLambert93);
+  }
 }
 
 watch(
