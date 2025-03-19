@@ -11,6 +11,12 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
+  server: {
+    allowedHosts: true
+  },
+  cors: {
+    origin: /http?:\/\/([A-Za-z0-9\-\.]+)?(\.ddev\.site)(?::\d+)?$/,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
