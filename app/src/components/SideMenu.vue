@@ -25,6 +25,13 @@
         </template>
       </component>
     </div>
+    <div class="visi">
+      <Visibility_switch 
+      :is-sidebar-open="isSidebarOpen" 
+      @toggle-visibility="$emit('toggle-visibility', $event)"
+      />
+    </div>
+    
   </div>
 </template>
 
@@ -34,6 +41,7 @@ import SidebarTabs from './SidebarTabs.vue'
 import TabContent from './TabContent.vue'
 import CartothequeFrance from './CartothequeFrance.vue'
 import Aide from './Aide.vue'
+import Visibility_switch from './Visibility_switch.vue'
 
 const activeTab = ref('carthotheque')
 const isSidebarOpen = ref(true)
@@ -107,4 +115,5 @@ function closeSubCategory() {
 .sidebar-content.open {
   width: 400px;
 }
+
 </style>

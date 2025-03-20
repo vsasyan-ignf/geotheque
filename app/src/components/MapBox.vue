@@ -1,12 +1,15 @@
 <template>
   <div class="map-container">
-    <SideMenu />
+    <SideMenu @toggle-visibility="toggleLayerVisibility"/>
     <div ref="mapElement" class="ol-map"></div>
     <BasecardSwitcher
       :layers="layers"
       :activeLayerIndex="activeLayerIndex"
       @layer-change="changeActiveLayer"
     />
+    <!-- <Visibility_switch
+      @toggleVisibility="toggleLayerVisibility"
+    /> -->
   </div>
 </template>
 
@@ -38,6 +41,7 @@ import Ortho from '../assets/basecard/ortho.jpeg';
 import BDParcellaire from '../assets/basecard/bdparcellaire.png';
 import CartesIGN from '../assets/basecard/cartesign.jpg';
 import Scan25 from '../assets/basecard/scan25.jpg';
+import Visibility_switch from './Visibility_switch.vue'
 
 const center = ref([260000, 6000000]);
 const projection = ref('EPSG:3857');
@@ -84,6 +88,18 @@ const layers = ref([
 
 const activeLayerIndex = ref(0);
 const olView = ref(null);
+const visibility_switch = ref(null);
+
+function toggleLayerVisibility(isVisible) {
+  if (olMap.value) {
+    const activeLayer = olMap.value.getLayers().getArray()[activeLayerIndex.value];
+    if (activeLayer) {
+      activeLayer.setVisible(isVisible);
+      visibility_switch.value = isVisible;
+      console.log("Layer", activeLayerIndex.value, "visibility set to", isVisible);
+    }
+  }
+}
 
 function changeActiveLayer(index) {
   activeLayerIndex.value = index;
@@ -92,7 +108,10 @@ function changeActiveLayer(index) {
     // Changement des couches WMTS uniquement
     const wmtsLayers = olMap.value.getLayers().getArray().slice(0, layers.value.length);
     wmtsLayers.forEach((layer, idx) => {
-      layer.setVisible(idx === index);
+      if (visibility_switch.value === true) {
+        layer.setVisible(idx === index);
+      }
+      
     });
 
     if (olView.value) {
