@@ -81,7 +81,8 @@ const mapRef = ref(null)
 const pins = ref([])
 const showPin = ref(false)
 
-const wfsSource = ref(null);
+const url_test = ref(`http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
+        `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json`);
 
 const layers = ref([
   {
@@ -196,15 +197,21 @@ onMounted(() => {
       }
     })
 
+    const showWfsLayer = ref(true)
+
     eventBus.on('bbox-updated', (bbox) => {
       console.log('BBOX reçue :', bbox);
       const [minX, minY, maxX, maxY] = bbox;
-      const url_test = ref(`http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
+      url_test.value = ref(`http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
         `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
         `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
-        `%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857`);
+        `%20&srsName=EPSG:3857`);
       
         console.log(url_test.value)
+        showWfsLayer.value = false;
+        nextTick(() => {
+        showWfsLayer.value = true;
+      });
     });
   })
 })
