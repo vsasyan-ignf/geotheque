@@ -1,25 +1,25 @@
 <template>
-  <div class="critere-selection">
+  <div class="critere-selection" @submit.prevent="handleSubmit">
     <form class="criteria-form" action="">
       <div class="form-row">
         <div class="form-group half">
           <label for="yearMin">Année min.</label>
-          <input id="yearMin" type="text" autocomplete="off" required />
+          <input id="yearMin" type="text" v-model="yearMin" autocomplete="off" />
         </div>
         <div class="form-group half">
           <label for="yearMax">Année max.</label>
-          <input id="yearMax" type="text" autocomplete="off" required />
+          <input id="yearMax" type="text" v-model="yearMax" autocomplete="off" />
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group half">
           <label for="scaleMin">Echelle min.</label>
-          <input id="scaleMin" type="text" autocomplete="off" required />
+          <input id="scaleMin" type="text" v-model="scaleMin" autocomplete="off" />
         </div>
         <div class="form-group half">
           <label for="scaleMax">Echelle max.</label>
-          <input id="scaleMax" type="text" autocomplete="off" required />
+          <input id="scaleMax" type="text" v-model="scaleMax" autocomplete="off" />
         </div>
       </div>
 
@@ -36,7 +36,26 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import Dropdown from './material/Dropdown.vue'
+import { eventBus } from './eventBus'
+
+const yearMin = ref('2000')
+const yearMax = ref('2000')
+const scaleMin = ref('2000')
+const scaleMax = ref('2000')
+
+const handleSubmit = () => {
+  const criteria = {
+    yearMin: yearMin.value,
+    yearMax: yearMax.value,
+    scaleMin: scaleMin.value,
+    scaleMax: scaleMax.value,
+  }
+
+  eventBus.emit('criteria', criteria);
+
+}
 </script>
 
 <style scoped>

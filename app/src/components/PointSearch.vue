@@ -18,10 +18,10 @@
           </option>
         </select>
       </div>
-      <button class="action-button" @click="handleGoToPoint">
+      <!-- <button class="action-button" @click="handleGoToPoint">
         <i class="mdi mdi-crosshairs-gps"></i>
         Centrer sur ce point
-      </button>
+      </button> -->
     </div>
 
     <CartothequeSubMenu />
@@ -144,7 +144,7 @@ async function handleGoToPoint() {
 }
 
 // gestion du clique sur la carte
-function handleMapClick(coords) {
+async function handleMapClick(coords) {
   // converti le x et y dans le bon système de proj sélectionné
   if (coords.projection !== selectedProjection.value) {
     const convertedCoords = convertCoordinates(
@@ -161,6 +161,28 @@ function handleMapClick(coords) {
   pointX.value = Math.round(coords.x * 100) / 100
   pointY.value = Math.round(coords.y * 100) / 100
   selectedProjection.value = coords.projection
+
+  const convertedCoord = convertCoordinates(
+    parseFloat(pointX.value), 
+    parseFloat(pointY.value), 
+    selectedProjection.value, 
+    'EPSG:4326'
+  )
+
+  const point = {
+    x: convertedCoord[0],
+    y: convertedCoord[1]
+  }
+  
+  const bboxResult = await fetchAndConvertBbox(point.x, point.y)
+  
+  if (bboxResult) {
+    point.locationData = bboxResult.data
+    point.bboxWGS84 = bboxResult.bboxWGS84
+    point.bboxLambert93 = bboxResult.bboxLambert93
+  }
+  
+  emit('go-to-point', point)
 }
 
 // mise à jour des x et y lorsque le système de proj change

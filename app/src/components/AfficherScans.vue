@@ -33,7 +33,6 @@ function get_tab_scans(){
   fetch(url_test).then(response =>response.json()).then(data =>{
     const newResults = data.features.map(feature =>({id:i++, name:feature.id }))
     tab_scans.value = newResults;
-    console.log(tab_scans);
   })
 }
 onMounted(() => {

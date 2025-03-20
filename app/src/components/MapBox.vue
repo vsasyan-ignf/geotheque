@@ -53,6 +53,7 @@ const vectorPinSource = ref(null);
 const vectorWfsSource = ref(null);
 
 const url_test = ref(``);
+const bbox = ref([0, 0, 0, 0]);
 
 const layers = ref([
   {
@@ -196,7 +197,6 @@ onMounted(() => {
     const wmtsLayers = layers.value.map((layer, index) => {
       const wmtsSource = createWmtsSource(layer.id);
       idlayer = layer.id;
-      console.log(getMaxZoom(layer.id));
       return new TileLayer({
         source: wmtsSource,
         visible: index === activeLayerIndex.value
@@ -288,9 +288,9 @@ onMounted(() => {
       pins.value = [[x, y]];
     });
     
-    eventBus.on('bbox-updated', (bbox) => {
-      console.log('BBOX reçue :', bbox);
-      const [minX, minY, maxX, maxY] = bbox;
+    eventBus.on('bbox-updated', (bboxLambert93) => {
+      bbox.value = bboxLambert93
+      const [minX, minY, maxX, maxY] = bboxLambert93;
       
       const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
         `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
@@ -300,6 +300,26 @@ onMounted(() => {
       vectorWfsSource.value.setUrl(newUrl);
       vectorWfsSource.value.refresh();
     });
+    
+    eventBus.on('criteria', (criteria) => {
+      const { yearMin, yearMax, scaleMin, scaleMax } = criteria;
+      const [minX, minY, maxX, maxY] = bbox.value;
+
+      let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`;
+
+      if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E${yearMin}`;
+      if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C${yearMax}`;
+      if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E${scaleMin}`;
+      if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C${scaleMax}`;
+
+      const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
+        `&cql_filter=${cqlFilter}&srsName=EPSG:3857`;
+
+      console.log(newUrl);
+      vectorWfsSource.value.setUrl(newUrl);
+      vectorWfsSource.value.refresh();
+    });
+
     
     // Forcer un redimensionnement pour assurer que la carte s'affiche correctement
     window.dispatchEvent(new Event('resize'));
