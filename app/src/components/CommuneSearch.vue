@@ -74,7 +74,6 @@ let searchCommune = ref('')
 const communeResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-let bboxLambert93 = null
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
@@ -100,7 +99,8 @@ function searchCommunes() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
 }
-  
+
+
 const query = searchCommune.value.toLowerCase().trim()
   
 if (!query) {
@@ -132,17 +132,18 @@ searchTimeout = setTimeout(() => {
 }
 
 function selectCommune(commune) {
-  emit('select-commune', commune)
-  searchCommune = commune.nom
 
   const bbox = commune.bbox.coordinates[0]
   const bboxWGS84 = [bbox[0], bbox[2]]
+  const bboxLambert93 = bboxWGS84.map( point => useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154') )
 
-  console.log(bboxWGS84)
+  const point = {
+    x: 0,
+    y: 0,
+    bboxLambert93: bboxLambert93.flat()
+  }
 
-  bboxLambert93 = bboxWGS84.map( point => useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154') )
-
-  console.log(bboxLambert93)
+  emit('select-commune', point)
 
   showResults.value = false
 }

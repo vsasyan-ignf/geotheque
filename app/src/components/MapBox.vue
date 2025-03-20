@@ -26,7 +26,7 @@
       </ol-tile-layer>
       <ol-vector-layer>
         <ol-source-vector
-          :url="url_test"
+          :url="url_test.value"
           :strategy="bbox"
           :format="GeoJSON"
           :projection="projection"

@@ -17,7 +17,7 @@
     <CommuneSearch
       v-if="activeSubCategory === 'commune'"
       @close="$emit('close-sub-category')"
-      @select-commune="goToCommune"
+      @select-commune="goToPoint"
     />
 
     <DepartementSearch
