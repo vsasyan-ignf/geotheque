@@ -31,22 +31,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import { bboxState, eventBus } from './eventBus'
-import proj4 from 'proj4'
+import { bboxState, eventBus } from './composables/eventBus'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-
-// définit les systèmes de projection
-proj4.defs([
-  [
-    'EPSG:3857',
-    '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs',
-  ],
-  ['EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs'],
-  [
-    'EPSG:2154',
-    '+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
-  ],
-])
+import { useConvertCoordinates } from './composables/convertCoordinates'
 
 const emit = defineEmits(['close', 'go-to-point'])
 
@@ -59,56 +46,36 @@ const projections = [
   { id: 'EPSG:2154', name: 'Lambert 93' },
 ]
 
-// converti les x et y en fonction du système de proj en entré et en sortie
-function convertCoordinates(x, y, fromProjection, toProjection) {
-  return proj4(fromProjection, toProjection, [x, y])
-}
-
 async function fetchAndConvertBbox(longitude, latitude) {
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
     const response = await fetch(url)
-    
+
     if (!response.ok) {
       throw new Error(`Erreur HTTP: ${response.status}`)
     }
-    
+
     const data = await response.json()
-    
+
     const bbox = data.boundingbox
-    
+
     const bboxWGS84 = [
       parseFloat(bbox[2]),
       parseFloat(bbox[0]),
       parseFloat(bbox[3]),
-      parseFloat(bbox[1])
+      parseFloat(bbox[1]),
     ]
-    
-    const southWest = convertCoordinates(
-      bboxWGS84[0], 
-      bboxWGS84[1], 
-      'EPSG:4326', 
-      'EPSG:2154'
-    )
-    
-    const northEast = convertCoordinates(
-      bboxWGS84[2], 
-      bboxWGS84[3], 
-      'EPSG:4326', 
-      'EPSG:2154'
-    )
-    
-    const bboxLambert93 = [
-      southWest[0],
-      southWest[1],
-      northEast[0],
-      northEast[1]
-    ]
-    
+
+    const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:2154')
+
+    const northEast = useConvertCoordinates(bboxWGS84[2], bboxWGS84[3], 'EPSG:4326', 'EPSG:2154')
+
+    const bboxLambert93 = [southWest[0], southWest[1], northEast[0], northEast[1]]
+
     return {
       data,
       bboxWGS84,
-      bboxLambert93
+      bboxLambert93,
     }
   } catch (error) {
     console.error('Erreur lors du géocodage inversé:', error)
@@ -120,26 +87,26 @@ async function fetchAndConvertBbox(longitude, latitude) {
 async function handleGoToPoint() {
   if (!pointX.value || !pointY.value) return
 
-  const convertedCoord = convertCoordinates(
-    parseFloat(pointX.value), 
-    parseFloat(pointY.value), 
-    selectedProjection.value, 
-    'EPSG:4326'
+  const convertedCoord = useConvertCoordinates(
+    parseFloat(pointX.value),
+    parseFloat(pointY.value),
+    selectedProjection.value,
+    'EPSG:4326',
   )
 
   const point = {
     x: convertedCoord[0],
-    y: convertedCoord[1]
+    y: convertedCoord[1],
   }
-  
+
   const bboxResult = await fetchAndConvertBbox(point.x, point.y)
-  
+
   if (bboxResult) {
     point.locationData = bboxResult.data
     point.bboxWGS84 = bboxResult.bboxWGS84
     point.bboxLambert93 = bboxResult.bboxLambert93
   }
-  
+
   emit('go-to-point', point)
 }
 
@@ -147,7 +114,7 @@ async function handleGoToPoint() {
 async function handleMapClick(coords) {
   // converti le x et y dans le bon système de proj sélectionné
   if (coords.projection !== selectedProjection.value) {
-    const convertedCoords = convertCoordinates(
+    const convertedCoords = useConvertCoordinates(
       coords.x,
       coords.y,
       coords.projection,
@@ -162,7 +129,7 @@ async function handleMapClick(coords) {
   pointY.value = Math.round(coords.y * 100) / 100
   selectedProjection.value = coords.projection
 
-  const convertedCoord = convertCoordinates(
+  const convertedCoord = useConvertCoordinates(
     parseFloat(pointX.value), 
     parseFloat(pointY.value), 
     selectedProjection.value, 
@@ -198,7 +165,7 @@ async function handleMapClick(coords) {
 // mise à jour des x et y lorsque le système de proj change
 watch(selectedProjection, (newProjection, oldProjection) => {
   if (pointX.value && pointY.value && newProjection !== oldProjection) {
-    const convertedCoords = convertCoordinates(
+    const convertedCoords = useConvertCoordinates(
       pointX.value,
       pointY.value,
       oldProjection,

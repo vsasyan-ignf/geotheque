@@ -38,7 +38,7 @@
 <script setup>
 import { ref } from 'vue'
 import Dropdown from './material/Dropdown.vue'
-import { bboxState, eventBus } from './eventBus'
+import { bboxState, eventBus } from './composables/eventBus'
 
 const yearMin = ref('2000')
 const yearMax = ref('2000')
