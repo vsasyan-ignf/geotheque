@@ -307,10 +307,10 @@ onMounted(() => {
 
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`;
 
-      if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E${yearMin}`;
-      if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C${yearMax}`;
-      if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E${scaleMin}`;
-      if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C${scaleMax}`;
+      if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`; // encodage utf8 %3E%3D = "=>"
+      if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`; // encodage utf8 %3C%3D = "<="
+      if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`;
+      if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`;
 
       const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
         `&cql_filter=${cqlFilter}&srsName=EPSG:3857`;
@@ -320,7 +320,7 @@ onMounted(() => {
       vectorWfsSource.value.refresh();
     });
 
-    
+
     // Forcer un redimensionnement pour assurer que la carte s'affiche correctement
     window.dispatchEvent(new Event('resize'));
   });
