@@ -18,10 +18,10 @@
           </option>
         </select>
       </div>
-      <!-- <button class="action-button" @click="handleGoToPoint">
+      <button class="action-button" @click="handleGoToPoint">
         <i class="mdi mdi-crosshairs-gps"></i>
         Centrer sur ce point
-      </button> -->
+      </button>
     </div>
 
     <CartothequeSubMenu />
@@ -31,7 +31,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import { eventBus } from './eventBus'
+import { bboxState, eventBus } from './eventBus'
 import proj4 from 'proj4'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 
@@ -182,7 +182,17 @@ async function handleMapClick(coords) {
     point.bboxLambert93 = bboxResult.bboxLambert93
   }
   
-  emit('go-to-point', point)
+  bboxState.value = point.bboxLambert93;
+
+  eventBus.emit('criteria', {
+    yearMin: null,
+    yearMax: null,
+    scaleMin: null,
+    scaleMax: null,
+    bboxe: point.bboxLambert93,
+    loadWfs: false,
+  });
+
 }
 
 // mise à jour des x et y lorsque le système de proj change

@@ -38,7 +38,7 @@
 <script setup>
 import { ref } from 'vue'
 import Dropdown from './material/Dropdown.vue'
-import { eventBus } from './eventBus'
+import { bboxState, eventBus } from './eventBus'
 
 const yearMin = ref('2000')
 const yearMax = ref('2000')
@@ -51,10 +51,11 @@ const handleSubmit = () => {
     yearMax: yearMax.value,
     scaleMin: scaleMin.value,
     scaleMax: scaleMax.value,
+    bboxe:bboxState.value,
+    loadWfs: true
   }
 
   eventBus.emit('criteria', criteria);
-
 }
 </script>
 
