@@ -59,8 +59,13 @@ function goToCommune(commune) {
 }
 
 function goToDepartement(departement) {
-  console.log(`dep: ${departement.nom}`)
+  console.log(Object.keys(departement))
+  console.log(departement.nom)
+
+  console.log(departement.bbox)
+  eventBus.emit('bbox-dep-to-map',departement.bbox )
 }
+
 
 function goToPoint(point) {
   console.log(`x:${point.x}, y:${point.y} en ${point.projection}`)

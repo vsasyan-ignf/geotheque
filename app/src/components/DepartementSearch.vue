@@ -42,6 +42,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
+import { get } from 'ol/proj'
 
 const emit = defineEmits(['close', 'select-departement'])
 const searchDepartement = ref('')
@@ -97,9 +98,39 @@ function searchDepartements() {
 }
 
 function selectDepartement(departement) {
-  emit('select-departement', departement)
-  showResults.value = false
+  getDepartementBbox(departement).then((bbox) => {
+    emit('select-departement', { nom: departement.nom, bbox: bbox });
+  }).catch((error) => {
+    console.error('Erreur lors de la récupération des bbox:', error);
+  });
+
+  showResults.value = false;
 }
+
+async function getDepartementBbox(departement) {
+  const depName = departement.nom.toString();
+  const upDepartement = depName.toUpperCase();
+  const urlDepBbox = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0
+  `+`&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=NOM_DEPT='${upDepartement}'`;
+  
+  try {
+    const response = await fetch(urlDepBbox);
+    if (!response.ok) {
+      throw new Error(`rrreur réseau : ${response.status}`);
+    }
+    const data = await response.json();
+    const bbox = data.features[0]?.geometry?.coordinates[0];
+    if (!bbox) {
+      throw new Error('bbox non trouvée dans la réponse');
+    }
+    return bbox;
+  } catch (error) {
+      console.error('e:', error);
+    throw error;
+  }
+}
+
+
 </script>
 
 <style scoped>
