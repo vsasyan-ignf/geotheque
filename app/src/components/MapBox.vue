@@ -60,7 +60,7 @@ import { ref, onMounted, nextTick, provide, inject } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import { eventBus } from './eventBus'
-import markerIcon from '@/assets/marker-icon.svg'
+import markerIcon from '@/assets/blue-marker.svg'
 
 import PlanIGN from '../assets/basecard/plan_ign.png'
 import Ortho from '../assets/basecard/ortho.jpeg'
