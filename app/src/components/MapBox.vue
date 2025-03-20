@@ -17,7 +17,6 @@ import BasecardSwitcher from './BasecardSwitcher.vue';
 import { eventBus } from './eventBus';
 import markerIcon from '@/assets/marker-icon.svg';
 
-// Import nécessaires pour OpenLayers
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -40,7 +39,6 @@ import BDParcellaire from '../assets/basecard/bdparcellaire.png';
 import CartesIGN from '../assets/basecard/cartesign.jpg';
 import Scan25 from '../assets/basecard/scan25.jpg';
 
-// Définitions de coordonnées et projections
 const center = ref([260000, 6000000]);
 const projection = ref('EPSG:3857');
 const zoom = ref(6);
@@ -54,10 +52,8 @@ const showPin = ref(false);
 const vectorPinSource = ref(null);
 const vectorWfsSource = ref(null);
 
-// URL WFS
 const url_test = ref(``);
 
-// Définition des couches
 const layers = ref([
   {
     id: 'plan',
@@ -164,31 +160,25 @@ function getFormatWmtsLayer(layerId) {
 }
 
 function createWmtsSource(layerId) {
-  // Obtenir la projection et son étendue
   const projObj = getProjection(projection_wmts);
   const projExtent = projObj.getExtent();
   
-  // Calculer les résolutions et les matrixIds
   const resolutions = [];
   const matrixIds = [];
   
-  // Utiliser 20 niveaux de zoom (0-19)
   const maxZoom = 19;
   
   for (let i = 0; i <= maxZoom; i++) {
     matrixIds.push(i.toString());
-    // Calculate resolutions based on zoom levels
     resolutions.push(156543.03392804097 / Math.pow(2, i));
   }
-  
-  // Créer le tileGrid pour WMTS
+
   const tileGrid = new WMTSTileGrid({
     origin: getTopLeft(projExtent),
     resolutions: resolutions,
     matrixIds: matrixIds
   });
   
-  // Créer la source WMTS
   return new WMTS({
     url: getWmtsUrl(layerId),
     layer: getWmtsLayerName(layerId),
@@ -203,7 +193,6 @@ function createWmtsSource(layerId) {
 let idlayer;
 onMounted(() => {
   nextTick(() => {
-    // Créer les sources WMTS
     const wmtsLayers = layers.value.map((layer, index) => {
       const wmtsSource = createWmtsSource(layer.id);
       idlayer = layer.id;
@@ -214,7 +203,6 @@ onMounted(() => {
       });
     });
     
-    // Créer la source vectorielle pour les polygones WFS
     vectorWfsSource.value = new VectorSource({
       url: url_test.value,
       format: new GeoJSON(),
@@ -231,7 +219,6 @@ onMounted(() => {
       })
     });
     
-    // Créer la source vectorielle pour les pins
     vectorPinSource.value = new VectorSource();
     
     const pinLayer = new VectorLayer({
@@ -245,7 +232,6 @@ onMounted(() => {
       })
     });
     
-    // Créer la vue
     const view = new View({
       center: center.value,
       zoom: zoom.value,
@@ -257,7 +243,6 @@ onMounted(() => {
     olView.value = view;
   
     
-    // Créer la carte
     olMap.value = new Map({
       target: mapElement.value,
       layers: [...wmtsLayers, wfsLayer, pinLayer],
@@ -268,10 +253,8 @@ onMounted(() => {
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel);
       if (showPin.value) {
-        // Supprimer les pins existants
         vectorPinSource.value.clear();
         
-        // Ajouter un nouveau pin
         const feature = new Feature({
           geometry: new Point(clickedCoord)
         });
@@ -309,7 +292,6 @@ onMounted(() => {
       console.log('BBOX reçue :', bbox);
       const [minX, minY, maxX, maxY] = bbox;
       
-      // Mettre à jour l'URL et recharger la source
       const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
         `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
         `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
