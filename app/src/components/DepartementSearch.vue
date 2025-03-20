@@ -1,9 +1,7 @@
 <!-- recherche par departement -->
-
 <template>
   <div class="sub-category-content">
     <SubCategoryHeader title="Recherche par département" @close="$emit('close')" />
-
     <div class="search-form">
       <div class="form-group">
         <label for="departement-search">Nom ou code</label>
@@ -20,7 +18,6 @@
           </button>
         </div>
       </div>
-
       <div class="results-container" v-if="departementResults.length > 0">
         <h5>Résultats ({{ departementResults.length }})</h5>
         <div class="results-list">
@@ -28,17 +25,15 @@
             v-for="dept in departementResults"
             :key="dept.code"
             class="result-item"
-            @click="$emit('select-departement', dept)"
+            @click="selectDepartement(dept)"
           >
             <div class="result-main">{{ dept.nom }}</div>
             <div class="result-secondary">{{ dept.code }} - {{ dept.region }}</div>
           </div>
         </div>
       </div>
-
       <div class="no-results" v-else-if="searchDepartement">Aucun département trouvé</div>
     </div>
-
     <CartothequeSubMenu />
   </div>
 </template>
@@ -48,78 +43,63 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 
-
-
-const emit =(['close', 'select-departement'])
-
+const emit = defineEmits(['close', 'select-departement'])
 const searchDepartement = ref('')
 const departementResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
 
-
-const departements = [
-  { nom: 'Paris', code: '75', region: 'Île-de-France' },
-  { nom: 'Rhône', code: '69', region: 'Auvergne-Rhône-Alpes' },
-  { nom: 'Bouches-du-Rhône', code: '13', region: "Provence-Alpes-Côte d'Azur" },
-  { nom: 'Haute-Garonne', code: '31', region: 'Occitanie' },
-  { nom: 'Alpes-Maritimes', code: '06', region: "Provence-Alpes-Côte d'Azur" },
-]
-
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
   const searchInput = document.getElementById('departement-search')
-  
-  if (resultsWrapper && 
-      !resultsWrapper.contains(event.target) && 
-      event.target !== searchInput) {
+  if (
+    resultsWrapper &&
+    !resultsWrapper.contains(event.target) &&
+    event.target !== searchInput
+  ) {
     showResults.value = false
   }
 }
 
-
 onMounted(() => {
-  document.addEventListener('click', searchDepartements)
+  document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('click', searchDepartements)
+  document.removeEventListener('click', handleClickOutside)
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
 function searchDepartements() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
-}
-
-const query = searchDepartements.value.toLowerCase().trim()
-
-// ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes 
-searchTimeout = setTimeout(() => {
-  fetch(`https://geo.api.gouv.fr/departement?nom=${query}&fields=nom,codesPostaux,departement`)
-    .then(response => response.json())
-    .then(data => {
-      const newResults = data.map(departement => ({
-        nom: departement.nom,
-        code: departement.codesPostaux[0],
-        departement: departement.departement.nom,
-      }))
-        
-      departementResults.value = newResults
-    })
-    .catch(error => {
-      console.error("Erreur lors de la récupération des departements:", error)
-      departementResults.value = []
-    })
+  }
+  
+  const query = searchDepartement.value.toLowerCase().trim()
+  
+  // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
+  searchTimeout = setTimeout(() => {
+    fetch(`https://geo.api.gouv.fr/departements?nom=${query}&fields=nom,code,region`)
+      .then(response => response.json())
+      .then(data => {
+        const newResults = data.map(departement => ({
+          nom: departement.nom,
+          code: departement.code,
+          region: departement.region.nom
+        }))
+        departementResults.value = newResults
+      })
+      .catch(error => {
+        console.error("Erreur lors de la récupération des departements:", error)
+        departementResults.value = []
+      })
   }, 300)
 }
-
 
 function selectDepartement(departement) {
   emit('select-departement', departement)
   showResults.value = false
 }
-
 </script>
 
 <style scoped>
