@@ -25,6 +25,7 @@ import VectorSource from 'ol/source/Vector';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import GeoJSON from 'ol/format/GeoJSON';
+import Polygon from 'ol/geom/Polygon.js';
 import { get, get as getProjection } from 'ol/proj';
 import { getTopLeft } from 'ol/extent';
 import Feature from 'ol/Feature';
@@ -287,6 +288,19 @@ onMounted(() => {
       vectorPinSource.value.addFeature(feature);
       pins.value = [[x, y]];
     });
+
+    eventBus.on('list-point-dep-to-map',(bbox) =>{
+      const coordinates = bbox[0].map(point => [point[0], point[1]]);
+      console.log(coordinates)
+      /** 
+      var polygon = new ol.Feature({
+      geometry : new ol.geom.Polygon([coordinates]).transform('EPSG:2154','EPSG:3857'),
+      desc:"Departement"
+      });
+
+      **/
+    });
+
     
     eventBus.on('bbox-updated', (bbox) => {
       console.log('BBOX reçue :', bbox);

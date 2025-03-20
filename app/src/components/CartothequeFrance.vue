@@ -63,7 +63,7 @@ function goToDepartement(departement) {
   console.log(departement.nom)
 
   console.log(departement.bbox)
-  eventBus.emit('bbox-dep-to-map',departement.bbox )
+  eventBus.emit('list-point-dep-to-map',departement.bbox )
 }
 
 
