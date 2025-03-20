@@ -29,7 +29,7 @@ const url_test =
   'BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)' +
   '%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857'
 
-let carteNames = ref([])
+const carteNames = ref([])
 
 function get_tab_scans() {
   fetch(url_test)
@@ -41,11 +41,9 @@ function get_tab_scans() {
 }
 
 function updateCarteNames(newCarteNames){
-  carteNames = newCarteNames
-  console.log(carteNames)
+  carteNames.value= newCarteNames
 }
 
-watch(carteNames, () => {})
 
 
 onMounted(() => {
