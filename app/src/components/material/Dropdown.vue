@@ -2,6 +2,7 @@
   <div class="dropdown">
     <label for="option">{{ nameDropdown }}</label>
     <select id="option" v-model="selected">
+      <option disabled value="">Veuillez sélectionner une carte</option>
       <option v-for="val in options" :key="val.id" :value="val.id">
         {{ val.name }}
       </option>
@@ -11,6 +12,8 @@
 
 <script setup>
 import { ref } from 'vue'
+
+const selected = ref("")
 
 const props = defineProps({
   nameDropdown: {
@@ -27,7 +30,7 @@ const props = defineProps({
   },
 })
 
-const selected = ref('EPSG:3857')
+
 </script>
 
 <style scoped>
