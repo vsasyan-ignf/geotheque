@@ -14,7 +14,7 @@
 import { ref, onMounted, nextTick, provide, inject } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
-import { eventBus } from './eventBus'
+import { eventBus } from './composables/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 
 import Map from 'ol/Map';

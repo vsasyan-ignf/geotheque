@@ -31,7 +31,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import { eventBus } from './eventBus'
+import { eventBus } from './composables/eventBus'
 import proj4 from 'proj4'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 
