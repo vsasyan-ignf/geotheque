@@ -134,6 +134,25 @@ function createWmtsSource(layerId) {
   })
 }
 
+async function getCarteNames(url){
+  console.log('update url : ' + url)
+
+  try {
+    const response = await fetch(url)
+    if (response.ok) {
+      const data = await response.json()
+      const carteNames = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE }))
+      return carteNames
+    } else {
+          throw new Error('Failed to fetch data')
+        }
+      } catch (error) {
+        this.error = true
+        console.error('Error:', error)
+    }
+}
+
+
 let idlayer
 onMounted(() => {
   nextTick(() => {
@@ -230,7 +249,7 @@ onMounted(() => {
       pins.value = [[x, y]]
     })
 
-    eventBus.on('bbox-updated', (bbox) => {
+    eventBus.on('bbox-updated', async (bbox) => {
       const [minX, minY, maxX, maxY] = bbox
 
       const newUrl =
@@ -239,7 +258,10 @@ onMounted(() => {
         `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
         `%20&srsName=EPSG:3857`
 
-      eventBus.emit('sendUrl', newUrl)
+
+      const cartes = await getCarteNames(newUrl)
+
+      eventBus.emit('sendUrl', cartes)
 
       vectorWfsSource.value.setUrl(newUrl)
       vectorWfsSource.value.refresh()

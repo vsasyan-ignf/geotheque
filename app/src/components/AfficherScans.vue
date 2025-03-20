@@ -1,7 +1,7 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" action="">
-      <Dropdown :options="CarteNames" />
+      <Dropdown :options="carteNames" />
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser">
@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch} from 'vue'
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
 import { eventBus } from './composables/eventBus'
@@ -29,7 +29,7 @@ const url_test =
   'BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)' +
   '%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857'
 
-const CarteNames = ref([])
+let carteNames = ref([])
 
 function get_tab_scans() {
   fetch(url_test)
@@ -40,23 +40,21 @@ function get_tab_scans() {
     })
 }
 
-function getCarteNames(url){
-  console.log('update url : ' + url)
-  fetch(url)
-    .then((response) => response.json())
-    .then((data) => {
-      const res = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE }))
-      CarteNames.value = res
-    })
+function updateCarteNames(newCarteNames){
+  carteNames = newCarteNames
+  console.log(carteNames)
 }
 
+watch(carteNames, () => {})
+
+
 onMounted(() => {
-  eventBus.on('sendUrl', getCarteNames)
+  eventBus.on('sendUrl', updateCarteNames)
 })
 
 
 onUnmounted(() => {
-  eventBus.off('sendUrl', getCarteNames)
+  eventBus.off('sendUrl', updateCarteNames)
 })
 </script>
 
