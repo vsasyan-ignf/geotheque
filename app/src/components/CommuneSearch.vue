@@ -14,7 +14,7 @@
             @input="searchCommunes"
             @focus="showResults = true"
           />
-          <button @click="searchCommunes">
+          <button @click="validateCommune">
             <i class="mdi mdi-magnify"></i>
           </button>
         </div>
@@ -74,6 +74,7 @@ let searchCommune = ref('')
 const communeResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
+let repCommune = ref(null)
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
@@ -99,8 +100,6 @@ function searchCommunes() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
 }
-
-console.log(searchCommune.value)
 
 const query = searchCommune.value.toLowerCase().trim()
   
@@ -134,21 +133,28 @@ searchTimeout = setTimeout(() => {
 
 function selectCommune(commune) {
 
-  const bbox = commune.bbox.coordinates[0]
-  const bboxWGS84 = [bbox[0], bbox[2]]
-  const bboxLambert93 = bboxWGS84.map( point => useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154') )
-
-  const point = {
-    x: 0,
-    y: 0,
-    bboxLambert93: bboxLambert93.flat()
-  }
-
-  emit('select-commune', point)
-
   searchCommune.value = commune.nom
+  repCommune = commune
 
   showResults.value = false
+}
+
+function validateCommune() {
+
+  if (repCommune) {
+    const bbox = repCommune.bbox.coordinates[0]
+    const bboxWGS84 = [bbox[0], bbox[2]]
+    const bboxLambert93 = bboxWGS84.map( point => useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154') )
+
+    const point = {
+      x: 0,
+      y: 0,
+      bboxLambert93: bboxLambert93.flat()
+    }
+
+    emit('select-commune', point)
+  }
+
 }
 
 
