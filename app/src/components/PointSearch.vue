@@ -32,21 +32,9 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import { eventBus } from './composables/eventBus'
-import proj4 from 'proj4'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
+import { useConvertCoordinates } from './composables/convertCoordinates'
 
-// définit les systèmes de projection
-proj4.defs([
-  [
-    'EPSG:3857',
-    '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs',
-  ],
-  ['EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs'],
-  [
-    'EPSG:2154',
-    '+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
-  ],
-])
 
 const emit = defineEmits(['close', 'go-to-point'])
 
@@ -59,10 +47,6 @@ const projections = [
   { id: 'EPSG:2154', name: 'Lambert 93' },
 ]
 
-// converti les x et y en fonction du système de proj en entré et en sortie
-function convertCoordinates(x, y, fromProjection, toProjection) {
-  return proj4(fromProjection, toProjection, [x, y])
-}
 
 async function fetchAndConvertBbox(longitude, latitude) {
   try {
@@ -84,14 +68,14 @@ async function fetchAndConvertBbox(longitude, latitude) {
       parseFloat(bbox[1])
     ]
     
-    const southWest = convertCoordinates(
+    const southWest = useConvertCoordinates(
       bboxWGS84[0], 
       bboxWGS84[1], 
       'EPSG:4326', 
       'EPSG:2154'
     )
     
-    const northEast = convertCoordinates(
+    const northEast = useConvertCoordinates(
       bboxWGS84[2], 
       bboxWGS84[3], 
       'EPSG:4326', 
@@ -120,7 +104,7 @@ async function fetchAndConvertBbox(longitude, latitude) {
 async function handleGoToPoint() {
   if (!pointX.value || !pointY.value) return
 
-  const convertedCoord = convertCoordinates(
+  const convertedCoord = useConvertCoordinates(
     parseFloat(pointX.value), 
     parseFloat(pointY.value), 
     selectedProjection.value, 
@@ -147,7 +131,7 @@ async function handleGoToPoint() {
 function handleMapClick(coords) {
   // converti le x et y dans le bon système de proj sélectionné
   if (coords.projection !== selectedProjection.value) {
-    const convertedCoords = convertCoordinates(
+    const convertedCoords = useConvertCoordinates(
       coords.x,
       coords.y,
       coords.projection,
@@ -166,7 +150,7 @@ function handleMapClick(coords) {
 // mise à jour des x et y lorsque le système de proj change
 watch(selectedProjection, (newProjection, oldProjection) => {
   if (pointX.value && pointY.value && newProjection !== oldProjection) {
-    const convertedCoords = convertCoordinates(
+    const convertedCoords = useConvertCoordinates(
       pointX.value,
       pointY.value,
       oldProjection,
