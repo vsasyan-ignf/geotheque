@@ -54,28 +54,19 @@ const props = defineProps({
 
 defineEmits(['select-sub-category', 'close-sub-category'])
 
-function goToCommune(commune) {
-  console.log(`com: ${commune.nom}`)
-}
-
 function goToDepartement(departement) {
   console.log(`dep: ${departement.nom}`)
 }
 
 function goToPoint(point) {
-  console.log(`x:${point.x}, y:${point.y}`)
-  
   if (point.bboxLambert93) {
-    console.log(point.bboxLambert93)
-
-    eventBus.emit('bbox-updated', point.bboxLambert93);
+    eventBus.emit('bbox-updated', point.bboxLambert93)
   }
 }
 
 watch(
   () => props.activeSubCategory,
   (newVal) => {
-    console.log(newVal)
     eventBus.emit('toggle-pin', newVal === 'point')
   },
 )

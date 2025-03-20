@@ -18,7 +18,7 @@
             <i class="mdi mdi-magnify"></i>
           </button>
         </div>
-        
+
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
             <h5 v-if="communeResults.length > 0">Résultats ({{ communeResults.length }})</h5>
@@ -28,7 +28,7 @@
               <i class="mdi mdi-close"></i>
             </button>
           </div>
-          
+
           <div class="results-content">
             <div class="results-list" v-if="communeResults.length > 0">
               <div
@@ -43,12 +43,12 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="no-results" v-else-if="searchCommune">
               <i class="mdi mdi-alert-circle-outline"></i>
               <span>Aucune commune trouvée</span>
             </div>
-            
+
             <div class="empty-search" v-else>
               <i class="mdi mdi-map-search-outline"></i>
               <span>Saisissez le nom ou code postal d'une commune</span>
@@ -58,7 +58,7 @@
       </div>
     </div>
 
-    <CartothequeSubMenu/>
+    <CartothequeSubMenu />
   </div>
 </template>
 
@@ -67,9 +67,9 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { useConvertCoordinates } from './composables/convertCoordinates'
-  
+
 const emit = defineEmits(['close', 'select-commune'])
-  
+
 let searchCommune = ref('')
 const communeResults = ref([])
 const showResults = ref(false)
@@ -79,10 +79,8 @@ let repCommune = ref(null)
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
   const searchInput = document.getElementById('commune-search')
-  
-  if (resultsWrapper && 
-      !resultsWrapper.contains(event.target) && 
-      event.target !== searchInput) {
+
+  if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
   }
 }
@@ -99,40 +97,39 @@ onUnmounted(() => {
 function searchCommunes() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
-}
+  }
 
-const query = searchCommune.value.toLowerCase().trim()
-  
-if (!query) {
-  communeResults.value = []
-  return
-}
-  
-showResults.value = true
+  const query = searchCommune.value.toLowerCase().trim()
 
-// ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes 
-searchTimeout = setTimeout(() => {
-  fetch(`https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox`)
-    .then(response => response.json())
-    .then(data => {
-      const newResults = data.map(commune => ({
-        nom: commune.nom,
-        code: commune.codesPostaux[0],
-        departement: commune.departement.nom,
-        bbox: commune.bbox
-      }))
-        
-      communeResults.value = newResults
-    })
-    .catch(error => {
-      console.error("Erreur lors de la récupération des communes:", error)
-      communeResults.value = []
-    })
+  if (!query) {
+    communeResults.value = []
+    return
+  }
+
+  showResults.value = true
+
+  // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
+  searchTimeout = setTimeout(() => {
+    fetch(`https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox`)
+      .then((response) => response.json())
+      .then((data) => {
+        const newResults = data.map((commune) => ({
+          nom: commune.nom,
+          code: commune.codesPostaux[0],
+          departement: commune.departement.nom,
+          bbox: commune.bbox,
+        }))
+
+        communeResults.value = newResults
+      })
+      .catch((error) => {
+        console.error('Erreur lors de la récupération des communes:', error)
+        communeResults.value = []
+      })
   }, 300)
 }
 
 function selectCommune(commune) {
-
   searchCommune.value = commune.nom
   repCommune = commune
 
@@ -140,24 +137,22 @@ function selectCommune(commune) {
 }
 
 function validateCommune() {
-
   if (repCommune) {
     const bbox = repCommune.bbox.coordinates[0]
     const bboxWGS84 = [bbox[0], bbox[2]]
-    const bboxLambert93 = bboxWGS84.map( point => useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154') )
+    const bboxLambert93 = bboxWGS84.map((point) =>
+      useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154'),
+    )
 
     const point = {
       x: 0,
       y: 0,
-      bboxLambert93: bboxLambert93.flat()
+      bboxLambert93: bboxLambert93.flat(),
     }
 
     emit('select-commune', point)
   }
-
 }
-
-
 </script>
 
 <style scoped>
@@ -167,8 +162,12 @@ function validateCommune() {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .search-form {
@@ -204,7 +203,9 @@ function validateCommune() {
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
   font-size: 14px;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
 }
 
 .input-group input:focus {
@@ -340,7 +341,8 @@ function validateCommune() {
   margin-top: 3px;
 }
 
-.no-results, .empty-search {
+.no-results,
+.empty-search {
   text-align: center;
   padding: 25px;
   color: #777;
@@ -351,7 +353,8 @@ function validateCommune() {
   gap: 10px;
 }
 
-.no-results i, .empty-search i {
+.no-results i,
+.empty-search i {
   font-size: 24px;
   color: #ddd;
 }

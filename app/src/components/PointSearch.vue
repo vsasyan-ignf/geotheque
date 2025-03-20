@@ -35,7 +35,6 @@ import { eventBus } from './composables/eventBus'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { useConvertCoordinates } from './composables/convertCoordinates'
 
-
 const emit = defineEmits(['close', 'go-to-point'])
 
 const pointX = ref('')
@@ -47,52 +46,36 @@ const projections = [
   { id: 'EPSG:2154', name: 'Lambert 93' },
 ]
 
-
 async function fetchAndConvertBbox(longitude, latitude) {
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
     const response = await fetch(url)
-    
+
     if (!response.ok) {
       throw new Error(`Erreur HTTP: ${response.status}`)
     }
-    
+
     const data = await response.json()
-    
+
     const bbox = data.boundingbox
-    
+
     const bboxWGS84 = [
       parseFloat(bbox[2]),
       parseFloat(bbox[0]),
       parseFloat(bbox[3]),
-      parseFloat(bbox[1])
+      parseFloat(bbox[1]),
     ]
-    
-    const southWest = useConvertCoordinates(
-      bboxWGS84[0], 
-      bboxWGS84[1], 
-      'EPSG:4326', 
-      'EPSG:2154'
-    )
-    
-    const northEast = useConvertCoordinates(
-      bboxWGS84[2], 
-      bboxWGS84[3], 
-      'EPSG:4326', 
-      'EPSG:2154'
-    )
-    
-    const bboxLambert93 = [
-      southWest[0],
-      southWest[1],
-      northEast[0],
-      northEast[1]
-    ]
-    
+
+    const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:2154')
+
+    const northEast = useConvertCoordinates(bboxWGS84[2], bboxWGS84[3], 'EPSG:4326', 'EPSG:2154')
+
+    const bboxLambert93 = [southWest[0], southWest[1], northEast[0], northEast[1]]
+
     return {
       data,
       bboxWGS84,
-      bboxLambert93
+      bboxLambert93,
     }
   } catch (error) {
     console.error('Erreur lors du géocodage inversé:', error)
@@ -105,25 +88,25 @@ async function handleGoToPoint() {
   if (!pointX.value || !pointY.value) return
 
   const convertedCoord = useConvertCoordinates(
-    parseFloat(pointX.value), 
-    parseFloat(pointY.value), 
-    selectedProjection.value, 
-    'EPSG:4326'
+    parseFloat(pointX.value),
+    parseFloat(pointY.value),
+    selectedProjection.value,
+    'EPSG:4326',
   )
 
   const point = {
     x: convertedCoord[0],
-    y: convertedCoord[1]
+    y: convertedCoord[1],
   }
-  
+
   const bboxResult = await fetchAndConvertBbox(point.x, point.y)
-  
+
   if (bboxResult) {
     point.locationData = bboxResult.data
     point.bboxWGS84 = bboxResult.bboxWGS84
     point.bboxLambert93 = bboxResult.bboxLambert93
   }
-  
+
   emit('go-to-point', point)
 }
 
