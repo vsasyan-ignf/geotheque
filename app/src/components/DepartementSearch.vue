@@ -1,9 +1,7 @@
 <!-- recherche par departement -->
-
 <template>
   <div class="sub-category-content">
     <SubCategoryHeader title="Recherche par département" @close="$emit('close')" />
-
     <div class="search-form">
       <div class="form-group">
         <label for="departement-search">Nom ou code</label>
@@ -20,7 +18,6 @@
           </button>
         </div>
       </div>
-
       <div class="results-container" v-if="departementResults.length > 0">
         <h5>Résultats ({{ departementResults.length }})</h5>
         <div class="results-list">
@@ -28,45 +25,112 @@
             v-for="dept in departementResults"
             :key="dept.code"
             class="result-item"
-            @click="$emit('select-departement', dept)"
+            @click="selectDepartement(dept)"
           >
             <div class="result-main">{{ dept.nom }}</div>
             <div class="result-secondary">{{ dept.code }} - {{ dept.region }}</div>
           </div>
         </div>
       </div>
-
       <div class="no-results" v-else-if="searchDepartement">Aucun département trouvé</div>
     </div>
-
     <CartothequeSubMenu />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
+import { get } from 'ol/proj'
 
-defineEmits(['close', 'select-departement'])
-
+const emit = defineEmits(['close', 'select-departement'])
 const searchDepartement = ref('')
 const departementResults = ref([])
+const showResults = ref(false)
+let searchTimeout = null
 
-const departements = [
-  { nom: 'Paris', code: '75', region: 'Île-de-France' },
-  { nom: 'Rhône', code: '69', region: 'Auvergne-Rhône-Alpes' },
-  { nom: 'Bouches-du-Rhône', code: '13', region: "Provence-Alpes-Côte d'Azur" },
-  { nom: 'Haute-Garonne', code: '31', region: 'Occitanie' },
-  { nom: 'Alpes-Maritimes', code: '06', region: "Provence-Alpes-Côte d'Azur" },
-]
+const handleClickOutside = (event) => {
+  const resultsWrapper = document.querySelector('.results-wrapper')
+  const searchInput = document.getElementById('departement-search')
+  if (
+    resultsWrapper &&
+    !resultsWrapper.contains(event.target) &&
+    event.target !== searchInput
+  ) {
+    showResults.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  if (searchTimeout) clearTimeout(searchTimeout)
+})
 
 function searchDepartements() {
-  const query = searchDepartement.value.toLowerCase()
-  departementResults.value = departements.filter(
-    (dept) => dept.nom.toLowerCase().includes(query) || dept.code.includes(query),
-  )
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  
+  const query = searchDepartement.value.toLowerCase().trim()
+  
+  // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
+  searchTimeout = setTimeout(() => {
+    fetch(`https://geo.api.gouv.fr/departements?nom=${query}&fields=nom,code,region`)
+      .then(response => response.json())
+      .then(data => {
+        const newResults = data.map(departement => ({
+          nom: departement.nom,
+          code: departement.code,
+          region: departement.region.nom
+        }))
+        departementResults.value = newResults
+      })
+      .catch(error => {
+        console.error("Erreur lors de la récupération des departements:", error)
+        departementResults.value = []
+      })
+  }, 300)
 }
+
+function selectDepartement(departement) {
+  getDepartementBbox(departement).then((bbox) => {
+    emit('select-departement', { nom: departement.nom, bbox: bbox });
+  }).catch((error) => {
+    console.error('Erreur lors de la récupération des bbox:', error);
+  });
+
+  showResults.value = false;
+}
+
+async function getDepartementBbox(departement) {
+  const depName = departement.nom.toString();
+  const upDepartement = depName.toUpperCase();
+  const urlDepBbox = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0
+  `+`&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=NOM_DEPT='${upDepartement}'`;
+  
+  try {
+    const response = await fetch(urlDepBbox);
+    if (!response.ok) {
+      throw new Error(`rrreur réseau : ${response.status}`);
+    }
+    const data = await response.json();
+    const bbox = data.features[0]?.geometry?.coordinates[0];
+    if (!bbox) {
+      throw new Error('bbox non trouvée dans la réponse');
+    }
+    return bbox;
+  } catch (error) {
+      console.error('e:', error);
+    throw error;
+  }
+}
+
+
 </script>
 
 <style scoped>
