@@ -25,12 +25,15 @@ import VectorSource from 'ol/source/Vector';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import GeoJSON from 'ol/format/GeoJSON';
-import { get, get as getProjection } from 'ol/proj';
+import { get as getProjection } from 'ol/proj';
 import { getTopLeft } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { Style, Icon, Stroke } from 'ol/style';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
+
+
+import {getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer} from './composables/getWMTS'
 
 // Images pour les thumbnails
 import PlanIGN from '../assets/basecard/plan_ign.png';
@@ -101,66 +104,9 @@ function changeActiveLayer(index) {
   }
 }
 
-const matrixSet = 'PM';
-const projection_wmts = 'EPSG:3857';
-
-function getWmtsUrl(layerId) {
-  if (layerId === 'cartesign' || layerId === 'scan25') {
-    return `https://data.geopf.fr/private/wmts?apikey=ign_scan_ws&SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`;
-  }
-  return `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`;
-}
-
-function getWmtsLayerName(layerId) {
-  switch (layerId) {
-    case 'plan':
-      return 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2';
-    case 'ortho':
-      return 'ORTHOIMAGERY.ORTHOPHOTOS';
-    case 'bdparcellaire':
-      return 'CADASTRALPARCELS.PARCELS';
-    case 'cartesign':
-      return 'GEOGRAPHICALGRIDSYSTEMS.MAPS';
-    case 'scan25':
-      return 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR';
-    default:
-      return 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2';
-  }
-}
-
-function getMaxZoom(layerId) {
-  switch (layerId) {
-    case 'plan':
-      return 19;
-    case 'ortho':
-      return 21;
-    case 'bdparcellaire':
-      return 20;
-    case 'cartesign':
-      return 19;
-    case 'scan25':
-      return 16;
-    default:
-      return 19;
-  }
-}
-
-function getFormatWmtsLayer(layerId) {
-  switch (layerId) {
-    case 'cartesign':
-    case 'ortho':
-    case 'scan25':
-      return 'image/jpeg';
-    case 'plan':
-    case 'bdparcellaire':
-      return 'image/png';
-    default:
-      return 'image/jpeg';
-  }
-}
 
 function createWmtsSource(layerId) {
-  const projObj = getProjection(projection_wmts);
+  const projObj = getProjection('EPSG:3857');
   const projExtent = projObj.getExtent();
   
   const resolutions = [];
@@ -182,7 +128,7 @@ function createWmtsSource(layerId) {
   return new WMTS({
     url: getWmtsUrl(layerId),
     layer: getWmtsLayerName(layerId),
-    matrixSet: matrixSet,
+    matrixSet: 'PM',
     format: getFormatWmtsLayer(layerId),
     projection: projObj,
     tileGrid: tileGrid,
