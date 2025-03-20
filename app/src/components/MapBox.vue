@@ -238,7 +238,9 @@ onMounted(() => {
         `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
         `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
         `%20&srsName=EPSG:3857`
-      console.log(newUrl)
+
+      eventBus.emit('sendUrl', newUrl)
+
       vectorWfsSource.value.setUrl(newUrl)
       vectorWfsSource.value.refresh()
     })
