@@ -75,6 +75,7 @@ function goToPoint(point) {
 watch(
   () => props.activeSubCategory,
   (newVal) => {
+    console.log(newVal)
     eventBus.emit('toggle-pin', newVal === 'point')
   },
 )
