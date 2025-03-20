@@ -26,7 +26,7 @@ import VectorSource from 'ol/source/Vector';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import GeoJSON from 'ol/format/GeoJSON';
-import { get as getProjection } from 'ol/proj';
+import { get, get as getProjection } from 'ol/proj';
 import { getTopLeft } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
@@ -87,6 +87,7 @@ const layers = ref([
 ]);
 
 const activeLayerIndex = ref(0);
+const olView = ref(null);
 
 function changeActiveLayer(index) {
   activeLayerIndex.value = index;
@@ -97,6 +98,10 @@ function changeActiveLayer(index) {
     wmtsLayers.forEach((layer, idx) => {
       layer.setVisible(idx === index);
     });
+
+    if (olView.value) {
+      olView.value.setMaxZoom(getMaxZoom(layers.value[index].id));
+    }
   }
 }
 
@@ -124,6 +129,23 @@ function getWmtsLayerName(layerId) {
       return 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR';
     default:
       return 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2';
+  }
+}
+
+function getMaxZoom(layerId) {
+  switch (layerId) {
+    case 'plan':
+      return 19;
+    case 'ortho':
+      return 21;
+    case 'bdparcellaire':
+      return 20;
+    case 'cartesign':
+      return 19;
+    case 'scan25':
+      return 16;
+    default:
+      return 19;
   }
 }
 
@@ -178,11 +200,14 @@ function createWmtsSource(layerId) {
   });
 }
 
+let idlayer;
 onMounted(() => {
   nextTick(() => {
     // Créer les sources WMTS
     const wmtsLayers = layers.value.map((layer, index) => {
       const wmtsSource = createWmtsSource(layer.id);
+      idlayer = layer.id;
+      console.log(getMaxZoom(layer.id));
       return new TileLayer({
         source: wmtsSource,
         visible: index === activeLayerIndex.value
@@ -226,8 +251,11 @@ onMounted(() => {
       zoom: zoom.value,
       projection: projection.value,
       rotation: rotation.value,
-      maxZoom: 19  // Permettre le zoom jusqu'à 19
+      maxZoom: getMaxZoom(layers.value[activeLayerIndex.value].id)
     });
+
+    olView.value = view;
+  
     
     // Créer la carte
     olMap.value = new Map({
