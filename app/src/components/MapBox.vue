@@ -11,11 +11,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, provide } from 'vue';
-import SideMenu from './SideMenu.vue';
-import BasecardSwitcher from './BasecardSwitcher.vue';
-import { eventBus } from './eventBus';
-import markerIcon from '@/assets/marker-icon.svg';
+import { ref, onMounted, nextTick, provide, inject } from 'vue'
+import SideMenu from './SideMenu.vue'
+import BasecardSwitcher from './BasecardSwitcher.vue'
+import { eventBus } from './eventBus'
+import markerIcon from '@/assets/blue-marker.svg'
 
 import Map from 'ol/Map';
 import View from 'ol/View';
