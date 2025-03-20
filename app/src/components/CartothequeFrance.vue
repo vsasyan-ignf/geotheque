@@ -39,7 +39,7 @@ import { watch } from 'vue'
 import CommuneSearch from './CommuneSearch.vue'
 import DepartementSearch from './DepartementSearch.vue'
 import PointSearch from './PointSearch.vue'
-import { eventBus } from './eventBus'
+import { eventBus } from './composables/eventBus'
 
 const props = defineProps({
   activeSubCategory: {
@@ -54,10 +54,6 @@ const props = defineProps({
 
 defineEmits(['select-sub-category', 'close-sub-category'])
 
-function goToCommune(commune) {
-  console.log(`com: ${commune.nom}`)
-}
-
 function goToDepartement(departement) {
   console.log(Object.keys(departement))
   console.log(departement.nom)
@@ -68,19 +64,14 @@ function goToDepartement(departement) {
 
 
 function goToPoint(point) {
-  console.log(`x:${point.x}, y:${point.y}`)
-  
   if (point.bboxLambert93) {
-    console.log(point.bboxLambert93)
-
-    eventBus.emit('bbox-updated', point.bboxLambert93);
+    eventBus.emit('bbox-updated', point.bboxLambert93)
   }
 }
 
 watch(
   () => props.activeSubCategory,
   (newVal) => {
-    console.log(newVal)
     eventBus.emit('toggle-pin', newVal === 'point')
   },
 )

@@ -3,7 +3,7 @@
     <label for="option">{{ nameDropdown }}</label>
     <select id="option" v-model="selected">
       <option v-for="val in options" :key="val.id" :value="val.id">
-        {{ val.name }} 
+        {{ val.name }}
       </option>
     </select>
   </div>
@@ -11,7 +11,6 @@
 
 <script setup>
 import { ref } from 'vue'
-import { defineProps } from 'vue'
 
 const props = defineProps({
   nameDropdown: {
