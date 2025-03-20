@@ -100,6 +100,7 @@ function searchCommunes() {
     clearTimeout(searchTimeout)
 }
 
+console.log(searchCommune.value)
 
 const query = searchCommune.value.toLowerCase().trim()
   
@@ -144,6 +145,8 @@ function selectCommune(commune) {
   }
 
   emit('select-commune', point)
+
+  searchCommune.value = commune.nom
 
   showResults.value = false
 }
