@@ -10,13 +10,13 @@
         :projection="projection"
       />
 
-      <!-- <ol-tile-layer v-for="(layer, index) in layers" :key="layer.id" :visible="index === activeLayerIndex">
-        <ol-source-osm />
-      </ol-tile-layer> -->
-
-      <ol-tile-layer v-for="(layer, index) in layers" :key="layer.id" :visible="index === activeLayerIndex">
+      <ol-tile-layer
+        v-for="(layer, index) in layers"
+        :key="layer.id"
+        :visible="index === activeLayerIndex"
+      >
         <ol-source-wmts
-          :url= "getWmtsUrl(layer.id)"
+          :url="getWmtsUrl(layer.id)"
           :matrixSet="matrixSet"
           :format="getFormatWmtsLayer(layer.id)"
           :layer="getWmtsLayerName(layer.id)"
@@ -26,12 +26,15 @@
       </ol-tile-layer>
       <ol-vector-layer>
         <ol-source-vector
-          :url="url_test"
+          :url="url_test.value"
           :strategy="bbox"
           :format="GeoJSON"
           :projection="projection"
-          >
+        >
         </ol-source-vector>
+        <ol-style>
+          <ol-style-stroke :color="'red'" :width="0.5" />
+        </ol-style>
       </ol-vector-layer>
       <ol-vector-layer>
         <ol-source-vector ref="pinSource">
@@ -44,17 +47,16 @@
         </ol-source-vector>
       </ol-vector-layer>
     </ol-map>
-    <BasecardSwitcher 
-      :layers="layers" 
-      :activeLayerIndex="activeLayerIndex" 
-      @layer-change="changeActiveLayer" 
+    <BasecardSwitcher
+      :layers="layers"
+      :activeLayerIndex="activeLayerIndex"
+      @layer-change="changeActiveLayer"
     />
   </div>
 </template>
 
 <script setup>
-
-import { ref, onMounted, nextTick, provide,inject } from 'vue'
+import { ref, onMounted, nextTick, provide, inject } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import { eventBus } from './eventBus'
@@ -66,16 +68,10 @@ import BDParcellaire from '../assets/basecard/bdparcellaire.png'
 import CartesIGN from '../assets/basecard/cartesign.jpg'
 import Scan25 from '../assets/basecard/scan25.jpg'
 
-
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
 const zoom = ref(6)
 const rotation = ref(0)
-
-const url_test = "http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0"+
- "&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter="+
- "BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)" +
- "%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857"
 
 const strategy = inject("ol-loadingstrategy");
 const bbox = strategy.bbox;
@@ -86,32 +82,35 @@ const mapRef = ref(null)
 const pins = ref([])
 const showPin = ref(false)
 
+const url_test = ref(`http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
+        `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json`);
+
 const layers = ref([
   {
     id: 'plan',
     name: 'Plan IGN',
-    thumbnail: PlanIGN
+    thumbnail: PlanIGN,
   },
   {
     id: 'ortho',
     name: 'Ortho',
-    thumbnail: Ortho
+    thumbnail: Ortho,
   },
   {
     id: 'bdparcellaire',
     name: 'BDParcellaire',
-    thumbnail: BDParcellaire
+    thumbnail: BDParcellaire,
   },
   {
     id: 'cartesign',
     name: 'Cartes IGN',
-    thumbnail: CartesIGN
+    thumbnail: CartesIGN,
   },
   {
     id: 'scan25',
     name: 'Scan25',
-    thumbnail: Scan25
-  }
+    thumbnail: Scan25,
+  },
 ])
 
 const activeLayerIndex = ref(0)
@@ -119,41 +118,41 @@ const activeLayerIndex = ref(0)
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
 
-  // refresh la map en le settant en visible
   const olMap = mapRef.value?.map;
   if (olMap) {
-    olMap.getLayers().forEach((layer, idx) => {
+
+    // changement des couches wmts uniquement
+    const wmtsLayers = olMap.getLayers().getArray().slice(0, layers.value.length);
+    wmtsLayers.forEach((layer, idx) => {
       layer.setVisible(idx === index);
     });
   }
 }
 
-const matrixSet=ref("PM")
-const projection_wmts=ref('EPSG:3857')
+const matrixSet = ref('PM')
+const projection_wmts = ref('EPSG:3857')
 
 function getWmtsUrl(layerId) {
   if (layerId === 'cartesign' || layerId === 'scan25') {
     return `https://data.geopf.fr/private/wmts?apikey=ign_scan_ws&SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
   }
   return `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
-  
 }
 
 function getWmtsLayerName(layerId) {
-
   switch (layerId) {
     case 'plan':
-      return 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2';
+      return 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2'
     case 'ortho':
-      return 'ORTHOIMAGERY.ORTHOPHOTOS';
+      return 'ORTHOIMAGERY.ORTHOPHOTOS'
     case 'bdparcellaire':
-      return 'CADASTRALPARCELS.PARCELS';
+      return 'CADASTRALPARCELS.PARCELS'
     case 'cartesign':
-      return 'GEOGRAPHICALGRIDSYSTEMS.MAPS';
+      return 'GEOGRAPHICALGRIDSYSTEMS.MAPS'
     case 'scan25':
-      return 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR';
+      return 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR'
     default:
-      return '';
+      return 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2';
   }
 }
 
@@ -162,12 +161,12 @@ function getFormatWmtsLayer(layerId) {
     case 'cartesign':
     case 'ortho':
     case 'scan25':
-      return 'image/jpeg';
+      return 'image/jpeg'
     case 'plan':
     case 'bdparcellaire':
-      return 'image/png';
+      return 'image/png'
     default:
-      return 'image/jpeg';
+      return 'image/jpeg'
   }
 }
 
@@ -176,6 +175,7 @@ onMounted(() => {
     window.dispatchEvent(new Event('resize'))
     if (mapRef.value) {
       const olMap = mapRef.value.map
+      
       olMap.on('click', (event) => {
         const clickedCoord = olMap.getCoordinateFromPixel(event.pixel)
         if (showPin.value) {
@@ -188,13 +188,30 @@ onMounted(() => {
         })
       })
     }
-    
+
     eventBus.on('toggle-pin', (isVisible) => {
       showPin.value = isVisible
       if (!isVisible) {
         pins.value = []
       }
     })
+
+    const showWfsLayer = ref(true)
+
+    eventBus.on('bbox-updated', (bbox) => {
+      console.log('BBOX reçue :', bbox);
+      const [minX, minY, maxX, maxY] = bbox;
+      url_test.value = ref(`http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
+        `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
+        `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
+        `%20&srsName=EPSG:3857`);
+      
+        console.log(url_test.value)
+        showWfsLayer.value = false;
+        nextTick(() => {
+        showWfsLayer.value = true;
+      });
+    });
   })
 })
 

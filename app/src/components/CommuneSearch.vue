@@ -14,7 +14,7 @@
             @input="searchCommunes"
             @focus="showResults = true"
           />
-          <button @click="searchCommunes">
+          <button @click="validateCommune">
             <i class="mdi mdi-magnify"></i>
           </button>
         </div>
@@ -66,13 +66,15 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
+import { useConvertCoordinates } from './composables/convertCoord'
   
 const emit = defineEmits(['close', 'select-commune'])
   
-const searchCommune = ref('')
+let searchCommune = ref('')
 const communeResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
+let repCommune = ref(null)
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
@@ -98,7 +100,7 @@ function searchCommunes() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
 }
-  
+
 const query = searchCommune.value.toLowerCase().trim()
   
 if (!query) {
@@ -110,13 +112,14 @@ showResults.value = true
 
 // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes 
 searchTimeout = setTimeout(() => {
-  fetch(`https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement`)
+  fetch(`https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox`)
     .then(response => response.json())
     .then(data => {
       const newResults = data.map(commune => ({
         nom: commune.nom,
         code: commune.codesPostaux[0],
         departement: commune.departement.nom,
+        bbox: commune.bbox
       }))
         
       communeResults.value = newResults
@@ -129,9 +132,32 @@ searchTimeout = setTimeout(() => {
 }
 
 function selectCommune(commune) {
-  emit('select-commune', commune)
+
+  searchCommune.value = commune.nom
+  repCommune = commune
+
   showResults.value = false
 }
+
+function validateCommune() {
+
+  if (repCommune) {
+    const bbox = repCommune.bbox.coordinates[0]
+    const bboxWGS84 = [bbox[0], bbox[2]]
+    const bboxLambert93 = bboxWGS84.map( point => useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154') )
+
+    const point = {
+      x: 0,
+      y: 0,
+      bboxLambert93: bboxLambert93.flat()
+    }
+
+    emit('select-commune', point)
+  }
+
+}
+
+
 </script>
 
 <style scoped>
