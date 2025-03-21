@@ -311,28 +311,28 @@ onMounted(() => {
 
     // });
     
-    eventBus.on('criteria', (criteria) => {
-    const { yearMin, yearMax, scaleMin, scaleMax, bboxe, loadWfs } = criteria;
+  //   eventBus.on('criteria', (criteria) => {
+  //   const { yearMin, yearMax, scaleMin, scaleMax, bboxe, loadWfs } = criteria;
 
 
-    if (!loadWfs) return;
+  //   if (!loadWfs) return;
     
-    const [minX, minY, maxX, maxY] = bboxe;
+  //   const [minX, minY, maxX, maxY] = bboxe;
   
 
-    let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`;
+  //   let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`;
     
-    if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`;
-    if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`;
-    if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`;
-    if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`;
+  //   if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`;
+  //   if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`;
+  //   if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`;
+  //   if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`;
     
-    const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
-      `&cql_filter=${cqlFilter}&srsName=EPSG:3857`;
+  //   const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
+  //     `&cql_filter=${cqlFilter}&srsName=EPSG:3857`;
 
-    vectorWfsSource.value.setUrl(newUrl);
-    vectorWfsSource.value.refresh();
-  });
+  //   vectorWfsSource.value.setUrl(newUrl);
+  //   vectorWfsSource.value.refresh();
+  // });
 
     // Forcer un redimensionnement pour assurer que la carte s'affiche correctement
     window.dispatchEvent(new Event('resize'))

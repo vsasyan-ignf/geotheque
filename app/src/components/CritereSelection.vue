@@ -38,7 +38,13 @@
 <script setup>
 import { ref } from 'vue'
 import Dropdown from './material/Dropdown.vue'
-import { bboxState, eventBus } from './composable/eventBus'
+import { eventBus } from './composable/eventBus'
+
+import { useScanStore } from './store/scan'
+import { storeToRefs } from 'pinia'
+
+const scanStore = useScanStore()
+const { storeCritereSelection } = storeToRefs(scanStore);
 
 const yearMin = ref('2000')
 const yearMax = ref('2000')
@@ -51,11 +57,10 @@ const handleSubmit = () => {
     yearMax: yearMax.value,
     scaleMin: scaleMin.value,
     scaleMax: scaleMax.value,
-    bboxe:bboxState.value,
-    loadWfs: true
   }
 
-  eventBus.emit('criteria', criteria);
+  scanStore.updateCriteria(criteria);
+  scanStore.updateUrl();
 }
 </script>
 

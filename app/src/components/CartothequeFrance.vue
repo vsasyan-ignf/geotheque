@@ -71,7 +71,7 @@ function goToPoint(point) {
     scanStore.updateBbox(point.bboxLambert93)
 
     console.log(storeBbox.value)
-    eventBus.emit('bbox-updated', point.bboxLambert93)
+    // eventBus.emit('bbox-updated', point.bboxLambert93)
   }
 }
 
