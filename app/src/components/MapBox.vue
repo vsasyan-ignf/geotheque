@@ -26,11 +26,11 @@ import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import GeoJSON from 'ol/format/GeoJSON';
 import Polygon from 'ol/geom/Polygon.js';
-import { get, get as getProjection } from 'ol/proj';
+import { get, get as getProjection, transform } from 'ol/proj';
 import { getTopLeft } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
-import { Style, Icon, Stroke } from 'ol/style';
+import { Style, Icon, Stroke, Fill } from 'ol/style';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 
 // Images pour les thumbnails
@@ -52,6 +52,8 @@ const pins = ref([]);
 const showPin = ref(false);
 const vectorPinSource = ref(null);
 const vectorWfsSource = ref(null);
+const vectorDeptSource = ref(null);
+const deptLayer = ref(null);
 
 const url_test = ref(``);
 
@@ -233,6 +235,21 @@ onMounted(() => {
       })
     });
     
+    // Création de la source et de la couche pour les départements
+    vectorDeptSource.value = new VectorSource();
+    deptLayer.value = new VectorLayer({
+      source: vectorDeptSource.value,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'blue',
+          width: 2
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 0, 255, 0.1)'
+        })
+      })
+    });
+    
     const view = new View({
       center: center.value,
       zoom: zoom.value,
@@ -246,7 +263,7 @@ onMounted(() => {
     
     olMap.value = new Map({
       target: mapElement.value,
-      layers: [...wmtsLayers, wfsLayer, pinLayer],
+      layers: [...wmtsLayers, wfsLayer, pinLayer, deptLayer.value],
       view: view
     });
     
@@ -289,16 +306,33 @@ onMounted(() => {
       pins.value = [[x, y]];
     });
 
-    eventBus.on('list-point-dep-to-map',(bbox) =>{
+    eventBus.on('list-point-dep-to-map', (bbox) => {
+      // Nettoyer les départements précédents
+      vectorDeptSource.value.clear();
+      
       const coordinates = bbox[0].map(point => [point[0], point[1]]);
-      console.log(coordinates)
-      /** 
-      var polygon = new ol.Feature({
-      geometry : new ol.geom.Polygon([coordinates]).transform('EPSG:2154','EPSG:3857'),
-      desc:"Departement"
-      });
-
-      **/
+      console.log('Coordonnées du polygone du département:', coordinates);
+      
+      // Vérifier si les coordonnées forment un polygone valide (au moins 3 points)
+      if (coordinates && coordinates.length >= 3) {
+        // Créer une feature de polygone
+        const polygon = new Feature({
+          geometry: new Polygon([coordinates]),
+          desc: "Departement"
+        });
+        
+        // Ajouter le polygone à la source vecteur des départements
+        vectorDeptSource.value.addFeature(polygon);
+        
+        // Optionnel: Zoomer sur les limites du département
+        const extent = polygon.getGeometry().getExtent();
+        olMap.value.getView().fit(extent, {
+          padding: [50, 50, 50, 50],
+          duration: 1000
+        });
+      } else {
+        console.error('Coordonnées de polygone invalides:', coordinates);
+      }
     });
 
     
