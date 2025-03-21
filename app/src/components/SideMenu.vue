@@ -107,4 +107,5 @@ function closeSubCategory() {
 .sidebar-content.open {
   width: 400px;
 }
+
 </style>

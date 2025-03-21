@@ -1,11 +1,15 @@
 <template>
   <div class="map-container">
-    <SideMenu />
+    <SideMenu @toggle-visibility="toggleLayerVisibility"/>
     <div ref="mapElement" class="ol-map"></div>
     <BasecardSwitcher
       :layers="layers"
       :activeLayerIndex="activeLayerIndex"
       @layer-change="changeActiveLayer"
+    />
+    <ZoomControl/>
+    <VisibilitySwitch
+      @toggle-visibility="toggleLayerVisibility"
     />
   </div>
 </template>
@@ -14,6 +18,8 @@
 import { ref, onMounted, nextTick, provide, inject } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
+import VisibilitySwitch from './VisibilitySwitch.vue'
+import ZoomControl from './ZoomControl.vue'
 import { eventBus } from './composables/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 
@@ -87,8 +93,20 @@ const layers = ref([
   },
 ])
 
-const activeLayerIndex = ref(0)
-const olView = ref(null)
+const activeLayerIndex = ref(0);
+const olView = ref(null);
+const visibility_switch = ref(null);
+
+function toggleLayerVisibility(isVisible) {
+  if (olMap.value) {
+    const activeLayer = olMap.value.getLayers().getArray()[activeLayerIndex.value];
+    if (activeLayer) {
+      activeLayer.setVisible(isVisible);
+      visibility_switch.value = isVisible;
+      console.log("Layer", activeLayerIndex.value, "visibility set to", isVisible);
+    }
+  }
+}
 
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
@@ -97,8 +115,11 @@ function changeActiveLayer(index) {
     // Changement des couches WMTS uniquement
     const wmtsLayers = olMap.value.getLayers().getArray().slice(0, layers.value.length)
     wmtsLayers.forEach((layer, idx) => {
-      layer.setVisible(idx === index)
-    })
+      if (visibility_switch.value === true) {
+        layer.setVisible(idx === index);
+      }
+      
+    });
 
     if (olView.value) {
       olView.value.setMaxZoom(getMaxZoom(layers.value[index].id))
@@ -256,8 +277,18 @@ onMounted(() => {
         vectorPinSource.value.clear()
         pins.value = []
       }
+    });
+    
+    eventBus.on('map-zoom', (delta) => {
+      if (olMap.value && olView.value) {
+        const currentZoom = olView.value.getZoom();
+        olView.value.animate({
+          zoom: currentZoom + delta,
+          duration: 250
+        });
+      }
     })
-
+    
     eventBus.on('update-coordinates', ({ x, y }) => {
       vectorPinSource.value.clear()
       const feature = new Feature({
