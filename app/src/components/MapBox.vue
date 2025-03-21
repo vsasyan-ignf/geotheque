@@ -17,21 +17,21 @@ import BasecardSwitcher from './BasecardSwitcher.vue'
 import { eventBus } from './composables/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 
-import Map from 'ol/Map'
-import View from 'ol/View'
-import TileLayer from 'ol/layer/Tile'
-import VectorLayer from 'ol/layer/Vector'
-import VectorSource from 'ol/source/Vector'
-import WMTS from 'ol/source/WMTS'
-import WMTSTileGrid from 'ol/tilegrid/WMTS'
-import GeoJSON from 'ol/format/GeoJSON'
-import { get as getProjection } from 'ol/proj'
-import { getTopLeft } from 'ol/extent'
-import Feature from 'ol/Feature'
-import Point from 'ol/geom/Point'
-import { Style, Icon, Stroke } from 'ol/style'
-import { bbox as bboxStrategy } from 'ol/loadingstrategy'
-
+import Map from 'ol/Map';
+import View from 'ol/View';
+import TileLayer from 'ol/layer/Tile';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import WMTS from 'ol/source/WMTS';
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
+import GeoJSON from 'ol/format/GeoJSON';
+import Polygon from 'ol/geom/Polygon.js';
+import { get, get as getProjection, transform } from 'ol/proj';
+import { getTopLeft } from 'ol/extent';
+import Feature from 'ol/Feature';
+import Point from 'ol/geom/Point';
+import { Style, Icon, Stroke, Fill } from 'ol/style';
+import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composables/getWMTS'
 
 // Images pour les thumbnails
@@ -47,12 +47,14 @@ const zoom = ref(6)
 const rotation = ref(0)
 
 // Références et états
-const mapElement = ref(null)
-const olMap = ref(null)
-const pins = ref([])
-const showPin = ref(false)
-const vectorPinSource = ref(null)
-const vectorWfsSource = ref(null)
+const mapElement = ref(null);
+const olMap = ref(null);
+const pins = ref([]);
+const showPin = ref(false);
+const vectorPinSource = ref(null);
+const vectorWfsSource = ref(null);
+const vectorDeptSource = ref(null);
+const deptLayer = ref(null);
 
 const url_test = ref(``);
 const bbox = ref([0, 0, 0, 0]);
@@ -190,11 +192,26 @@ onMounted(() => {
         image: new Icon({
           src: markerIcon,
           scale: 0.05,
-          anchor: [0.5, 1],
+          anchor: [0.5, 1]
+        })
+      })
+    });
+    
+    // Création de la source et de la couche pour les départements
+    vectorDeptSource.value = new VectorSource();
+    deptLayer.value = new VectorLayer({
+      source: vectorDeptSource.value,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'blue',
+          width: 2
         }),
-      }),
-    })
-
+        fill: new Fill({
+          color: 'rgba(0, 0, 255, 0.1)'
+        })
+      })
+    });
+    
     const view = new View({
       center: center.value,
       zoom: zoom.value,
@@ -207,10 +224,10 @@ onMounted(() => {
 
     olMap.value = new Map({
       target: mapElement.value,
-      layers: [...wmtsLayers, wfsLayer, pinLayer],
-      view: view,
-    })
-
+      layers: [...wmtsLayers, wfsLayer, pinLayer, deptLayer.value],
+      view: view
+    });
+    
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
@@ -249,6 +266,36 @@ onMounted(() => {
       vectorPinSource.value.addFeature(feature);
       pins.value = [[x, y]];
     });
+
+    eventBus.on('list-point-dep-to-map', (bbox) => {
+      // Nettoyer les départements précédents
+      vectorDeptSource.value.clear();
+      
+      const coordinates = bbox[0].map(point => [point[0], point[1]]);
+      console.log('Coordonnées du polygone du département:', coordinates);
+      
+      // Vérifier si les coordonnées forment un polygone valide (au moins 3 points)
+      if (coordinates && coordinates.length >= 3) {
+        // Créer une feature de polygone
+        const polygon = new Feature({
+          geometry: new Polygon([coordinates]),
+          desc: "Departement"
+        });
+        
+        // Ajouter le polygone à la source vecteur des départements
+        vectorDeptSource.value.addFeature(polygon);
+        
+        // Optionnel: Zoomer sur les limites du département
+        const extent = polygon.getGeometry().getExtent();
+        olMap.value.getView().fit(extent, {
+          padding: [50, 50, 50, 50],
+          duration: 1000
+        });
+      } else {
+        console.error('Coordonnées de polygone invalides:', coordinates);
+      }
+    });
+
     
     eventBus.on('bbox-updated', async (bboxLambert93) => {
       bbox.value = bboxLambert93
