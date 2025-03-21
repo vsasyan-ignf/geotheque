@@ -109,8 +109,17 @@ function searchCommunes() {
   showResults.value = true
 
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
+  let search_url = '';
   searchTimeout = setTimeout(() => {
-    fetch(`https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox`)
+
+    if (parseInt(query)) {
+      console.log('code postal')
+      search_url = `https://geo.api.gouv.fr/communes?codePostal=${query}&fields=nom,codesPostaux,departement,bbox`
+    } else {
+      search_url = `https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox`
+    }
+
+    fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
         const newResults = data.map((commune) => ({
