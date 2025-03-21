@@ -7,9 +7,10 @@
       :activeLayerIndex="activeLayerIndex"
       @layer-change="changeActiveLayer"
     />
-    <!-- <Visibility_switch
-      @toggleVisibility="toggleLayerVisibility"
-    /> -->
+    <ZoomControl/>
+    <VisibilitySwitch
+      @toggle-visibility="toggleLayerVisibility"
+    />
   </div>
 </template>
 
@@ -17,6 +18,8 @@
 import { ref, onMounted, nextTick, provide, inject } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
+import VisibilitySwitch from './VisibilitySwitch.vue'
+import ZoomControl from './ZoomControl.vue'
 import { eventBus } from './eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 
@@ -41,7 +44,6 @@ import Ortho from '../assets/basecard/ortho.jpeg';
 import BDParcellaire from '../assets/basecard/bdparcellaire.png';
 import CartesIGN from '../assets/basecard/cartesign.jpg';
 import Scan25 from '../assets/basecard/scan25.jpg';
-import Visibility_switch from './Visibility_switch.vue'
 
 const center = ref([260000, 6000000]);
 const projection = ref('EPSG:3857');
@@ -297,6 +299,16 @@ onMounted(() => {
         pins.value = [];
       }
     });
+    
+    eventBus.on('map-zoom', (delta) => {
+      if (olMap.value && olView.value) {
+        const currentZoom = olView.value.getZoom();
+        olView.value.animate({
+          zoom: currentZoom + delta,
+          duration: 250
+        });
+      }
+    })
     
     eventBus.on('update-coordinates', ({ x, y }) => {
       vectorPinSource.value.clear();
