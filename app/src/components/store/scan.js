@@ -12,6 +12,8 @@ export const useScanStore = defineStore('scan', () => {
         scaleMax: null
     });
 
+    let activeSubCategory = ref(null)
+
     let storeURL = computed(() => {
         if (storeBbox.value.length > 0) {
             const [minX, minY, maxX, maxY] = storeBbox.value;
@@ -43,13 +45,18 @@ export const useScanStore = defineStore('scan', () => {
 
     function updateCriteria(newCriteria) {
         storeCritereSelection.value = { ...newCriteria };
-        // console.log("Updated criteria:", storeCritereSelection.value);
+        console.log("Updated criteria:", storeCritereSelection.value);
     }
 
     function updateBboxTemp(newBbox) {
         storeDataHandleClickMap.value = newBbox;
         console.log("Temporary BBox stored:", storeDataHandleClickMap.value);
     }
+
+    function updateActiveSubCategory(subCategory) {
+        activeSubCategory.value = subCategory
+        console.log('Sous-catégorie active:', activeSubCategory.value)
+      }
 
 function updateUrl() {
     if (storeDataHandleClickMap.value.length > 0) {
@@ -72,5 +79,7 @@ function updateUrl() {
             console.error('Error:', error)
         }
     }
-    return { storeData, storeBbox, storeURL, storeGet, updateBbox, updateBboxHandleClick, storeDataHandleClickMap, updateBboxTemp, storeCritereSelection, updateCriteria, updateUrl}
+    return { storeData, storeBbox, storeURL, storeGet, updateBbox, 
+        updateBboxHandleClick, storeDataHandleClickMap, updateBboxTemp, 
+        storeCritereSelection, updateCriteria, updateUrl, updateActiveSubCategory, activeSubCategory}
 })

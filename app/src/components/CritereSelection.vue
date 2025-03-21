@@ -44,12 +44,12 @@ import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { storeCritereSelection } = storeToRefs(scanStore);
+const { activeSubCategory } = storeToRefs(scanStore);
 
-const yearMin = ref('2000')
-const yearMax = ref('2000')
-const scaleMin = ref('2000')
-const scaleMax = ref('2000')
+const yearMin = ref('')
+const yearMax = ref('')
+const scaleMin = ref('')
+const scaleMax = ref('')
 
 const handleSubmit = () => {
   const criteria = {
@@ -60,7 +60,8 @@ const handleSubmit = () => {
   }
 
   scanStore.updateCriteria(criteria);
-  scanStore.updateUrl();
+  if (activeSubCategory.value == "point") scanStore.updateUrl();
+
 }
 </script>
 
