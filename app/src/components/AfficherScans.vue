@@ -1,10 +1,10 @@
 <template>
   <div class="scan-box">
-    <form class="criteria-form" action="">
+    <form class="criteria-form" @submit.prevent="">
       <Dropdown :options="carteNames" />
 
       <div class="button-group">
-        <ShakingButton nameButton="Visualiser">
+        <ShakingButton nameButton="Visualiser" @click="openModal">
           <template #icon><i class="mdi mdi-eye"></i></template>
         </ShakingButton>
         <ShakingButton nameButton="Télécharger">
@@ -13,6 +13,14 @@
         <ShakingButton nameButton="XML" />
       </div>
     </form>
+
+    <ImageModal 
+      :is-open="isModalOpen" 
+      :image-url="imageUrl"
+      title="Visualisation de l'image : 21FD0120x00001_03343.jp2"
+      @close="closeModal"
+    />
+
   </div>
 </template>
 
@@ -21,35 +29,26 @@ import { ref, onMounted, onUnmounted, watch} from 'vue'
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
 import { eventBus } from './composables/eventBus'
+import ImageModal from './ImageModal.vue'
 
+const isModalOpen = ref(false)
+const imageUrl = ref('http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/001_86K_1756.JP2&CVT=jpeg')
 
-const url_test =
-  'http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0' +
-  '&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter=' +
-  'BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)' +
-  '%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857'
-
-const carteNames = ref([])
-
-function get_tab_scans() {
-  fetch(url_test)
-    .then((response) => response.json())
-    .then((data) => {
-      const res = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE }))
-      CarteNames.value = res
-    })
+function updateCarteNames(newCarteNames) {
+  carteNames.value = newCarteNames
 }
 
-function updateCarteNames(newCarteNames){
-  carteNames.value= newCarteNames
+function openModal() {
+  isModalOpen.value = true
 }
 
-
+function closeModal() {
+  isModalOpen.value = false
+}
 
 onMounted(() => {
   eventBus.on('sendUrl', updateCarteNames)
 })
-
 
 onUnmounted(() => {
   eventBus.off('sendUrl', updateCarteNames)
