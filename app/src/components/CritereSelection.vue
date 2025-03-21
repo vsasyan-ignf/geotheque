@@ -144,10 +144,10 @@ const hideScaleMaxOptionsDelayed = () => {
 }
 
 const initialValues = {
-  yearMin: '2000',
-  yearMax: '2000',
-  scaleMin: '2000',
-  scaleMax: '2000'
+  yearMin: '',
+  yearMax: '',
+  scaleMin: '',
+  scaleMax: ''
 }
 
 const handleSubmit = () => {
