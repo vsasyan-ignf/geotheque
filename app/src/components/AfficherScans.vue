@@ -1,13 +1,13 @@
 <template>
   <div class="scan-box">
-    <form class="criteria-form" action="">
+    <form class="criteria-form" action="" @submit.prevent="">
       <Dropdown :options="carteNames" />
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser">
           <template #icon><i class="mdi mdi-eye"></i></template>
         </ShakingButton>
-        <ShakingButton nameButton="Télécharger">
+        <ShakingButton nameButton="Télécharger" @click="downloadScans">
           <template #icon><i class="mdi mdi-briefcase-download"></i></template>
         </ShakingButton>
         <ShakingButton nameButton="XML" />
@@ -40,8 +40,29 @@ function get_tab_scans() {
     })
 }
 
+function downloadScans() {
+  const image_name = "001_86K_1756.JP2"
+  const imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/${image_name}&CVT=jpeg`;
+  
+  fetch(imageUrl)
+    .then(response => response.blob())
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", image_name);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    })
+    .catch(error => console.error("Erreur lors du téléchargement:", error));
+}
+
+
 function updateCarteNames(newCarteNames){
   carteNames.value= newCarteNames
+  console.log('updateCarteNames', newCarteNames)
 }
 
 
