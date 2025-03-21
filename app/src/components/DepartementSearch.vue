@@ -111,7 +111,7 @@ async function getDepartementBbox(departement) {
   const depName = departement.nom.toString();
   const upDepartement = depName.toUpperCase();
   const urlDepBbox = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0
-  `+`&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=NOM_DEPT='${upDepartement}'`;
+  `+`&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=NOM_DEPT='${upDepartement}'&srsName=EPSG:3857`;
   
   try {
     const response = await fetch(urlDepBbox);
