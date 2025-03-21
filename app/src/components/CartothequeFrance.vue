@@ -39,7 +39,7 @@ import { watch } from 'vue'
 import CommuneSearch from './CommuneSearch.vue'
 import DepartementSearch from './DepartementSearch.vue'
 import PointSearch from './PointSearch.vue'
-import { eventBus } from './composables/eventBus'
+import { eventBus } from './composable/eventBus'
 
 const props = defineProps({
   activeSubCategory: {

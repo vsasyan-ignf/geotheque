@@ -14,7 +14,7 @@
 import { ref, onMounted, nextTick, provide, inject } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
-import { eventBus } from './composables/eventBus'
+import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 
 import Map from 'ol/Map';
@@ -32,7 +32,7 @@ import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { Style, Icon, Stroke, Fill } from 'ol/style';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
-import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composables/getWMTS'
+import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
 
 // Images pour les thumbnails
 import PlanIGN from '@/assets/basecard/plan_ign.png'

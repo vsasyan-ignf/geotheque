@@ -20,7 +20,7 @@
 import { ref, onMounted, onUnmounted, watch} from 'vue'
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
-import { eventBus } from './composables/eventBus'
+import { eventBus } from './composable/eventBus'
 
 
 const url_test =

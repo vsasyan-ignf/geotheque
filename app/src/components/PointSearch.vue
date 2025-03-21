@@ -31,9 +31,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import { bboxState, eventBus } from './composables/eventBus'
+import { bboxState, eventBus } from './composable/eventBus'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import { useConvertCoordinates } from './composables/convertCoordinates'
+import { useConvertCoordinates } from './composable/convertCoordinates'
 
 const emit = defineEmits(['close', 'go-to-point'])
 
