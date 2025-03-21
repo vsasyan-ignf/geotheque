@@ -34,6 +34,9 @@ import SidebarTabs from './SidebarTabs.vue'
 import TabContent from './TabContent.vue'
 import CartothequeFrance from './CartothequeFrance.vue'
 import Aide from './Aide.vue'
+import { useScanStore } from './store/scan'
+
+const scanStore = useScanStore()
 
 const activeTab = ref('carthotheque')
 const isSidebarOpen = ref(true)
@@ -78,10 +81,13 @@ function closeTab() {
 
 function selectSubCategory(subId) {
   activeSubCategory.value = subId
+  scanStore.updateActiveSubCategory(subId) 
+  console.log('Sous-catégorie sélectionnée:', subId)
 }
 
 function closeSubCategory() {
   activeSubCategory.value = null
+  scanStore.updateActiveSubCategory(null)
 }
 </script>
 

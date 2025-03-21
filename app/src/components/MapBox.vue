@@ -15,13 +15,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, provide, inject } from 'vue'
+import { ref, onMounted, nextTick, provide, watch } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
 import ZoomControl from './ZoomControl.vue'
-import { eventBus } from './composables/eventBus'
+import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
+import { useScanStore } from './store/scan'
+import { storeToRefs } from 'pinia'
 
 import Map from 'ol/Map';
 import View from 'ol/View';
@@ -38,7 +40,7 @@ import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import { Style, Icon, Stroke, Fill } from 'ol/style';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
-import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composables/getWMTS'
+import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
 
 // Images pour les thumbnails
 import PlanIGN from '@/assets/basecard/plan_ign.png'
@@ -46,6 +48,9 @@ import Ortho from '@/assets/basecard/ortho.jpeg'
 import BDParcellaire from '@/assets/basecard/bdparcellaire.png'
 import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
+
+const scanStore = useScanStore()
+const { storeURL } = storeToRefs(scanStore);
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -157,25 +162,6 @@ function createWmtsSource(layerId) {
     crossOrigin: 'anonymous',
   })
 }
-
-async function getCarteNames(url){
-  console.log('update url : ' + url)
-
-  try {
-    const response = await fetch(url)
-    if (response.ok) {
-      const data = await response.json()
-      const carteNames = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE }))
-      return carteNames
-    } else {
-          throw new Error('Failed to fetch data')
-        }
-      } catch (error) {
-        this.error = true
-        console.error('Error:', error)
-    }
-}
-
 
 let idlayer
 onMounted(() => {
@@ -326,50 +312,57 @@ onMounted(() => {
       }
     });
 
-    
-    eventBus.on('bbox-updated', async (bboxLambert93) => {
-      bbox.value = bboxLambert93
-      const [minX, minY, maxX, maxY] = bboxLambert93;
-      
-      const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
-        `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
-        `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
-        `%20&srsName=EPSG:3857`;
-      
-      vectorWfsSource.value.setUrl(newUrl);
+    console.log('---------------------------- URL ----------------------------')
+
+    watch(storeURL, async (newValue) => {
+      console.log('NEW URL:', newValue)
+
+
+      vectorWfsSource.value.setUrl(newValue);
       vectorWfsSource.value.refresh();
 
-      const cartes = await getCarteNames(newUrl)
+      await scanStore.storeGet(newValue)
+    })
 
-      eventBus.emit('sendUrl', cartes)
-    });
-    
-    eventBus.on('criteria', (criteria) => {
-    const { yearMin, yearMax, scaleMin, scaleMax, bboxe, loadWfs } = criteria;
-    
-    console.log(loadWfs)
-    console.log(bboxe)
 
-    if (!loadWfs) return;
-    
-    const [minX, minY, maxX, maxY] = bboxe;
-    
-    console.log(bboxe);
+    // eventBus.on('bbox-updated', async (bboxLambert93) => {
+    //   bbox.value = bboxLambert93
+    //   const [minX, minY, maxX, maxY] = bboxLambert93;
+      
+    //   const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
+    //     `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
+    //     `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
+    //     `%20&srsName=EPSG:3857`;
+      
+    //   vectorWfsSource.value.setUrl(newUrl);
+    //   vectorWfsSource.value.refresh();
 
-    let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`;
+    //   await scanStore.storeGet(newUrl)
+
+    // });
     
-    if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`;
-    if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`;
-    if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`;
-    if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`;
+  //   eventBus.on('criteria', (criteria) => {
+  //   const { yearMin, yearMax, scaleMin, scaleMax, bboxe, loadWfs } = criteria;
+
+
+  //   if (!loadWfs) return;
     
-    const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
-      `&cql_filter=${cqlFilter}&srsName=EPSG:3857`;
+  //   const [minX, minY, maxX, maxY] = bboxe;
+  
+
+  //   let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`;
     
-    console.log(newUrl);
-    vectorWfsSource.value.setUrl(newUrl);
-    vectorWfsSource.value.refresh();
-  });
+  //   if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`;
+  //   if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`;
+  //   if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`;
+  //   if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`;
+    
+  //   const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
+  //     `&cql_filter=${cqlFilter}&srsName=EPSG:3857`;
+
+  //   vectorWfsSource.value.setUrl(newUrl);
+  //   vectorWfsSource.value.refresh();
+  // });
 
     // Forcer un redimensionnement pour assurer que la carte s'affiche correctement
     window.dispatchEvent(new Event('resize'))

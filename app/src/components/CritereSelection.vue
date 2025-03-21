@@ -94,12 +94,18 @@
 <script setup>
 import { ref, defineExpose } from 'vue'
 import Dropdown from './material/Dropdown.vue'
-import { bboxState, eventBus } from './composables/eventBus'
+import { eventBus } from './composable/eventBus'
 
-const yearMin = ref('2000')
-const yearMax = ref('2000')
-const scaleMin = ref('2000')
-const scaleMax = ref('2000')
+import { useScanStore } from './store/scan'
+import { storeToRefs } from 'pinia'
+
+const scanStore = useScanStore()
+const { activeSubCategory } = storeToRefs(scanStore);
+
+const yearMin = ref('')
+const yearMax = ref('')
+const scaleMin = ref('')
+const scaleMax = ref('')
 
 const scaleOptions = [
   '500',
@@ -150,11 +156,11 @@ const handleSubmit = () => {
     yearMax: yearMax.value,
     scaleMin: scaleMin.value,
     scaleMax: scaleMax.value,
-    bboxe: bboxState.value,
-    loadWfs: true
   }
 
-  eventBus.emit('criteria', criteria);
+  scanStore.updateCriteria(criteria);
+  if (activeSubCategory.value == "point") scanStore.updateUrl();
+
 }
 
 const resetForm = () => {

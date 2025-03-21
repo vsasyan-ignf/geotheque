@@ -66,7 +66,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import { useConvertCoordinates } from './composables/convertCoordinates'
+import { useConvertCoordinates } from './composable/convertCoordinates'
 
 const emit = defineEmits(['close', 'select-commune'])
 

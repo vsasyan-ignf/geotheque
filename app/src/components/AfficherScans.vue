@@ -1,7 +1,7 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
-      <Dropdown :options="carteNames" />
+      <Dropdown :options="storeData" />
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser" @click="openModal">
@@ -25,11 +25,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch} from 'vue'
+import { ref, watch} from 'vue'
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
-import { eventBus } from './composables/eventBus'
+import { eventBus } from './composable/eventBus'
 import ImageModal from './ImageModal.vue'
+import { useScanStore } from './store/scan'
+import { storeToRefs } from 'pinia'
+
+const scanStore = useScanStore()
+const { storeData } = storeToRefs(scanStore);
+
+watch(storeData, (newValue) => {
+  console.log('dataStore updated dans Afficher Scan:', newValue)
+}, { deep: true })
 
 const isModalOpen = ref(false)
 const imageUrl = ref('http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/001_86K_1756.JP2&CVT=jpeg')
@@ -91,13 +100,6 @@ function closeModal() {
   isModalOpen.value = false
 }
 
-onMounted(() => {
-  eventBus.on('sendUrl', updateCarteNames)
-})
-
-onUnmounted(() => {
-  eventBus.off('sendUrl', updateCarteNames)
-})
 </script>
 
 <style scoped>

@@ -31,9 +31,15 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import { bboxState, eventBus } from './composables/eventBus'
+import { bboxState, eventBus } from './composable/eventBus'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import { useConvertCoordinates } from './composables/convertCoordinates'
+import { useConvertCoordinates } from './composable/convertCoordinates'
+import { useScanStore } from './store/scan'
+import { storeToRefs } from 'pinia'
+
+const scanStore = useScanStore()
+const { storeDataHandleClickMap } = storeToRefs(scanStore);
+
 
 const emit = defineEmits(['close', 'go-to-point'])
 
@@ -150,15 +156,8 @@ async function handleMapClick(coords) {
   }
   
   bboxState.value = point.bboxLambert93;
-
-  eventBus.emit('criteria', {
-    yearMin: null,
-    yearMax: null,
-    scaleMin: null,
-    scaleMax: null,
-    bboxe: point.bboxLambert93,
-    loadWfs: false,
-  });
+  scanStore.updateBboxTemp(point.bboxLambert93);
+  console.log(storeDataHandleClickMap.value)
 
 }
 
