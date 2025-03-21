@@ -28,7 +28,6 @@
 import { ref, watch} from 'vue'
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
-import { eventBus } from './composable/eventBus'
 import ImageModal from './ImageModal.vue'
 import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'

@@ -41,7 +41,7 @@ import Point from 'ol/geom/Point';
 import { Style, Icon, Stroke, Fill } from 'ol/style';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
-
+import { defaults as defaultControls } from 'ol/control';
 // Images pour les thumbnails
 import PlanIGN from '@/assets/basecard/plan_ign.png'
 import Ortho from '@/assets/basecard/ortho.jpeg'
@@ -232,7 +232,8 @@ onMounted(() => {
     olMap.value = new Map({
       target: mapElement.value,
       layers: [...wmtsLayers, wfsLayer, pinLayer, deptLayer.value],
-      view: view
+      view: view,
+      controls: defaultControls({ zoom: false, rotate: false })
     });
     
     // Gestionnaire d'événements de clic
