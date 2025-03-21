@@ -95,7 +95,7 @@ const layers = ref([
 
 const activeLayerIndex = ref(0);
 const olView = ref(null);
-const visibility_switch = ref(null);
+const visibility_switch = ref(true);
 
 function toggleLayerVisibility(isVisible) {
   if (olMap.value) {
