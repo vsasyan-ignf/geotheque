@@ -75,12 +75,20 @@ function searchDepartements() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-  
-  const query = searchDepartement.value.toLowerCase().trim()
+  let url_dep;
+  const query = searchDepartement.value.toLowerCase().trim();
+  const numbner_dep = parseInt(query);
+  console.log(numbner_dep);
+  if(!isNaN(numbner_dep )){
+    url_dep = `https://geo.api.gouv.fr/departements?code=${query}&fields=nom,code,region`;
+  }
+  else{
+    url_dep = `https://geo.api.gouv.fr/departements?nom=${query}&fields=nom,code,region`;
+  }
   
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   searchTimeout = setTimeout(() => {
-    fetch(`https://geo.api.gouv.fr/departements?nom=${query}&fields=nom,code,region`)
+    fetch(url_dep)
       .then(response => response.json())
       .then(data => {
         const newResults = data.map(departement => ({
