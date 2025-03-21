@@ -149,7 +149,7 @@ function validateCommune() {
       y: 0,
       bboxLambert93: bboxLambert93.flat(),
     }
-
+    
     emit('select-commune', point)
   }
 }

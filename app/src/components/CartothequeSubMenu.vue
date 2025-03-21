@@ -74,6 +74,7 @@ function toggleAccordeon(ind) {
 
 .accordeon-content.open {
   max-height: 800px;
+  overflow: visible;
   opacity: 1;
 }
 </style>

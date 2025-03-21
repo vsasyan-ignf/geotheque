@@ -1,10 +1,10 @@
 <template>
   <div class="scan-box">
-    <form  class="criteria-form" v-on:submit.prevent="">
+    <form class="criteria-form" @submit.prevent="">
       <Dropdown :options="carteNames" />
 
       <div class="button-group">
-        <ShakingButton nameButton="Visualiser">
+        <ShakingButton nameButton="Visualiser" @click="openModal">
           <template #icon><i class="mdi mdi-eye"></i></template>
         </ShakingButton>
         <ShakingButton nameButton="Télécharger" @click="downloadScans">
@@ -13,6 +13,14 @@
         <ShakingButton nameButton="XML" @click="downloadxml"/>
       </div>
     </form>
+
+    <ImageModal 
+      :is-open="isModalOpen" 
+      :image-url="imageUrl"
+      title="Visualisation de l'image : 21FD0120x00001_03343.jp2"
+      @close="closeModal"
+    />
+
   </div>
 </template>
 
@@ -21,7 +29,10 @@ import { ref, onMounted, onUnmounted, watch} from 'vue'
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
 import { eventBus } from './composables/eventBus'
+import ImageModal from './ImageModal.vue'
 
+const isModalOpen = ref(false)
+const imageUrl = ref('http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/001_86K_1756.JP2&CVT=jpeg')
 
 const url_test =
   'http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0' +
@@ -64,22 +75,25 @@ function downloadScans() {
     .catch(error => console.error("Erreur lors du téléchargement:", error));
 }
 
-
-function updateCarteNames(newCarteNames){
-  carteNames.value= newCarteNames
-  console.log('updateCarteNames', newCarteNames)
-}
-
-
-
 function downloadxml(){
   window.open(url_xml, "xml")
+}
+
+function updateCarteNames(newCarteNames) {
+  carteNames.value = newCarteNames
+}
+
+function openModal() {
+  isModalOpen.value = true
+}
+
+function closeModal() {
+  isModalOpen.value = false
 }
 
 onMounted(() => {
   eventBus.on('sendUrl', updateCarteNames)
 })
-
 
 onUnmounted(() => {
   eventBus.off('sendUrl', updateCarteNames)
