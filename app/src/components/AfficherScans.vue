@@ -1,7 +1,7 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" action="">
-      <Dropdown :options="dataStore" />
+      <Dropdown :options="storeData" />
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser">
@@ -24,9 +24,9 @@ import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { dataStore } = storeToRefs(scanStore);
+const { storeData } = storeToRefs(scanStore);
 
-watch(dataStore, (newValue) => {
+watch(storeData, (newValue) => {
   console.log('dataStore updated dans Afficher Scan:', newValue)
 }, { deep: true })
 

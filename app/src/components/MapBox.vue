@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, provide, inject } from 'vue'
+import { ref, onMounted, nextTick, provide, watch } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import { eventBus } from './composable/eventBus'
@@ -44,7 +44,7 @@ import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
 
 const scanStore = useScanStore()
-const { dataStore } = storeToRefs(scanStore);
+const { storeURL } = storeToRefs(scanStore);
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -141,23 +141,6 @@ function createWmtsSource(layerId) {
     crossOrigin: 'anonymous',
   })
 }
-
-async function getCarteNames(url){
-  try {
-    const response = await fetch(url)
-    if (response.ok) {
-      const data = await response.json()
-      const carteNames = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE }))
-      return carteNames
-    } else {
-          throw new Error('Failed to fetch data')
-        }
-      } catch (error) {
-        this.error = true
-        console.error('Error:', error)
-    }
-}
-
 
 let idlayer
 onMounted(() => {
@@ -299,22 +282,34 @@ onMounted(() => {
       }
     });
 
-    
-    eventBus.on('bbox-updated', async (bboxLambert93) => {
-      bbox.value = bboxLambert93
-      const [minX, minY, maxX, maxY] = bboxLambert93;
-      
-      const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
-        `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
-        `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
-        `%20&srsName=EPSG:3857`;
-      
-      vectorWfsSource.value.setUrl(newUrl);
+    console.log('---------------------------- URL ----------------------------')
+
+    watch(storeURL, async (newValue) => {
+      console.log('NEW URL:', newValue)
+
+
+      vectorWfsSource.value.setUrl(newValue);
       vectorWfsSource.value.refresh();
 
-      await scanStore.storeGet(newUrl)
+      await scanStore.storeGet(newValue)
+    })
 
-    });
+
+    // eventBus.on('bbox-updated', async (bboxLambert93) => {
+    //   bbox.value = bboxLambert93
+    //   const [minX, minY, maxX, maxY] = bboxLambert93;
+      
+    //   const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
+    //     `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
+    //     `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
+    //     `%20&srsName=EPSG:3857`;
+      
+    //   vectorWfsSource.value.setUrl(newUrl);
+    //   vectorWfsSource.value.refresh();
+
+    //   await scanStore.storeGet(newUrl)
+
+    // });
     
     eventBus.on('criteria', (criteria) => {
     const { yearMin, yearMax, scaleMin, scaleMax, bboxe, loadWfs } = criteria;

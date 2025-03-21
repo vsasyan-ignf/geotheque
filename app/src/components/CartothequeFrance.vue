@@ -45,7 +45,7 @@ import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { dataStore } = storeToRefs(scanStore);
+const { storeBbox } = storeToRefs(scanStore);
 
 const props = defineProps({
   activeSubCategory: {
@@ -67,6 +67,10 @@ function goToDepartement(departement) {
 
 function goToPoint(point) {
   if (point.bboxLambert93) {
+    console.log('----------dans cartotheque------------------')
+    scanStore.updateBbox(point.bboxLambert93)
+
+    console.log(storeBbox.value)
     eventBus.emit('bbox-updated', point.bboxLambert93)
   }
 }
