@@ -101,7 +101,7 @@ function selectDepartement(departement) {
   getDepartementBbox(departement).then((bbox) => {
     emit('select-departement', { nom: departement.nom, bbox: bbox });
   }).catch((error) => {
-    console.error('Erreur lors de la récupération des bbox:', error);
+    console.error('Erreur lors de la récupération des controus du departements:', error);
   });
 
   showResults.value = false;
@@ -121,7 +121,7 @@ async function getDepartementBbox(departement) {
     const data = await response.json();
     const bbox = data.features[0]?.geometry?.coordinates[0];
     if (!bbox) {
-      throw new Error('bbox non trouvée dans la réponse');
+      throw new Error('coordonées non trouvée dans la réponse');
     }
     return bbox;
   } catch (error) {

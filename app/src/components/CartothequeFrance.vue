@@ -55,10 +55,6 @@ const props = defineProps({
 defineEmits(['select-sub-category', 'close-sub-category'])
 
 function goToDepartement(departement) {
-  console.log(Object.keys(departement))
-  console.log(departement.nom)
-
-  console.log(departement.bbox)
   eventBus.emit('list-point-dep-to-map',departement.bbox )
 }
 

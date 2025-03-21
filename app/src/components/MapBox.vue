@@ -303,7 +303,6 @@ onMounted(() => {
       vectorDeptSource.value.clear();
       
       const coordinates = bbox[0].map(point => [point[0], point[1]]);
-      console.log('Coordonnées du polygone du département:', coordinates);
       
       // Vérifier si les coordonnées forment un polygone valide (au moins 3 points)
       if (coordinates && coordinates.length >= 3) {
