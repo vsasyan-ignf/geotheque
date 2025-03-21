@@ -1,6 +1,6 @@
 <template>
   <div class="scan-box">
-    <form class="criteria-form" action="" @submit.prevent="">
+    <form  class="criteria-form" v-on:submit.prevent="">
       <Dropdown :options="carteNames" />
 
       <div class="button-group">
@@ -10,7 +10,7 @@
         <ShakingButton nameButton="Télécharger" @click="downloadScans">
           <template #icon><i class="mdi mdi-briefcase-download"></i></template>
         </ShakingButton>
-        <ShakingButton nameButton="XML" />
+        <ShakingButton nameButton="XML" @click="downloadxml"/>
       </div>
     </form>
   </div>
@@ -29,14 +29,19 @@ const url_test =
   'BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)' +
   '%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857'
 
+const url_xml = ' http://localhost:8081/Misphot/Lambert93/2021/2021_FD 01_C_20/'+
+  '2021_FD 01_C_20.xml'
+
+
 const carteNames = ref([])
+
 
 function get_tab_scans() {
   fetch(url_test)
     .then((response) => response.json())
     .then((data) => {
       const res = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE }))
-      CarteNames.value = res
+      carteNames.value = res
     })
 }
 
@@ -66,6 +71,10 @@ function updateCarteNames(newCarteNames){
 }
 
 
+
+function downloadxml(){
+  window.open(url_xml, "xml")
+}
 
 onMounted(() => {
   eventBus.on('sendUrl', updateCarteNames)
