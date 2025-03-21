@@ -16,6 +16,8 @@ import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
+import { useScanStore } from './store/scan'
+import { storeToRefs } from 'pinia'
 
 import Map from 'ol/Map';
 import View from 'ol/View';
@@ -40,6 +42,9 @@ import Ortho from '@/assets/basecard/ortho.jpeg'
 import BDParcellaire from '@/assets/basecard/bdparcellaire.png'
 import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
+
+const scanStore = useScanStore()
+const { dataStore } = storeToRefs(scanStore);
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -138,8 +143,6 @@ function createWmtsSource(layerId) {
 }
 
 async function getCarteNames(url){
-  console.log('update url : ' + url)
-
   try {
     const response = await fetch(url)
     if (response.ok) {
@@ -309,22 +312,18 @@ onMounted(() => {
       vectorWfsSource.value.setUrl(newUrl);
       vectorWfsSource.value.refresh();
 
-      const cartes = await getCarteNames(newUrl)
+      await scanStore.storeGet(newUrl)
 
-      eventBus.emit('sendUrl', cartes)
     });
     
     eventBus.on('criteria', (criteria) => {
     const { yearMin, yearMax, scaleMin, scaleMax, bboxe, loadWfs } = criteria;
-    
-    console.log(loadWfs)
-    console.log(bboxe)
+
 
     if (!loadWfs) return;
     
     const [minX, minY, maxX, maxY] = bboxe;
-    
-    console.log(bboxe);
+  
 
     let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`;
     
@@ -335,8 +334,7 @@ onMounted(() => {
     
     const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
       `&cql_filter=${cqlFilter}&srsName=EPSG:3857`;
-    
-    console.log(newUrl);
+
     vectorWfsSource.value.setUrl(newUrl);
     vectorWfsSource.value.refresh();
   });

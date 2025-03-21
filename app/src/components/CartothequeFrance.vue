@@ -41,6 +41,12 @@ import DepartementSearch from './DepartementSearch.vue'
 import PointSearch from './PointSearch.vue'
 import { eventBus } from './composable/eventBus'
 
+import { useScanStore } from './store/scan'
+import { storeToRefs } from 'pinia'
+
+const scanStore = useScanStore()
+const { dataStore } = storeToRefs(scanStore);
+
 const props = defineProps({
   activeSubCategory: {
     type: String,
@@ -55,10 +61,6 @@ const props = defineProps({
 defineEmits(['select-sub-category', 'close-sub-category'])
 
 function goToDepartement(departement) {
-  console.log(Object.keys(departement))
-  console.log(departement.nom)
-
-  console.log(departement.bbox)
   eventBus.emit('list-point-dep-to-map',departement.bbox )
 }
 

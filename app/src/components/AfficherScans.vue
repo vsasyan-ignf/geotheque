@@ -1,7 +1,7 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" action="">
-      <Dropdown :options="carteNames" />
+      <Dropdown :options="dataStore" />
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser">
@@ -17,43 +17,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch} from 'vue'
+import { watch} from 'vue'
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
-import { eventBus } from './composable/eventBus'
+import { useScanStore } from './store/scan'
+import { storeToRefs } from 'pinia'
+
+const scanStore = useScanStore()
+const { dataStore } = storeToRefs(scanStore);
+
+watch(dataStore, (newValue) => {
+  console.log('dataStore updated dans Afficher Scan:', newValue)
+}, { deep: true })
 
 
-const url_test =
-  'http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0' +
-  '&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter=' +
-  'BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)' +
-  '%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857'
-
-const carteNames = ref([])
-
-function get_tab_scans() {
-  fetch(url_test)
-    .then((response) => response.json())
-    .then((data) => {
-      const res = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE }))
-      CarteNames.value = res
-    })
-}
-
-function updateCarteNames(newCarteNames){
-  carteNames.value= newCarteNames
-}
-
-
-
-onMounted(() => {
-  eventBus.on('sendUrl', updateCarteNames)
-})
-
-
-onUnmounted(() => {
-  eventBus.off('sendUrl', updateCarteNames)
-})
 </script>
 
 <style scoped>
