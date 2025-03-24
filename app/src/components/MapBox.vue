@@ -50,11 +50,9 @@ import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
 
 const scanStore = useScanStore()
-<<<<<<< HEAD
-const { storeURL, storeCommuneContour } = storeToRefs(scanStore);
-=======
-const { storeURL, activeSubCategory } = storeToRefs(scanStore);
->>>>>>> origin/dev
+
+const { storeURL, storeCommuneContour, activeSubCategory } = storeToRefs(scanStore);
+
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -289,41 +287,13 @@ onMounted(() => {
       pins.value = [[x, y]];
     });
 
-    eventBus.on('list-point-dep-to-map', (contour) => {
-      // Nettoyer les départements précédents
-      vectorSource.value.clear();
-      
-      const coordinates = contour[0].map(point => [point[0], point[1]]);
-      
-      // Vérifier si les coordonnées forment un polygone valide (au moins 3 points)
-      if (coordinates && coordinates.length >= 3) {
-        // Créer une feature de polygone
-        const polygon = new Feature({
-          geometry: new Polygon([coordinates]),
-          desc: "Departement"
-        });
-
-        
-        // Ajouter le polygone à la source vecteur des départements
-        vectorSource.value.addFeature(polygon);
-        
-        // Optionnel: Zoomer sur les limites du département
-        const extent = polygon.getGeometry().getExtent();
-        olMap.value.getView().fit(extent, {
-          padding: [50, 50, 50, 50+400],
-          duration: 1000
-        });
-      } else {
-        console.error('Coordonnées de polygone invalides:', coordinates);
-      }
-    });
-
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
         vectorPinSource.value.clear();
         vectorWfsSource.value.clear();
         vectorWfsSource.value.setUrl("");
         vectorSource.value.clear();
+        scanStore.updateCommuneContour([])
       }
     });
 
@@ -332,7 +302,8 @@ onMounted(() => {
       console.log('NEW URL:', newValue)
       vectorSource.value.clear();
 
-      const polygon = new Feature({
+      if (storeCommuneContour.value.length !== 0) {
+        const polygon = new Feature({
           geometry: new Polygon([storeCommuneContour.value]),
         });
 
@@ -341,10 +312,12 @@ onMounted(() => {
       const extent = polygon.getGeometry().getExtent();
 
       olMap.value.getView().fit(extent, {
-          padding: [500, 500, 500, 500+400],
+          padding: [50, 50, 50, 50+400],
           duration: 3_000
         });
 
+
+      }
 
 
       vectorWfsSource.value.setUrl(newValue);
@@ -361,7 +334,9 @@ onMounted(() => {
       }
       if (vectorWfsSource.value) {
         vectorWfsSource.value.clear()
+        vectorWfsSource.value.setUrl("");
         olMap.value.removeLayer(wfsLayer);
+
       }
       if (vectorSource.value) {
         vectorSource.value.clear();
