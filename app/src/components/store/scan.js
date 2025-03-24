@@ -57,6 +57,8 @@ export const useScanStore = defineStore('scan', () => {
             scaleMax: null
         };
         storeCommuneContour.value = []
+        storeBbox.value = [];
+        storeData.value = null;
     }
 
     function updateCommuneContour(newVal) {
@@ -64,6 +66,11 @@ export const useScanStore = defineStore('scan', () => {
     }
 
     async function storeGet(url) {
+
+        if (!url) {
+            return;
+        }
+
         try {
             const response = await fetch(url)
             if (response.ok) {
