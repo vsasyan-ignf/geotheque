@@ -61,7 +61,10 @@ const props = defineProps({
 defineEmits(['select-sub-category', 'close-sub-category'])
 
 function goToDepartement(departement) {
-  eventBus.emit('list-point-dep-to-map',departement.bbox )
+  eventBus.emit('list-point-dep-to-map',departement.contour )
+  scanStore.updateBbox(departement.bbox.bboxLambert93)
+
+  console.log(storeBbox.value)
 }
 
 

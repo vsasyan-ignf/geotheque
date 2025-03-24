@@ -50,7 +50,11 @@ import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
 
 const scanStore = useScanStore()
+<<<<<<< HEAD
 const { storeURL, storeCommuneContour } = storeToRefs(scanStore);
+=======
+const { storeURL, activeSubCategory } = storeToRefs(scanStore);
+>>>>>>> origin/dev
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -285,11 +289,11 @@ onMounted(() => {
       pins.value = [[x, y]];
     });
 
-    eventBus.on('list-point-dep-to-map', (bbox) => {
+    eventBus.on('list-point-dep-to-map', (contour) => {
       // Nettoyer les départements précédents
       vectorSource.value.clear();
       
-      const coordinates = bbox[0].map(point => [point[0], point[1]]);
+      const coordinates = contour[0].map(point => [point[0], point[1]]);
       
       // Vérifier si les coordonnées forment un polygone valide (au moins 3 points)
       if (coordinates && coordinates.length >= 3) {
@@ -314,11 +318,18 @@ onMounted(() => {
       }
     });
 
-    console.log('---------------------------- URL ----------------------------')
+    watch(activeSubCategory, (newValue) => {
+      if (newValue === null && olMap.value) {
+        vectorPinSource.value.clear();
+        vectorWfsSource.value.clear();
+        vectorWfsSource.value.setUrl("");
+        vectorSource.value.clear();
+      }
+    });
 
+    console.log('---------------------------- URL ----------------------------')
     watch(storeURL, async (newValue) => {
       console.log('NEW URL:', newValue)
-
       vectorSource.value.clear();
 
       const polygon = new Feature({
@@ -335,10 +346,27 @@ onMounted(() => {
         });
 
 
+
       vectorWfsSource.value.setUrl(newValue);
       vectorWfsSource.value.refresh();
 
       await scanStore.storeGet(newValue)
+    })
+
+
+    eventBus.on('criteria-reset', () => {
+      if (vectorPinSource.value) {
+        vectorPinSource.value.clear()
+
+      }
+      if (vectorWfsSource.value) {
+        vectorWfsSource.value.clear()
+        olMap.value.removeLayer(wfsLayer);
+      }
+      if (vectorSource.value) {
+        vectorSource.value.clear();
+        olMap.value.removeLayer(deptLayer);
+      }
     })
 
     window.dispatchEvent(new Event('resize'))

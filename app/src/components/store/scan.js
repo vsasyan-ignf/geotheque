@@ -5,7 +5,7 @@ export const useScanStore = defineStore('scan', () => {
     let storeBbox = ref([]);
     let storeData = ref(null);
     let storeCommuneContour = ref([]);
-    let storeDataHandleClickMap = ref([]);
+
     let storeCritereSelection = ref({
         yearMin: null,
         yearMax: null,
@@ -39,19 +39,9 @@ export const useScanStore = defineStore('scan', () => {
         storeBbox.value = newBbox;
     }
 
-    function updateBboxHandleClick(newBbox) {
-        storeDataHandleClickMap.value = newBbox;
-        console.log(storeDataHandleClickMap.value)
-    }
-
     function updateCriteria(newCriteria) {
         storeCritereSelection.value = { ...newCriteria };
         console.log("Updated criteria:", storeCritereSelection.value);
-    }
-
-    function updateBboxTemp(newBbox) {
-        storeDataHandleClickMap.value = newBbox;
-        console.log("Temporary BBox stored:", storeDataHandleClickMap.value);
     }
 
     function updateActiveSubCategory(subCategory) {
@@ -59,15 +49,13 @@ export const useScanStore = defineStore('scan', () => {
         console.log('Sous-catégorie active:', activeSubCategory.value)
     }
 
-    function updateUrl() {
-        if (storeDataHandleClickMap.value.length > 0) {
-            storeBbox.value = storeDataHandleClickMap.value;
-            console.log("BBox applied to storeBbox:", storeBbox.value);
-        }
-    }
-
-    function updateCommuneContour(newValue) {
-        storeCommuneContour.value = newValue;
+    function resetCriteria() {
+        storeCritereSelection.value = {
+            yearMin: null,
+            yearMax: null,
+            scaleMin: null,
+            scaleMax: null
+        };
     }
 
     async function storeGet(url) {
@@ -84,9 +72,7 @@ export const useScanStore = defineStore('scan', () => {
             console.error('Error:', error)
         }
     }
-    return {
-        storeData, storeBbox, storeURL, storeCommuneContour, storeGet, updateBbox,
-        updateBboxHandleClick, storeDataHandleClickMap, updateBboxTemp, updateCommuneContour,
-        storeCritereSelection, updateCriteria, updateUrl, updateActiveSubCategory, activeSubCategory
-    }
+    return { storeData, storeBbox, storeURL, storeGet, updateBbox,  
+        storeCritereSelection, updateCriteria, 
+        updateActiveSubCategory, activeSubCategory, resetCriteria}
 })

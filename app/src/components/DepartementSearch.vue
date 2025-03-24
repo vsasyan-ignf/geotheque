@@ -43,12 +43,17 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { get } from 'ol/proj'
+import { bbox } from 'ol/loadingstrategy'
+import proj4 from 'proj4';
 
 const emit = defineEmits(['close', 'select-departement'])
 const searchDepartement = ref('')
 const departementResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
+const proj3857 = 'EPSG:3857';  // Web Mercator
+const proj2154 = 'EPSG:2154';  // Lambert-93
+
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
@@ -71,6 +76,51 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
+function create_bbox(contour) {
+  if (!contour || contour.length === 0) {
+    throw new Error("Contour invalide");
+  }
+  const coordinates = contour[0].map(point => [point[0], point[1]]);
+  
+  if (coordinates.length < 3) {
+    throw new Error("Un polygone doit avoir au moins 3 points");
+  }
+  let minX = coordinates[0][0];
+  let minY = coordinates[0][1];
+  let maxX = coordinates[0][0];
+  let maxY = coordinates[0][1];
+
+  coordinates.forEach(point => {
+    const [x, y] = point;
+    minX = Math.min(minX, x);
+    minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x);
+    maxY = Math.max(maxY, y);
+  });
+
+  return { minX, minY, maxX, maxY };
+}
+
+function convertBbox(bbox,proj_in,proj_out) {
+  //Convertion Bbox de proj_in vers proj_out
+  const minX = bbox.minX;
+  const minY = bbox.minY;
+  const maxX = bbox.maxX;
+  const maxY = bbox.maxY;
+  
+  const minCoord = proj4(proj_in, proj_out, [minX, minY]);
+  const maxCoord = proj4(proj_in, proj_out, [maxX, maxY]);
+
+  return [
+    minCoord[0],
+    minCoord[1],
+    maxCoord[0],
+    maxCoord[1]
+  ];
+}
+
+
+
 function searchDepartements() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
@@ -78,7 +128,6 @@ function searchDepartements() {
   let url_dep;
   const query = searchDepartement.value.toLowerCase().trim();
   const numbner_dep = parseInt(query);
-  console.log(numbner_dep);
   if(!isNaN(numbner_dep )){
     url_dep = `https://geo.api.gouv.fr/departements?code=${query}&fields=nom,code,region`;
   }
@@ -106,8 +155,16 @@ function searchDepartements() {
 }
 
 function selectDepartement(departement) {
-  getDepartementBbox(departement).then((bbox) => {
-    emit('select-departement', { nom: departement.nom, bbox: bbox });
+  getDepartementBbox(departement).then((contour) => {
+    let bbox3857 = create_bbox(contour);
+    const bbox2154 = convertBbox(bbox3857,proj3857,proj2154);
+    const points = {
+      x: 0,
+      y: 0,
+      bboxLambert93: bbox2154
+    }
+
+    emit('select-departement', { nom: departement.nom, contour: contour,bbox : points });
   }).catch((error) => {
     console.error('Erreur lors de la récupération des controus du departements:', error);
   });
@@ -116,10 +173,9 @@ function selectDepartement(departement) {
 }
 
 async function getDepartementBbox(departement) {
-  const depName = departement.nom.toString();
-  const upDepartement = depName.toUpperCase();
+  const depCode = departement.code.toString();
   const urlDepBbox = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0
-  `+`&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=NOM_DEPT='${upDepartement}'&srsName=EPSG:3857`;
+  `+`&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=CODE_DEPT='${depCode}'&srsName=EPSG:3857`;
   
   try {
     const response = await fetch(urlDepBbox);
@@ -127,16 +183,18 @@ async function getDepartementBbox(departement) {
       throw new Error(`rrreur réseau : ${response.status}`);
     }
     const data = await response.json();
-    const bbox = data.features[0]?.geometry?.coordinates[0];
-    if (!bbox) {
+    const contour_dep = data.features[0]?.geometry?.coordinates[0];
+    if (!contour_dep) {
       throw new Error('coordonées non trouvée dans la réponse');
     }
-    return bbox;
+    return contour_dep;
   } catch (error) {
       console.error('e:', error);
     throw error;
   }
 }
+
+
 
 
 </script>
