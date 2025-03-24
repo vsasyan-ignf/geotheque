@@ -67,6 +67,9 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { useConvertCoordinates } from './composable/convertCoordinates'
+import { useScanStore } from './store/scan'
+
+const scanStore = useScanStore()
 
 const emit = defineEmits(['close', 'select-commune'])
 
@@ -114,9 +117,9 @@ function searchCommunes() {
 
     if (parseInt(query)) {
       console.log('code postal')
-      search_url = `https://geo.api.gouv.fr/communes?codePostal=${query}&fields=nom,codesPostaux,departement,bbox`
+      search_url = `https://geo.api.gouv.fr/communes?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
     } else {
-      search_url = `https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox`
+      search_url = `https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
     }
 
     fetch(search_url)
@@ -127,6 +130,7 @@ function searchCommunes() {
           code: commune.codesPostaux[0],
           departement: commune.departement.nom,
           bbox: commune.bbox,
+          contour: commune.contour
         }))
 
         communeResults.value = newResults
@@ -158,7 +162,11 @@ function validateCommune() {
       y: 0,
       bboxLambert93: bboxLambert93.flat(),
     }
-    
+
+    const contourMercator = repCommune.contour.coordinates[0].map(coord => useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'))
+
+    scanStore.updateCommuneContour(contourMercator)
+
     emit('select-commune', point)
   }
 }

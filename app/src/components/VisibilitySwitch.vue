@@ -41,14 +41,14 @@ watch(isMapVisible, (newValue) => {
 <style scoped>
 .map-visibility-container {
   position: absolute;
-  top: 137px;
+  top: 120px;
   right: 20px;
   z-index: 10;
 }
 
 .visibility-toggle-button {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   background-color: white;
   border: none;
   border-radius: 4px;

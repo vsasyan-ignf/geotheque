@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import { ref, defineExpose } from 'vue'
+import { ref } from 'vue'
 import Dropdown from './material/Dropdown.vue'
 import { eventBus } from './composable/eventBus'
 
@@ -100,12 +100,12 @@ import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { activeSubCategory } = storeToRefs(scanStore);
+const { storeCritereSelection } = storeToRefs(scanStore);
 
-const yearMin = ref('')
-const yearMax = ref('')
-const scaleMin = ref('')
-const scaleMax = ref('')
+const yearMin = ref(storeCritereSelection.value.yearMin || '');
+const yearMax = ref(storeCritereSelection.value.yearMax || '');
+const scaleMin = ref(storeCritereSelection.value.scaleMin || '500');
+const scaleMax = ref(storeCritereSelection.value.scaleMax || '100000');
 
 const scaleOptions = [
   '500',
@@ -146,11 +146,13 @@ const hideScaleMaxOptionsDelayed = () => {
 const initialValues = {
   yearMin: '',
   yearMax: '',
-  scaleMin: '',
-  scaleMax: ''
+  scaleMin: '500',
+  scaleMax: '100000'
 }
 
 const handleSubmit = () => {
+  eventBus.emit('reset')
+
   const criteria = {
     yearMin: yearMin.value,
     yearMax: yearMax.value,
@@ -159,7 +161,6 @@ const handleSubmit = () => {
   }
 
   scanStore.updateCriteria(criteria);
-  if (activeSubCategory.value == "point") scanStore.updateUrl();
 
 }
 
@@ -168,12 +169,8 @@ const resetForm = () => {
   yearMax.value = initialValues.yearMax
   scaleMin.value = initialValues.scaleMin
   scaleMax.value = initialValues.scaleMax
-  
- 
-  if (bboxState.value) {
-    bboxState.value = null
-  }
-  
+  scanStore.resetCriteria()
+
   eventBus.emit('criteria-reset')
 }
 

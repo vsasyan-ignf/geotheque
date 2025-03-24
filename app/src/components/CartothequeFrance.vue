@@ -23,7 +23,7 @@
     <DepartementSearch
       v-if="activeSubCategory === 'departement'"
       @close="$emit('close-sub-category')"
-      @select-departement="goToDepartement"
+      @select-departement="goToPoint"
     />
 
     <PointSearch
@@ -42,10 +42,8 @@ import PointSearch from './PointSearch.vue'
 import { eventBus } from './composable/eventBus'
 
 import { useScanStore } from './store/scan'
-import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { storeBbox } = storeToRefs(scanStore);
 
 const props = defineProps({
   activeSubCategory: {
@@ -60,18 +58,10 @@ const props = defineProps({
 
 defineEmits(['select-sub-category', 'close-sub-category'])
 
-function goToDepartement(departement) {
-  eventBus.emit('list-point-dep-to-map',departement.bbox )
-}
-
 
 function goToPoint(point) {
   if (point.bboxLambert93) {
-    console.log('----------dans cartotheque------------------')
     scanStore.updateBbox(point.bboxLambert93)
-
-    console.log(storeBbox.value)
-    // eventBus.emit('bbox-updated', point.bboxLambert93)
   }
 }
 

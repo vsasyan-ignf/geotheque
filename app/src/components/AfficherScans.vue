@@ -38,9 +38,6 @@ const { storeData, currentCollecInfo } = storeToRefs(scanStore);
 
 console.log('dataStore dans Afficher Scan:', storeData)
 
-watch(storeData, (newValue) => {
-  console.log('dataStore updated dans Afficher Scan:', newValue)
-}, { deep: true })
 
 const isModalOpen = ref(false)
 const imageUrl = ref('http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/001_86K_1756.JP2&CVT=jpeg')
@@ -48,9 +45,6 @@ const imageUrl = ref('http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METR
 
 const url_xml = ' http://localhost:8081/Misphot/Lambert93/2021/2021_FD 01_C_20/'+
   '2021_FD 01_C_20.xml'
-
-
-const carteNames = ref([])
 
 
 function downloadScans() {
@@ -77,10 +71,6 @@ function downloadScans() {
 
 function downloadxml(){
   window.open(url_xml, "xml")
-}
-
-function updateCarteNames(newCarteNames) {
-  carteNames.value = newCarteNames
 }
 
 function openModal() {

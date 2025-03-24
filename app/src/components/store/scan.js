@@ -4,7 +4,8 @@ import { ref, computed } from "vue";
 export const useScanStore = defineStore('scan', () => {
     let storeBbox = ref([]);
     let storeData = ref(null);
-    let storeDataHandleClickMap = ref([]);
+    let storeCommuneContour = ref([]);
+
     let storeCritereSelection = ref({
         yearMin: null,
         yearMax: null,
@@ -39,19 +40,9 @@ export const useScanStore = defineStore('scan', () => {
         storeBbox.value = newBbox;
     }
 
-    function updateBboxHandleClick(newBbox) {
-        storeDataHandleClickMap.value = newBbox;
-        console.log(storeDataHandleClickMap.value)
-    }
-
     function updateCriteria(newCriteria) {
         storeCritereSelection.value = { ...newCriteria };
         console.log("Updated criteria:", storeCritereSelection.value);
-    }
-
-    function updateBboxTemp(newBbox) {
-        storeDataHandleClickMap.value = newBbox;
-        console.log("Temporary BBox stored:", storeDataHandleClickMap.value);
     }
 
     function updateActiveSubCategory(subCategory) {
@@ -69,27 +60,48 @@ export const useScanStore = defineStore('scan', () => {
             storeBbox.value = storeDataHandleClickMap.value;
             console.log("BBox applied to storeBbox:", storeBbox.value);
         }
-    }
+        function resetCriteria() {
+            storeCritereSelection.value = {
+                yearMin: null,
+                yearMax: null,
+                scaleMin: null,
+                scaleMax: null
+            };
+            storeCommuneContour.value = []
+            storeBbox.value = [];
+            storeData.value = null;
+        }
 
-    async function storeGet(url) {
-        try {
-            const response = await fetch(url)
-            if (response.ok) {
-                const data = await response.json()
-                console.log('Data:', data.features)
-                const carteNames = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE, collecInfo: feature.properties.COLLECTION + "/" + feature.properties.SOUS_COLL + "/" + feature.properties.ID_CARTE }))
-                storeData.value = carteNames
-            } else {
-                throw new Error('Failed to fetch data')
+        function updateCommuneContour(newVal) {
+            storeCommuneContour.value = newVal
+        }
+
+        async function storeGet(url) {
+
+            if (!url) {
+                return;
             }
-        } catch (error) {
-            console.error('Error:', error)
+
+            try {
+                const response = await fetch(url)
+                if (response.ok) {
+                    const data = await response.json()
+                    console.log('Data:', data.features)
+                    const carteNames = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE, collecInfo: feature.properties.COLLECTION + "/" + feature.properties.SOUS_COLL + "/" + feature.properties.ID_CARTE }))
+                    storeData.value = carteNames
+                } else {
+                    throw new Error('Failed to fetch data')
+                }
+            } catch (error) {
+                console.error('Error:', error)
+            }
         }
     }
+
     return {
         storeData, storeBbox, storeURL, storeGet, updateBbox,
-        updateBboxHandleClick, storeDataHandleClickMap, updateBboxTemp,
         storeCritereSelection, updateCriteria, updateUrl, updateActiveSubCategory, activeSubCategory,
-        updateCurrentScanInfo, currentCollecInfo
-    }
-})
+        updateCurrentScanInfo, currentCollecInfo, storeCommuneContour, updateCommuneContour,
+        resetCriteria
+    };
+});
