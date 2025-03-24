@@ -4,6 +4,7 @@ import { ref, computed } from "vue";
 export const useScanStore = defineStore('scan', () => {
     let storeBbox = ref([]);
     let storeData = ref(null);
+    let storeCommuneContour = ref([]);
     let storeDataHandleClickMap = ref([]);
     let storeCritereSelection = ref({
         yearMin: null,
@@ -56,14 +57,18 @@ export const useScanStore = defineStore('scan', () => {
     function updateActiveSubCategory(subCategory) {
         activeSubCategory.value = subCategory
         console.log('Sous-catégorie active:', activeSubCategory.value)
-      }
-
-function updateUrl() {
-    if (storeDataHandleClickMap.value.length > 0) {
-        storeBbox.value = storeDataHandleClickMap.value;
-        console.log("BBox applied to storeBbox:", storeBbox.value);
     }
-}
+
+    function updateUrl() {
+        if (storeDataHandleClickMap.value.length > 0) {
+            storeBbox.value = storeDataHandleClickMap.value;
+            console.log("BBox applied to storeBbox:", storeBbox.value);
+        }
+    }
+
+    function updateCommuneContour(newValue) {
+        storeCommuneContour.value = newValue;
+    }
 
     async function storeGet(url) {
         try {
@@ -79,7 +84,9 @@ function updateUrl() {
             console.error('Error:', error)
         }
     }
-    return { storeData, storeBbox, storeURL, storeGet, updateBbox, 
-        updateBboxHandleClick, storeDataHandleClickMap, updateBboxTemp, 
-        storeCritereSelection, updateCriteria, updateUrl, updateActiveSubCategory, activeSubCategory}
+    return {
+        storeData, storeBbox, storeURL, storeCommuneContour, storeGet, updateBbox,
+        updateBboxHandleClick, storeDataHandleClickMap, updateBboxTemp, updateCommuneContour,
+        storeCritereSelection, updateCriteria, updateUrl, updateActiveSubCategory, activeSubCategory
+    }
 })

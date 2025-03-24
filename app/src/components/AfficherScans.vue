@@ -35,34 +35,14 @@ import { storeToRefs } from 'pinia'
 const scanStore = useScanStore()
 const { storeData } = storeToRefs(scanStore);
 
-watch(storeData, (newValue) => {
-  console.log('dataStore updated dans Afficher Scan:', newValue)
-}, { deep: true })
 
 const isModalOpen = ref(false)
 const imageUrl = ref('http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/001_86K_1756.JP2&CVT=jpeg')
 
-const url_test =
-  'http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0' +
-  '&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json&cql_filter=' +
-  'BBOX(the_geom,-9252.7093,6055896.5059,1179955.9877,7151272.0258)' +
-  '%20AND%20DATE_PUB%3E2015&srsName=EPSG:3857'
 
 const url_xml = ' http://localhost:8081/Misphot/Lambert93/2021/2021_FD 01_C_20/'+
   '2021_FD 01_C_20.xml'
 
-
-const carteNames = ref([])
-
-
-function get_tab_scans() {
-  fetch(url_test)
-    .then((response) => response.json())
-    .then((data) => {
-      const res = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE }))
-      carteNames.value = res
-    })
-}
 
 function downloadScans() {
   const image_name = "001_86K_1756.JP2"
@@ -85,10 +65,6 @@ function downloadScans() {
 
 function downloadxml(){
   window.open(url_xml, "xml")
-}
-
-function updateCarteNames(newCarteNames) {
-  carteNames.value = newCarteNames
 }
 
 function openModal() {
