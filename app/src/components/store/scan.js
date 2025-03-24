@@ -11,6 +11,7 @@ export const useScanStore = defineStore('scan', () => {
         scaleMin: null,
         scaleMax: null
     });
+    let currentCollecInfo = ref(null);
 
     let activeSubCategory = ref(null)
 
@@ -56,21 +57,27 @@ export const useScanStore = defineStore('scan', () => {
     function updateActiveSubCategory(subCategory) {
         activeSubCategory.value = subCategory
         console.log('Sous-catégorie active:', activeSubCategory.value)
-      }
-
-function updateUrl() {
-    if (storeDataHandleClickMap.value.length > 0) {
-        storeBbox.value = storeDataHandleClickMap.value;
-        console.log("BBox applied to storeBbox:", storeBbox.value);
     }
-}
+
+    function updateCurrentScanInfo(collec) {
+        currentCollecInfo.value = collec
+        console.log('Collection actuelle:', currentCollecInfo.value)
+    }
+
+    function updateUrl() {
+        if (storeDataHandleClickMap.value.length > 0) {
+            storeBbox.value = storeDataHandleClickMap.value;
+            console.log("BBox applied to storeBbox:", storeBbox.value);
+        }
+    }
 
     async function storeGet(url) {
         try {
             const response = await fetch(url)
             if (response.ok) {
                 const data = await response.json()
-                const carteNames = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE }))
+                console.log('Data:', data.features)
+                const carteNames = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE, collecInfo: feature.properties.COLLECTION + "/" + feature.properties.SOUS_COLL + "/" + feature.properties.ID_CARTE }))
                 storeData.value = carteNames
             } else {
                 throw new Error('Failed to fetch data')
@@ -79,7 +86,10 @@ function updateUrl() {
             console.error('Error:', error)
         }
     }
-    return { storeData, storeBbox, storeURL, storeGet, updateBbox, 
-        updateBboxHandleClick, storeDataHandleClickMap, updateBboxTemp, 
-        storeCritereSelection, updateCriteria, updateUrl, updateActiveSubCategory, activeSubCategory}
+    return {
+        storeData, storeBbox, storeURL, storeGet, updateBbox,
+        updateBboxHandleClick, storeDataHandleClickMap, updateBboxTemp,
+        storeCritereSelection, updateCriteria, updateUrl, updateActiveSubCategory, activeSubCategory,
+        updateCurrentScanInfo, currentCollecInfo
+    }
 })

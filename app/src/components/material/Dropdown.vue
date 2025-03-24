@@ -1,9 +1,9 @@
 <template>
   <div class="dropdown">
     <label for="option">{{ nameDropdown }}</label>
-    <select id="option" v-model="selected">
+    <select id="option" v-model="selected" @change="updateStoredata($event)">
       <option disabled value="">Veuillez sélectionner une carte</option>
-      <option v-for="val in options" :key="val.id" :value="val.id">
+      <option v-for="val in options" :key="val.id" :value="val.collecInfo">
         {{ val.name }}
       </option>
     </select>
@@ -12,6 +12,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useScanStore } from '../store/scan'
+import { storeToRefs } from 'pinia'
+
+const scanStore = useScanStore()
 
 const selected = ref("")
 
@@ -29,6 +33,10 @@ const props = defineProps({
     ],
   },
 })
+
+function updateStoredata(event) {
+  scanStore.updateCurrentScanInfo(event.target.value)
+}
 
 
 </script>
