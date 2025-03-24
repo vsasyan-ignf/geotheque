@@ -317,14 +317,14 @@ onMounted(() => {
       if (newValue === null && olMap.value) {
         vectorPinSource.value.clear();
         vectorWfsSource.value.clear();
-
+        vectorWfsSource.value.setUrl("");
+        vectorDeptSource.value.clear();
       }
     });
 
     console.log('---------------------------- URL ----------------------------')
     watch(storeURL, async (newValue) => {
       console.log('NEW URL:', newValue)
-
 
       vectorWfsSource.value.setUrl(newValue);
       vectorWfsSource.value.refresh();
@@ -335,9 +335,15 @@ onMounted(() => {
     eventBus.on('criteria-reset', () => {
       if (vectorPinSource.value) {
         vectorPinSource.value.clear()
+
       }
       if (vectorWfsSource.value) {
         vectorWfsSource.value.clear()
+        olMap.value.removeLayer(wfsLayer);
+      }
+      if (vectorDeptSource.value) {
+        vectorDeptSource.value.clear();
+        olMap.value.removeLayer(deptLayer);
       }
     })
     // eventBus.on('bbox-updated', async (bboxLambert93) => {
