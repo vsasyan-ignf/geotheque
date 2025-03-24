@@ -1,11 +1,17 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
-      <Dropdown :options="storeData"/>
-
+      <div class="dropdown-container">
+        <div class="dropdown-wrapper">
+          <Dropdown :options="storeData"/>
+        </div>
+        <button class="icon-button" @click.prevent="openModal">
+          <i class="mdi mdi-eye"></i>
+        </button>
+      </div>
       <div class="button-group">
         <ShakingButton nameButton="Visualiser" @click="openModal">
-          <template #icon><i class="mdi mdi-eye"></i></template>
+          <template #icon><i class="mdi mdi-monitor-eye"></i></template>
         </ShakingButton>
         <ShakingButton nameButton="Télécharger" @click="downloadScans">
           <template #icon><i class="mdi mdi-briefcase-download"></i></template>
@@ -13,14 +19,12 @@
         <ShakingButton nameButton="XML" @click="downloadxml"/>
       </div>
     </form>
-
-    <ImageModal 
-      :is-open="isModalOpen" 
-      :image-url="imageUrl"
-      title="Visualisation de l'image : 21FD0120x00001_03343.jp2"
-      @close="closeModal"
+    <ImageModal
+     :is-open="isModalOpen"
+     :image-url="imageUrl"
+     title="Prévisualisation de l'image : 21FD0120x00001_03343.jp2"
+     @close="closeModal"
     />
-
   </div>
 </template>
 
@@ -34,18 +38,11 @@ import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
 const { storeData, currentCollecInfo } = storeToRefs(scanStore);
-
-
 console.log('dataStore dans Afficher Scan:', storeData)
-
-
 const isModalOpen = ref(false)
 const imageUrl = ref('http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/001_86K_1756.JP2&CVT=jpeg')
-
-
 const url_xml = ' http://localhost:8081/Misphot/Lambert93/2021/2021_FD 01_C_20/'+
-  '2021_FD 01_C_20.xml'
-
+'2021_FD 01_C_20.xml'
 
 function downloadScans() {
   if (currentCollecInfo.value){
@@ -65,26 +62,20 @@ function downloadScans() {
         window.URL.revokeObjectURL(url);
       })
       .catch(error => console.error("Erreur lors du téléchargement:", error));
-    }
-  
+  }
 }
 
 function downloadxml(){
   window.open(url_xml, "xml")
 }
-
 function openModal() {
   isModalOpen.value = true
 }
-
 function closeModal() {
   isModalOpen.value = false
 }
 
-
-
 </script>
-
 <style scoped>
 .scan-box {
   margin-top: 20px;
@@ -107,44 +98,77 @@ function closeModal() {
   width: 100%;
 }
 
+.dropdown-container {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ width: 100%;
+ gap: 8px;
+}
+
+.dropdown-wrapper {
+  flex: 1;
+  width: 100%;
+}
+
+.icon-button {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ width: 40px;
+ height: 40px;
+ min-width: 40px;
+ border-radius: 4px;
+ background-color: #739614;
+ color: white;
+ border: none;
+ cursor: pointer;
+ transition: background-color 0.3s, transform 0.2s;
+ margin-top: 4px;
+}
+
+.icon-button:hover {
+  background-color: #5e7a10;
+}
+
+.icon-button:active {
+  transform: translateY(1px);
+}
+
 .form-row {
   display: flex;
   gap: 10px;
   width: 100%;
   flex-wrap: wrap;
 }
-
 .form-group {
   width: 100%;
 }
-
 .form-group.half {
   flex: 1;
   min-width: calc(50% - 5px);
-  max-width: calc(50% - 5px);
+   max-width: calc(50% - 5px);
 }
-
 .form-group label {
   font-size: 14px;
   color: #555;
 }
-
 .form-group input {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
   transition:
-    border-color 0.3s,
-    box-shadow 0.3s;
+   border-color 0.3s,
+   box-shadow 0.3s;
   width: 100%;
   box-sizing: border-box;
 }
 
 .form-group input:focus {
   border-color: #739614;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(115, 150, 20, 0.2);
+   outline: none;
+   box-shadow: 0 0 0 2px rgba(115, 150, 20, 0.2);
 }
 
 .button-group {
@@ -152,7 +176,6 @@ function closeModal() {
   display: flex;
   gap: 10px;
 }
-
 .search-button {
   display: flex;
   align-items: center;
@@ -167,10 +190,9 @@ function closeModal() {
   font-size: 14px;
   font-weight: 500;
   transition:
-    background-color 0.3s,
-    transform 0.2s;
+   background-color 0.3s,
+   transform 0.2s;
 }
-
 .search-button:hover {
   background-color: #5e7a10;
 }
@@ -180,13 +202,13 @@ function closeModal() {
 }
 
 @media (max-width: 500px) {
-  .form-row {
-    flex-direction: column;
-    gap: 15px;
-  }
+.form-row {
+   flex-direction: column;
+   gap: 15px;
+}
 
-  .form-group.half {
-    min-width: 100%;
+.form-group.half {
+   min-width: 100%;
     max-width: 100%;
   }
 }

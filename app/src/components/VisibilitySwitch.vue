@@ -80,7 +80,7 @@ svg {
   color: #fff;
   text-align: center;
   border-radius: 4px;
-  padding: 16px 15px;
+  padding: 11.3px 15px;
   position: absolute;
   z-index: 20;
   bottom: 0px;
