@@ -34,7 +34,7 @@ import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import GeoJSON from 'ol/format/GeoJSON';
 import Polygon from 'ol/geom/Polygon.js';
-import { get, get as getProjection, transform } from 'ol/proj';
+import { get as getProjection } from 'ol/proj';
 import { getTopLeft } from 'ol/extent';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
@@ -51,7 +51,7 @@ import Scan25 from '@/assets/basecard/scan25.jpg'
 
 const scanStore = useScanStore()
 
-const { storeURL, storeCommuneContour, activeSubCategory } = storeToRefs(scanStore);
+const { storeURL, storeCommuneContour, activeSubCategory, storeSelectedScan } = storeToRefs(scanStore);
 
 
 const center = ref([260000, 6000000])

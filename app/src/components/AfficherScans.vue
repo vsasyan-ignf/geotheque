@@ -35,10 +35,6 @@ import { storeToRefs } from 'pinia'
 const scanStore = useScanStore()
 const { storeData, currentCollecInfo } = storeToRefs(scanStore);
 
-
-console.log('dataStore dans Afficher Scan:', storeData)
-
-
 const isModalOpen = ref(false)
 const imageUrl = ref('http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/001_86K_1756.JP2&CVT=jpeg')
 

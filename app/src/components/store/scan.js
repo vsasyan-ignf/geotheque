@@ -5,6 +5,7 @@ export const useScanStore = defineStore('scan', () => {
     let storeBbox = ref([]);
     let storeData = ref(null);
     let storeCommuneContour = ref([]);
+    let storeSelectedScan = ref(null)
 
     let storeCritereSelection = ref({
         yearMin: null,
@@ -72,7 +73,9 @@ export const useScanStore = defineStore('scan', () => {
         storeCommuneContour.value = newVal
     }
 
-
+    function updateSelectedScan(newVal) {
+        storeSelectedScan.value = newVal
+    }
 
     async function storeGet(url) {
 
@@ -85,7 +88,8 @@ export const useScanStore = defineStore('scan', () => {
             if (response.ok) {
                 const data = await response.json()
                 console.log('Data:', data.features)
-                const carteNames = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE, collecInfo: feature.properties.COLLECTION + "/" + feature.properties.SOUS_COLL + "/" + feature.properties.ID_CARTE }))
+
+                const carteNames = data.features.map((feature, index) => ({ id: index, geom: feature.geometry.coordinates[0], name: feature.properties.ID_CARTE, collecInfo: feature.properties.COLLECTION + "/" + feature.properties.SOUS_COLL + "/" + feature.properties.ID_CARTE }))
                 storeData.value = carteNames
             } else {
                 throw new Error('Failed to fetch data')
@@ -97,7 +101,7 @@ export const useScanStore = defineStore('scan', () => {
 
 
     return {
-        storeData, storeBbox, storeURL, storeGet, updateBbox,
+        storeData, storeBbox, storeURL, storeGet, updateBbox, updateSelectedScan, storeSelectedScan,
         storeCritereSelection, updateCriteria, updateActiveSubCategory, activeSubCategory,
         updateCurrentScanInfo, currentCollecInfo, storeCommuneContour, updateCommuneContour,
         resetCriteria
