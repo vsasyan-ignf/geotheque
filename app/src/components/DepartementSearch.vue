@@ -42,8 +42,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import { get } from 'ol/proj'
-import { bbox } from 'ol/loadingstrategy'
 import proj4 from 'proj4';
 
 const emit = defineEmits(['close', 'select-departement'])
@@ -53,7 +51,10 @@ const showResults = ref(false)
 let searchTimeout = null
 const proj3857 = 'EPSG:3857';  // Web Mercator
 const proj2154 = 'EPSG:2154';  // Lambert-93
+import { useScanStore } from './store/scan';
 
+
+const scanStore = useScanStore()
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
@@ -158,13 +159,17 @@ function selectDepartement(departement) {
   getDepartementBbox(departement).then((contour) => {
     let bbox3857 = create_bbox(contour);
     const bbox2154 = convertBbox(bbox3857,proj3857,proj2154);
-    const points = {
+    const point = {
       x: 0,
       y: 0,
       bboxLambert93: bbox2154
     }
 
-    emit('select-departement', { nom: departement.nom, contour: contour,bbox : points });
+    const coordinates = contour[0].map(point => [point[0], point[1]]);
+
+    scanStore.updateCommuneContour(coordinates)
+
+    emit('select-departement', point);
   }).catch((error) => {
     console.error('Erreur lors de la récupération des controus du departements:', error);
   });

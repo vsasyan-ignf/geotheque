@@ -4,6 +4,8 @@ import { ref, computed } from "vue";
 export const useScanStore = defineStore('scan', () => {
     let storeBbox = ref([]);
     let storeData = ref(null);
+    let storeCommuneContour = ref([]);
+
     let storeCritereSelection = ref({
         yearMin: null,
         yearMax: null,
@@ -54,6 +56,11 @@ export const useScanStore = defineStore('scan', () => {
             scaleMin: null,
             scaleMax: null
         };
+        storeCommuneContour.value = []
+    }
+
+    function updateCommuneContour(newVal) {
+        storeCommuneContour.value = newVal
     }
 
     async function storeGet(url) {
@@ -70,7 +77,9 @@ export const useScanStore = defineStore('scan', () => {
             console.error('Error:', error)
         }
     }
-    return { storeData, storeBbox, storeURL, storeGet, updateBbox,  
-        storeCritereSelection, updateCriteria, 
-        updateActiveSubCategory, activeSubCategory, resetCriteria}
+    return {
+        storeData, storeBbox, storeURL, storeGet, storeCommuneContour, updateBbox,
+        storeCritereSelection, updateCriteria, updateCommuneContour,
+        updateActiveSubCategory, activeSubCategory, resetCriteria
+    }
 })

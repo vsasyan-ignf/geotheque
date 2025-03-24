@@ -151,6 +151,8 @@ const initialValues = {
 }
 
 const handleSubmit = () => {
+  eventBus.emit('reset')
+
   const criteria = {
     yearMin: yearMin.value,
     yearMax: yearMax.value,

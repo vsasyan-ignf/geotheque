@@ -50,7 +50,9 @@ import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
 
 const scanStore = useScanStore()
-const { storeURL, activeSubCategory } = storeToRefs(scanStore);
+
+const { storeURL, storeCommuneContour, activeSubCategory } = storeToRefs(scanStore);
+
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -64,7 +66,7 @@ const pins = ref([]);
 const showPin = ref(false);
 const vectorPinSource = ref(null);
 const vectorWfsSource = ref(null);
-const vectorDeptSource = ref(null);
+const vectorSource = ref(null);
 const deptLayer = ref(null);
 
 const url_test = ref(``);
@@ -205,9 +207,9 @@ onMounted(() => {
     });
     
     // Création de la source et de la couche pour les départements
-    vectorDeptSource.value = new VectorSource();
+    vectorSource.value = new VectorSource();
     deptLayer.value = new VectorLayer({
-      source: vectorDeptSource.value,
+      source: vectorSource.value,
       style: new Style({
         stroke: new Stroke({
           color: 'blue',
@@ -285,52 +287,45 @@ onMounted(() => {
       pins.value = [[x, y]];
     });
 
-    eventBus.on('list-point-dep-to-map', (contour) => {
-      // Nettoyer les départements précédents
-      vectorDeptSource.value.clear();
-      
-      const coordinates = contour[0].map(point => [point[0], point[1]]);
-      
-      // Vérifier si les coordonnées forment un polygone valide (au moins 3 points)
-      if (coordinates && coordinates.length >= 3) {
-        // Créer une feature de polygone
-        const polygon = new Feature({
-          geometry: new Polygon([coordinates]),
-          desc: "Departement"
-        });
-        
-        // Ajouter le polygone à la source vecteur des départements
-        vectorDeptSource.value.addFeature(polygon);
-        
-        // Optionnel: Zoomer sur les limites du département
-        const extent = polygon.getGeometry().getExtent();
-        olMap.value.getView().fit(extent, {
-          padding: [50, 50, 50, 50],
-          duration: 1000
-        });
-      } else {
-        console.error('Coordonnées de polygone invalides:', coordinates);
-      }
-    });
-
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
         vectorPinSource.value.clear();
         vectorWfsSource.value.clear();
         vectorWfsSource.value.setUrl("");
-        vectorDeptSource.value.clear();
+        vectorSource.value.clear();
+        scanStore.updateCommuneContour([])
       }
     });
 
     console.log('---------------------------- URL ----------------------------')
     watch(storeURL, async (newValue) => {
       console.log('NEW URL:', newValue)
+      vectorSource.value.clear();
+
+      if (storeCommuneContour.value.length !== 0) {
+        const polygon = new Feature({
+          geometry: new Polygon([storeCommuneContour.value]),
+        });
+
+        vectorSource.value.addFeature(polygon);
+
+      const extent = polygon.getGeometry().getExtent();
+
+      olMap.value.getView().fit(extent, {
+          padding: [50, 50, 50, 50+400],
+          duration: 3_000
+        });
+
+
+      }
+
 
       vectorWfsSource.value.setUrl(newValue);
       vectorWfsSource.value.refresh();
 
       await scanStore.storeGet(newValue)
     })
+
 
     eventBus.on('criteria-reset', () => {
       if (vectorPinSource.value) {
@@ -339,53 +334,16 @@ onMounted(() => {
       }
       if (vectorWfsSource.value) {
         vectorWfsSource.value.clear()
+        vectorWfsSource.value.setUrl("");
         olMap.value.removeLayer(wfsLayer);
+
       }
-      if (vectorDeptSource.value) {
-        vectorDeptSource.value.clear();
+      if (vectorSource.value) {
+        vectorSource.value.clear();
         olMap.value.removeLayer(deptLayer);
       }
     })
-    // eventBus.on('bbox-updated', async (bboxLambert93) => {
-    //   bbox.value = bboxLambert93
-    //   const [minX, minY, maxX, maxY] = bboxLambert93;
-      
-    //   const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
-    //     `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
-    //     `&cql_filter=BBOX(the_geom,${minX},${minY},${maxX},${maxY})` +
-    //     `%20&srsName=EPSG:3857`;
-      
-    //   vectorWfsSource.value.setUrl(newUrl);
-    //   vectorWfsSource.value.refresh();
 
-    //   await scanStore.storeGet(newUrl)
-
-    // });
-    
-  //   eventBus.on('criteria', (criteria) => {
-  //   const { yearMin, yearMax, scaleMin, scaleMax, bboxe, loadWfs } = criteria;
-
-
-  //   if (!loadWfs) return;
-    
-  //   const [minX, minY, maxX, maxY] = bboxe;
-  
-
-  //   let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`;
-    
-  //   if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`;
-  //   if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`;
-  //   if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`;
-  //   if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`;
-    
-  //   const newUrl = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
-  //     `&cql_filter=${cqlFilter}&srsName=EPSG:3857`;
-
-  //   vectorWfsSource.value.setUrl(newUrl);
-  //   vectorWfsSource.value.refresh();
-  // });
-
-    // Forcer un redimensionnement pour assurer que la carte s'affiche correctement
     window.dispatchEvent(new Event('resize'))
   })
 })
