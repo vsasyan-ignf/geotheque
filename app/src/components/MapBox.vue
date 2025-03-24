@@ -278,6 +278,15 @@ onMounted(() => {
       }
     })
     
+    eventBus.on('center-map', ({ x, y }) => {
+      if (olMap.value && olView.value) {
+        olView.value.animate({
+          center: [x, y],
+          duration: 750
+        });
+      }
+    });
+
     eventBus.on('update-coordinates', ({ x, y }) => {
       vectorPinSource.value.clear()
       const feature = new Feature({

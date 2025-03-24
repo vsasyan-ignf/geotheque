@@ -85,7 +85,6 @@ import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { updateBbox } = storeToRefs(scanStore)
 
 const emit = defineEmits(['close', 'go-to-point'])
 
@@ -160,6 +159,16 @@ async function handleGoToPoint() {
     point.bboxWGS84 = bboxResult.bboxWGS84
     point.bboxLambert93 = bboxResult.bboxLambert93
   }
+
+   const mapCoords = useConvertCoordinates(
+    parseFloat(pointX.value),
+    parseFloat(pointY.value),
+    selectedProjection.value,
+    'EPSG:3857'
+  )
+  
+  eventBus.emit('update-coordinates', { x: mapCoords[0], y: mapCoords[1] })  
+  eventBus.emit('center-map', { x: mapCoords[0], y: mapCoords[1] })
 
   emit('go-to-point', point)
 }
@@ -288,7 +297,6 @@ onUnmounted(() => {
   background-color: #5e7a10;
 }
 
-/* Nouveaux styles pour le sélecteur de mode */
 .search-mode-selector {
   display: flex;
   gap: 10px;
@@ -322,7 +330,6 @@ onUnmounted(() => {
   background-color: #e6f0d8;
 }
 
-/* Styles pour les instructions de recherche sur carte */
 .map-search-instructions {
   display: flex;
   flex-direction: column;
