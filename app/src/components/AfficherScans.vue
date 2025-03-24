@@ -1,7 +1,7 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
-      <Dropdown :options="storeData" />
+      <Dropdown :options="storeData"/>
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser" @click="openModal">
@@ -33,7 +33,10 @@ import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { storeData } = storeToRefs(scanStore);
+const { storeData, currentCollecInfo } = storeToRefs(scanStore);
+
+
+console.log('dataStore dans Afficher Scan:', storeData)
 
 
 const isModalOpen = ref(false)
@@ -45,22 +48,25 @@ const url_xml = ' http://localhost:8081/Misphot/Lambert93/2021/2021_FD 01_C_20/'
 
 
 function downloadScans() {
-  const image_name = "001_86K_1756.JP2"
-  const imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/${image_name}&CVT=jpeg`;
+  if (currentCollecInfo.value){
+    const image_name = currentCollecInfo.value
+    const lieu = "METROPOLE"
+    const imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${image_name}.JP2&CVT=jpeg`;
+    fetch(imageUrl)
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", image_name);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(error => console.error("Erreur lors du téléchargement:", error));
+    }
   
-  fetch(imageUrl)
-    .then(response => response.blob())
-    .then(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", image_name);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    })
-    .catch(error => console.error("Erreur lors du téléchargement:", error));
 }
 
 function downloadxml(){
@@ -74,6 +80,8 @@ function openModal() {
 function closeModal() {
   isModalOpen.value = false
 }
+
+
 
 </script>
 
