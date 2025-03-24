@@ -120,7 +120,7 @@ onUnmounted(() => {
 }
 
 .layer-switcher__options {
-  max-height: 240px;
+  /* max-height: 240px; */
   overflow-y: auto;
   border-top: 1px solid #eee;
 }
