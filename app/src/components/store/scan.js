@@ -55,52 +55,50 @@ export const useScanStore = defineStore('scan', () => {
         console.log('Collection actuelle:', currentCollecInfo.value)
     }
 
-    function updateUrl() {
-        if (storeDataHandleClickMap.value.length > 0) {
-            storeBbox.value = storeDataHandleClickMap.value;
-            console.log("BBox applied to storeBbox:", storeBbox.value);
-        }
-        function resetCriteria() {
-            storeCritereSelection.value = {
-                yearMin: null,
-                yearMax: null,
-                scaleMin: null,
-                scaleMax: null
-            };
-            storeCommuneContour.value = []
-            storeBbox.value = [];
-            storeData.value = null;
+    function resetCriteria() {
+        storeCritereSelection.value = {
+            yearMin: null,
+            yearMax: null,
+            scaleMin: null,
+            scaleMax: null
+        };
+        storeCommuneContour.value = []
+        storeBbox.value = [];
+        storeData.value = null;
+        currentCollecInfo.value = null;
+    }
+
+    function updateCommuneContour(newVal) {
+        storeCommuneContour.value = newVal
+    }
+
+
+
+    async function storeGet(url) {
+
+        if (!url) {
+            return;
         }
 
-        function updateCommuneContour(newVal) {
-            storeCommuneContour.value = newVal
-        }
-
-        async function storeGet(url) {
-
-            if (!url) {
-                return;
+        try {
+            const response = await fetch(url)
+            if (response.ok) {
+                const data = await response.json()
+                console.log('Data:', data.features)
+                const carteNames = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE, collecInfo: feature.properties.COLLECTION + "/" + feature.properties.SOUS_COLL + "/" + feature.properties.ID_CARTE }))
+                storeData.value = carteNames
+            } else {
+                throw new Error('Failed to fetch data')
             }
-
-            try {
-                const response = await fetch(url)
-                if (response.ok) {
-                    const data = await response.json()
-                    console.log('Data:', data.features)
-                    const carteNames = data.features.map((feature, index) => ({ id: index, name: feature.properties.ID_CARTE, collecInfo: feature.properties.COLLECTION + "/" + feature.properties.SOUS_COLL + "/" + feature.properties.ID_CARTE }))
-                    storeData.value = carteNames
-                } else {
-                    throw new Error('Failed to fetch data')
-                }
-            } catch (error) {
-                console.error('Error:', error)
-            }
+        } catch (error) {
+            console.error('Error:', error)
         }
     }
 
+
     return {
         storeData, storeBbox, storeURL, storeGet, updateBbox,
-        storeCritereSelection, updateCriteria, updateUrl, updateActiveSubCategory, activeSubCategory,
+        storeCritereSelection, updateCriteria, updateActiveSubCategory, activeSubCategory,
         updateCurrentScanInfo, currentCollecInfo, storeCommuneContour, updateCommuneContour,
         resetCriteria
     };
