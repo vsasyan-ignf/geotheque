@@ -340,7 +340,7 @@ onMounted(() => {
 
       olMap.value.getView().fit(extent, {
           padding: [50, 50, 50, 50+400],
-          duration: 3_000
+          duration: 2_000
         });
       }
 
@@ -366,7 +366,7 @@ onMounted(() => {
 
       olMap.value.getView().fit(extent, {
           padding: [50, 50, 50, 50+400],
-          duration: 3_000
+          duration: 1_000
         });
       }
 
