@@ -34,10 +34,7 @@ const props = defineProps({
 })
 
 function updateStoredata() {
-
-  console.log('-------------------------Dropdown----------------')
-
-  useScanStore.updateSelectedScan(selected.value.geom)
+  scanStore.updateSelectedScan(selected.value.geom[0])
   scanStore.updateCurrentScanInfo(selected.value.collecInfo)
 }
 

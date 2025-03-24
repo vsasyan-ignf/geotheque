@@ -75,6 +75,7 @@ export const useScanStore = defineStore('scan', () => {
 
     function updateSelectedScan(newVal) {
         storeSelectedScan.value = newVal
+        console.log("geom selected : ", storeSelectedScan.value)
     }
 
     async function storeGet(url) {
@@ -87,7 +88,6 @@ export const useScanStore = defineStore('scan', () => {
             const response = await fetch(url)
             if (response.ok) {
                 const data = await response.json()
-                console.log('Data:', data.features)
 
                 const carteNames = data.features.map((feature, index) => ({ id: index, geom: feature.geometry.coordinates[0], name: feature.properties.ID_CARTE, collecInfo: feature.properties.COLLECTION + "/" + feature.properties.SOUS_COLL + "/" + feature.properties.ID_CARTE }))
                 storeData.value = carteNames

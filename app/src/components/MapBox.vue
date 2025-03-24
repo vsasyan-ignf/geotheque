@@ -68,6 +68,8 @@ const vectorPinSource = ref(null);
 const vectorWfsSource = ref(null);
 const vectorSource = ref(null);
 const deptLayer = ref(null);
+const vectorScanSource = ref(null)
+const scanLayer = ref(null)
 
 const url_test = ref(``);
 const bbox = ref([0, 0, 0, 0]);
@@ -208,6 +210,7 @@ onMounted(() => {
     
     // Création de la source et de la couche pour les départements
     vectorSource.value = new VectorSource();
+
     deptLayer.value = new VectorLayer({
       source: vectorSource.value,
       style: new Style({
@@ -220,6 +223,28 @@ onMounted(() => {
         })
       })
     });
+
+    // Layer emprise selected
+
+
+    vectorScanSource.value = new VectorSource();
+
+    scanLayer.value = new VectorLayer({
+      source: vectorScanSource.value,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'red',
+          width: 2
+        }),
+        fill: new Fill({
+          color: 'rgba(255, 0, 0, 0.5)'
+        })
+      })
+
+    })
+
+
+
     
     const view = new View({
       center: center.value,
@@ -233,7 +258,7 @@ onMounted(() => {
 
     olMap.value = new Map({
       target: mapElement.value,
-      layers: [...wmtsLayers, wfsLayer, pinLayer, deptLayer.value],
+      layers: [...wmtsLayers, wfsLayer, pinLayer, deptLayer.value, scanLayer.value],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false })
     });
@@ -293,6 +318,7 @@ onMounted(() => {
         vectorWfsSource.value.clear();
         vectorWfsSource.value.setUrl("");
         vectorSource.value.clear();
+        vectorScanSource.value.clear();
         scanStore.updateCommuneContour([])
       }
     });
@@ -301,6 +327,7 @@ onMounted(() => {
     watch(storeURL, async (newValue) => {
       console.log('NEW URL:', newValue)
       vectorSource.value.clear();
+      vectorScanSource.value.clear();
 
       if (storeCommuneContour.value.length !== 0) {
         const polygon = new Feature({
@@ -315,16 +342,45 @@ onMounted(() => {
           padding: [50, 50, 50, 50+400],
           duration: 3_000
         });
-
-
       }
-
 
       vectorWfsSource.value.setUrl(newValue);
       vectorWfsSource.value.refresh();
 
       await scanStore.storeGet(newValue)
     })
+
+
+    watch(storeSelectedScan, (newValue) => {
+      console.log('NEW GEOM', newValue)
+      vectorScanSource.value.clear();
+
+      if (storeSelectedScan.value) {
+        const polygon = new Feature({
+          geometry: new Polygon([storeSelectedScan.value]),
+        });
+
+        vectorScanSource.value.addFeature(polygon);
+
+      const extent = polygon.getGeometry().getExtent();
+
+      olMap.value.getView().fit(extent, {
+          padding: [50, 50, 50, 50+400],
+          duration: 3_000
+        });
+      }
+
+
+
+
+
+
+    })
+
+
+
+
+
 
 
     eventBus.on('criteria-reset', () => {
