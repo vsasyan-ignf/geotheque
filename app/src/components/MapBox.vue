@@ -285,11 +285,11 @@ onMounted(() => {
       pins.value = [[x, y]];
     });
 
-    eventBus.on('list-point-dep-to-map', (bbox) => {
+    eventBus.on('list-point-dep-to-map', (contour) => {
       // Nettoyer les départements précédents
       vectorDeptSource.value.clear();
       
-      const coordinates = bbox[0].map(point => [point[0], point[1]]);
+      const coordinates = contour[0].map(point => [point[0], point[1]]);
       
       // Vérifier si les coordonnées forment un polygone valide (au moins 3 points)
       if (coordinates && coordinates.length >= 3) {
