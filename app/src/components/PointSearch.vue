@@ -1,6 +1,8 @@
 <template>
   <div class="sub-category-content">
     <SubCategoryHeader title="Recherche par coordonnées" @close="$emit('close')" />
+
+    <Accordeon title="Recherche par coordonnées" defaultOpen>
     <div class="search-form">
       <div class="form-group">
         <label for="point-x">Coordonnée X</label>
@@ -23,7 +25,7 @@
         Centrer sur ce point
       </button>
     </div>
-
+  </Accordeon>
     <CartothequeSubMenu />
   </div>
 </template>
@@ -33,12 +35,13 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import { bboxState, eventBus } from './composable/eventBus'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
+import Accordeon from './Accordeon.vue'
 import { useConvertCoordinates } from './composable/convertCoordinates'
 import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { storeDataHandleClickMap } = storeToRefs(scanStore);
+const { updateBbox } = storeToRefs(scanStore);
 
 
 const emit = defineEmits(['close', 'go-to-point'])
@@ -156,9 +159,7 @@ async function handleMapClick(coords) {
   }
   
   bboxState.value = point.bboxLambert93;
-  scanStore.updateBboxTemp(point.bboxLambert93);
-  console.log(storeDataHandleClickMap.value)
-
+  scanStore.updateBbox(point.bboxLambert93);
 }
 
 // mise à jour des x et y lorsque le système de proj change

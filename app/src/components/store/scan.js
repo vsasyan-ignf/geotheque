@@ -4,7 +4,6 @@ import { ref, computed } from "vue";
 export const useScanStore = defineStore('scan', () => {
     let storeBbox = ref([]);
     let storeData = ref(null);
-    let storeDataHandleClickMap = ref([]);
     let storeCritereSelection = ref({
         yearMin: null,
         yearMax: null,
@@ -38,32 +37,24 @@ export const useScanStore = defineStore('scan', () => {
         storeBbox.value = newBbox;
     }
 
-    function updateBboxHandleClick(newBbox) {
-        storeDataHandleClickMap.value = newBbox;
-        console.log(storeDataHandleClickMap.value)
-    }
-
     function updateCriteria(newCriteria) {
         storeCritereSelection.value = { ...newCriteria };
         console.log("Updated criteria:", storeCritereSelection.value);
     }
 
-    function updateBboxTemp(newBbox) {
-        storeDataHandleClickMap.value = newBbox;
-        console.log("Temporary BBox stored:", storeDataHandleClickMap.value);
-    }
-
     function updateActiveSubCategory(subCategory) {
         activeSubCategory.value = subCategory
         console.log('Sous-catégorie active:', activeSubCategory.value)
-      }
-
-function updateUrl() {
-    if (storeDataHandleClickMap.value.length > 0) {
-        storeBbox.value = storeDataHandleClickMap.value;
-        console.log("BBox applied to storeBbox:", storeBbox.value);
     }
-}
+
+    function resetCriteria() {
+        storeCritereSelection.value = {
+            yearMin: null,
+            yearMax: null,
+            scaleMin: null,
+            scaleMax: null
+        };
+    }
 
     async function storeGet(url) {
         try {
@@ -79,7 +70,7 @@ function updateUrl() {
             console.error('Error:', error)
         }
     }
-    return { storeData, storeBbox, storeURL, storeGet, updateBbox, 
-        updateBboxHandleClick, storeDataHandleClickMap, updateBboxTemp, 
-        storeCritereSelection, updateCriteria, updateUrl, updateActiveSubCategory, activeSubCategory}
+    return { storeData, storeBbox, storeURL, storeGet, updateBbox,  
+        storeCritereSelection, updateCriteria, 
+        updateActiveSubCategory, activeSubCategory, resetCriteria}
 })

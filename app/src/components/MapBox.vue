@@ -50,7 +50,7 @@ import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
 
 const scanStore = useScanStore()
-const { storeURL } = storeToRefs(scanStore);
+const { storeURL, activeSubCategory } = storeToRefs(scanStore);
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -313,8 +313,15 @@ onMounted(() => {
       }
     });
 
-    console.log('---------------------------- URL ----------------------------')
+    watch(activeSubCategory, (newValue) => {
+      if (newValue === null && olMap.value) {
+        vectorPinSource.value.clear();
+        vectorWfsSource.value.clear();
 
+      }
+    });
+
+    console.log('---------------------------- URL ----------------------------')
     watch(storeURL, async (newValue) => {
       console.log('NEW URL:', newValue)
 
@@ -325,7 +332,14 @@ onMounted(() => {
       await scanStore.storeGet(newValue)
     })
 
-
+    eventBus.on('criteria-reset', () => {
+      if (vectorPinSource.value) {
+        vectorPinSource.value.clear()
+      }
+      if (vectorWfsSource.value) {
+        vectorWfsSource.value.clear()
+      }
+    })
     // eventBus.on('bbox-updated', async (bboxLambert93) => {
     //   bbox.value = bboxLambert93
     //   const [minX, minY, maxX, maxY] = bboxLambert93;
