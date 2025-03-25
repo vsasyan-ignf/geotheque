@@ -37,8 +37,6 @@ function updatestoreScansData() {
   scanStore.updateSelectedScan(selected.value.geom[0])
   scanStore.updateCurrentScanInfo(selected.value.collecInfo)
 }
-
-
 </script>
 
 <style scoped>

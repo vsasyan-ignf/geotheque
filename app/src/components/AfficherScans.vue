@@ -1,7 +1,7 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
-      <Dropdown :options="storeScansData"/>
+      <Dropdown :options="storeScansData" />
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser" @click="openModal">
@@ -10,17 +10,16 @@
         <ShakingButton nameButton="Télécharger" @click="downloadScans">
           <template #icon><i class="mdi mdi-briefcase-download"></i></template>
         </ShakingButton>
-        <ShakingButton nameButton="XML" @click="downloadxml"/>
+        <ShakingButton nameButton="XML" @click="downloadxml" />
       </div>
     </form>
 
-    <ImageModal 
-      :is-open="isModalOpen" 
+    <ImageModal
+      :is-open="isModalOpen"
       :image-url="imageUrl"
       title="Visualisation de l'image : 21FD0120x00001_03343.jp2"
       @close="closeModal"
     />
-
   </div>
 </template>
 
@@ -33,59 +32,53 @@ import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { storeScansData, currentCollecInfo } = storeToRefs(scanStore);
+const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)
 
 const isModalOpen = ref(false)
 let imageUrl = ref('')
 
-
 function downloadScans() {
-  if (currentCollecInfo.value){
+  if (currentCollecInfo.value) {
     const info = currentCollecInfo.value.split('/')
-    const lieu = "METROPOLE"
+    const lieu = 'METROPOLE'
     let name = ''
-    if (info[1] != ""){
-      imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[1]}/${info[2]}.JP2&CVT=jpeg`;
+    if (info[1] != '') {
+      imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[1]}/${info[2]}.JP2&CVT=jpeg`
       name = info[2]
     } else {
-      imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[2]}.JP2&CVT=jpeg`;
+      imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[2]}.JP2&CVT=jpeg`
       name = info[1]
     }
     fetch(imageUrl)
-      .then(response => response.blob())
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", name);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', name)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
       })
-      .catch(error => console.error("Erreur lors du téléchargement:", error));
-    }
-  
+      .catch((error) => console.error('Erreur lors du téléchargement:', error))
+  }
 }
 
 let url_xml = ref(``)
 
-function downloadxml(){
-  if (currentCollecInfo.value){
-
+function downloadxml() {
+  if (currentCollecInfo.value) {
     const info = currentCollecInfo.value.split('/')
-    const lieu = "METROPOLE"
-    if (info.length == 3){
+    const lieu = 'METROPOLE'
+    if (info.length == 3) {
       url_xml = `http://localhost:8082/Cartes/${lieu}/${info[0]}/${info[1]}/Fiches/${info[2]}.xml`
-
     } else {
       url_xml = `http://localhost:8082/Cartes/${lieu}/${info[0]}/Fiches/${info[1]}.xml`
-
     }
     console.log('url_xml:', url_xml)
-    window.open(url_xml, "xml")
+    window.open(url_xml, 'xml')
   }
-  
 }
 
 function openModal() {
@@ -95,9 +88,6 @@ function openModal() {
 function closeModal() {
   isModalOpen.value = false
 }
-
-
-
 </script>
 
 <style scoped>

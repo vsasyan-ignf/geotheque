@@ -81,7 +81,7 @@ function closeTab() {
 
 function selectSubCategory(subId) {
   activeSubCategory.value = subId
-  scanStore.updateActiveSubCategory(subId) 
+  scanStore.updateActiveSubCategory(subId)
   console.log('Sous-catégorie sélectionnée:', subId)
 }
 
@@ -113,5 +113,4 @@ function closeSubCategory() {
 .sidebar-content.open {
   width: 400px;
 }
-
 </style>

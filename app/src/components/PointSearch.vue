@@ -3,15 +3,15 @@
     <SubCategoryHeader title="Recherche de point" @close="$emit('close')" />
 
     <div class="search-mode-selector">
-      <button 
-        :class="['mode-button', { active: searchMode === 'map' }]" 
+      <button
+        :class="['mode-button', { active: searchMode === 'map' }]"
         @click="searchMode = 'map'"
       >
         <i class="mdi mdi-map-marker"></i>
         Recherche sur la carte
       </button>
-      <button 
-        :class="['mode-button', { active: searchMode === 'coords' }]" 
+      <button
+        :class="['mode-button', { active: searchMode === 'coords' }]"
         @click="searchMode = 'coords'"
       >
         <i class="mdi mdi-crosshairs-gps"></i>
@@ -51,7 +51,7 @@
         <div class="map-search-instructions">
           <i class="mdi mdi-information-outline"></i>
           <p>Cliquez sur la carte pour sélectionner un point.</p>
-          
+
           <div v-if="pointX && pointY" class="selected-coordinates">
             <h4>Coordonnées sélectionnées</h4>
             <div class="coordinates-display">
@@ -184,29 +184,29 @@ async function handleMapClick(coords) {
   selectedProjection.value = coords.projection
 
   const convertedCoord = useConvertCoordinates(
-    parseFloat(pointX.value), 
-    parseFloat(pointY.value), 
-    selectedProjection.value, 
-    'EPSG:4326'
+    parseFloat(pointX.value),
+    parseFloat(pointY.value),
+    selectedProjection.value,
+    'EPSG:4326',
   )
 
   const point = {
     x: convertedCoord[0],
-    y: convertedCoord[1]
+    y: convertedCoord[1],
   }
-  
+
   const bboxResult = await fetchAndConvertBbox(point.x, point.y)
-  
+
   if (bboxResult) {
     point.locationData = bboxResult.data
     point.bboxWGS84 = bboxResult.bboxWGS84
     point.bboxLambert93 = bboxResult.bboxLambert93
   }
-  
-  bboxState.value = point.bboxLambert93;
-  scanStore.updateBbox(point.bboxLambert93);
-  
-  searchMode.value = 'map';
+
+  bboxState.value = point.bboxLambert93
+  scanStore.updateBbox(point.bboxLambert93)
+
+  searchMode.value = 'map'
 }
 
 // mise à jour des x et y lorsque le système de proj change
@@ -328,7 +328,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  color:black;
+  color: black;
   border: 1px dashed #ddd;
   border-radius: 8px;
   background-color: #f9f9f9;

@@ -20,8 +20,10 @@
         </div>
 
         <div class="results-wrapper" v-if="showResults">
-         <div class="results-header">
-            <h5 v-if="departementResults.length > 0">Résultats ({{ departementResults.length }})</h5>
+          <div class="results-header">
+            <h5 v-if="departementResults.length > 0">
+              Résultats ({{ departementResults.length }})
+            </h5>
             <h5 v-else-if="searchDepartement">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
@@ -29,8 +31,7 @@
             </button>
           </div>
 
-      
-          <div class="results-content" >
+          <div class="results-content">
             <div class="results-list" v-if="departementResults.length > 0">
               <div
                 v-for="dept in departementResults"
@@ -38,24 +39,24 @@
                 class="result-item"
                 @click="selectDepartement(dept)"
               >
-              <div class="result-content">
-                <div class="result-main">{{ dept.nom }}</div>
-                <div class="result-secondary">{{ dept.code }} - {{ dept.region }}</div>
+                <div class="result-content">
+                  <div class="result-main">{{ dept.nom }}</div>
+                  <div class="result-secondary">{{ dept.code }} - {{ dept.region }}</div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="no-results" v-else-if="searchDepartement">
-            <i class="mdi mdi-alert-circle-outline"></i>
-            <span>Aucun Département trouvée</span>
-          </div>
+            <div class="no-results" v-else-if="searchDepartement">
+              <i class="mdi mdi-alert-circle-outline"></i>
+              <span>Aucun Département trouvée</span>
+            </div>
 
-          <div class="empty-search" v-else>
-            <i class="mdi mdi-map-search-outline"></i>
-            <span>Saisissez le nom ou code d'un Département</span>
+            <div class="empty-search" v-else>
+              <i class="mdi mdi-map-search-outline"></i>
+              <span>Saisissez le nom ou code d'un Département</span>
+            </div>
           </div>
         </div>
-       </div>
       </div>
     </div>
     <CartothequeSubMenu />
@@ -66,28 +67,23 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import proj4 from 'proj4';
+import proj4 from 'proj4'
 
 const emit = defineEmits(['close', 'select-departement'])
 const searchDepartement = ref('')
 const departementResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-const proj3857 = 'EPSG:3857';  // Web Mercator
-const proj2154 = 'EPSG:2154';  // Lambert-93
-import { useScanStore } from './store/scan';
-
+const proj3857 = 'EPSG:3857' // Web Mercator
+const proj2154 = 'EPSG:2154' // Lambert-93
+import { useScanStore } from './store/scan'
 
 const scanStore = useScanStore()
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
   const searchInput = document.getElementById('departement-search')
-  if (
-    resultsWrapper &&
-    !resultsWrapper.contains(event.target) &&
-    event.target !== searchInput
-  ) {
+  if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
   }
 }
@@ -103,129 +99,121 @@ onUnmounted(() => {
 
 function create_bbox(contour) {
   if (!contour || contour.length === 0) {
-    throw new Error("Contour invalide");
+    throw new Error('Contour invalide')
   }
-  const coordinates = contour[0].map(point => [point[0], point[1]]);
-  
+  const coordinates = contour[0].map((point) => [point[0], point[1]])
+
   if (coordinates.length < 3) {
-    throw new Error("Un polygone doit avoir au moins 3 points");
+    throw new Error('Un polygone doit avoir au moins 3 points')
   }
-  let minX = coordinates[0][0];
-  let minY = coordinates[0][1];
-  let maxX = coordinates[0][0];
-  let maxY = coordinates[0][1];
+  let minX = coordinates[0][0]
+  let minY = coordinates[0][1]
+  let maxX = coordinates[0][0]
+  let maxY = coordinates[0][1]
 
-  coordinates.forEach(point => {
-    const [x, y] = point;
-    minX = Math.min(minX, x);
-    minY = Math.min(minY, y);
-    maxX = Math.max(maxX, x);
-    maxY = Math.max(maxY, y);
-  });
+  coordinates.forEach((point) => {
+    const [x, y] = point
+    minX = Math.min(minX, x)
+    minY = Math.min(minY, y)
+    maxX = Math.max(maxX, x)
+    maxY = Math.max(maxY, y)
+  })
 
-  return { minX, minY, maxX, maxY };
+  return { minX, minY, maxX, maxY }
 }
 
-function convertBbox(bbox,proj_in,proj_out) {
+function convertBbox(bbox, proj_in, proj_out) {
   //Convertion Bbox de proj_in vers proj_out
-  const minX = bbox.minX;
-  const minY = bbox.minY;
-  const maxX = bbox.maxX;
-  const maxY = bbox.maxY;
-  
-  const minCoord = proj4(proj_in, proj_out, [minX, minY]);
-  const maxCoord = proj4(proj_in, proj_out, [maxX, maxY]);
+  const minX = bbox.minX
+  const minY = bbox.minY
+  const maxX = bbox.maxX
+  const maxY = bbox.maxY
 
-  return [
-    minCoord[0],
-    minCoord[1],
-    maxCoord[0],
-    maxCoord[1]
-  ];
+  const minCoord = proj4(proj_in, proj_out, [minX, minY])
+  const maxCoord = proj4(proj_in, proj_out, [maxX, maxY])
+
+  return [minCoord[0], minCoord[1], maxCoord[0], maxCoord[1]]
 }
-
-
 
 function searchDepartements() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-  let url_dep;
-  const query = searchDepartement.value.toLowerCase().trim();
-  const numbner_dep = parseInt(query);
-  if(!isNaN(numbner_dep )){
-    url_dep = `https://geo.api.gouv.fr/departements?code=${query}&fields=nom,code,region`;
+  let url_dep
+  const query = searchDepartement.value.toLowerCase().trim()
+  const numbner_dep = parseInt(query)
+  if (!isNaN(numbner_dep)) {
+    url_dep = `https://geo.api.gouv.fr/departements?code=${query}&fields=nom,code,region`
+  } else {
+    url_dep = `https://geo.api.gouv.fr/departements?nom=${query}&fields=nom,code,region`
   }
-  else{
-    url_dep = `https://geo.api.gouv.fr/departements?nom=${query}&fields=nom,code,region`;
-  }
-  
+
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   searchTimeout = setTimeout(() => {
     fetch(url_dep)
-      .then(response => response.json())
-      .then(data => {
-        const newResults = data.map(departement => ({
+      .then((response) => response.json())
+      .then((data) => {
+        const newResults = data.map((departement) => ({
           nom: departement.nom,
           code: departement.code,
-          region: departement.region.nom
+          region: departement.region.nom,
         }))
         departementResults.value = newResults
       })
-      .catch(error => {
-        console.error("Erreur lors de la récupération des departements:", error)
+      .catch((error) => {
+        console.error('Erreur lors de la récupération des departements:', error)
         departementResults.value = []
       })
   }, 300)
 }
 
 function selectDepartement(departement) {
-  getDepartementBbox(departement).then((contour) => {
-    let bbox3857 = create_bbox(contour);
-    const bbox2154 = convertBbox(bbox3857,proj3857,proj2154);
-    const point = {
-      x: 0,
-      y: 0,
-      bboxLambert93: bbox2154
-    }
+  getDepartementBbox(departement)
+    .then((contour) => {
+      let bbox3857 = create_bbox(contour)
+      const bbox2154 = convertBbox(bbox3857, proj3857, proj2154)
+      const point = {
+        x: 0,
+        y: 0,
+        bboxLambert93: bbox2154,
+      }
 
-    const coordinates = contour[0].map(point => [point[0], point[1]]);
+      const coordinates = contour[0].map((point) => [point[0], point[1]])
 
-    scanStore.updateSelectedGeom(coordinates)
+      scanStore.updateSelectedGeom(coordinates)
 
-    emit('select-departement', point);
-  }).catch((error) => {
-    console.error('Erreur lors de la récupération des controus du departements:', error);
-  });
+      emit('select-departement', point)
+    })
+    .catch((error) => {
+      console.error('Erreur lors de la récupération des controus du departements:', error)
+    })
 
-  showResults.value = false;
+  showResults.value = false
 }
 
 async function getDepartementBbox(departement) {
-  const depCode = departement.code.toString();
-  const urlDepBbox = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0
-  `+`&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=CODE_DEPT='${depCode}'&srsName=EPSG:3857`;
-  
+  const depCode = departement.code.toString()
+  const urlDepBbox =
+    `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0
+  ` +
+    `&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=CODE_DEPT='${depCode}'&srsName=EPSG:3857`
+
   try {
-    const response = await fetch(urlDepBbox);
+    const response = await fetch(urlDepBbox)
     if (!response.ok) {
-      throw new Error(`rrreur réseau : ${response.status}`);
+      throw new Error(`rrreur réseau : ${response.status}`)
     }
-    const data = await response.json();
-    const contour_dep = data.features[0]?.geometry?.coordinates[0];
+    const data = await response.json()
+    const contour_dep = data.features[0]?.geometry?.coordinates[0]
     if (!contour_dep) {
-      throw new Error('coordonées non trouvée dans la réponse');
+      throw new Error('coordonées non trouvée dans la réponse')
     }
-    return contour_dep;
+    return contour_dep
   } catch (error) {
-      console.error('e:', error);
-    throw error;
+    console.error('e:', error)
+    throw error
   }
 }
-
-
-
-
 </script>
 
 <style scoped>
@@ -285,7 +273,6 @@ async function getDepartementBbox(departement) {
   border-color: #739614;
   box-shadow: 0 0 0 2px rgba(115, 150, 20, 0.1);
 }
-
 
 .input-group button {
   padding: 0 15px;

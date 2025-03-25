@@ -112,9 +112,8 @@ function searchCommunes() {
   showResults.value = true
 
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
-  let search_url = '';
+  let search_url = ''
   searchTimeout = setTimeout(() => {
-
     if (parseInt(query)) {
       console.log('code postal')
       search_url = `https://geo.api.gouv.fr/communes?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
@@ -130,7 +129,7 @@ function searchCommunes() {
           code: commune.codesPostaux[0],
           departement: commune.departement.nom,
           bbox: commune.bbox,
-          contour: commune.contour
+          contour: commune.contour,
         }))
 
         communeResults.value = newResults
@@ -163,7 +162,9 @@ function validateCommune() {
       bboxLambert93: bboxLambert93.flat(),
     }
 
-    const contourMercator = repCommune.contour.coordinates[0].map(coord => useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'))
+    const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
+      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
+    )
 
     scanStore.updateSelectedGeom(contourMercator)
 

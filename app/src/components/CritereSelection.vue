@@ -16,25 +16,25 @@
         <div class="form-group half">
           <label for="scaleMin">Echelle min.</label>
           <div class="combo-input-container">
-            <input 
-              id="scaleMin" 
-              type="text" 
-              v-model="scaleMin" 
+            <input
+              id="scaleMin"
+              type="text"
+              v-model="scaleMin"
               autocomplete="off"
               @focus="showScaleMinOptions = true"
               @blur="hideScaleMinOptionsDelayed"
             />
-            <button 
-              type="button" 
-              class="dropdown-toggle" 
+            <button
+              type="button"
+              class="dropdown-toggle"
               @click="showScaleMinOptions = !showScaleMinOptions"
             >
               <i class="mdi mdi-menu-down"></i>
             </button>
             <div class="dropdown-options" v-if="showScaleMinOptions">
-              <div 
-                v-for="scale in scaleOptions" 
-                :key="scale" 
+              <div
+                v-for="scale in scaleOptions"
+                :key="scale"
                 class="dropdown-item"
                 @mousedown.prevent="selectScaleMin(scale)"
               >
@@ -46,25 +46,25 @@
         <div class="form-group half">
           <label for="scaleMax">Echelle max.</label>
           <div class="combo-input-container">
-            <input 
-              id="scaleMax" 
-              type="text" 
-              v-model="scaleMax" 
+            <input
+              id="scaleMax"
+              type="text"
+              v-model="scaleMax"
               autocomplete="off"
               @focus="showScaleMaxOptions = true"
               @blur="hideScaleMaxOptionsDelayed"
             />
-            <button 
-              type="button" 
-              class="dropdown-toggle" 
+            <button
+              type="button"
+              class="dropdown-toggle"
               @click="showScaleMaxOptions = !showScaleMaxOptions"
             >
               <i class="mdi mdi-menu-down"></i>
             </button>
             <div class="dropdown-options" v-if="showScaleMaxOptions">
-              <div 
-                v-for="scale in scaleOptions" 
-                :key="scale" 
+              <div
+                v-for="scale in scaleOptions"
+                :key="scale"
                 class="dropdown-item"
                 @mousedown.prevent="selectScaleMax(scale)"
               >
@@ -100,23 +100,14 @@ import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { storeCritereSelection } = storeToRefs(scanStore);
+const { storeCritereSelection } = storeToRefs(scanStore)
 
-const yearMin = ref(storeCritereSelection.value.yearMin || '');
-const yearMax = ref(storeCritereSelection.value.yearMax || '');
-const scaleMin = ref(storeCritereSelection.value.scaleMin || '500');
-const scaleMax = ref(storeCritereSelection.value.scaleMax || '100000');
+const yearMin = ref(storeCritereSelection.value.yearMin || '')
+const yearMax = ref(storeCritereSelection.value.yearMax || '')
+const scaleMin = ref(storeCritereSelection.value.scaleMin || '500')
+const scaleMax = ref(storeCritereSelection.value.scaleMax || '100000')
 
-const scaleOptions = [
-  '500',
-  '1000',
-  '2000',
-  '5000',
-  '10000',
-  '25000',
-  '50000',
-  '100000'
-]
+const scaleOptions = ['500', '1000', '2000', '5000', '10000', '25000', '50000', '100000']
 
 const showScaleMinOptions = ref(false)
 const showScaleMaxOptions = ref(false)
@@ -147,7 +138,7 @@ const initialValues = {
   yearMin: '',
   yearMax: '',
   scaleMin: '500',
-  scaleMax: '100000'
+  scaleMax: '100000',
 }
 
 const handleSubmit = () => {
@@ -160,8 +151,7 @@ const handleSubmit = () => {
     scaleMax: scaleMax.value,
   }
 
-  scanStore.updateCriteria(criteria);
-
+  scanStore.updateCriteria(criteria)
 }
 
 const resetForm = () => {
@@ -272,7 +262,7 @@ const resetForm = () => {
   top: 100%;
   left: 0;
   width: 100%;
-  color:black;
+  color: black;
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 0 0 6px 6px;
@@ -367,11 +357,11 @@ const resetForm = () => {
     min-width: 100%;
     max-width: 100%;
   }
-  
+
   .button-group {
     flex-direction: column;
   }
-  
+
   .button {
     width: 100%;
   }
