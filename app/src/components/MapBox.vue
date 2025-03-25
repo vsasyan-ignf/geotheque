@@ -49,6 +49,10 @@ import BDParcellaire from '@/assets/basecard/bdparcellaire.png'
 import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
 
+
+//test
+import {parcour_txt_to_tab } from './composable/parseTXT'
+
 const scanStore = useScanStore()
 
 const { storeURL, storeCommuneContour, activeSubCategory } = storeToRefs(scanStore);
@@ -241,6 +245,7 @@ onMounted(() => {
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
+      parcour_txt_to_tab("./2021_FD 01_C_20.txt");
       if (showPin.value) {
         vectorPinSource.value.clear()
 
