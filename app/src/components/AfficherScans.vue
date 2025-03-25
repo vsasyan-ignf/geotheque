@@ -1,7 +1,7 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
-      <Dropdown :options="storeData"/>
+      <Dropdown :options="storeScansData"/>
 
       <div class="button-group">
         <ShakingButton nameButton="Visualiser" @click="openModal">
@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, watch} from 'vue'
+import { ref } from 'vue'
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
 import ImageModal from './ImageModal.vue'
@@ -33,7 +33,7 @@ import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { storeData, currentCollecInfo } = storeToRefs(scanStore);
+const { storeScansData, currentCollecInfo } = storeToRefs(scanStore);
 
 const isModalOpen = ref(false)
 let imageUrl = ref('')

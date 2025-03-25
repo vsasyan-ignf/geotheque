@@ -165,7 +165,7 @@ function validateCommune() {
 
     const contourMercator = repCommune.contour.coordinates[0].map(coord => useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'))
 
-    scanStore.updateCommuneContour(contourMercator)
+    scanStore.updateSelectedGeom(contourMercator)
 
     emit('select-commune', point)
   }

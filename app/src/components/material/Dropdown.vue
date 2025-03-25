@@ -1,7 +1,7 @@
 <template>
   <div class="dropdown">
     <label for="option">{{ nameDropdown }}</label>
-    <select id="option" v-model="selected" @change="updateStoredata">
+    <select id="option" v-model="selected" @change="updatestoreScansData">
       <option disabled value="">Veuillez sélectionner une carte</option>
       <option v-for="val in options" :key="val.id" :value="val">
         {{ val.name }}
@@ -33,7 +33,7 @@ const props = defineProps({
   },
 })
 
-function updateStoredata() {
+function updatestoreScansData() {
   scanStore.updateSelectedScan(selected.value.geom[0])
   scanStore.updateCurrentScanInfo(selected.value.collecInfo)
 }

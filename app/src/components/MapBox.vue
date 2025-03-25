@@ -51,7 +51,7 @@ import Scan25 from '@/assets/basecard/scan25.jpg'
 
 const scanStore = useScanStore()
 
-const { storeURL, storeCommuneContour, activeSubCategory, storeSelectedScan } = storeToRefs(scanStore);
+const { storeURL, storeSelectedGeom, activeSubCategory, storeSelectedScan } = storeToRefs(scanStore);
 
 
 const center = ref([260000, 6000000])
@@ -319,7 +319,7 @@ onMounted(() => {
         vectorWfsSource.value.setUrl("");
         vectorSource.value.clear();
         vectorScanSource.value.clear();
-        scanStore.updateCommuneContour([])
+        scanStore.updateSelectedGeom([])
       }
     });
 
@@ -329,9 +329,9 @@ onMounted(() => {
       vectorSource.value.clear();
       vectorScanSource.value.clear();
 
-      if (storeCommuneContour.value.length !== 0) {
+      if (storeSelectedGeom.value.length !== 0) {
         const polygon = new Feature({
-          geometry: new Polygon([storeCommuneContour.value]),
+          geometry: new Polygon([storeSelectedGeom.value]),
         });
 
         vectorSource.value.addFeature(polygon);

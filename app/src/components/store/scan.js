@@ -3,12 +3,11 @@ import { ref, computed } from "vue";
 
 export const useScanStore = defineStore('scan', () => {
     let storeBbox = ref([]);
-    let storeData = ref(null);
-    let storeCommuneContour = ref([]);
+    let storeScansData = ref(null)
+    let storeSelectedGeom = ref([]);
     let storeSelectedScan = ref(null);
     let currentCollecInfo = ref(null);
     let activeSubCategory = ref(null);
-
 
     let storeCritereSelection = ref({
         yearMin: null,
@@ -16,7 +15,6 @@ export const useScanStore = defineStore('scan', () => {
         scaleMin: null,
         scaleMax: null
     });
-
 
     let storeURL = computed(() => {
         if (storeBbox.value.length > 0) {
@@ -64,14 +62,14 @@ export const useScanStore = defineStore('scan', () => {
             scaleMin: null,
             scaleMax: null
         };
-        storeCommuneContour.value = []
+        storeSelectedGeom.value = []
         storeBbox.value = [];
-        storeData.value = null;
+        storeScansData.value = null;
         currentCollecInfo.value = null;
     }
 
-    function updateCommuneContour(newVal) {
-        storeCommuneContour.value = newVal
+    function updateSelectedGeom(newVal) {
+        storeSelectedGeom.value = newVal
     }
 
     function updateSelectedScan(newVal) {
@@ -89,9 +87,13 @@ export const useScanStore = defineStore('scan', () => {
             const response = await fetch(url)
             if (response.ok) {
                 const data = await response.json()
-
-                const carteNames = data.features.map((feature, index) => ({ id: index, geom: feature.geometry.coordinates[0], name: feature.properties.ID_CARTE, collecInfo: feature.properties.COLLECTION + "/" + feature.properties.SOUS_COLL + "/" + feature.properties.ID_CARTE }))
-                storeData.value = carteNames
+                storeScansData.value = data.features.map((feature, index) => ({
+                    id: index,
+                    geom: feature.geometry.coordinates[0],
+                    name: feature.properties.ID_CARTE,
+                    collecInfo: feature.properties.COLLECTION + "/" + feature.properties.SOUS_COLL + "/" + feature.properties.ID_CARTE,
+                    properties: feature.properties
+                }))
             } else {
                 throw new Error('Failed to fetch data')
             }
@@ -102,7 +104,7 @@ export const useScanStore = defineStore('scan', () => {
 
 
     return {
-        storeData,
+        storeScansData,
         storeBbox,
         storeURL,
         storeGet,
@@ -115,8 +117,8 @@ export const useScanStore = defineStore('scan', () => {
         activeSubCategory,
         updateCurrentScanInfo,
         currentCollecInfo,
-        storeCommuneContour,
-        updateCommuneContour,
+        storeSelectedGeom,
+        updateSelectedGeom,
         resetCriteria
     };
 });

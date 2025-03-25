@@ -191,7 +191,7 @@ function selectDepartement(departement) {
 
     const coordinates = contour[0].map(point => [point[0], point[1]]);
 
-    scanStore.updateCommuneContour(coordinates)
+    scanStore.updateSelectedGeom(coordinates)
 
     emit('select-departement', point);
   }).catch((error) => {
