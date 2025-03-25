@@ -64,7 +64,7 @@ const showPin = ref(false)
 const vectorPinSource = ref(null)
 const vectorWfsSource = ref(null)
 const vectorGeomSource = ref(null)
-const deptLayer = ref(null)
+const geomLayer = ref(null)
 const vectorScanSource = ref(null)
 const scanLayer = ref(null)
 
@@ -206,7 +206,7 @@ onMounted(() => {
     /***************************************** Create source and layer for geom selected ******************************* */
     vectorGeomSource.value = new VectorSource()
 
-    deptLayer.value = new VectorLayer({
+    geomLayer.value = new VectorLayer({
       source: vectorGeomSource.value,
       style: new Style({
         stroke: new Stroke({
@@ -247,7 +247,7 @@ onMounted(() => {
 
     olMap.value = new Map({
       target: mapElement.value,
-      layers: [...wmtsLayers, wfsLayer, pinLayer, deptLayer.value, scanLayer.value],
+      layers: [...wmtsLayers, wfsLayer, pinLayer, geomLayer.value, scanLayer.value],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
@@ -380,7 +380,7 @@ onMounted(() => {
       }
       if (vectorGeomSource.value) {
         vectorGeomSource.value.clear()
-        olMap.value.removeLayer(deptLayer)
+        olMap.value.removeLayer(geomLayer)
       }
     })
 
