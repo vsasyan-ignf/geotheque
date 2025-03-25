@@ -36,25 +36,28 @@ const scanStore = useScanStore()
 const { storeData, currentCollecInfo } = storeToRefs(scanStore);
 
 const isModalOpen = ref(false)
-const imageUrl = ref('http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/001_86K_1756.JP2&CVT=jpeg')
-
-
-const url_xml = ' http://localhost:8081/Misphot/Lambert93/2021/2021_FD 01_C_20/'+
-  '2021_FD 01_C_20.xml'
+let imageUrl = ref('')
 
 
 function downloadScans() {
   if (currentCollecInfo.value){
-    const image_name = currentCollecInfo.value
+    const info = currentCollecInfo.value.split('/')
     const lieu = "METROPOLE"
-    const imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${image_name}.JP2&CVT=jpeg`;
+    let name = ''
+    if (info[1] != ""){
+      imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[1]}/${info[2]}.JP2&CVT=jpeg`;
+      name = info[2]
+    } else {
+      imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[2]}.JP2&CVT=jpeg`;
+      name = info[1]
+    }
     fetch(imageUrl)
       .then(response => response.blob())
       .then(blob => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", image_name);
+        link.setAttribute("download", name);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -65,8 +68,24 @@ function downloadScans() {
   
 }
 
+let url_xml = ref(``)
+
 function downloadxml(){
-  window.open(url_xml, "xml")
+  if (currentCollecInfo.value){
+
+    const info = currentCollecInfo.value.split('/')
+    const lieu = "METROPOLE"
+    if (info.length == 3){
+      url_xml = `http://localhost:8082/Cartes/${lieu}/${info[0]}/${info[1]}/Fiches/${info[2]}.xml`
+
+    } else {
+      url_xml = `http://localhost:8082/Cartes/${lieu}/${info[0]}/Fiches/${info[1]}.xml`
+
+    }
+    console.log('url_xml:', url_xml)
+    window.open(url_xml, "xml")
+  }
+  
 }
 
 function openModal() {
