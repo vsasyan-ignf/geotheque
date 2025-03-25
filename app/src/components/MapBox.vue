@@ -1,16 +1,14 @@
 <template>
   <div class="map-container">
-    <SideMenu @toggle-visibility="toggleLayerVisibility"/>
+    <SideMenu @toggle-visibility="toggleLayerVisibility" />
     <div ref="mapElement" class="ol-map"></div>
     <BasecardSwitcher
       :layers="layers"
       :activeLayerIndex="activeLayerIndex"
       @layer-change="changeActiveLayer"
     />
-    <ZoomControl/>
-    <VisibilitySwitch
-      @toggle-visibility="toggleLayerVisibility"
-    />
+    <ZoomControl />
+    <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
   </div>
 </template>
 
@@ -25,23 +23,23 @@ import markerIcon from '@/assets/blue-marker.svg'
 import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
-import Map from 'ol/Map';
-import View from 'ol/View';
-import TileLayer from 'ol/layer/Tile';
-import VectorLayer from 'ol/layer/Vector';
-import VectorSource from 'ol/source/Vector';
-import WMTS from 'ol/source/WMTS';
-import WMTSTileGrid from 'ol/tilegrid/WMTS';
-import GeoJSON from 'ol/format/GeoJSON';
-import Polygon from 'ol/geom/Polygon.js';
-import { get as getProjection } from 'ol/proj';
-import { getTopLeft } from 'ol/extent';
-import Feature from 'ol/Feature';
-import Point from 'ol/geom/Point';
-import { Style, Icon, Stroke, Fill } from 'ol/style';
-import { bbox as bboxStrategy } from 'ol/loadingstrategy';
+import Map from 'ol/Map'
+import View from 'ol/View'
+import TileLayer from 'ol/layer/Tile'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import WMTS from 'ol/source/WMTS'
+import WMTSTileGrid from 'ol/tilegrid/WMTS'
+import GeoJSON from 'ol/format/GeoJSON'
+import Polygon from 'ol/geom/Polygon.js'
+import { get as getProjection } from 'ol/proj'
+import { getTopLeft } from 'ol/extent'
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point'
+import { Style, Icon, Stroke, Fill } from 'ol/style'
+import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
-import { defaults as defaultControls } from 'ol/control';
+import { defaults as defaultControls } from 'ol/control'
 // Images pour les thumbnails
 import PlanIGN from '@/assets/basecard/plan_ign.png'
 import Ortho from '@/assets/basecard/ortho.jpeg'
@@ -51,8 +49,7 @@ import Scan25 from '@/assets/basecard/scan25.jpg'
 
 const scanStore = useScanStore()
 
-const { storeURL, storeCommuneContour, activeSubCategory, storeSelectedScan } = storeToRefs(scanStore);
-
+const { storeURL, storeSelectedGeom, activeSubCategory, storeSelectedScan } = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -60,19 +57,19 @@ const zoom = ref(6)
 const rotation = ref(0)
 
 // Références et états
-const mapElement = ref(null);
-const olMap = ref(null);
-const pins = ref([]);
-const showPin = ref(false);
-const vectorPinSource = ref(null);
-const vectorWfsSource = ref(null);
-const vectorSource = ref(null);
-const deptLayer = ref(null);
+const mapElement = ref(null)
+const olMap = ref(null)
+const pins = ref([])
+const showPin = ref(false)
+const vectorPinSource = ref(null)
+const vectorWfsSource = ref(null)
+const vectorGeomSource = ref(null)
+const geomLayer = ref(null)
 const vectorScanSource = ref(null)
 const scanLayer = ref(null)
 
-const url_test = ref(``);
-const bbox = ref([0, 0, 0, 0]);
+const url_test = ref(``)
+const bbox = ref([0, 0, 0, 0])
 
 const layers = ref([
   {
@@ -102,17 +99,17 @@ const layers = ref([
   },
 ])
 
-const activeLayerIndex = ref(0);
-const olView = ref(null);
-const visibility_switch = ref(true);
+const activeLayerIndex = ref(0)
+const olView = ref(null)
+const visibility_switch = ref(true)
 
 function toggleLayerVisibility(isVisible) {
   if (olMap.value) {
-    const activeLayer = olMap.value.getLayers().getArray()[activeLayerIndex.value];
+    const activeLayer = olMap.value.getLayers().getArray()[activeLayerIndex.value]
     if (activeLayer) {
-      activeLayer.setVisible(isVisible);
-      visibility_switch.value = isVisible;
-      console.log("Layer", activeLayerIndex.value, "visibility set to", isVisible);
+      activeLayer.setVisible(isVisible)
+      visibility_switch.value = isVisible
+      console.log('Layer', activeLayerIndex.value, 'visibility set to', isVisible)
     }
   }
 }
@@ -125,10 +122,9 @@ function changeActiveLayer(index) {
     const wmtsLayers = olMap.value.getLayers().getArray().slice(0, layers.value.length)
     wmtsLayers.forEach((layer, idx) => {
       if (visibility_switch.value === true) {
-        layer.setVisible(idx === index);
+        layer.setVisible(idx === index)
       }
-      
-    });
+    })
 
     if (olView.value) {
       olView.value.setMaxZoom(getMaxZoom(layers.value[index].id))
@@ -167,12 +163,11 @@ function createWmtsSource(layerId) {
   })
 }
 
-let idlayer
 onMounted(() => {
   nextTick(() => {
     const wmtsLayers = layers.value.map((layer, index) => {
-      const wmtsSource = createWmtsSource(layer.id);
-      idlayer = layer.id;
+      const wmtsSource = createWmtsSource(layer.id)
+
       return new TileLayer({
         source: wmtsSource,
         visible: index === activeLayerIndex.value,
@@ -203,49 +198,43 @@ onMounted(() => {
         image: new Icon({
           src: markerIcon,
           scale: 0.05,
-          anchor: [0.5, 1]
-        })
-      })
-    });
-    
-    // Création de la source et de la couche pour les départements
-    vectorSource.value = new VectorSource();
+          anchor: [0.5, 1],
+        }),
+      }),
+    })
 
-    deptLayer.value = new VectorLayer({
-      source: vectorSource.value,
+    /***************************************** Create source and layer for geom selected ******************************* */
+    vectorGeomSource.value = new VectorSource()
+
+    geomLayer.value = new VectorLayer({
+      source: vectorGeomSource.value,
       style: new Style({
         stroke: new Stroke({
           color: 'blue',
-          width: 2
+          width: 2,
         }),
         fill: new Fill({
-          color: 'rgba(0, 0, 255, 0.1)'
-        })
-      })
-    });
+          color: 'rgba(0, 0, 255, 0.1)',
+        }),
+      }),
+    })
 
-    // Layer emprise selected
-
-
-    vectorScanSource.value = new VectorSource();
+    /***************************************** Create source and layer for scan selected ******************************* */
+    vectorScanSource.value = new VectorSource()
 
     scanLayer.value = new VectorLayer({
       source: vectorScanSource.value,
       style: new Style({
         stroke: new Stroke({
           color: 'red',
-          width: 2
+          width: 2,
         }),
         fill: new Fill({
-          color: 'rgba(255, 0, 0, 0.5)'
-        })
-      })
-
+          color: 'rgba(255, 0, 0, 0.5)',
+        }),
+      }),
     })
 
-
-
-    
     const view = new View({
       center: center.value,
       zoom: zoom.value,
@@ -258,11 +247,11 @@ onMounted(() => {
 
     olMap.value = new Map({
       target: mapElement.value,
-      layers: [...wmtsLayers, wfsLayer, pinLayer, deptLayer.value, scanLayer.value],
+      layers: [...wmtsLayers, wfsLayer, pinLayer, geomLayer.value, scanLayer.value],
       view: view,
-      controls: defaultControls({ zoom: false, rotate: false })
-    });
-    
+      controls: defaultControls({ zoom: false, rotate: false }),
+    })
+
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
@@ -291,11 +280,11 @@ onMounted(() => {
         vectorPinSource.value.clear()
         pins.value = []
       }
-    });
-    
+    })
+
     eventBus.on('map-zoom', (delta) => {
       if (olMap.value && olView.value) {
-        const currentZoom = olView.value.getZoom();
+        const currentZoom = olView.value.getZoom()
         olView.value.animate({
           zoom: currentZoom + delta,
           duration: 250
@@ -315,97 +304,83 @@ onMounted(() => {
     eventBus.on('update-coordinates', ({ x, y }) => {
       vectorPinSource.value.clear()
       const feature = new Feature({
-        geometry: new Point([x, y])
-      });
-      vectorPinSource.value.addFeature(feature);
-      pins.value = [[x, y]];
-    });
+        geometry: new Point([x, y]),
+      })
+      vectorPinSource.value.addFeature(feature)
+      pins.value = [[x, y]]
+    })
 
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
-        vectorPinSource.value.clear();
-        vectorWfsSource.value.clear();
-        vectorWfsSource.value.setUrl("");
-        vectorSource.value.clear();
-        vectorScanSource.value.clear();
-        scanStore.updateCommuneContour([])
+        vectorPinSource.value.clear()
+        vectorWfsSource.value.clear()
+        vectorWfsSource.value.setUrl('')
+        vectorGeomSource.value.clear()
+        vectorScanSource.value.clear()
+        scanStore.updateSelectedGeom([])
       }
-    });
+    })
 
-    console.log('---------------------------- URL ----------------------------')
+    console.log('---------------------------- NEW URL ----------------------------')
     watch(storeURL, async (newValue) => {
       console.log('NEW URL:', newValue)
-      vectorSource.value.clear();
-      vectorScanSource.value.clear();
+      vectorGeomSource.value.clear()
+      vectorScanSource.value.clear()
 
-      if (storeCommuneContour.value.length !== 0) {
+      if (storeSelectedGeom.value.length !== 0) {
         const polygon = new Feature({
-          geometry: new Polygon([storeCommuneContour.value]),
-        });
+          geometry: new Polygon([storeSelectedGeom.value]),
+        })
 
-        vectorSource.value.addFeature(polygon);
+        vectorGeomSource.value.addFeature(polygon)
 
-      const extent = polygon.getGeometry().getExtent();
+        const extent = polygon.getGeometry().getExtent()
 
-      olMap.value.getView().fit(extent, {
-          padding: [50, 50, 50, 50+400],
-          duration: 2_000
-        });
+        olMap.value.getView().fit(extent, {
+          padding: [50, 50, 50, 50 + 400],
+          duration: 2_000,
+        })
       }
 
-      vectorWfsSource.value.setUrl(newValue);
-      vectorWfsSource.value.refresh();
+      vectorWfsSource.value.setUrl(newValue)
+      vectorWfsSource.value.refresh()
 
       await scanStore.storeGet(newValue)
     })
 
-
     watch(storeSelectedScan, (newValue) => {
-      console.log('NEW GEOM', newValue)
-      vectorScanSource.value.clear();
+      console.log('----------------- NEW SCAN SELECTED ------------------------')
+
+      vectorScanSource.value.clear()
 
       if (storeSelectedScan.value) {
         const polygon = new Feature({
-          geometry: new Polygon([storeSelectedScan.value]),
-        });
+          geometry: new Polygon([storeSelectedScan.value.geom[0]]),
+        })
 
-        vectorScanSource.value.addFeature(polygon);
+        vectorScanSource.value.addFeature(polygon)
 
-      const extent = polygon.getGeometry().getExtent();
+        const extent = polygon.getGeometry().getExtent()
 
-      olMap.value.getView().fit(extent, {
-          padding: [50, 50, 50, 50+400],
-          duration: 1_000
-        });
+        olMap.value.getView().fit(extent, {
+          padding: [50, 50, 50, 50 + 400],
+          duration: 1_000,
+        })
       }
-
-
-
-
-
-
     })
-
-
-
-
-
-
 
     eventBus.on('criteria-reset', () => {
       if (vectorPinSource.value) {
         vectorPinSource.value.clear()
-
       }
       if (vectorWfsSource.value) {
         vectorWfsSource.value.clear()
-        vectorWfsSource.value.setUrl("");
-        olMap.value.removeLayer(wfsLayer);
-
+        vectorWfsSource.value.setUrl('')
+        olMap.value.removeLayer(wfsLayer)
       }
-      if (vectorSource.value) {
-        vectorSource.value.clear();
-        olMap.value.removeLayer(deptLayer);
+      if (vectorGeomSource.value) {
+        vectorGeomSource.value.clear()
+        olMap.value.removeLayer(geomLayer)
       }
     })
 

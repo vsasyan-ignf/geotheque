@@ -3,7 +3,7 @@
     <form class="criteria-form" @submit.prevent="">
       <div class="dropdown-container">
         <div class="dropdown-wrapper">
-          <Dropdown :options="storeData"/>
+          <Dropdown :options="storeScansData"/>
         </div>
         <!-- <button class="icon-button" @click.prevent="openModal">
           <i class="mdi mdi-eye"></i>
@@ -16,8 +16,13 @@
         <ShakingButton nameButton="Télécharger" @click="downloadScans">
           <template #icon><i class="mdi mdi-briefcase-download"></i></template>
         </ShakingButton>
-        <ShakingButton nameButton="XML" @click="downloadxml"/>
+        <ShakingButton nameButton="XML" @click="downloadxml" />
+
       </div>
+
+      <ShakingButton nameButton="Exporter tous les scans" @click="downloadCSV" style="width: 210px; margin-top: 10px;">
+          <template #icon><i class="mdi mdi-briefcase-download"></i></template>
+      </ShakingButton>
     </form>
     <ImageModal
      :is-open="isModalOpen"
@@ -29,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, watch} from 'vue'
+import { ref, watch } from 'vue'
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
 import ImageModal from './ImageModal.vue'
@@ -37,7 +42,7 @@ import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { storeData, currentCollecInfo } = storeToRefs(scanStore);
+const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)
 
 const isModalOpen = ref(false)
 
@@ -102,30 +107,61 @@ function downloadScans() {
 
 let url_xml = ref(``)
 
-function downloadxml(){
-  if (currentCollecInfo.value){
-
+function downloadxml() {
+  if (currentCollecInfo.value) {
     const info = currentCollecInfo.value.split('/')
-    const lieu = "METROPOLE"
-    if (info.length == 3){
+    const lieu = 'METROPOLE'
+    if (info.length == 3) {
       url_xml = `http://localhost:8082/Cartes/${lieu}/${info[0]}/${info[1]}/Fiches/${info[2]}.xml`
-
     } else {
       url_xml = `http://localhost:8082/Cartes/${lieu}/${info[0]}/Fiches/${info[1]}.xml`
-
     }
     console.log('url_xml:', url_xml)
-    window.open(url_xml, "xml")
+    window.open(url_xml, 'xml')
   }
-  
 }
+
+function downloadCSV() {
+  const data = storeScansData.value;
+
+  if (data) {
+    const newData = data.map( scan => scan.properties )
+    const csvContent = dicoToFormatCSV(newData)
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' })
+    const objUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', objUrl)
+    link.setAttribute('download', 'scans.csv')
+    link.click()
+  }
+}
+
+
+function dicoToFormatCSV(arrObj){
+
+  const titleKeys = Object.keys(arrObj[0])
+
+  const refinedData = []
+  refinedData.push(titleKeys)
+
+  arrObj.forEach(item => {
+      refinedData.push(Object.values(item))  
+  })
+
+  let csvContent = ''
+
+  refinedData.forEach(row => {
+  csvContent += row.join(';') + '\n'
+  })
+  return csvContent;
+}
+
 function openModal() {
   isModalOpen.value = true
 }
 function closeModal() {
   isModalOpen.value = false
 }
-
 </script>
 <style scoped>
 .scan-box {
