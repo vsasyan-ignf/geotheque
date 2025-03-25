@@ -100,19 +100,14 @@ export const layers_photo = ref([
 
 export const layers_photo_monde = ref([
     {
-        id: 'plan',
-        name: 'Plan IGN',
-        thumbnail: PlanIGN,
+        id: 'osm',
+        name: 'osm',
+        thumbnail: osm,
     },
     {
         id: 'ortho',
         name: 'Ortho',
         thumbnail: Ortho,
-    },
-    {
-        id: 'bdparcellaire',
-        name: 'BDParcellaire',
-        thumbnail: BDParcellaire,
     },
     {
         id: 'cartesign',

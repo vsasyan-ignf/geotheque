@@ -2,6 +2,9 @@ export function getWmtsUrl(layerId) {
   if (layerId === 'cartesign' || layerId === 'scan25') {
     return `https://data.geopf.fr/private/wmts?apikey=ign_scan_ws&SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
   }
+  else if (layerId === 'ortho') {
+    return `https://data.geopf.fr/wms-r?LAYERS=ORTHOIMAGERY.ORTHOPHOTOS.1950-1965&VERSION=1.3.0`
+  }
   return `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
 }
 
