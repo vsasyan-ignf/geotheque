@@ -63,7 +63,7 @@ const pins = ref([])
 const showPin = ref(false)
 const vectorPinSource = ref(null)
 const vectorWfsSource = ref(null)
-const vectorSource = ref(null)
+const vectorGeomSource = ref(null)
 const deptLayer = ref(null)
 const vectorScanSource = ref(null)
 const scanLayer = ref(null)
@@ -163,12 +163,11 @@ function createWmtsSource(layerId) {
   })
 }
 
-let idlayer
 onMounted(() => {
   nextTick(() => {
     const wmtsLayers = layers.value.map((layer, index) => {
       const wmtsSource = createWmtsSource(layer.id)
-      idlayer = layer.id
+
       return new TileLayer({
         source: wmtsSource,
         visible: index === activeLayerIndex.value,
@@ -204,11 +203,11 @@ onMounted(() => {
       }),
     })
 
-    // Création de la source et de la couche pour les départements
-    vectorSource.value = new VectorSource()
+    /***************************************** Create source and layer for geom selected ******************************* */
+    vectorGeomSource.value = new VectorSource()
 
     deptLayer.value = new VectorLayer({
-      source: vectorSource.value,
+      source: vectorGeomSource.value,
       style: new Style({
         stroke: new Stroke({
           color: 'blue',
@@ -220,8 +219,7 @@ onMounted(() => {
       }),
     })
 
-    // Layer emprise selected
-
+    /***************************************** Create source and layer for scan selected ******************************* */
     vectorScanSource.value = new VectorSource()
 
     scanLayer.value = new VectorLayer({
@@ -308,16 +306,16 @@ onMounted(() => {
         vectorPinSource.value.clear()
         vectorWfsSource.value.clear()
         vectorWfsSource.value.setUrl('')
-        vectorSource.value.clear()
+        vectorGeomSource.value.clear()
         vectorScanSource.value.clear()
         scanStore.updateSelectedGeom([])
       }
     })
 
-    console.log('---------------------------- URL ----------------------------')
+    console.log('---------------------------- NEW URL ----------------------------')
     watch(storeURL, async (newValue) => {
       console.log('NEW URL:', newValue)
-      vectorSource.value.clear()
+      vectorGeomSource.value.clear()
       vectorScanSource.value.clear()
 
       if (storeSelectedGeom.value.length !== 0) {
@@ -325,7 +323,7 @@ onMounted(() => {
           geometry: new Polygon([storeSelectedGeom.value]),
         })
 
-        vectorSource.value.addFeature(polygon)
+        vectorGeomSource.value.addFeature(polygon)
 
         const extent = polygon.getGeometry().getExtent()
 
@@ -342,12 +340,13 @@ onMounted(() => {
     })
 
     watch(storeSelectedScan, (newValue) => {
-      console.log('NEW GEOM', newValue)
+      console.log('----------------- NEW SCAN SELECTED ------------------------')
+
       vectorScanSource.value.clear()
 
       if (storeSelectedScan.value) {
         const polygon = new Feature({
-          geometry: new Polygon([storeSelectedScan.value]),
+          geometry: new Polygon([storeSelectedScan.value.geom[0]]),
         })
 
         vectorScanSource.value.addFeature(polygon)
@@ -370,8 +369,8 @@ onMounted(() => {
         vectorWfsSource.value.setUrl('')
         olMap.value.removeLayer(wfsLayer)
       }
-      if (vectorSource.value) {
-        vectorSource.value.clear()
+      if (vectorGeomSource.value) {
+        vectorGeomSource.value.clear()
         olMap.value.removeLayer(deptLayer)
       }
     })

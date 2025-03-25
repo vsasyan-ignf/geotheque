@@ -16,7 +16,7 @@ import { useScanStore } from '../store/scan'
 
 const scanStore = useScanStore()
 
-const selected = ref([])
+const selected = ref('')
 
 const props = defineProps({
   nameDropdown: {
@@ -34,7 +34,7 @@ const props = defineProps({
 })
 
 function updatestoreScansData() {
-  scanStore.updateSelectedScan(selected.value.geom[0])
+  scanStore.updateSelectedScan(selected.value)
   scanStore.updateCurrentScanInfo(selected.value.collecInfo)
 }
 </script>

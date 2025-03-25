@@ -11,7 +11,12 @@
           <template #icon><i class="mdi mdi-briefcase-download"></i></template>
         </ShakingButton>
         <ShakingButton nameButton="XML" @click="downloadxml" />
+
       </div>
+
+      <ShakingButton nameButton="Exporter tous les scans" @click="downloadCSV" style="width: 210px; margin-top: 10px;">
+          <template #icon><i class="mdi mdi-briefcase-download"></i></template>
+      </ShakingButton>
     </form>
 
     <ImageModal
@@ -79,6 +84,41 @@ function downloadxml() {
     console.log('url_xml:', url_xml)
     window.open(url_xml, 'xml')
   }
+}
+
+function downloadCSV() {
+  const data = storeScansData.value;
+
+  if (data) {
+    const newData = data.map( scan => scan.properties )
+    const csvContent = dicoToFormatCSV(newData)
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' })
+    const objUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', objUrl)
+    link.setAttribute('download', 'scans.csv')
+    link.click()
+  }
+}
+
+
+function dicoToFormatCSV(arrObj){
+
+  const titleKeys = Object.keys(arrObj[0])
+
+  const refinedData = []
+  refinedData.push(titleKeys)
+
+  arrObj.forEach(item => {
+      refinedData.push(Object.values(item))  
+  })
+
+  let csvContent = ''
+
+  refinedData.forEach(row => {
+  csvContent += row.join(';') + '\n'
+  })
+  return csvContent;
 }
 
 function openModal() {
