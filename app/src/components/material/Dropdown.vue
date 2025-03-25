@@ -1,9 +1,10 @@
 <template>
   <div class="dropdown">
     <label for="option">{{ nameDropdown }}</label>
-    <select id="option" v-model="selected">
-      <option v-for="val in options" :key="val.id" :value="val.id">
-        {{ val.name }} 
+    <select id="option" v-model="selected" @change="updatestoreScansData">
+      <option disabled value="">Veuillez sélectionner une carte</option>
+      <option v-for="val in options" :key="val.id" :value="val">
+        {{ val.name }}
       </option>
     </select>
   </div>
@@ -11,7 +12,11 @@
 
 <script setup>
 import { ref } from 'vue'
-import { defineProps } from 'vue'
+import { useScanStore } from '../store/scan'
+
+const scanStore = useScanStore()
+
+const selected = ref('')
 
 const props = defineProps({
   nameDropdown: {
@@ -28,7 +33,10 @@ const props = defineProps({
   },
 })
 
-const selected = ref('EPSG:3857')
+function updatestoreScansData() {
+  scanStore.updateSelectedScan(selected.value)
+  scanStore.updateCurrentScanInfo(selected.value.collecInfo)
+}
 </script>
 
 <style scoped>

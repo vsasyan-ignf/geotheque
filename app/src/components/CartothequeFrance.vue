@@ -23,7 +23,7 @@
     <DepartementSearch
       v-if="activeSubCategory === 'departement'"
       @close="$emit('close-sub-category')"
-      @select-departement="goToDepartement"
+      @select-departement="goToPoint"
     />
 
     <PointSearch
@@ -39,7 +39,11 @@ import { watch } from 'vue'
 import CommuneSearch from './CommuneSearch.vue'
 import DepartementSearch from './DepartementSearch.vue'
 import PointSearch from './PointSearch.vue'
-import { eventBus } from './eventBus'
+import { eventBus } from './composable/eventBus'
+
+import { useScanStore } from './store/scan'
+
+const scanStore = useScanStore()
 
 const props = defineProps({
   activeSubCategory: {
@@ -54,28 +58,15 @@ const props = defineProps({
 
 defineEmits(['select-sub-category', 'close-sub-category'])
 
-function goToCommune(commune) {
-  console.log(`com: ${commune.nom}`)
-}
-
-function goToDepartement(departement) {
-  console.log(`dep: ${departement.nom}`)
-}
-
 function goToPoint(point) {
-  console.log(`x:${point.x}, y:${point.y}`)
-  
   if (point.bboxLambert93) {
-    console.log(point.bboxLambert93)
-
-    eventBus.emit('bbox-updated', point.bboxLambert93);
+    scanStore.updateBbox(point.bboxLambert93)
   }
 }
 
 watch(
   () => props.activeSubCategory,
   (newVal) => {
-    console.log(newVal)
     eventBus.emit('toggle-pin', newVal === 'point')
   },
 )
