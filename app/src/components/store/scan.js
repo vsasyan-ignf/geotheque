@@ -12,8 +12,8 @@ export const useScanStore = defineStore('scan', () => {
     let storeCritereSelection = ref({
         yearMin: null,
         yearMax: null,
-        scaleMin: null,
-        scaleMax: null,
+        scaleMin: 500,
+        scaleMax: 100000,
     })
 
     let storeURL = computed(() => {
