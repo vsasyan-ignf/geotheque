@@ -5,12 +5,12 @@
         <div class="dropdown-wrapper">
           <Dropdown :options="storeData"/>
         </div>
-        <button class="icon-button" @click.prevent="openModal">
+        <!-- <button class="icon-button" @click.prevent="openModal">
           <i class="mdi mdi-eye"></i>
-        </button>
+        </button> -->
       </div>
       <div class="button-group">
-        <ShakingButton nameButton="Visualiser" @click="openModal">
+        <ShakingButton nameButton="Visualiser" @click="openIipmooviewer">
           <template #icon><i class="mdi mdi-monitor-eye"></i></template>
         </ShakingButton>
         <ShakingButton nameButton="Télécharger" @click="downloadScans">
@@ -38,24 +38,35 @@ import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
 const { storeData, currentCollecInfo } = storeToRefs(scanStore);
-console.log('dataStore dans Afficher Scan:', storeData)
 const isModalOpen = ref(false)
-const imageUrl = ref('http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/METROPOLE/CASSINI/CARTES/001_86K_1756.JP2&CVT=jpeg')
 const url_xml = ' http://localhost:8081/Misphot/Lambert93/2021/2021_FD 01_C_20/'+
 '2021_FD 01_C_20.xml'
 
+const imageUrl = ref('');
+
+watch(currentCollecInfo, (newVal) => {
+  if (newVal) {
+    const lieu = "METROPOLE";
+    imageUrl.value = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${newVal}.JP2&CVT=jpeg`;
+  }
+});
+
+function openIipmooviewer() {
+  const urlParams = new URLSearchParams(new URL(imageUrl.value).search);
+  const imageUrlServ = urlParams.get('FIF');
+  sessionStorage.setItem('imageUrl', imageUrlServ);
+  window.open('/geotheque/iipmooviewer/index.html', '_blank');
+}
+
 function downloadScans() {
   if (currentCollecInfo.value){
-    const image_name = currentCollecInfo.value
-    const lieu = "METROPOLE"
-    const imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${image_name}.JP2&CVT=jpeg`;
-    fetch(imageUrl)
+    fetch(imageUrl.value)
       .then(response => response.blob())
       .then(blob => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.setAttribute("download", image_name);
+        link.setAttribute("download", currentCollecInfo.value);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
