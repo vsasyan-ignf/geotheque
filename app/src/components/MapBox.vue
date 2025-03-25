@@ -287,10 +287,19 @@ onMounted(() => {
         const currentZoom = olView.value.getZoom()
         olView.value.animate({
           zoom: currentZoom + delta,
-          duration: 250,
-        })
+          duration: 250
+        });
       }
     })
+    
+    eventBus.on('center-map', ({ x, y }) => {
+      if (olMap.value && olView.value) {
+        olView.value.animate({
+          center: [x, y],
+          duration: 750
+        });
+      }
+    });
 
     eventBus.on('update-coordinates', ({ x, y }) => {
       vectorPinSource.value.clear()
