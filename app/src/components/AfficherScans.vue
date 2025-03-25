@@ -48,12 +48,15 @@ function downloadScans() {
     const info = currentCollecInfo.value.split('/')
     const lieu = "METROPOLE"
     let name = ''
-    if (info.length == 3){
+    console.log('info:', info.length)
+    if (info[1] != ""){
       imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[1]}/${info[2]}.JP2&CVT=jpeg`;
       name = info[2]
+      console.log('imageUrl:', imageUrl)
     } else {
-      imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[1]}.JP2&CVT=jpeg`;
+      imageUrl = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[2]}.JP2&CVT=jpeg`;
       name = info[1]
+      console.log('imageUrl:', imageUrl)
     }
     fetch(imageUrl)
       .then(response => response.blob())
