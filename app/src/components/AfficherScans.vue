@@ -3,7 +3,7 @@
     <form class="criteria-form" @submit.prevent="">
       <div class="dropdown-container">
         <div class="dropdown-wrapper">
-          <Dropdown :options="storeScansData"/>
+          <Dropdown nameDropdown="Nom du Scan" :options="storeScansData"/>
         </div>
         <!-- <button class="icon-button" @click.prevent="openModal">
           <i class="mdi mdi-eye"></i>
@@ -165,7 +165,7 @@ function closeModal() {
 </script>
 <style scoped>
 .scan-box {
-  margin-top: 20px;
+  /* margin-top: 20px; */
   padding-top: 10px;
   width: 100%;
   box-sizing: border-box;
