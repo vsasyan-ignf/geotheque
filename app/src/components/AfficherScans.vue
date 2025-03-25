@@ -3,7 +3,7 @@
     <form class="criteria-form" @submit.prevent="">
       <div class="dropdown-container">
         <div class="dropdown-wrapper">
-          <Dropdown :options="storeData"/>
+          <Dropdown :options="storeScansData"/>
         </div>
         <!-- <button class="icon-button" @click.prevent="openModal">
           <i class="mdi mdi-eye"></i>
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import ShakingButton from './material/ShakingButton.vue'
 import Dropdown from './material/Dropdown.vue'
 import ImageModal from './ImageModal.vue'
