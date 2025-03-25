@@ -5,7 +5,10 @@ export const useScanStore = defineStore('scan', () => {
     let storeBbox = ref([]);
     let storeData = ref(null);
     let storeCommuneContour = ref([]);
-    let storeSelectedScan = ref(null)
+    let storeSelectedScan = ref(null);
+    let currentCollecInfo = ref(null);
+    let activeSubCategory = ref(null);
+
 
     let storeCritereSelection = ref({
         yearMin: null,
@@ -13,9 +16,7 @@ export const useScanStore = defineStore('scan', () => {
         scaleMin: null,
         scaleMax: null
     });
-    let currentCollecInfo = ref(null);
 
-    let activeSubCategory = ref(null)
 
     let storeURL = computed(() => {
         if (storeBbox.value.length > 0) {
@@ -101,9 +102,21 @@ export const useScanStore = defineStore('scan', () => {
 
 
     return {
-        storeData, storeBbox, storeURL, storeGet, updateBbox, updateSelectedScan, storeSelectedScan,
-        storeCritereSelection, updateCriteria, updateActiveSubCategory, activeSubCategory,
-        updateCurrentScanInfo, currentCollecInfo, storeCommuneContour, updateCommuneContour,
+        storeData,
+        storeBbox,
+        storeURL,
+        storeGet,
+        updateBbox,
+        updateSelectedScan,
+        storeSelectedScan,
+        storeCritereSelection,
+        updateCriteria,
+        updateActiveSubCategory,
+        activeSubCategory,
+        updateCurrentScanInfo,
+        currentCollecInfo,
+        storeCommuneContour,
+        updateCommuneContour,
         resetCriteria
     };
 });
