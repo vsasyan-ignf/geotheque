@@ -1,3 +1,10 @@
+import { ref } from 'vue'
+import PlanIGN from '@/assets/basecard/plan_ign.png'
+import Ortho from '@/assets/basecard/ortho.jpeg'
+import BDParcellaire from '@/assets/basecard/bdparcellaire.png'
+import CartesIGN from '@/assets/basecard/cartesign.jpg'
+import Scan25 from '@/assets/basecard/scan25.jpg'
+import osm from '@/assets/basecard/scan25.jpg'
 // export const tabs = [
 //     { id: 'carthotheque', icon: 'layers', title: 'Cartothèque France' },
 //     { id: 'carthotheque_etranger', icon: 'layers', title: 'Cartothèque Étranger' },
@@ -42,19 +49,14 @@ export const layers_carto = ref([
 
 export const layers_carto_monde = ref([
     {
-        id: 'plan',
-        name: 'Plan IGN',
-        thumbnail: PlanIGN,
+        id: 'osm',
+        name: 'osm',
+        thumbnail: osm,
     },
     {
         id: 'ortho',
         name: 'Ortho',
         thumbnail: Ortho,
-    },
-    {
-        id: 'bdparcellaire',
-        name: 'BDParcellaire',
-        thumbnail: BDParcellaire,
     },
     {
         id: 'cartesign',

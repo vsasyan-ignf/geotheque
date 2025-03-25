@@ -8,6 +8,7 @@ export const useScanStore = defineStore('scan', () => {
     let storeSelectedScan = ref(null);
     let currentCollecInfo = ref(null);
     let activeSubCategory = ref(null);
+    let activeTab = ref(null);
 
 
     let storeCritereSelection = ref({
@@ -79,6 +80,11 @@ export const useScanStore = defineStore('scan', () => {
         console.log("geom selected : ", storeSelectedScan.value)
     }
 
+    function updateActiveTab(newVal) {
+        activeTab.value = newVal
+        console.log("tab selected : ", activeTab.value)
+    }
+
     async function storeGet(url) {
 
         if (!url) {
@@ -117,6 +123,8 @@ export const useScanStore = defineStore('scan', () => {
         currentCollecInfo,
         storeCommuneContour,
         updateCommuneContour,
-        resetCriteria
+        resetCriteria,
+        activeTab,
+        updateActiveTab
     };
 });

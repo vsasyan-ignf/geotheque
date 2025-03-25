@@ -43,15 +43,13 @@ import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control';
 // Images pour les thumbnails
-import PlanIGN from '@/assets/basecard/plan_ign.png'
-import Ortho from '@/assets/basecard/ortho.jpeg'
-import BDParcellaire from '@/assets/basecard/bdparcellaire.png'
-import CartesIGN from '@/assets/basecard/cartesign.jpg'
-import Scan25 from '@/assets/basecard/scan25.jpg'
+import { layers_carto, layers_carto_monde, layers_photo, layers_photo_monde } from './composable/baseMap'
+import OSM from 'ol/source/OSM';
+
 
 const scanStore = useScanStore()
 
-const { storeURL, storeCommuneContour, activeSubCategory, storeSelectedScan } = storeToRefs(scanStore);
+const { storeURL, storeCommuneContour, activeSubCategory, storeSelectedScan, activeTab } = storeToRefs(scanStore);
 
 
 const center = ref([260000, 6000000])
@@ -73,34 +71,78 @@ const scanLayer = ref(null)
 
 const url_test = ref(``);
 const bbox = ref([0, 0, 0, 0]);
+let layers = ref(layers_carto.value);
+console.log("layers", layers)
 
-const layers = ref([
-  {
-    id: 'plan',
-    name: 'Plan IGN',
-    thumbnail: PlanIGN,
-  },
-  {
-    id: 'ortho',
-    name: 'Ortho',
-    thumbnail: Ortho,
-  },
-  {
-    id: 'bdparcellaire',
-    name: 'BDParcellaire',
-    thumbnail: BDParcellaire,
-  },
-  {
-    id: 'cartesign',
-    name: 'Cartes IGN',
-    thumbnail: CartesIGN,
-  },
-  {
-    id: 'scan25',
-    name: 'Scan25',
-    thumbnail: Scan25,
-  },
-])
+// const layers = ref([
+//   {
+//     id: 'plan',
+//     name: 'Plan IGN',
+//     thumbnail: PlanIGN,
+//   },
+//   {
+//     id: 'ortho',
+//     name: 'Ortho',
+//     thumbnail: Ortho,
+//   },
+//   {
+//     id: 'bdparcellaire',
+//     name: 'BDParcellaire',
+//     thumbnail: BDParcellaire,
+//   },
+//   {
+//     id: 'cartesign',
+//     name: 'Cartes IGN',
+//     thumbnail: CartesIGN,
+//   },
+//   {
+//     id: 'scan25',
+//     name: 'Scan25',
+//     thumbnail: Scan25,
+//   },
+// ])
+
+function getLayers(){
+  if (activeTab.value === 'carthotheque') {
+    return layers_carto
+  } else if (activeTab.value === 'carthotheque_etranger') {
+    return layers_carto_monde
+  } else if (activeTab.value === 'phototheque') {
+    return layers_photo
+  } else if (activeTab.value === 'phototheque_etranger') {
+    return layers_photo_monde
+  } else {
+    return ref([])
+  }
+}
+
+watch(activeTab, (newValue) => {
+  const newLayers = getLayers();
+  layers.value = newLayers.value;
+  console.log("layers", layers)
+
+  olMap.value.getLayers().getArray().forEach(layer => {
+    if (layer instanceof TileLayer && layer.getSource() instanceof WMTS) {
+      olMap.value.removeLayer(layer);
+    }
+  });
+
+  const wmtsLayers = layers.value.map((layer, index) => {
+    return new TileLayer({
+      source: createWmtsSource(layer.id),
+      visible: index === activeLayerIndex.value, // Seule la première couche est visible
+    });
+  });
+
+  wmtsLayers.forEach(layer => olMap.value.addLayer(layer));
+
+  console.log("WMTS Layers updated based on activeTab:", newValue);
+  activeLayerIndex.value = newLayers.value.length > 0 ? 0 : -1; // -1 si aucun layer
+  console.log("activeLayerIndex", activeLayerIndex.value)
+  changeActiveLayer(activeLayerIndex.value);
+})
+
+
 
 const activeLayerIndex = ref(0);
 const olView = ref(null);
@@ -137,34 +179,41 @@ function changeActiveLayer(index) {
 }
 
 function createWmtsSource(layerId) {
-  const projObj = getProjection('EPSG:3857')
-  const projExtent = projObj.getExtent()
-
-  const resolutions = []
-  const matrixIds = []
-
-  const maxZoom = 19
-
-  for (let i = 0; i <= maxZoom; i++) {
-    matrixIds.push(i.toString())
-    resolutions.push(156543.03392804097 / Math.pow(2, i))
+  console.log('Layer ID:', layerId)
+  if (layerId === 'osm') {
+    return new OSM();
   }
+  else{
+    const projObj = getProjection('EPSG:3857')
+    const projExtent = projObj.getExtent()
 
-  const tileGrid = new WMTSTileGrid({
-    origin: getTopLeft(projExtent),
-    resolutions: resolutions,
-    matrixIds: matrixIds,
-  })
+    const resolutions = []
+    const matrixIds = []
 
-  return new WMTS({
-    url: getWmtsUrl(layerId),
-    layer: getWmtsLayerName(layerId),
-    matrixSet: 'PM',
-    format: getFormatWmtsLayer(layerId),
-    projection: projObj,
-    tileGrid: tileGrid,
-    crossOrigin: 'anonymous',
-  })
+    const maxZoom = 19
+
+    for (let i = 0; i <= maxZoom; i++) {
+      matrixIds.push(i.toString())
+      resolutions.push(156543.03392804097 / Math.pow(2, i))
+    }
+
+    const tileGrid = new WMTSTileGrid({
+      origin: getTopLeft(projExtent),
+      resolutions: resolutions,
+      matrixIds: matrixIds,
+    })
+
+    return new WMTS({
+      url: getWmtsUrl(layerId),
+      layer: getWmtsLayerName(layerId),
+      matrixSet: 'PM',
+      format: getFormatWmtsLayer(layerId),
+      projection: projObj,
+      tileGrid: tileGrid,
+      crossOrigin: 'anonymous',
+    })
+  }
+  
 }
 
 let idlayer
