@@ -82,7 +82,6 @@ import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import Accordeon from './Accordeon.vue'
 import { useConvertCoordinates } from './composable/convertCoordinates'
 import { useScanStore } from './store/scan'
-import { storeToRefs } from 'pinia'
 import { mdiInformationOutline, mdiCrosshairsGps, mdiMapMarker } from '@mdi/js'
 
 const scanStore = useScanStore()
@@ -161,14 +160,14 @@ async function handleGoToPoint() {
     point.bboxLambert93 = bboxResult.bboxLambert93
   }
 
-   const mapCoords = useConvertCoordinates(
+  const mapCoords = useConvertCoordinates(
     parseFloat(pointX.value),
     parseFloat(pointY.value),
     selectedProjection.value,
-    'EPSG:3857'
+    'EPSG:3857',
   )
-  
-  eventBus.emit('update-coordinates', { x: mapCoords[0], y: mapCoords[1] })  
+
+  eventBus.emit('update-coordinates', { x: mapCoords[0], y: mapCoords[1] })
   eventBus.emit('center-map', { x: mapCoords[0], y: mapCoords[1] })
 
   emit('go-to-point', point)

@@ -41,7 +41,7 @@ var Scale = new Class({
       else if( units == "degrees" ){
 	// Degree units for astronomy
 	this.units = {
-	  dims:   ["\'\'", "\'", "&deg"],
+	  dims:   ["''", "'", "&deg"],
 	  orders: [ 1/3600, 1/60, 1 ],
 	  mults: [1,10,15,30],
 	  factor: 3600

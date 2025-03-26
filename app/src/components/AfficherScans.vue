@@ -3,7 +3,7 @@
     <form class="criteria-form" @submit.prevent="">
       <div class="dropdown-container">
         <div class="dropdown-wrapper">
-          <Dropdown nameDropdown="Nom du Scan" :options="storeScansData"/>
+          <Dropdown nameDropdown="Nom du Scan" :options="storeScansData" />
         </div>
         <!-- <button class="icon-button" @click.prevent="openModal">
           <i class="mdi mdi-eye"></i>
@@ -18,18 +18,20 @@
           <template #icon><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"/></template>
         </ShakingButton>
         <ShakingButton nameButton="XML" @click="downloadxml" />
-
       </div>
 
-      <ShakingButton nameButton="Exporter tous les scans" @click="downloadCSV" style="width: 210px; margin-top: 10px;">
-          <template #icon><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"/></template>
+      <ShakingButton
+        nameButton="Exporter tous les scans"
+        @click="downloadCSV"
+        style="width: 210px; margin-top: 10px">
+      <template #icon><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"/></template>
       </ShakingButton>
     </form>
     <ImageModal
-     :is-open="isModalOpen"
-     :image-url="imageUrl"
-     title="Prévisualisation de l'image : 21FD0120x00001_03343.jp2"
-     @close="closeModal"
+      :is-open="isModalOpen"
+      :image-url="imageUrl"
+      title="Prévisualisation de l'image : 21FD0120x00001_03343.jp2"
+      @close="closeModal"
     />
   </div>
 </template>
@@ -51,59 +53,58 @@ const isModalOpen = ref(false)
 const imageUrl = ref('')
 
 function generateImageUrl(info) {
-  const lieu = "METROPOLE";
-  let name = '';
-  let url = '';
+  const lieu = 'METROPOLE'
+  let name = ''
+  let url = ''
 
-  if (info[1] !== "") {
-    url = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[1]}/${info[2]}.JP2&CVT=jpeg`;
-    name = info[2];
+  if (info[1] !== '') {
+    url = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[1]}/${info[2]}.JP2&CVT=jpeg`
+    name = info[2]
   } else {
-    url = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[2]}.JP2&CVT=jpeg`;
-    name = info[1];
+    url = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[2]}.JP2&CVT=jpeg`
+    name = info[1]
   }
 
-  return { url, name };
+  return { url, name }
 }
 
 watch(currentCollecInfo, (newVal) => {
   if (newVal) {
-    const info = currentCollecInfo.value.split('/');
-    const { url, name } = generateImageUrl(info);
-    imageUrl.value = url;
+    const info = currentCollecInfo.value.split('/')
+    const { url, name } = generateImageUrl(info)
+    imageUrl.value = url
   }
-});
-
+})
 
 function openIipmooviewer() {
   if (imageUrl.value) {
-    const urlParams = new URLSearchParams(new URL(imageUrl.value).search);
-    const imageUrlServ = urlParams.get('FIF');
-    sessionStorage.setItem('imageUrl', imageUrlServ);
-    window.open('/geotheque/iipmooviewer/index.html', '_blank');
+    const urlParams = new URLSearchParams(new URL(imageUrl.value).search)
+    const imageUrlServ = urlParams.get('FIF')
+    sessionStorage.setItem('imageUrl', imageUrlServ)
+    window.open('/geotheque/iipmooviewer/index.html', '_blank')
   } else {
-    console.error('L\'URL de l\'image est indéfinie.');
+    console.error("L'URL de l'image est indéfinie.")
   }
 }
 
 function downloadScans() {
   if (currentCollecInfo.value) {
-    const info = currentCollecInfo.value.split('/');
-    const { url, name } = generateImageUrl(info);
+    const info = currentCollecInfo.value.split('/')
+    const { url, name } = generateImageUrl(info)
 
     fetch(url)
-      .then(response => response.blob())
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", name);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', name)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
       })
-      .catch(error => console.error("Erreur lors du téléchargement:", error));
+      .catch((error) => console.error('Erreur lors du téléchargement:', error))
   }
 }
 
@@ -124,10 +125,10 @@ function downloadxml() {
 }
 
 function downloadCSV() {
-  const data = storeScansData.value;
+  const data = storeScansData.value
 
   if (data) {
-    const newData = data.map( scan => scan.properties )
+    const newData = data.map((scan) => scan.properties)
     const csvContent = dicoToFormatCSV(newData)
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' })
     const objUrl = URL.createObjectURL(blob)
@@ -138,24 +139,22 @@ function downloadCSV() {
   }
 }
 
-
-function dicoToFormatCSV(arrObj){
-
+function dicoToFormatCSV(arrObj) {
   const titleKeys = Object.keys(arrObj[0])
 
   const refinedData = []
   refinedData.push(titleKeys)
 
-  arrObj.forEach(item => {
-      refinedData.push(Object.values(item))  
+  arrObj.forEach((item) => {
+    refinedData.push(Object.values(item))
   })
 
   let csvContent = ''
 
-  refinedData.forEach(row => {
-  csvContent += row.join(';') + '\n'
+  refinedData.forEach((row) => {
+    csvContent += row.join(';') + '\n'
   })
-  return csvContent;
+  return csvContent
 }
 
 function openModal() {
@@ -188,11 +187,11 @@ function closeModal() {
 }
 
 .dropdown-container {
- display: flex;
- align-items: center;
- justify-content: center;
- width: 100%;
- gap: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 8px;
 }
 
 .dropdown-wrapper {
@@ -201,19 +200,21 @@ function closeModal() {
 }
 
 .icon-button {
- display: flex;
- align-items: center;
- justify-content: center;
- width: 40px;
- height: 40px;
- min-width: 40px;
- border-radius: 4px;
- background-color: #739614;
- color: white;
- border: none;
- cursor: pointer;
- transition: background-color 0.3s, transform 0.2s;
- margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 4px;
+  background-color: #739614;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    transform 0.2s;
+  margin-top: 4px;
 }
 
 .icon-button:hover {
@@ -236,7 +237,7 @@ function closeModal() {
 .form-group.half {
   flex: 1;
   min-width: calc(50% - 5px);
-   max-width: calc(50% - 5px);
+  max-width: calc(50% - 5px);
 }
 .form-group label {
   font-size: 14px;
@@ -248,16 +249,16 @@ function closeModal() {
   border-radius: 4px;
   font-size: 14px;
   transition:
-   border-color 0.3s,
-   box-shadow 0.3s;
+    border-color 0.3s,
+    box-shadow 0.3s;
   width: 100%;
   box-sizing: border-box;
 }
 
 .form-group input:focus {
   border-color: #739614;
-   outline: none;
-   box-shadow: 0 0 0 2px rgba(115, 150, 20, 0.2);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(115, 150, 20, 0.2);
 }
 
 .button-group {
@@ -279,8 +280,8 @@ function closeModal() {
   font-size: 14px;
   font-weight: 500;
   transition:
-   background-color 0.3s,
-   transform 0.2s;
+    background-color 0.3s,
+    transform 0.2s;
 }
 .search-button:hover {
   background-color: #5e7a10;
@@ -291,15 +292,14 @@ function closeModal() {
 }
 
 @media (max-width: 500px) {
-.form-row {
-   flex-direction: column;
-   gap: 15px;
-}
+  .form-row {
+    flex-direction: column;
+    gap: 15px;
+  }
 
-.form-group.half {
-   min-width: 100%;
+  .form-group.half {
+    min-width: 100%;
     max-width: 100%;
   }
 }
-
 </style>

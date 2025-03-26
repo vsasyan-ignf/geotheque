@@ -68,9 +68,11 @@ function toggleTab(tabId) {
   if (activeTab.value === tabId) {
     activeTab.value = null
     isSidebarOpen.value = false
+    // scanStore.updateActiveTab(null)
   } else {
     activeTab.value = tabId
     isSidebarOpen.value = true
+    scanStore.updateActiveTab(tabId)
   }
 }
 
