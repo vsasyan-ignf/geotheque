@@ -338,6 +338,7 @@ onMounted(() => {
 
         olMap.value.getView().fit(extent, {
           padding: [50, 50, 50, 50 + 400],
+          minResolution: 200,
           duration: 2_000,
         })
       }
