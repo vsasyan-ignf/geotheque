@@ -47,6 +47,10 @@ import BDParcellaire from '@/assets/basecard/bdparcellaire.png'
 import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
 
+
+//test
+import {parcour_txt_to_tab } from './composable/parseTXT'
+
 const scanStore = useScanStore()
 
 const { storeURL, storeSelectedGeom, activeSubCategory, storeSelectedScan } = storeToRefs(scanStore)
@@ -255,6 +259,7 @@ onMounted(() => {
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
+      parcour_txt_to_tab("./1000_AERODROME CREIL_C_100.txt");
       if (showPin.value) {
         vectorPinSource.value.clear()
 

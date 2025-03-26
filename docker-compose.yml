@@ -35,6 +35,8 @@ services:
       - "8081:80"
     volumes:
       - ./montages/mtd:/var/www/html/:ro
+    environment:
+      CORS: "*"
 
   img:
     image: php:8.2-apache
@@ -43,3 +45,6 @@ services:
       - "8082:80"
     volumes:
       - ./montages/images:/var/www/html/:ro
+    environment:
+      CORS: "*"
+      
