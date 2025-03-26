@@ -15,7 +15,7 @@
             @focus="showResults = true"
           />
           <button @click="validateCommune">
-            <SvgIcon :path="mdiMagnify" type="mdi" class="mdi"/>
+            <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
@@ -25,7 +25,7 @@
             <h5 v-else-if="searchCommune">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
-              <SvgIcon :path="mdiClose" type="mdi" class="mdi"/>
+              <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
             </button>
           </div>
 
@@ -45,12 +45,12 @@
             </div>
 
             <div class="no-results" v-else-if="searchCommune">
-              <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi"/>
+              <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
               <span>Aucune commune trouvée</span>
             </div>
 
             <div class="empty-search" v-else>
-              <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi"/>
+              <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
               <span>Saisissez le nom ou code postal d'une commune</span>
             </div>
           </div>
@@ -66,8 +66,8 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import { useConvertCoordinates } from './composable/convertCoordinates'
-import { useScanStore } from './store/scan'
+import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
+import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 
 const scanStore = useScanStore()

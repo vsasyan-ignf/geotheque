@@ -2,7 +2,7 @@
   <div class="accordion">
     <div class="accordion-header" @click="toggleAccordion">
       <h4 class="accordion-title">{{ title }}</h4>
-       <SvgIcon type="mdi" :path="isOpen ? mdiChevronUp : mdiChevronDown" />
+      <SvgIcon type="mdi" :path="isOpen ? mdiChevronUp : mdiChevronDown" />
     </div>
     <div class="accordion-content" :class="{ open: isOpen }">
       <slot></slot>

@@ -6,7 +6,7 @@
           <div class="modal-header">
             <h3>{{ title }}</h3>
             <button class="modal-close-button" @click="closeModal">
-              <SvgIcon :path="mdiClose" type="mdi" class="mdicon"/>
+              <SvgIcon :path="mdiClose" type="mdi" class="mdicon" />
             </button>
           </div>
           <div class="modal-body">
@@ -19,14 +19,14 @@
                 @load="handleImageLoaded"
               />
               <div v-if="isLoading" class="loading-spinner">
-                <SvgIcon :path="mdiLoading" type="mdi" class="mdicon"/>
+                <SvgIcon :path="mdiLoading" type="mdi" class="mdicon" />
               </div>
             </div>
           </div>
           <div class="modal-footer">
             <button class="modal-button" @click="closeModal">Fermer</button>
             <a :href="imageUrl" download class="modal-button download-button" target="_blank">
-              <SvgIcon :path="mdiDownload" type="mdi" class="mdicon"/> Télécharger
+              <SvgIcon :path="mdiDownload" type="mdi" class="mdicon" /> Télécharger
             </a>
           </div>
         </div>

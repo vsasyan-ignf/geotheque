@@ -29,7 +29,7 @@
               class="dropdown-toggle"
               @click="showScaleMinOptions = !showScaleMinOptions"
             >
-              <SvgIcon :path="mdiMenuDown" type="mdi" class="i"/>
+              <SvgIcon :path="mdiMenuDown" type="mdi" class="i" />
             </button>
             <div class="dropdown-options" v-if="showScaleMinOptions">
               <div
@@ -59,7 +59,7 @@
               class="dropdown-toggle"
               @click="showScaleMaxOptions = !showScaleMaxOptions"
             >
-              <SvgIcon :path="mdiMenuDown" type="mdi" class="i"/>
+              <SvgIcon :path="mdiMenuDown" type="mdi" class="i" />
             </button>
             <div class="dropdown-options" v-if="showScaleMaxOptions">
               <div
@@ -83,11 +83,11 @@
 
       <div class="button-group">
         <button type="submit" class="button search-button">
-          <SvgIcon :path="mdiMagnify" type="mdi" class="i"/>
+          <SvgIcon :path="mdiMagnify" type="mdi" class="i" />
           <span>Rechercher</span>
         </button>
         <button type="button" class="button reset-button" @click="resetForm">
-          <SvgIcon :path="mdiRefresh" type="mdi" class="i"/>
+          <SvgIcon :path="mdiRefresh" type="mdi" class="i" />
           <span>Réinitialiser</span>
         </button>
       </div>
@@ -97,10 +97,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import Dropdown from './material/Dropdown.vue'
-import { eventBus } from './composable/eventBus'
+import Dropdown from '@/components/material/Dropdown.vue'
+import { eventBus } from '@/components/composable/eventBus'
 
-import { useScanStore } from './store/scan'
+import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiRefresh, mdiMagnify, mdiMenuDown } from '@mdi/js'
 

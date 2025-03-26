@@ -12,7 +12,7 @@
       @mouseleave="tab.showTooltip = false"
       :title="tab.title"
     >
-      <SvgIcon v-if="mdiIcons[tab.icon]" :path="mdiIcons[tab.icon]" class="icon" type="mdi"/>
+      <SvgIcon v-if="mdiIcons[tab.icon]" :path="mdiIcons[tab.icon]" class="icon" type="mdi" />
       <div class="tooltip" v-show="activeTab !== tab.id">{{ tab.title }}</div>
     </button>
   </div>

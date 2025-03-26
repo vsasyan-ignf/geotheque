@@ -1,59 +1,57 @@
-<!-- recherche par departement -->
 <template>
   <div class="sub-category-content">
-    <SubCategoryHeader title="Recherche par département" @close="$emit('close')" />
+    <SubCategoryHeader title="Recherche par feuilles" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="departement-search">Nom ou code</label>
+        <label for="feuille-search">Nom</label>
         <div class="input-group">
           <input
-            id="departement-search"
-            v-model="searchDepartement"
+            id="feuille-search"
+            autocomplete="off"
+            v-model="feuilleSelected"
             type="text"
-            placeholder="Ex: Rhône ou 69"
-            @input="searchDepartements"
+            placeholder="Ex: Feuille verte de printemps"
+            @input="searchFeuille"
             @focus="showResults = true"
           />
-          <button @click="searchDepartements">
-            <SvgIcon :path="mdiMagnify" type="mdi" class="mdi"/>
+          <button @click="validateFeuille">
+            <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="departementResults.length > 0">
-              Résultats ({{ departementResults.length }})
-            </h5>
-            <h5 v-else-if="searchDepartement">Aucun résultat</h5>
+            <h5 v-if="communeResults.length > 0">Résultats ({{ communeResults.length }})</h5>
+            <h5 v-else-if="feuilleSelected">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
-              <SvgIcon :path="mdiClose" type="mdi" class="mdi"/>
+              <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
             </button>
           </div>
 
           <div class="results-content">
-            <div class="results-list" v-if="departementResults.length > 0">
+            <div class="results-list" v-if="communeResults.length > 0">
               <div
-                v-for="dept in departementResults"
-                :key="dept.code"
+                v-for="(commune, index) in communeResults"
+                :key="commune.code + '-' + commune.nom"
                 class="result-item"
-                @click="selectDepartement(dept)"
+                @click="selectFeuille(commune)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ dept.nom }}</div>
-                  <div class="result-secondary">{{ dept.code }} - {{ dept.region }}</div>
+                  <div class="result-main">{{ commune.nom }}</div>
+                  <div class="result-secondary">{{ commune.code }} - {{ commune.departement }}</div>
                 </div>
               </div>
             </div>
 
-            <div class="no-results" v-else-if="searchDepartement">
-              <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi"/>
-              <span>Aucun Département trouvée</span>
+            <div class="no-results" v-else-if="feuilleSelected">
+              <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
+              <span>Aucune commune trouvée</span>
             </div>
 
             <div class="empty-search" v-else>
-              <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi"/>
-              <span>Saisissez le nom ou code d'un Département</span>
+              <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
+              <span>Saisissez le nom ou code postal d'une commune</span>
             </div>
           </div>
         </div>
@@ -67,23 +65,24 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import proj4 from 'proj4'
+import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
+import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-
-const emit = defineEmits(['close', 'select-departement'])
-const searchDepartement = ref('')
-const departementResults = ref([])
-const showResults = ref(false)
-let searchTimeout = null
-const proj3857 = 'EPSG:3857' // Web Mercator
-const proj2154 = 'EPSG:2154' // Lambert-93
-import { useScanStore } from './store/scan'
 
 const scanStore = useScanStore()
 
+const emit = defineEmits(['close', 'select-commune'])
+
+let feuilleSelected = ref('')
+const communeResults = ref([])
+const showResults = ref(false)
+let searchTimeout = null
+let repCommune = ref(null)
+
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
-  const searchInput = document.getElementById('departement-search')
+  const searchInput = document.getElementById('feuille-search')
+
   if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
   }
@@ -98,121 +97,78 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
-function create_bbox(contour) {
-  if (!contour || contour.length === 0) {
-    throw new Error('Contour invalide')
-  }
-  const coordinates = contour[0].map((point) => [point[0], point[1]])
-
-  if (coordinates.length < 3) {
-    throw new Error('Un polygone doit avoir au moins 3 points')
-  }
-  let minX = coordinates[0][0]
-  let minY = coordinates[0][1]
-  let maxX = coordinates[0][0]
-  let maxY = coordinates[0][1]
-
-  coordinates.forEach((point) => {
-    const [x, y] = point
-    minX = Math.min(minX, x)
-    minY = Math.min(minY, y)
-    maxX = Math.max(maxX, x)
-    maxY = Math.max(maxY, y)
-  })
-
-  return { minX, minY, maxX, maxY }
-}
-
-function convertBbox(bbox, proj_in, proj_out) {
-  //Convertion Bbox de proj_in vers proj_out
-  const minX = bbox.minX
-  const minY = bbox.minY
-  const maxX = bbox.maxX
-  const maxY = bbox.maxY
-
-  const minCoord = proj4(proj_in, proj_out, [minX, minY])
-  const maxCoord = proj4(proj_in, proj_out, [maxX, maxY])
-
-  return [minCoord[0], minCoord[1], maxCoord[0], maxCoord[1]]
-}
-
-function searchDepartements() {
+function searchFeuille() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-  let url_dep
-  const query = searchDepartement.value.toLowerCase().trim()
-  const numbner_dep = parseInt(query)
-  if (!isNaN(numbner_dep)) {
-    url_dep = `https://geo.api.gouv.fr/departements?code=${query}&fields=nom,code,region`
-  } else {
-    url_dep = `https://geo.api.gouv.fr/departements?nom=${query}&fields=nom,code,region`
+
+  const query = feuilleSelected.value.toLowerCase().trim()
+
+  if (!query) {
+    communeResults.value = []
+    return
   }
 
+  showResults.value = true
+
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
+  let search_url = ''
   searchTimeout = setTimeout(() => {
-    fetch(url_dep)
+    if (parseInt(query)) {
+      console.log('code postal')
+      search_url = `https://geo.api.gouv.fr/communes?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+    } else {
+      search_url = `https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+    }
+
+    fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.map((departement) => ({
-          nom: departement.nom,
-          code: departement.code,
-          region: departement.region.nom,
+        const newResults = data.map((commune) => ({
+          nom: commune.nom,
+          code: commune.codesPostaux[0],
+          departement: commune.departement.nom,
+          bbox: commune.bbox,
+          contour: commune.contour,
         }))
-        departementResults.value = newResults
+
+        communeResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des departements:', error)
-        departementResults.value = []
+        console.error('Erreur lors de la récupération des communes:', error)
+        communeResults.value = []
       })
   }, 300)
 }
 
-function selectDepartement(departement) {
-  getDepartementBbox(departement)
-    .then((contour) => {
-      let bbox3857 = create_bbox(contour)
-      const bbox2154 = convertBbox(bbox3857, proj3857, proj2154)
-      const point = {
-        x: 0,
-        y: 0,
-        bboxLambert93: bbox2154,
-      }
-
-      const coordinates = contour[0].map((point) => [point[0], point[1]])
-
-      scanStore.updateSelectedGeom(coordinates)
-
-      emit('select-departement', point)
-    })
-    .catch((error) => {
-      console.error('Erreur lors de la récupération des controus du departements:', error)
-    })
+function selectFeuille(commune) {
+  feuilleSelected.value = commune.nom
+  repCommune = commune
 
   showResults.value = false
 }
 
-async function getDepartementBbox(departement) {
-  const depCode = departement.code.toString()
-  const urlDepBbox =
-    `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0
-  ` +
-    `&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=CODE_DEPT='${depCode}'&srsName=EPSG:3857`
+function validateFeuille() {
+  if (repCommune) {
+    const bbox = repCommune.bbox.coordinates[0]
+    const bboxWGS84 = [bbox[0], bbox[2]]
+    const bboxLambert93 = bboxWGS84.map((point) =>
+      useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154'),
+    )
 
-  try {
-    const response = await fetch(urlDepBbox)
-    if (!response.ok) {
-      throw new Error(`rrreur réseau : ${response.status}`)
+    const point = {
+      x: 0,
+      y: 0,
+      bboxLambert93: bboxLambert93.flat(),
     }
-    const data = await response.json()
-    const contour_dep = data.features[0]?.geometry?.coordinates[0]
-    if (!contour_dep) {
-      throw new Error('coordonées non trouvée dans la réponse')
-    }
-    return contour_dep
-  } catch (error) {
-    console.error('e:', error)
-    throw error
+
+    const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
+      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
+    )
+
+    scanStore.updateSelectedGeom(contourMercator)
+
+    emit('select-commune', point)
   }
 }
 </script>
@@ -222,6 +178,7 @@ async function getDepartementBbox(departement) {
   animation: fadeIn 0.3s ease;
   position: relative;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -1,4 +1,3 @@
-import { ref } from 'vue'
 import PlanIGN from '@/assets/basecard/plan_ign.png'
 import Ortho from '@/assets/basecard/ortho.jpeg'
 import BDParcellaire from '@/assets/basecard/bdparcellaire.png'

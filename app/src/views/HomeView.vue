@@ -9,11 +9,9 @@ import MapBox from '@/components/MapBox.vue'
 </script>
 
 <style>
-
-.mdicon{
+.mdicon {
   height: 20px;
   width: 20px;
   color: #ffffff;
 }
-
 </style>

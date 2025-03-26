@@ -1,13 +1,13 @@
 <template>
   <header class="header">
     <div class="logo">
-      <SvgIcon :path="mdiMap" type="mdi" class="mdicon"/>
+      <SvgIcon :path="mdiMap" type="mdi" class="mdicon" />
       <span>Géothèque</span>
     </div>
 
     <nav class="header-nav">
       <button class="header-button" title="Paramètres">
-        <SvgIcon :path="mdiCog" type="mdi" class="mdicon"/>
+        <SvgIcon :path="mdiCog" type="mdi" class="mdicon" />
       </button>
     </nav>
   </header>
@@ -15,7 +15,6 @@
 
 <script setup>
 import { mdiMap, mdiCog } from '@mdi/js'
-
 </script>
 
 <style scoped>

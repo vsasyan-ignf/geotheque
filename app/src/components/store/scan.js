@@ -5,8 +5,6 @@ export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
   let storeScansData = ref(null)
   let storeSelectedGeom = ref([])
-  let storeData = ref(null)
-  let storeCommuneContour = ref([])
   let storeSelectedScan = ref(null)
   let currentCollecInfo = ref(null)
   let activeSubCategory = ref(null)
@@ -15,8 +13,8 @@ export const useScanStore = defineStore('scan', () => {
   let storeCritereSelection = ref({
     yearMin: null,
     yearMax: null,
-    scaleMin: null,
-    scaleMax: null,
+    scaleMin: 500,
+    scaleMax: 100000,
     selectedCollection: null,
   })
 
@@ -68,8 +66,8 @@ export const useScanStore = defineStore('scan', () => {
     storeCritereSelection.value = {
       yearMin: null,
       yearMax: null,
-      scaleMin: null,
-      scaleMax: null,
+      scaleMin: 500,
+      scaleMax: 100000,
       selectedCollection: null,
     }
     storeSelectedGeom.value = []
@@ -137,8 +135,6 @@ export const useScanStore = defineStore('scan', () => {
     storeSelectedGeom,
     updateSelectedGeom,
     resetCriteria,
-    storeCommuneContour,
-    // updateCommuneContour,
     resetCriteria,
     activeTab,
     updateActiveTab,

@@ -20,6 +20,15 @@
           />
         </template>
 
+        <template v-if="activeTab === 'carthotheque_etranger'">
+          <CartothequeEtranger
+            :activeSubCategory="activeSubCategory"
+            :subCategories="subCategoriesEtranger"
+            @select-sub-category="selectSubCategory"
+            @close-sub-category="closeSubCategory"
+          />
+        </template>
+
         <template v-else-if="activeTab === 'aide'">
           <Aide />
         </template>
@@ -32,7 +41,8 @@
 import { ref, computed } from 'vue'
 import SidebarTabs from './SidebarTabs.vue'
 import TabContent from './TabContent.vue'
-import CartothequeFrance from './CartothequeFrance.vue'
+import CartothequeFrance from './cartotheque/CartothequeFrance.vue'
+import CartothequeEtranger from './cartotheque/CartothequeEtranger.vue'
 import Aide from './Aide.vue'
 import { useScanStore } from './store/scan'
 
@@ -51,9 +61,15 @@ const tabs = [
 ]
 
 const subCategories = [
-  { id: 'commune', icon: 'city', title: 'Commune' },
-  { id: 'departement', icon: 'map', title: 'Département' },
-  { id: 'point', icon: 'crosshairs-gps', title: 'Point XY' },
+  { id: 'commune', icon: 'commune', title: 'Commune' },
+  { id: 'departement', icon: 'departement', title: 'Département' },
+  { id: 'point', icon: 'point', title: 'Point XY' },
+]
+
+const subCategoriesEtranger = [
+  { id: 'feuilles', icon: 'feuille', title: 'Feuilles' },
+  { id: 'pays', icon: 'pays', title: 'Pays' },
+  { id: 'point', icon: 'point', title: 'Point XY' },
 ]
 
 const activeTabTitle = computed(() => {
@@ -73,6 +89,8 @@ function toggleTab(tabId) {
     activeTab.value = tabId
     isSidebarOpen.value = true
     scanStore.updateActiveTab(tabId)
+    activeSubCategory.value = null
+    scanStore.updateActiveSubCategory(null)
   }
 }
 

@@ -1,54 +1,49 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
+      <SparkleButton
+        nameButton="Exporter les scans"
+        @click="downloadCSV"
+      >
+        <template #icon
+          ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
+        /></template>
+      </SparkleButton>
       <div class="dropdown-container">
         <div class="dropdown-wrapper">
           <Dropdown nameDropdown="Nom du Scan" :options="storeScansData" />
         </div>
-        <!-- <button class="icon-button" @click.prevent="openModal">
-          <i class="mdi mdi-eye"></i>
-          
-        </button> -->
       </div>
       <div class="button-group">
         <ShakingButton nameButton="Visualiser" @click="openIipmooviewer">
-          <template #icon><SvgIcon type="mdi" :path="mdiMonitorEye" class="mdicon"/></template>
+          <template #icon><SvgIcon type="mdi" :path="mdiMonitorEye" class="mdicon" /></template>
         </ShakingButton>
         <ShakingButton nameButton="Télécharger" @click="downloadScans">
-          <template #icon><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"/></template>
+          <template #icon
+            ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
+          /></template>
         </ShakingButton>
-        <ShakingButton nameButton="XML" @click="downloadxml" />
+        <ShakingButton nameButton="XML" @click="downloadxml">
+          <template #icon
+            ><SvgIcon type="mdi" :path="mdiXml" class="mdicon"
+          /></template>
+        </ShakingButton>
       </div>
-
-      <ShakingButton
-        nameButton="Exporter tous les scans"
-        @click="downloadCSV"
-        style="width: 210px; margin-top: 10px">
-      <template #icon><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"/></template>
-      </ShakingButton>
     </form>
-    <ImageModal
-      :is-open="isModalOpen"
-      :image-url="imageUrl"
-      title="Prévisualisation de l'image : 21FD0120x00001_03343.jp2"
-      @close="closeModal"
-    />
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
-import ShakingButton from './material/ShakingButton.vue'
-import Dropdown from './material/Dropdown.vue'
-import ImageModal from './ImageModal.vue'
-import { useScanStore } from './store/scan'
+import ShakingButton from '@/components/material/ShakingButton.vue'
+import SparkleButton from '../material/SparkleButton.vue'
+import Dropdown from '@/components/material/Dropdown.vue'
+import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
-import { mdiMonitorEye, mdiBriefcaseDownload} from '@mdi/js'
+import { mdiMonitorEye, mdiBriefcaseDownload, mdiXml } from '@mdi/js'
 
 const scanStore = useScanStore()
 const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)
-
-const isModalOpen = ref(false)
 
 const imageUrl = ref('')
 
@@ -157,16 +152,10 @@ function dicoToFormatCSV(arrObj) {
   return csvContent
 }
 
-function openModal() {
-  isModalOpen.value = true
-}
-function closeModal() {
-  isModalOpen.value = false
-}
+
 </script>
 <style scoped>
 .scan-box {
-  /* margin-top: 20px; */
   padding-top: 10px;
   width: 100%;
   box-sizing: border-box;
@@ -182,6 +171,7 @@ function closeModal() {
 .criteria-form {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 5px;
   width: 100%;
 }
@@ -190,6 +180,8 @@ function closeModal() {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
   width: 100%;
   gap: 8px;
 }
@@ -199,31 +191,6 @@ function closeModal() {
   width: 100%;
 }
 
-.icon-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  border-radius: 4px;
-  background-color: #739614;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition:
-    background-color 0.3s,
-    transform 0.2s;
-  margin-top: 4px;
-}
-
-.icon-button:hover {
-  background-color: #5e7a10;
-}
-
-.icon-button:active {
-  transform: translateY(1px);
-}
 
 .form-row {
   display: flex;
