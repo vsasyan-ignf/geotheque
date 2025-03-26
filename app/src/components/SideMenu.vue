@@ -20,6 +20,16 @@
           />
         </template>
 
+        <template v-if="activeTab === 'carthotheque_etranger'">
+          <CartothequeEtranger
+            :activeSubCategory="activeSubCategory"
+            :subCategories="subCategories"
+            @select-sub-category="selectSubCategory"
+            @close-sub-category="closeSubCategory"
+          />
+        </template>
+
+
         <template v-else-if="activeTab === 'aide'">
           <Aide />
         </template>
@@ -33,6 +43,7 @@ import { ref, computed } from 'vue'
 import SidebarTabs from './SidebarTabs.vue'
 import TabContent from './TabContent.vue'
 import CartothequeFrance from './cartotheque/CartothequeFrance.vue'
+import CartothequeEtranger from './cartotheque/CartothequeEtranger.vue'
 import Aide from './Aide.vue'
 import { useScanStore } from './store/scan'
 
