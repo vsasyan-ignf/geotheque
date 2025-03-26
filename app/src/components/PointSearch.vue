@@ -79,7 +79,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import { bboxState, eventBus } from './composable/eventBus'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import Accordeon from './Accordeon.vue'
+import Accordeon from './material/Accordeon.vue'
 import { useConvertCoordinates } from './composable/convertCoordinates'
 import { useScanStore } from './store/scan'
 
