@@ -86,17 +86,41 @@ function getLayersActiveTab(){
   }
 }
 
-
 watch(activeTab, (newValue) => {
   console.log("🔄 Changement d'onglet détecté:", newValue);
-
+  
+  // Récupérer les nouvelles layers
   const newLayers = getLayersActiveTab();
-  layers = ref(newLayers);
+  layers.value = newLayers;
 
+  if (olMap.value) {
+    // get wmts layers
+    const mapLayers = olMap.value.getLayers();
+    const wmtsLayers = mapLayers.getArray().filter(layer => layer instanceof TileLayer);
+    
+    // met à jour les wmts
+    wmtsLayers.forEach((layer, index) => {
+      if (index < newLayers.length) {
+        // Créer une nouvelle source pour cette couche
+        const newSource = createWmtsSource(newLayers[index].id);
+        
+        // defined source
+        layer.setSource(newSource);
+        
+        // défini la visilibité de l'index 0
+        layer.setVisible(index === 0);
+      }
+    });
+
+    scanStore.resetCriteria()
+
+    // reset l'index à 0
+    activeLayerIndex.value = 0;
+  }
+  
   console.log("✅ Nouvelles couches chargées:", layers.value);
-
-
 });
+
 
 const activeLayerIndex = ref(0);
 const olView = ref(null);
@@ -115,29 +139,33 @@ function toggleLayerVisibility(isVisible) {
 }
 
 function changeActiveLayer(index) {
-  activeLayerIndex.value = index
+  activeLayerIndex.value = index;
 
   if (olMap.value) {
-    // Changement des couches WMTS uniquement
-    const wmtsLayers = olMap.value.getLayers().getArray().slice(0, layers.value.length)
-    wmtsLayers.forEach((layer, idx) => {
-      if (visibility_switch.value === true) {
-        layer.setVisible(idx === index);
-        // console.log("Layer", layer.id, idx, "visibility set to", idx === index);
-      }
-      
+    // recup les wmts layers
+    const wmtsLayers = olMap.value.getLayers().getArray()
+      .filter(layer => layer instanceof TileLayer);
+
+    // masque les wmts
+    wmtsLayers.forEach((layer, layerIndex) => {
+      layer.setVisible(layerIndex === index);
     });
 
+    // met à jour le setzoom
     if (olView.value) {
-      olView.value.setMaxZoom(getMaxZoom(layers.value[index].id))
+      olView.value.setMaxZoom(getMaxZoom(layers.value[index].id));
     }
   }
 }
 
+
 function createWmtsSource(layerId) {
   console.log('Layer ID:', layerId)
   if (layerId === 'osm') {
-    return new OSM();
+    return new OSM({
+      attributions: null,
+      controls: [] 
+    });
   }
   else{
     const projObj = getProjection('EPSG:3857')
@@ -179,7 +207,6 @@ onMounted(() => {
 
     const wmtsLayers = layers.value.map((layer, index) => {
       const wmtsSource = createWmtsSource(layer.id);
-      idlayer = layer.id;
       return new TileLayer({
         source: wmtsSource,
         visible: index === activeLayerIndex.value,
@@ -378,12 +405,6 @@ onMounted(() => {
           duration: 1_000
         });
       }
-
-
-
-
-
-
     })
 
 
