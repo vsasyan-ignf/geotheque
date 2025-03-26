@@ -6,21 +6,9 @@ import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
 import osm from '@/assets/basecard/scan25.jpg'
 import ortho1950 from '@/assets/basecard/ortho1950.png'
-// export const tabs = [
-//     { id: 'carthotheque', icon: 'layers', title: 'Cartothèque France' },
-//     { id: 'carthotheque_etranger', icon: 'layers', title: 'Cartothèque Étranger' },
-//     { id: 'phototheque', icon: 'camera', title: 'Photothèque France' },
-//     { id: 'phototheque_etranger', icon: 'camera', title: 'Photothèque Étranger' },
-//     { id: 'aide', icon: 'lightbulb-on', title: 'Aide' },
-// ];
 
-// export const subCategories = [
-//     { id: 'commune', icon: 'city', title: 'Commune' },
-//     { id: 'departement', icon: 'map', title: 'Département' },
-//     { id: 'point', icon: 'crosshairs-gps', title: 'Point XY' },
-// ];
 
-export const layers_carto = ref([
+export const layers_carto = [
     {
         id: 'plan',
         name: 'Plan IGN',
@@ -46,9 +34,9 @@ export const layers_carto = ref([
         name: 'Scan25',
         thumbnail: Scan25,
     },
-]);
+];
 
-export const layers_carto_monde = ref([
+export const layers_carto_monde = [
     {
         id: 'osm',
         name: 'osm',
@@ -69,9 +57,9 @@ export const layers_carto_monde = ref([
         name: 'Scan25',
         thumbnail: Scan25,
     },
-]);
+];
 
-export const layers_photo = ref([
+export const layers_photo = [
     {
         id: 'plan',
         name: 'Plan IGN',
@@ -102,9 +90,9 @@ export const layers_photo = ref([
         name: 'ortho1950',
         thumbnail: ortho1950,
     }
-]);
+];
 
-export const layers_photo_monde = ref([
+export const layers_photo_monde = [
     {
         id: 'osm',
         name: 'osm',
@@ -125,4 +113,4 @@ export const layers_photo_monde = ref([
         name: 'Scan25',
         thumbnail: Scan25,
     },
-]);
+];

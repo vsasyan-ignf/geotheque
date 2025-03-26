@@ -48,9 +48,7 @@ import OSM from 'ol/source/OSM';
 
 
 const scanStore = useScanStore()
-
 const { storeURL, storeCommuneContour, activeSubCategory, storeSelectedScan, activeTab } = storeToRefs(scanStore);
-
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -70,12 +68,11 @@ const vectorScanSource = ref(null)
 const scanLayer = ref(null)
 
 const url_test = ref(``);
-const bbox = ref([0, 0, 0, 0]);
-let layers = ref(layers_carto.value);
+let layers = ref(layers_carto);
 console.log("layers", layers)
 
 
-function getLayers(){
+function getLayersActiveTab(){
   if (activeTab.value === 'carthotheque') {
     return layers_carto
   } else if (activeTab.value === 'carthotheque_etranger') {
@@ -85,116 +82,21 @@ function getLayers(){
   } else if (activeTab.value === 'phototheque_etranger') {
     return layers_photo_monde
   } else {
-    return ref([])
+    return []
   }
 }
-
-// watch(activeTab, (newValue) => {
-//   const newLayers = getLayers();
-//   layers.value = newLayers.value;
-//   console.log("layers", layers)
-
-//   olMap.value.getLayers().getArray().forEach(layer => {
-//     if (layer instanceof TileLayer && layer.getSource() instanceof WMTS) {
-//       olMap.value.removeLayer(layer);
-//     }
-//   });
-
-//   const wmtsLayers = layers.value.map((layer, index) => {
-//     return new TileLayer({
-//       source: createWmtsSource(layer.id),
-//       visible: index === activeLayerIndex.value, // Seule la première couche est visible
-//     });
-//   });
-
-//   wmtsLayers.forEach(layer => olMap.value.addLayer(layer));
-
-//   console.log("WMTS Layers updated based on activeTab:", newValue);
-//   activeLayerIndex.value = newLayers.value.length > 0 ? 0 : -1; // -1 si aucun layer
-//   console.log("activeLayerIndex", activeLayerIndex.value)
-//   changeActiveLayer(activeLayerIndex.value);
-// })
 
 
 watch(activeTab, (newValue) => {
   console.log("🔄 Changement d'onglet détecté:", newValue);
 
-  const newLayers = getLayers();
-  layers.value = newLayers.value;
+  const newLayers = getLayersActiveTab();
+  layers = ref(newLayers);
+
   console.log("✅ Nouvelles couches chargées:", layers.value);
 
-  if (activeLayerIndex.value >= layers.value.length) {
-    activeLayerIndex.value = 0;
-  }
 
-  if (olMap.value) {
-    olMap.value.setTarget(null);
-    olMap.value = null;
-  }
-
-  const wmtsLayers = layers.value.map((layer, index) => new TileLayer({
-    source: createWmtsSource(layer.id),
-    visible: index === activeLayerIndex.value,
-  }));
-
-  vectorWfsSource.value = new VectorSource({
-    url: url_test.value,
-    format: new GeoJSON(),
-    strategy: bboxStrategy,
-  });
-
-  const wfsLayer = new VectorLayer({
-    source: vectorWfsSource.value,
-    style: new Style({
-      stroke: new Stroke({ color: 'red', width: 0.5 }),
-    }),
-  });
-
-  vectorPinSource.value = new VectorSource();
-  const pinLayer = new VectorLayer({
-    source: vectorPinSource.value,
-    style: new Style({
-      image: new Icon({ src: markerIcon, scale: 0.05, anchor: [0.5, 1] })
-    })
-  });
-
-  vectorScanSource.value = new VectorSource();
-  scanLayer.value = new VectorLayer({
-    source: vectorScanSource.value,
-    style: new Style({
-      stroke: new Stroke({ color: 'red', width: 2 }),
-      fill: new Fill({ color: 'rgba(255, 0, 0, 0.5)' }),
-    })
-  });
-
-  const view = new View({
-    center: center.value,
-    zoom: zoom.value,
-    projection: projection.value,
-    rotation: rotation.value,
-    maxZoom: getMaxZoom(layers.value[activeLayerIndex.value]?.id),
-  });
-
-  olMap.value = new Map({
-    target: mapElement.value,
-    layers: [...wmtsLayers, wfsLayer, pinLayer, scanLayer.value],
-    view: view,
-    controls: defaultControls({ zoom: false, rotate: false })
-  });
-
-  olView.value = view;
-
-  console.log("🆕 Nouvelle carte OpenLayers créée !");
-  
-  toggleLayerVisibility(visibility_switch.value);
-
-  window.dispatchEvent(new Event('resize'));
 });
-
-
-
-
-
 
 const activeLayerIndex = ref(0);
 const olView = ref(null);
@@ -273,6 +175,8 @@ function createWmtsSource(layerId) {
 let idlayer
 onMounted(() => {
   nextTick(() => {
+
+
     const wmtsLayers = layers.value.map((layer, index) => {
       const wmtsSource = createWmtsSource(layer.id);
       idlayer = layer.id;
