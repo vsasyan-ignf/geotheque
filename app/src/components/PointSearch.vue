@@ -7,14 +7,14 @@
         :class="['mode-button', { active: searchMode === 'map' }]"
         @click="searchMode = 'map'"
       >
-        <i class="mdi mdi-map-marker"></i>
+        <SvgIcon :path="mdiMapMarker" type="mdi" class="mdi"/>
         Recherche sur la carte
       </button>
       <button
         :class="['mode-button', { active: searchMode === 'coords' }]"
         @click="searchMode = 'coords'"
       >
-        <i class="mdi mdi-crosshairs-gps"></i>
+        <SvgIcon :path="mdiCrosshairsGps" type="mdi" class="mdi"/>
         Recherche par coordonnées
       </button>
     </div>
@@ -39,7 +39,7 @@
             </select>
           </div>
           <button class="action-button" @click="handleGoToPoint">
-            <i class="mdi mdi-crosshairs-gps"></i>
+            <SvgIcon :path="mdiCrosshairsGps" type="mdi" class="mdi"/>
             Centrer sur ce point
           </button>
         </div>
@@ -49,7 +49,7 @@
     <div v-if="searchMode === 'map'">
       <Accordeon title="Recherche sur la carte" defaultOpen>
         <div class="map-search-instructions">
-          <i class="mdi mdi-information-outline"></i>
+          <SvgIcon :path="mdiInformationOutline" type="mdi" class="mdi"/>
           <p>Cliquez sur la carte pour sélectionner un point.</p>
 
           <div v-if="pointX && pointY" class="selected-coordinates">
@@ -83,6 +83,7 @@ import Accordeon from './Accordeon.vue'
 import { useConvertCoordinates } from './composable/convertCoordinates'
 import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
+import { mdiInformationOutline, mdiCrosshairsGps, mdiMapMarker } from '@mdi/js'
 
 const scanStore = useScanStore()
 
@@ -315,7 +316,7 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.3s;
 }
-.mode-button i {
+.mode-button .mdi {
   font-size: 24px;
   color: #666;
 }
@@ -323,7 +324,7 @@ onUnmounted(() => {
   background-color: #e6f0d8;
   border-color: #739614;
 }
-.mode-button.active i {
+.mode-button.active .mdi {
   color: #739614;
 }
 .mode-button:hover {
@@ -341,7 +342,7 @@ onUnmounted(() => {
   background-color: #f9f9f9;
   text-align: center;
 }
-.map-search-instructions i {
+.map-search-instructions .mdi {
   font-size: 32px;
   color: #739614;
   margin-bottom: 10px;
