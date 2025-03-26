@@ -2,8 +2,8 @@ export function getWmtsUrl(layerId) {
   if (layerId === 'cartesign' || layerId === 'scan25') {
     return `https://data.geopf.fr/private/wmts?apikey=ign_scan_ws&SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
   }
-  else if (layerId === 'ortho') {
-    return `https://data.geopf.fr/wms-r?LAYERS=ORTHOIMAGERY.ORTHOPHOTOS.1950-1965&VERSION=1.3.0`
+  else if (layerId === 'ortho1950') {
+    return `https://data.geopf.fr/wms-r?SERVICE=WMS&VERSION=1.3.0&TRANSPARENT=TRUE&EXCEPTIONS=INIMAGE&REQUEST=GetMap&CRS=EPSG%3A3857`
   }
   return `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
 }
@@ -20,6 +20,8 @@ export function getWmtsLayerName(layerId) {
       return 'GEOGRAPHICALGRIDSYSTEMS.MAPS'
     case 'scan25':
       return 'GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR'
+    case 'ortho1950':
+      return 'ORTHOIMAGERY.ORTHOPHOTOS.1950-1965'
     default:
       return 'GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2'
   }
@@ -37,6 +39,8 @@ export function getMaxZoom(layerId) {
       return 19
     case 'scan25':
       return 16
+    case 'ortho1950':
+      return 19
     default:
       return 19
   }
@@ -50,6 +54,8 @@ export function getFormatWmtsLayer(layerId) {
       return 'image/jpeg'
     case 'plan':
     case 'bdparcellaire':
+      return 'image/png'
+    case 'ortho1950':
       return 'image/png'
     default:
       return 'image/jpeg'

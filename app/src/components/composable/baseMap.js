@@ -5,6 +5,7 @@ import BDParcellaire from '@/assets/basecard/bdparcellaire.png'
 import CartesIGN from '@/assets/basecard/cartesign.jpg'
 import Scan25 from '@/assets/basecard/scan25.jpg'
 import osm from '@/assets/basecard/scan25.jpg'
+import ortho1950 from '@/assets/basecard/ortho1950.png'
 // export const tabs = [
 //     { id: 'carthotheque', icon: 'layers', title: 'Cartothèque France' },
 //     { id: 'carthotheque_etranger', icon: 'layers', title: 'Cartothèque Étranger' },
@@ -96,6 +97,11 @@ export const layers_photo = ref([
         name: 'Scan25',
         thumbnail: Scan25,
     },
+    {
+        id: 'ortho1950',
+        name: 'ortho1950',
+        thumbnail: ortho1950,
+    }
 ]);
 
 export const layers_photo_monde = ref([
