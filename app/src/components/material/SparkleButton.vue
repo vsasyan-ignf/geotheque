@@ -14,7 +14,6 @@
     font-size: 14px;
     font-family: inherit;
     font-weight: 500;
-    width: 200px;
   }
 
   .button:active {
