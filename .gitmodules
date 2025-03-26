@@ -1,0 +1,3 @@
+[submodule "app/public/iipmooviewer"]
+   path = app/public/iipmooviewer
+   url = iipmooviewer

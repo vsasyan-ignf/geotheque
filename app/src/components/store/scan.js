@@ -12,14 +12,15 @@ export const useScanStore = defineStore('scan', () => {
     let storeCritereSelection = ref({
         yearMin: null,
         yearMax: null,
-        scaleMin: 500,
-        scaleMax: 100000,
+        scaleMin: null,
+        scaleMax: null,
+        selectedCollection: null
     })
 
     let storeURL = computed(() => {
         if (storeBbox.value.length > 0) {
             const [minX, minY, maxX, maxY] = storeBbox.value
-            const { yearMin, yearMax, scaleMin, scaleMax } = storeCritereSelection.value
+            const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } = storeCritereSelection.value
 
             let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
 
@@ -27,6 +28,8 @@ export const useScanStore = defineStore('scan', () => {
             if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`
             if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`
             if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`
+            
+            if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
 
             return (
                 `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
@@ -63,6 +66,7 @@ export const useScanStore = defineStore('scan', () => {
             yearMax: null,
             scaleMin: null,
             scaleMax: null,
+            selectedCollection: null
         }
         storeSelectedGeom.value = []
         storeBbox.value = []

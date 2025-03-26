@@ -11,11 +11,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
+import { defineProps, defineEmits } from 'vue'
+import { eventBus } from '../composable/eventBus';
 import { useScanStore } from '../store/scan'
 
 const scanStore = useScanStore()
-
 const selected = ref('')
 
 const props = defineProps({
@@ -33,10 +34,20 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits()
+
 function updatestoreScansData() {
+  emit('update:selected', selected.value)
   scanStore.updateSelectedScan(selected.value)
   scanStore.updateCurrentScanInfo(selected.value.collecInfo)
 }
+
+watchEffect(() => eventBus.on('criteria-reset', (payload) => {
+  if (payload?.resetDropdown) {
+    selected.value = '';
+  }
+}));
+
 </script>
 
 <style scoped>

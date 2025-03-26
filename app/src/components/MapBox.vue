@@ -350,10 +350,11 @@ onMounted(() => {
 
     watch(storeSelectedScan, (newValue) => {
       console.log('----------------- NEW SCAN SELECTED ------------------------')
+      console.log("storeSelectedScan.value:", storeSelectedScan.value)
 
       vectorScanSource.value.clear()
-
-      if (storeSelectedScan.value) {
+      console.log(storeSelectedScan.value)
+      if (storeSelectedScan.value && storeSelectedScan.value.geom && storeSelectedScan.value.geom.length > 0) {
         const polygon = new Feature({
           geometry: new Polygon([storeSelectedScan.value.geom[0]]),
         })
@@ -368,6 +369,7 @@ onMounted(() => {
         })
       }
     })
+
 
     eventBus.on('criteria-reset', () => {
       if (vectorPinSource.value) {
