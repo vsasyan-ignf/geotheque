@@ -5,10 +5,6 @@
         <div class="dropdown-wrapper">
           <Dropdown nameDropdown="Nom du Scan" :options="storeScansData" />
         </div>
-        <!-- <button class="icon-button" @click.prevent="openModal">
-          <i class="mdi mdi-eye"></i>
-          
-        </button> -->
       </div>
       <div class="button-group">
         <ShakingButton nameButton="Visualiser" @click="openIipmooviewer">
@@ -32,12 +28,6 @@
         /></template>
       </ShakingButton>
     </form>
-    <ImageModal
-      :is-open="isModalOpen"
-      :image-url="imageUrl"
-      title="Prévisualisation de l'image : 21FD0120x00001_03343.jp2"
-      @close="closeModal"
-    />
   </div>
 </template>
 
@@ -45,15 +35,12 @@
 import { ref, watch } from 'vue'
 import ShakingButton from '@/components/material/ShakingButton.vue'
 import Dropdown from '@/components/material/Dropdown.vue'
-import ImageModal from '@/components/ImageModal.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiMonitorEye, mdiBriefcaseDownload } from '@mdi/js'
 
 const scanStore = useScanStore()
 const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)
-
-const isModalOpen = ref(false)
 
 const imageUrl = ref('')
 
