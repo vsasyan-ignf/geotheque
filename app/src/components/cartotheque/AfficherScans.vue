@@ -1,15 +1,14 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
-      <ShakingButton
-        nameButton="Exporter tous les scans"
+      <SparkleButton
+        nameButton="Exporter les scans"
         @click="downloadCSV"
-        style="width: 210px"
       >
         <template #icon
           ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
         /></template>
-      </ShakingButton>
+      </SparkleButton>
       <div class="dropdown-container">
         <div class="dropdown-wrapper">
           <Dropdown nameDropdown="Nom du Scan" :options="storeScansData" />
@@ -37,6 +36,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import ShakingButton from '@/components/material/ShakingButton.vue'
+import SparkleButton from '../material/SparkleButton.vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
@@ -156,7 +156,6 @@ function dicoToFormatCSV(arrObj) {
 </script>
 <style scoped>
 .scan-box {
-  /* margin-top: 20px; */
   padding-top: 10px;
   width: 100%;
   box-sizing: border-box;
@@ -172,6 +171,7 @@ function dicoToFormatCSV(arrObj) {
 .criteria-form {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 5px;
   width: 100%;
 }
@@ -191,31 +191,6 @@ function dicoToFormatCSV(arrObj) {
   width: 100%;
 }
 
-.icon-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  border-radius: 4px;
-  background-color: #739614;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition:
-    background-color 0.3s,
-    transform 0.2s;
-  margin-top: 4px;
-}
-
-.icon-button:hover {
-  background-color: #5e7a10;
-}
-
-.icon-button:active {
-  transform: translateY(1px);
-}
 
 .form-row {
   display: flex;
