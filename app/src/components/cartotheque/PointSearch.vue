@@ -7,14 +7,14 @@
         :class="['mode-button', { active: searchMode === 'map' }]"
         @click="searchMode = 'map'"
       >
-        <SvgIcon :path="mdiMapMarker" type="mdi" class="mdi"/>
+        <SvgIcon :path="mdiMapMarker" type="mdi" class="mdi" />
         Recherche sur la carte
       </button>
       <button
         :class="['mode-button', { active: searchMode === 'coords' }]"
         @click="searchMode = 'coords'"
       >
-        <SvgIcon :path="mdiCrosshairsGps" type="mdi" class="mdi"/>
+        <SvgIcon :path="mdiCrosshairsGps" type="mdi" class="mdi" />
         Recherche par coordonnées
       </button>
     </div>
@@ -39,7 +39,7 @@
             </select>
           </div>
           <button class="action-button" @click="handleGoToPoint">
-            <SvgIcon :path="mdiCrosshairsGps" type="mdi" class="mdi"/>
+            <SvgIcon :path="mdiCrosshairsGps" type="mdi" class="mdi" />
             Centrer sur ce point
           </button>
         </div>
@@ -49,7 +49,7 @@
     <div v-if="searchMode === 'map'">
       <Accordeon title="Recherche sur la carte" defaultOpen>
         <div class="map-search-instructions">
-          <SvgIcon :path="mdiInformationOutline" type="mdi" class="mdi"/>
+          <SvgIcon :path="mdiInformationOutline" type="mdi" class="mdi" />
           <p>Cliquez sur la carte pour sélectionner un point.</p>
 
           <div v-if="pointX && pointY" class="selected-coordinates">

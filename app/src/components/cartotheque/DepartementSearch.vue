@@ -4,7 +4,7 @@
     <SubCategoryHeader title="Recherche par département" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="departement-search">Nom ou code</label>
+        <label for="departement-search">Nom ou numéro de département</label>
         <div class="input-group">
           <input
             id="departement-search"
@@ -15,7 +15,7 @@
             @focus="showResults = true"
           />
           <button @click="searchDepartements">
-            <SvgIcon :path="mdiMagnify" type="mdi" class="mdi"/>
+            <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
@@ -27,7 +27,7 @@
             <h5 v-else-if="searchDepartement">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
-              <SvgIcon :path="mdiClose" type="mdi" class="mdi"/>
+              <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
             </button>
           </div>
 
@@ -47,12 +47,12 @@
             </div>
 
             <div class="no-results" v-else-if="searchDepartement">
-              <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi"/>
+              <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
               <span>Aucun Département trouvée</span>
             </div>
 
             <div class="empty-search" v-else>
-              <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi"/>
+              <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
               <span>Saisissez le nom ou code d'un Département</span>
             </div>
           </div>
@@ -77,7 +77,7 @@ const showResults = ref(false)
 let searchTimeout = null
 const proj3857 = 'EPSG:3857' // Web Mercator
 const proj2154 = 'EPSG:2154' // Lambert-93
-import { useScanStore } from '../store/scan'
+import { useScanStore } from '@/components/store/scan'
 
 const scanStore = useScanStore()
 

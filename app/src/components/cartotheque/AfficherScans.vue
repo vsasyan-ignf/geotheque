@@ -12,10 +12,12 @@
       </div>
       <div class="button-group">
         <ShakingButton nameButton="Visualiser" @click="openIipmooviewer">
-          <template #icon><SvgIcon type="mdi" :path="mdiMonitorEye" class="mdicon"/></template>
+          <template #icon><SvgIcon type="mdi" :path="mdiMonitorEye" class="mdicon" /></template>
         </ShakingButton>
         <ShakingButton nameButton="Télécharger" @click="downloadScans">
-          <template #icon><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"/></template>
+          <template #icon
+            ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
+          /></template>
         </ShakingButton>
         <ShakingButton nameButton="XML" @click="downloadxml" />
       </div>
@@ -23,8 +25,11 @@
       <ShakingButton
         nameButton="Exporter tous les scans"
         @click="downloadCSV"
-        style="width: 210px; margin-top: 10px">
-      <template #icon><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"/></template>
+        style="width: 210px; margin-top: 10px"
+      >
+        <template #icon
+          ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
+        /></template>
       </ShakingButton>
     </form>
     <ImageModal
@@ -43,7 +48,7 @@ import Dropdown from '@/components/material/Dropdown.vue'
 import ImageModal from '@/components/ImageModal.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
-import { mdiMonitorEye, mdiBriefcaseDownload} from '@mdi/js'
+import { mdiMonitorEye, mdiBriefcaseDownload } from '@mdi/js'
 
 const scanStore = useScanStore()
 const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)

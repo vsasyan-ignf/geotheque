@@ -9,7 +9,7 @@
         class="sub-category"
         @click="$emit('select-sub-category', sub.id)"
       >
-        <SvgIcon v-if="mdiIcons[sub.icon]" :path="mdiIcons[sub.icon]" type="mdi" class="icon"/>
+        <SvgIcon v-if="mdiIcons[sub.icon]" :path="mdiIcons[sub.icon]" type="mdi" class="icon" />
         <span>{{ sub.title }}</span>
       </div>
     </div>
@@ -41,23 +41,14 @@ import DepartementSearch from './DepartementSearch.vue'
 import PointSearch from './PointSearch.vue'
 import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
-import {
-  mdiCity,
-  mdiMap,
-  mdiCrosshairsGps,
-  mdiHome,
-  mdiMagnify,
-} from '@mdi/js'
-
+import { mdiCity, mdiMap, mdiCrosshairsGps } from '@mdi/js'
 
 const scanStore = useScanStore()
 
 const mdiIcons = {
-  city: mdiCity,
-  map: mdiMap,
-  'crosshairs-gps': mdiCrosshairsGps,
-  home: mdiHome,
-  magnify: mdiMagnify,
+  commune: mdiCity,
+  departement: mdiMap,
+  point: mdiCrosshairsGps,
 }
 
 const props = defineProps({

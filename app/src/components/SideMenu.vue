@@ -29,7 +29,6 @@
           />
         </template>
 
-
         <template v-else-if="activeTab === 'aide'">
           <Aide />
         </template>
@@ -62,15 +61,15 @@ const tabs = [
 ]
 
 const subCategories = [
-  { id: 'commune', icon: 'city', title: 'Commune' },
-  { id: 'departement', icon: 'map', title: 'Département' },
-  { id: 'point', icon: 'crosshairs-gps', title: 'Point XY' },
+  { id: 'commune', icon: 'commune', title: 'Commune' },
+  { id: 'departement', icon: 'departement', title: 'Département' },
+  { id: 'point', icon: 'point', title: 'Point XY' },
 ]
 
 const subCategoriesEtranger = [
-  { id: 'feuilles', icon: 'city', title: 'Feuilles' },
-  { id: 'pays', icon: 'map', title: 'Pays' },
-  { id: 'point', icon: 'crosshairs-gps', title: 'Point XY' },
+  { id: 'feuilles', icon: 'feuille', title: 'Feuilles' },
+  { id: 'pays', icon: 'pays', title: 'Pays' },
+  { id: 'point', icon: 'point', title: 'Point XY' },
 ]
 
 const activeTabTitle = computed(() => {
