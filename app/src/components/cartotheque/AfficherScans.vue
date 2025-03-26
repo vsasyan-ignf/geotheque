@@ -1,6 +1,15 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
+      <ShakingButton
+        nameButton="Exporter tous les scans"
+        @click="downloadCSV"
+        style="width: 210px"
+      >
+        <template #icon
+          ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
+        /></template>
+      </ShakingButton>
       <div class="dropdown-container">
         <div class="dropdown-wrapper">
           <Dropdown nameDropdown="Nom du Scan" :options="storeScansData" />
@@ -15,18 +24,12 @@
             ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
           /></template>
         </ShakingButton>
-        <ShakingButton nameButton="XML" @click="downloadxml" />
+        <ShakingButton nameButton="XML" @click="downloadxml">
+          <template #icon
+            ><SvgIcon type="mdi" :path="mdiXml" class="mdicon"
+          /></template>
+        </ShakingButton>
       </div>
-
-      <ShakingButton
-        nameButton="Exporter tous les scans"
-        @click="downloadCSV"
-        style="width: 210px; margin-top: 10px"
-      >
-        <template #icon
-          ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
-        /></template>
-      </ShakingButton>
     </form>
   </div>
 </template>
@@ -37,7 +40,7 @@ import ShakingButton from '@/components/material/ShakingButton.vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
-import { mdiMonitorEye, mdiBriefcaseDownload } from '@mdi/js'
+import { mdiMonitorEye, mdiBriefcaseDownload, mdiXml } from '@mdi/js'
 
 const scanStore = useScanStore()
 const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)
@@ -149,12 +152,7 @@ function dicoToFormatCSV(arrObj) {
   return csvContent
 }
 
-function openModal() {
-  isModalOpen.value = true
-}
-function closeModal() {
-  isModalOpen.value = false
-}
+
 </script>
 <style scoped>
 .scan-box {
@@ -182,6 +180,8 @@ function closeModal() {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
   width: 100%;
   gap: 8px;
 }
