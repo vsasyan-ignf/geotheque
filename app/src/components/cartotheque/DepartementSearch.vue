@@ -4,7 +4,7 @@
     <SubCategoryHeader title="Recherche par département" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="departement-search">Nom ou numéro de département</label>
+        <label for="departement-search">Nom ou numéro</label>
         <div class="input-group">
           <input
             id="departement-search"

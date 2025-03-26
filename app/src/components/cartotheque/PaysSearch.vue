@@ -3,7 +3,7 @@
     <SubCategoryHeader title="Recherche par pays" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="pays-search">Nom de Pays</label>
+        <label for="pays-search">Nom</label>
         <div class="input-group">
           <input
             id="pays-search"

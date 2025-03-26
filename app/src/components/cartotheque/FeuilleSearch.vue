@@ -3,7 +3,7 @@
     <SubCategoryHeader title="Recherche par feuilles" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="feuille-search">Nom d'une feuille</label>
+        <label for="feuille-search">Nom</label>
         <div class="input-group">
           <input
             id="feuille-search"
