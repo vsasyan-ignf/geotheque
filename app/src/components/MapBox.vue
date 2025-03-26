@@ -33,7 +33,7 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS'
 import GeoJSON from 'ol/format/GeoJSON'
 import Polygon from 'ol/geom/Polygon.js'
 import { get as getProjection } from 'ol/proj'
-import { getTopLeft } from 'ol/extent'
+import { containsCoordinate, getTopLeft } from 'ol/extent'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Style, Icon, Stroke, Fill } from 'ol/style'
@@ -50,6 +50,7 @@ import Scan25 from '@/assets/basecard/scan25.jpg'
 
 //test
 import {parcour_txt_to_tab } from './composable/parseTXT'
+import {useConvertCoordinates } from './composable/convertCoordinates'
 
 const scanStore = useScanStore()
 
@@ -117,6 +118,39 @@ function toggleLayerVisibility(isVisible) {
     }
   }
 }
+
+function addPointToMap(x, y) {
+  const coord = [x, y];
+  const feature = new Feature({
+    geometry: new Point(coord),
+  });
+  vectorPinSource.value.addFeature(feature);  // Ajouter le point à la source
+}
+
+
+
+async function parcour_tab_and_map(url) {
+    try {
+        const tab_test = await parcour_txt_to_tab(url);
+        let elem, i, i2, x, y,x_3857,y3857;
+        for (i = 1; i < tab_test.length; i = i + 2) {
+            elem = tab_test[i];
+            for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
+                x = elem[i2];
+                y = elem[i2 + 1];
+                [x_3857,y3857] = useConvertCoordinates(x,y,'EPSG:2154','EPSG:3857');
+                //console.log(x, y);
+                addPointToMap(x_3857, y3857);
+
+            }
+        }
+          
+    } catch (error) {
+        console.error("Erreur lors de la récupération des données :", error);
+    }
+    
+}
+
 
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
@@ -259,7 +293,8 @@ onMounted(() => {
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
-      parcour_txt_to_tab("./1000_AERODROME CREIL_C_100.txt");
+      parcour_tab_and_map("./1000_AERODROME CREIL_C_100.txt");
+      
       if (showPin.value) {
         vectorPinSource.value.clear()
 
