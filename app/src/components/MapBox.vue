@@ -245,7 +245,7 @@ onMounted(() => {
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
-      parcour_txt_to_tab("./2021_FD 01_C_20.txt");
+      parcour_txt_to_tab("./1000_AERODROME CREIL_C_100.txt");
       if (showPin.value) {
         vectorPinSource.value.clear()
 
