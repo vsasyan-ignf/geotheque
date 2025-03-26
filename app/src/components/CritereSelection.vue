@@ -29,7 +29,7 @@
               class="dropdown-toggle"
               @click="showScaleMinOptions = !showScaleMinOptions"
             >
-              <i class="mdi mdi-menu-down"></i>
+              <SvgIcon :path="mdiMenuDown" type="mdi" class="i"/>
             </button>
             <div class="dropdown-options" v-if="showScaleMinOptions">
               <div
@@ -59,7 +59,7 @@
               class="dropdown-toggle"
               @click="showScaleMaxOptions = !showScaleMaxOptions"
             >
-              <i class="mdi mdi-menu-down"></i>
+              <SvgIcon :path="mdiMenuDown" type="mdi" class="i"/>
             </button>
             <div class="dropdown-options" v-if="showScaleMaxOptions">
               <div
@@ -83,11 +83,11 @@
 
       <div class="button-group">
         <button type="submit" class="button search-button">
-          <i class="mdi mdi-magnify"></i>
+          <SvgIcon :path="mdiMagnify" type="mdi" class="i"/>
           <span>Rechercher</span>
         </button>
         <button type="button" class="button reset-button" @click="resetForm">
-          <i class="mdi mdi-refresh"></i>
+          <SvgIcon :path="mdiRefresh" type="mdi" class="i"/>
           <span>Réinitialiser</span>
         </button>
       </div>
@@ -102,6 +102,7 @@ import { eventBus } from './composable/eventBus'
 
 import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
+import { mdiRefresh, mdiMagnify, mdiMenuDown } from '@mdi/js'
 
 const scanStore = useScanStore()
 const { storeCritereSelection } = storeToRefs(scanStore)
@@ -360,8 +361,10 @@ const updateSelectedCollection = (selected) => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.button i {
+.i {
   font-size: 18px;
+  width: 18px;
+  height: 18px;
 }
 
 @media (max-width: 500px) {
