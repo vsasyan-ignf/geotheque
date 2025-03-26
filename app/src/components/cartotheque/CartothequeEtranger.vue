@@ -13,13 +13,13 @@
       </div>
   
       <FeuilleSearch
-        v-if="activeSubCategory === 'commune'"
+        v-if="activeSubCategory === 'feuilles'"
         @close="$emit('close-sub-category')"
         @select-commune="goToPoint"
       />
   
-      <DepartementSearch
-        v-if="activeSubCategory === 'departement'"
+      <PaysSearch
+        v-if="activeSubCategory === 'pays'"
         @close="$emit('close-sub-category')"
         @select-departement="goToPoint"
       />
@@ -34,12 +34,12 @@
   
   <script setup>
   import { watch } from 'vue'
-  import CommuneSearch from './CommuneSearch.vue'
-  import DepartementSearch from './DepartementSearch.vue'
   import PointSearch from './PointSearch.vue'
   import FeuilleSearch from './FeuilleSearch.vue'
+  import PaysSearch from './PaysSearch.vue'
   import { eventBus } from '@/components/composable/eventBus'
   import { useScanStore } from '@/components/store/scan'
+
   
   const scanStore = useScanStore()
   

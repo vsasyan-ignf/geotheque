@@ -68,8 +68,8 @@ const subCategories = [
 ]
 
 const subCategoriesEtranger = [
-  { id: 'commune', icon: 'city', title: 'Feuilles' },
-  { id: 'departement', icon: 'map', title: 'Pays' },
+  { id: 'feuilles', icon: 'city', title: 'Feuilles' },
+  { id: 'pays', icon: 'map', title: 'Pays' },
   { id: 'point', icon: 'crosshairs-gps', title: 'Point XY' },
 ]
 
@@ -90,6 +90,8 @@ function toggleTab(tabId) {
     activeTab.value = tabId
     isSidebarOpen.value = true
     scanStore.updateActiveTab(tabId)
+    activeSubCategory.value = null
+    scanStore.updateActiveSubCategory(null)
   }
 }
 

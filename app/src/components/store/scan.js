@@ -5,7 +5,6 @@ export const useScanStore = defineStore('scan', () => {
     let storeBbox = ref([])
     let storeScansData = ref(null)
     let storeSelectedGeom = ref([])
-    let storeCommuneContour = ref([])
     let storeSelectedScan = ref(null)
     let currentCollecInfo = ref(null)
     let activeSubCategory = ref(null)
