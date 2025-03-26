@@ -14,7 +14,9 @@
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
+    "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/font": "^7.4.47",
+    "@mdi/js": "^7.4.47",
     "mitt": "^3.0.1",
     "ol": "^10.4.0",
     "ol-contextmenu": "^5.5.0",

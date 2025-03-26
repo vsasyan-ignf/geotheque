@@ -15,7 +15,7 @@
             @focus="showResults = true"
           />
           <button @click="searchDepartements">
-            <i class="mdi mdi-magnify"></i>
+            <SvgIcon :path="mdiMagnify" type="mdi" class="mdi"/>
           </button>
         </div>
 
@@ -27,7 +27,7 @@
             <h5 v-else-if="searchDepartement">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
-              <i class="mdi mdi-close"></i>
+              <SvgIcon :path="mdiClose" type="mdi" class="mdi"/>
             </button>
           </div>
 
@@ -47,12 +47,12 @@
             </div>
 
             <div class="no-results" v-else-if="searchDepartement">
-              <i class="mdi mdi-alert-circle-outline"></i>
+              <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi"/>
               <span>Aucun Département trouvée</span>
             </div>
 
             <div class="empty-search" v-else>
-              <i class="mdi mdi-map-search-outline"></i>
+              <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi"/>
               <span>Saisissez le nom ou code d'un Département</span>
             </div>
           </div>
@@ -68,6 +68,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import proj4 from 'proj4'
+import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 
 const emit = defineEmits(['close', 'select-departement'])
 const searchDepartement = ref('')

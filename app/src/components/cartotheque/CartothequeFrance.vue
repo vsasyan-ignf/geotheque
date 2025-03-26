@@ -9,7 +9,7 @@
         class="sub-category"
         @click="$emit('select-sub-category', sub.id)"
       >
-        <i :class="'mdi mdi-' + sub.icon"></i>
+        <SvgIcon v-if="mdiIcons[sub.icon]" :path="mdiIcons[sub.icon]" type="mdi" class="icon"/>
         <span>{{ sub.title }}</span>
       </div>
     </div>
@@ -41,8 +41,24 @@ import DepartementSearch from './DepartementSearch.vue'
 import PointSearch from './PointSearch.vue'
 import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
+import {
+  mdiCity,
+  mdiMap,
+  mdiCrosshairsGps,
+  mdiHome,
+  mdiMagnify,
+} from '@mdi/js'
+
 
 const scanStore = useScanStore()
+
+const mdiIcons = {
+  city: mdiCity,
+  map: mdiMap,
+  'crosshairs-gps': mdiCrosshairsGps,
+  home: mdiHome,
+  magnify: mdiMagnify,
+}
 
 const props = defineProps({
   activeSubCategory: {
@@ -97,7 +113,7 @@ watch(
   transform: scale(1.05);
 }
 
-.sub-category i {
+.icon {
   font-size: 24px;
   color: #739614;
   transition:
@@ -105,7 +121,7 @@ watch(
     font-size 0.3s;
 }
 
-.sub-category:hover i {
+.sub-category:hover .icon {
   color: #4caf50;
   font-size: 28px;
 }

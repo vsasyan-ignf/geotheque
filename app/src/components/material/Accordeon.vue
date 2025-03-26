@@ -2,7 +2,7 @@
   <div class="accordion">
     <div class="accordion-header" @click="toggleAccordion">
       <h4 class="accordion-title">{{ title }}</h4>
-      <i class="mdi" :class="isOpen ? 'mdi-chevron-up' : 'mdi-chevron-down'"></i>
+       <SvgIcon type="mdi" :path="isOpen ? mdiChevronUp : mdiChevronDown" />
     </div>
     <div class="accordion-content" :class="{ open: isOpen }">
       <slot></slot>
@@ -12,6 +12,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { mdiChevronUp, mdiChevronDown } from '@mdi/js'
 
 const props = defineProps({
   title: {

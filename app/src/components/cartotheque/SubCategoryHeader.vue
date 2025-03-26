@@ -3,13 +3,15 @@
 <template>
   <div class="sub-category-header">
     <button class="back-button" @click="$emit('close')">
-      <i class="mdi mdi-arrow-left"></i>
+      <SvgIcon :path="mdiArrowLeft" type="mdi" class="mdi"/>
     </button>
     <h4>{{ title }}</h4>
   </div>
 </template>
 
 <script setup>
+import { mdiArrowLeft } from '@mdi/js';
+
 defineProps({
   title: {
     type: String,
