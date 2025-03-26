@@ -10,7 +10,7 @@
     cursor: pointer;
     background-color: #739614;
     transition: all 0.2s ease;
-    margin:10px;
+
     font-size: 14px;
     font-family: inherit;
     font-weight: 500;
