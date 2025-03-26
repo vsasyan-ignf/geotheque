@@ -12,7 +12,7 @@
         </div>
       </div>
   
-      <CommuneSearch
+      <FeuilleSearch
         v-if="activeSubCategory === 'commune'"
         @close="$emit('close-sub-category')"
         @select-commune="goToPoint"
@@ -37,6 +37,7 @@
   import CommuneSearch from './CommuneSearch.vue'
   import DepartementSearch from './DepartementSearch.vue'
   import PointSearch from './PointSearch.vue'
+  import FeuilleSearch from './FeuilleSearch.vue'
   import { eventBus } from '@/components/composable/eventBus'
   import { useScanStore } from '@/components/store/scan'
   

@@ -23,7 +23,7 @@
         <template v-if="activeTab === 'carthotheque_etranger'">
           <CartothequeEtranger
             :activeSubCategory="activeSubCategory"
-            :subCategories="subCategories"
+            :subCategories="subCategoriesEtranger"
             @select-sub-category="selectSubCategory"
             @close-sub-category="closeSubCategory"
           />
@@ -64,6 +64,12 @@ const tabs = [
 const subCategories = [
   { id: 'commune', icon: 'city', title: 'Commune' },
   { id: 'departement', icon: 'map', title: 'Département' },
+  { id: 'point', icon: 'crosshairs-gps', title: 'Point XY' },
+]
+
+const subCategoriesEtranger = [
+  { id: 'commune', icon: 'city', title: 'Feuilles' },
+  { id: 'departement', icon: 'map', title: 'Pays' },
   { id: 'point', icon: 'crosshairs-gps', title: 'Point XY' },
 ]
 
