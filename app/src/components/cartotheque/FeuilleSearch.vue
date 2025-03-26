@@ -3,18 +3,18 @@
       <SubCategoryHeader title="Recherche par feuilles" @close="$emit('close')" />
       <div class="search-form">
         <div class="form-group">
-          <label for="commune-search">Nom ou code postal</label>
+          <label for="feuille-search">Entrez le nom d'une feuille</label>
           <div class="input-group">
             <input
-              id="commune-search"
+              id="feuille-search"
               autocomplete="off"
-              v-model="searchCommune"
+              v-model="feuilleSelected"
               type="text"
-              placeholder="Ex: Paris ou 75000"
-              @input="searchCommunes"
+              placeholder="Ex: Feuille verte de printemps"
+              @input="searchFeuille"
               @focus="showResults = true"
             />
-            <button @click="validateCommune">
+            <button @click="validateFeuille">
               <i class="mdi mdi-magnify"></i>
             </button>
           </div>
@@ -22,7 +22,7 @@
           <div class="results-wrapper" v-if="showResults">
             <div class="results-header">
               <h5 v-if="communeResults.length > 0">Résultats ({{ communeResults.length }})</h5>
-              <h5 v-else-if="searchCommune">Aucun résultat</h5>
+              <h5 v-else-if="feuilleSelected">Aucun résultat</h5>
               <h5 v-else>Commencez à taper pour rechercher</h5>
               <button class="close-results" @click="showResults = false">
                 <i class="mdi mdi-close"></i>
@@ -35,7 +35,7 @@
                   v-for="(commune, index) in communeResults"
                   :key="commune.code + '-' + commune.nom"
                   class="result-item"
-                  @click="selectCommune(commune)"
+                  @click="selectFeuille(commune)"
                 >
                   <div class="result-content">
                     <div class="result-main">{{ commune.nom }}</div>
@@ -44,7 +44,7 @@
                 </div>
               </div>
   
-              <div class="no-results" v-else-if="searchCommune">
+              <div class="no-results" v-else-if="feuilleSelected">
                 <i class="mdi mdi-alert-circle-outline"></i>
                 <span>Aucune commune trouvée</span>
               </div>
@@ -72,7 +72,7 @@
   
   const emit = defineEmits(['close', 'select-commune'])
   
-  let searchCommune = ref('')
+  let feuilleSelected = ref('')
   const communeResults = ref([])
   const showResults = ref(false)
   let searchTimeout = null
@@ -80,7 +80,7 @@
   
   const handleClickOutside = (event) => {
     const resultsWrapper = document.querySelector('.results-wrapper')
-    const searchInput = document.getElementById('commune-search')
+    const searchInput = document.getElementById('feuille-search')
   
     if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
       showResults.value = false
@@ -96,12 +96,12 @@
     if (searchTimeout) clearTimeout(searchTimeout)
   })
   
-  function searchCommunes() {
+  function searchFeuille() {
     if (searchTimeout) {
       clearTimeout(searchTimeout)
     }
   
-    const query = searchCommune.value.toLowerCase().trim()
+    const query = feuilleSelected.value.toLowerCase().trim()
   
     if (!query) {
       communeResults.value = []
@@ -140,14 +140,14 @@
     }, 300)
   }
   
-  function selectCommune(commune) {
-    searchCommune.value = commune.nom
+  function selectFeuille(commune) {
+    feuilleSelected.value = commune.nom
     repCommune = commune
   
     showResults.value = false
   }
   
-  function validateCommune() {
+  function validateFeuille() {
     if (repCommune) {
       const bbox = repCommune.bbox.coordinates[0]
       const bboxWGS84 = [bbox[0], bbox[2]]
