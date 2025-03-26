@@ -41,11 +41,9 @@ import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 // Images pour les thumbnails
-import PlanIGN from '@/assets/basecard/plan_ign.png'
-import Ortho from '@/assets/basecard/ortho.jpeg'
-import BDParcellaire from '@/assets/basecard/bdparcellaire.png'
-import CartesIGN from '@/assets/basecard/cartesign.jpg'
-import Scan25 from '@/assets/basecard/scan25.jpg'
+import { layers_carto, layers_carto_monde, layers_photo, layers_photo_monde } from './composable/baseMap'
+import OSM from 'ol/source/OSM';
+
 
 
 //test
@@ -53,7 +51,7 @@ import {parcour_txt_to_tab } from './composable/parseTXT'
 
 const scanStore = useScanStore()
 
-const { storeURL, storeSelectedGeom, activeSubCategory, storeSelectedScan } = storeToRefs(scanStore)
+const { storeURL, storeCommuneContour, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } = storeToRefs(scanStore);
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -74,34 +72,59 @@ const scanLayer = ref(null)
 
 const url_test = ref(``)
 const bbox = ref([0, 0, 0, 0])
+let layers = ref(layers_carto);
+console.log("layers", layers)
 
-const layers = ref([
-  {
-    id: 'plan',
-    name: 'Plan IGN',
-    thumbnail: PlanIGN,
-  },
-  {
-    id: 'ortho',
-    name: 'Ortho',
-    thumbnail: Ortho,
-  },
-  {
-    id: 'bdparcellaire',
-    name: 'BDParcellaire',
-    thumbnail: BDParcellaire,
-  },
-  {
-    id: 'cartesign',
-    name: 'Cartes IGN',
-    thumbnail: CartesIGN,
-  },
-  {
-    id: 'scan25',
-    name: 'Scan25',
-    thumbnail: Scan25,
-  },
-])
+
+function getLayersActiveTab(){
+  if (activeTab.value === 'carthotheque') {
+    return layers_carto
+  } else if (activeTab.value === 'carthotheque_etranger') {
+    return layers_carto_monde
+  } else if (activeTab.value === 'phototheque') {
+    return layers_photo
+  } else if (activeTab.value === 'phototheque_etranger') {
+    return layers_photo_monde
+  } else {
+    return []
+  }
+}
+
+watch(activeTab, (newValue) => {
+  console.log("🔄 Changement d'onglet détecté:", newValue);
+  
+  // Récupérer les nouvelles layers
+  const newLayers = getLayersActiveTab();
+  layers.value = newLayers;
+
+  if (olMap.value) {
+    // get wmts layers
+    const mapLayers = olMap.value.getLayers();
+    const wmtsLayers = mapLayers.getArray().filter(layer => layer instanceof TileLayer);
+    
+    // met à jour les wmts
+    wmtsLayers.forEach((layer, index) => {
+      if (index < newLayers.length) {
+        // Créer une nouvelle source pour cette couche
+        const newSource = createWmtsSource(newLayers[index].id);
+        
+        // defined source
+        layer.setSource(newSource);
+        
+        // défini la visilibité de l'index 0
+        layer.setVisible(index === 0);
+      }
+    });
+
+    scanStore.resetCriteria()
+
+    // reset l'index à 0
+    activeLayerIndex.value = 0;
+  }
+  
+  console.log("✅ Nouvelles couches chargées:", layers.value);
+});
+
 
 const activeLayerIndex = ref(0)
 const olView = ref(null)
@@ -119,64 +142,80 @@ function toggleLayerVisibility(isVisible) {
 }
 
 function changeActiveLayer(index) {
-  activeLayerIndex.value = index
+  activeLayerIndex.value = index;
 
   if (olMap.value) {
-    // Changement des couches WMTS uniquement
-    const wmtsLayers = olMap.value.getLayers().getArray().slice(0, layers.value.length)
-    wmtsLayers.forEach((layer, idx) => {
-      if (visibility_switch.value === true) {
-        layer.setVisible(idx === index)
-      }
-    })
+    // recup les wmts layers
+    const wmtsLayers = olMap.value.getLayers().getArray()
+      .filter(layer => layer instanceof TileLayer);
 
+    // masque les wmts
+    wmtsLayers.forEach((layer, layerIndex) => {
+      layer.setVisible(layerIndex === index);
+    });
+
+    // met à jour le setzoom
     if (olView.value) {
-      olView.value.setMaxZoom(getMaxZoom(layers.value[index].id))
+      olView.value.setMaxZoom(getMaxZoom(layers.value[index].id));
     }
   }
 }
 
+
 function createWmtsSource(layerId) {
-  const projObj = getProjection('EPSG:3857')
-  const projExtent = projObj.getExtent()
-
-  const resolutions = []
-  const matrixIds = []
-
-  const maxZoom = 19
-
-  for (let i = 0; i <= maxZoom; i++) {
-    matrixIds.push(i.toString())
-    resolutions.push(156543.03392804097 / Math.pow(2, i))
+  console.log('Layer ID:', layerId)
+  if (layerId === 'osm') {
+    return new OSM({
+      attributions: null,
+      controls: [] 
+    });
   }
+  else{
+    const projObj = getProjection('EPSG:3857')
+    const projExtent = projObj.getExtent()
 
-  const tileGrid = new WMTSTileGrid({
-    origin: getTopLeft(projExtent),
-    resolutions: resolutions,
-    matrixIds: matrixIds,
-  })
+    const resolutions = []
+    const matrixIds = []
 
-  return new WMTS({
-    url: getWmtsUrl(layerId),
-    layer: getWmtsLayerName(layerId),
-    matrixSet: 'PM',
-    format: getFormatWmtsLayer(layerId),
-    projection: projObj,
-    tileGrid: tileGrid,
-    crossOrigin: 'anonymous',
-  })
+    const maxZoom = 19
+
+    for (let i = 0; i <= maxZoom; i++) {
+      matrixIds.push(i.toString())
+      resolutions.push(156543.03392804097 / Math.pow(2, i))
+    }
+
+    const tileGrid = new WMTSTileGrid({
+      origin: getTopLeft(projExtent),
+      resolutions: resolutions,
+      matrixIds: matrixIds,
+    })
+
+    return new WMTS({
+      url: getWmtsUrl(layerId),
+      layer: getWmtsLayerName(layerId),
+      matrixSet: 'PM',
+      format: getFormatWmtsLayer(layerId),
+      projection: projObj,
+      tileGrid: tileGrid,
+      crossOrigin: 'anonymous',
+    })
+  }
+  
 }
 
 onMounted(() => {
   nextTick(() => {
-    const wmtsLayers = layers.value.map((layer, index) => {
-      const wmtsSource = createWmtsSource(layer.id)
 
+
+    const wmtsLayers = layers.value.map((layer, index) => {
+      const wmtsSource = createWmtsSource(layer.id);
       return new TileLayer({
         source: wmtsSource,
         visible: index === activeLayerIndex.value,
       })
     })
+
+    
 
     vectorWfsSource.value = new VectorSource({
       url: url_test.value,

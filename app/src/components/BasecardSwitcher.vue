@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="layer-switcher" :class="{ 'layer-switcher--expanded': isExpanded }">
     <div class="layer-switcher__current" @click="toggleExpand">
       <img :src="layers[activeLayerIndex].thumbnail" alt="" class="layer-switcher__thumbnail" />
@@ -20,10 +20,40 @@
       </div>
     </div>
   </div>
+</template> -->
+<template>
+  <div class="layer-switcher" :class="{ 'layer-switcher--expanded': isExpanded }">
+    <div class="layer-switcher__current" @click="toggleExpand">
+      <img 
+        v-if="layers[activeLayerIndex]?.thumbnail" 
+        :src="layers[activeLayerIndex]?.thumbnail" 
+        alt="" 
+        class="layer-switcher__thumbnail" 
+      />
+      <span class="layer-switcher__label">
+        {{ layers[activeLayerIndex]?.name || 'No layer selected' }}
+      </span>
+      <span class="layer-switcher__toggle-icon">
+        {{ isExpanded ? '▼' : '▲' }}
+      </span>
+    </div>
+    <div v-if="isExpanded" class="layer-switcher__options">
+      <div
+        v-for="(layer, index) in layers"
+        :key="layer.id"
+        class="layer-switcher__option"
+        :class="{ 'layer-switcher__option--active': index === activeLayerIndex }"
+        @click="selectLayer(index)"
+      >
+        <img :src="layer.thumbnail" alt="" class="layer-switcher__thumbnail" />
+        <span class="layer-switcher__label">{{ layer.name }}</span>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 
 const props = defineProps({
   layers: {
@@ -36,12 +66,14 @@ const props = defineProps({
   },
 })
 
+
 const emit = defineEmits(['layer-change'])
 
 const isExpanded = ref(false)
 
 function toggleExpand() {
   isExpanded.value = !isExpanded.value
+  console.log("layer value du switch", props.layers)
 }
 
 function selectLayer(index) {

@@ -5,9 +5,13 @@ export const useScanStore = defineStore('scan', () => {
     let storeBbox = ref([])
     let storeScansData = ref(null)
     let storeSelectedGeom = ref([])
-    let storeSelectedScan = ref(null)
-    let currentCollecInfo = ref(null)
-    let activeSubCategory = ref(null)
+    let storeData = ref(null);
+    let storeCommuneContour = ref([]);
+    let storeSelectedScan = ref(null);
+    let currentCollecInfo = ref(null);
+    let activeSubCategory = ref(null);
+    let activeTab = ref(null);
+
 
     let storeCritereSelection = ref({
         yearMin: null,
@@ -82,6 +86,11 @@ export const useScanStore = defineStore('scan', () => {
         storeSelectedScan.value = newVal
     }
 
+    function updateActiveTab(newVal) {
+        activeTab.value = newVal
+        console.log("tab selected : ", activeTab.value)
+    }
+
     async function storeGet(url) {
         if (!url) {
             return
@@ -128,5 +137,10 @@ export const useScanStore = defineStore('scan', () => {
         storeSelectedGeom,
         updateSelectedGeom,
         resetCriteria,
-    }
-})
+        storeCommuneContour,
+        // updateCommuneContour,
+        resetCriteria,
+        activeTab,
+        updateActiveTab
+    };
+});
