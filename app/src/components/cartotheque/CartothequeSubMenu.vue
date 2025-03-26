@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import Accordion from './material/Accordeon.vue'
+import Accordion from '@/components/material/Accordeon.vue'
 import CritereSelection from './CritereSelection.vue'
 import AfficherScans from './AfficherScans.vue'
 </script>

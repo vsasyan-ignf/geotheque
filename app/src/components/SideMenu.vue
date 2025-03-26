@@ -32,7 +32,7 @@
 import { ref, computed } from 'vue'
 import SidebarTabs from './SidebarTabs.vue'
 import TabContent from './TabContent.vue'
-import CartothequeFrance from './CartothequeFrance.vue'
+import CartothequeFrance from './cartotheque/CartothequeFrance.vue'
 import Aide from './Aide.vue'
 import { useScanStore } from './store/scan'
 

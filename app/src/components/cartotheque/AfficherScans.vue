@@ -38,10 +38,10 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import ShakingButton from './material/ShakingButton.vue'
-import Dropdown from './material/Dropdown.vue'
-import ImageModal from './ImageModal.vue'
-import { useScanStore } from './store/scan'
+import ShakingButton from '@/components/material/ShakingButton.vue'
+import Dropdown from '@/components/material/Dropdown.vue'
+import ImageModal from '@/components/ImageModal.vue'
+import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()

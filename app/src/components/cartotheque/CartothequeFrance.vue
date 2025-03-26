@@ -39,9 +39,8 @@ import { watch } from 'vue'
 import CommuneSearch from './CommuneSearch.vue'
 import DepartementSearch from './DepartementSearch.vue'
 import PointSearch from './PointSearch.vue'
-import { eventBus } from './composable/eventBus'
-
-import { useScanStore } from './store/scan'
+import { eventBus } from '@/components/composable/eventBus'
+import { useScanStore } from '@/components/store/scan'
 
 const scanStore = useScanStore()
 

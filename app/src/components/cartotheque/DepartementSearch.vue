@@ -76,7 +76,7 @@ const showResults = ref(false)
 let searchTimeout = null
 const proj3857 = 'EPSG:3857' // Web Mercator
 const proj2154 = 'EPSG:2154' // Lambert-93
-import { useScanStore } from './store/scan'
+import { useScanStore } from '../store/scan'
 
 const scanStore = useScanStore()
 

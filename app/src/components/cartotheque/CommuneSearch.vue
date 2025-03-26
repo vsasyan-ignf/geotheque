@@ -66,8 +66,8 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import { useConvertCoordinates } from './composable/convertCoordinates'
-import { useScanStore } from './store/scan'
+import { useConvertCoordinates } from '../composable/convertCoordinates'
+import { useScanStore } from '../store/scan'
 
 const scanStore = useScanStore()
 

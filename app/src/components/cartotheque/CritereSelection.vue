@@ -97,10 +97,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import Dropdown from './material/Dropdown.vue'
-import { eventBus } from './composable/eventBus'
+import Dropdown from '@/components/material/Dropdown.vue'
+import { eventBus } from '@/components/composable/eventBus'
 
-import { useScanStore } from './store/scan'
+import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()

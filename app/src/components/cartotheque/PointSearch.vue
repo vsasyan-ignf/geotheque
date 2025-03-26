@@ -77,11 +77,11 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import { bboxState, eventBus } from './composable/eventBus'
+import { bboxState, eventBus } from '@/components/composable/eventBus'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import Accordeon from './material/Accordeon.vue'
-import { useConvertCoordinates } from './composable/convertCoordinates'
-import { useScanStore } from './store/scan'
+import Accordeon from '@/components/material/Accordeon.vue'
+import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
+import { useScanStore } from '@/components/store/scan'
 
 const scanStore = useScanStore()
 
