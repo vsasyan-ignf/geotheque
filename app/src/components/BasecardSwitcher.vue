@@ -24,11 +24,11 @@
 <template>
   <div class="layer-switcher" :class="{ 'layer-switcher--expanded': isExpanded }">
     <div class="layer-switcher__current" @click="toggleExpand">
-      <img 
-        v-if="layers[activeLayerIndex]?.thumbnail" 
-        :src="layers[activeLayerIndex]?.thumbnail" 
-        alt="" 
-        class="layer-switcher__thumbnail" 
+      <img
+        v-if="layers[activeLayerIndex]?.thumbnail"
+        :src="layers[activeLayerIndex]?.thumbnail"
+        alt=""
+        class="layer-switcher__thumbnail"
       />
       <span class="layer-switcher__label">
         {{ layers[activeLayerIndex]?.name || 'No layer selected' }}
@@ -66,14 +66,13 @@ const props = defineProps({
   },
 })
 
-
 const emit = defineEmits(['layer-change'])
 
 const isExpanded = ref(false)
 
 function toggleExpand() {
   isExpanded.value = !isExpanded.value
-  console.log("layer value du switch", props.layers)
+  console.log('layer value du switch', props.layers)
 }
 
 function selectLayer(index) {

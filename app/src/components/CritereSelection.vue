@@ -75,7 +75,11 @@
         </div>
       </div>
 
-      <Dropdown nameDropdown="Collections" :options="collectionOptions" @update:selected="updateSelectedCollection" />
+      <Dropdown
+        nameDropdown="Collections"
+        :options="collectionOptions"
+        @update:selected="updateSelectedCollection"
+      />
 
       <div class="button-group">
         <button type="submit" class="button search-button">
@@ -116,7 +120,7 @@ const showScaleMaxOptions = ref(false)
 const collectionOptions = ref([
   { id: '1', name: 'CASSINI' },
   { id: '2', name: 'CASSINI' },
-  { id: '3', name: 'CASSINI' }
+  { id: '3', name: 'CASSINI' },
 ])
 
 const selectScaleMin = (scale) => {
@@ -146,7 +150,7 @@ const initialValues = {
   yearMax: '',
   scaleMin: '500',
   scaleMax: '100000',
-  selectedCollection: null
+  selectedCollection: null,
 }
 
 const handleSubmit = () => {
@@ -157,10 +161,9 @@ const handleSubmit = () => {
     yearMax: yearMax.value,
     scaleMin: scaleMin.value,
     scaleMax: scaleMax.value,
-    selectedCollection: selectedCollection.value.name
+    selectedCollection: selectedCollection.value.name,
   }
   scanStore.updateCriteria(criteria)
-
 }
 
 const resetForm = () => {
@@ -171,7 +174,7 @@ const resetForm = () => {
   selectedCollection.value = { id: '', name: '' }
   scanStore.resetCriteria()
 
-  eventBus.emit('criteria-reset', { resetDropdown: true });
+  eventBus.emit('criteria-reset', { resetDropdown: true })
 }
 
 const updateSelectedCollection = (selected) => {

@@ -41,17 +41,19 @@ import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 // Images pour les thumbnails
-import { layers_carto, layers_carto_monde, layers_photo, layers_photo_monde } from './composable/baseMap'
-import OSM from 'ol/source/OSM';
+import {
+  layers_carto,
+  layers_carto_monde,
+  layers_photo,
+  layers_photo_monde,
+} from './composable/baseMap'
+import OSM from 'ol/source/OSM'
 
-
-
-//test
-import {parcour_txt_to_tab } from './composable/parseTXT'
+import { parcour_txt_to_tab } from './composable/parseTXT'
 
 const scanStore = useScanStore()
-
-const { storeURL, storeCommuneContour, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } = storeToRefs(scanStore);
+const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
+  storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -71,12 +73,10 @@ const vectorScanSource = ref(null)
 const scanLayer = ref(null)
 
 const url_test = ref(``)
-const bbox = ref([0, 0, 0, 0])
-let layers = ref(layers_carto);
-console.log("layers", layers)
+let layers = ref(layers_carto)
+console.log('layers', layers)
 
-
-function getLayersActiveTab(){
+function getLayersActiveTab() {
   if (activeTab.value === 'carthotheque') {
     return layers_carto
   } else if (activeTab.value === 'carthotheque_etranger') {
@@ -91,40 +91,39 @@ function getLayersActiveTab(){
 }
 
 watch(activeTab, (newValue) => {
-  console.log("🔄 Changement d'onglet détecté:", newValue);
-  
+  console.log("🔄 Changement d'onglet détecté:", newValue)
+
   // Récupérer les nouvelles layers
-  const newLayers = getLayersActiveTab();
-  layers.value = newLayers;
+  const newLayers = getLayersActiveTab()
+  layers.value = newLayers
 
   if (olMap.value) {
     // get wmts layers
-    const mapLayers = olMap.value.getLayers();
-    const wmtsLayers = mapLayers.getArray().filter(layer => layer instanceof TileLayer);
-    
+    const mapLayers = olMap.value.getLayers()
+    const wmtsLayers = mapLayers.getArray().filter((layer) => layer instanceof TileLayer)
+
     // met à jour les wmts
     wmtsLayers.forEach((layer, index) => {
       if (index < newLayers.length) {
         // Créer une nouvelle source pour cette couche
-        const newSource = createWmtsSource(newLayers[index].id);
-        
+        const newSource = createWmtsSource(newLayers[index].id)
+
         // defined source
-        layer.setSource(newSource);
-        
+        layer.setSource(newSource)
+
         // défini la visilibité de l'index 0
-        layer.setVisible(index === 0);
+        layer.setVisible(index === 0)
       }
-    });
+    })
 
     scanStore.resetCriteria()
 
     // reset l'index à 0
-    activeLayerIndex.value = 0;
+    activeLayerIndex.value = 0
   }
-  
-  console.log("✅ Nouvelles couches chargées:", layers.value);
-});
 
+  console.log('✅ Nouvelles couches chargées:', layers.value)
+})
 
 const activeLayerIndex = ref(0)
 const olView = ref(null)
@@ -142,35 +141,35 @@ function toggleLayerVisibility(isVisible) {
 }
 
 function changeActiveLayer(index) {
-  activeLayerIndex.value = index;
+  activeLayerIndex.value = index
 
   if (olMap.value) {
     // recup les wmts layers
-    const wmtsLayers = olMap.value.getLayers().getArray()
-      .filter(layer => layer instanceof TileLayer);
+    const wmtsLayers = olMap.value
+      .getLayers()
+      .getArray()
+      .filter((layer) => layer instanceof TileLayer)
 
     // masque les wmts
     wmtsLayers.forEach((layer, layerIndex) => {
-      layer.setVisible(layerIndex === index);
-    });
+      layer.setVisible(layerIndex === index)
+    })
 
     // met à jour le setzoom
     if (olView.value) {
-      olView.value.setMaxZoom(getMaxZoom(layers.value[index].id));
+      olView.value.setMaxZoom(getMaxZoom(layers.value[index].id))
     }
   }
 }
-
 
 function createWmtsSource(layerId) {
   console.log('Layer ID:', layerId)
   if (layerId === 'osm') {
     return new OSM({
       attributions: null,
-      controls: [] 
-    });
-  }
-  else{
+      controls: [],
+    })
+  } else {
     const projObj = getProjection('EPSG:3857')
     const projExtent = projObj.getExtent()
 
@@ -200,22 +199,17 @@ function createWmtsSource(layerId) {
       crossOrigin: 'anonymous',
     })
   }
-  
 }
 
 onMounted(() => {
   nextTick(() => {
-
-
     const wmtsLayers = layers.value.map((layer, index) => {
-      const wmtsSource = createWmtsSource(layer.id);
+      const wmtsSource = createWmtsSource(layer.id)
       return new TileLayer({
         source: wmtsSource,
         visible: index === activeLayerIndex.value,
       })
     })
-
-    
 
     vectorWfsSource.value = new VectorSource({
       url: url_test.value,
@@ -298,7 +292,7 @@ onMounted(() => {
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
-      parcour_txt_to_tab("./1000_AERODROME CREIL_C_100.txt");
+      parcour_txt_to_tab('./1000_AERODROME CREIL_C_100.txt')
       if (showPin.value) {
         vectorPinSource.value.clear()
 
@@ -331,19 +325,19 @@ onMounted(() => {
         const currentZoom = olView.value.getZoom()
         olView.value.animate({
           zoom: currentZoom + delta,
-          duration: 250
-        });
+          duration: 250,
+        })
       }
     })
-    
+
     eventBus.on('center-map', ({ x, y }) => {
       if (olMap.value && olView.value) {
         olView.value.animate({
           center: [x, y],
-          duration: 750
-        });
+          duration: 750,
+        })
       }
-    });
+    })
 
     eventBus.on('update-coordinates', ({ x, y }) => {
       vectorPinSource.value.clear()
@@ -395,11 +389,15 @@ onMounted(() => {
 
     watch(storeSelectedScan, (newValue) => {
       console.log('----------------- NEW SCAN SELECTED ------------------------')
-      console.log("storeSelectedScan.value:", storeSelectedScan.value)
+      console.log('storeSelectedScan.value:', storeSelectedScan.value)
 
       vectorScanSource.value.clear()
       console.log(storeSelectedScan.value)
-      if (storeSelectedScan.value && storeSelectedScan.value.geom && storeSelectedScan.value.geom.length > 0) {
+      if (
+        storeSelectedScan.value &&
+        storeSelectedScan.value.geom &&
+        storeSelectedScan.value.geom.length > 0
+      ) {
         const polygon = new Feature({
           geometry: new Polygon([storeSelectedScan.value.geom[0]]),
         })
@@ -414,7 +412,6 @@ onMounted(() => {
         })
       }
     })
-
 
     eventBus.on('criteria-reset', () => {
       if (vectorPinSource.value) {

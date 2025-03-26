@@ -803,7 +803,7 @@ String.implement({
 	},
 
 	escapeRegExp: function(){
-		return String(this).replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+		return String(this).replace(/([-.*+?^${}()|[\]/\\])/g, '\\$1');
 	},
 
 	toInt: function(base){
@@ -862,9 +862,9 @@ var parse = function(ua, platform){
 
 	// chrome is included in the edge UA, so need to check for edge first,
 	// before checking if it's chrome.
-	var UA = ua.match(/(edge)[\s\/:]([\w\d\.]+)/);
+	var UA = ua.match(/(edge)[\s/:]([\w\d.]+)/);
 	if (!UA){
-		UA = ua.match(/(opera|ie|firefox|chrome|trident|crios|version)[\s\/:]([\w\d\.]+)?.*?(safari|(?:rv[\s\/:]|version[\s\/:])([\w\d\.]+)|$)/) || [null, 'unknown', 0];
+		UA = ua.match(/(opera|ie|firefox|chrome|trident|crios|version)[\s/:]([\w\d.]+)?.*?(safari|(?:rv[\s/:]|version[\s/:])([\w\d.]+)|$)/) || [null, 'unknown', 0];
 	}
 
 	if (UA[1] == 'trident'){
@@ -1660,7 +1660,7 @@ var parse = function(expression, isReversed){
 var reverseCombinator = function(combinator){
 	if (combinator === '!') return ' ';
 	else if (combinator === ' ') return '!';
-	else if ((/^!/).test(combinator)) return combinator.replace(/^!/, '');
+	else if (combinator.startsWith("!")) return combinator.replace(/^!/, '');
 	else return '!' + combinator;
 };
 
@@ -4637,7 +4637,7 @@ Element.implement({
 			if (color) result = result.replace(color[0], color[0].rgbToHex());
 		}
 		if (!hasGetComputedStyle && !this.style[property]){
-			if ((/^(height|width)$/).test(property) && !(/px$/.test(result))){
+			if ((/^(height|width)$/).test(property) && !(result.endsWith("px"))){
 				var values = (property == 'width') ? ['left', 'right'] : ['top', 'bottom'], size = 0;
 				values.each(function(value){
 					size += this.getStyle('border-' + value + '-width').toInt() + this.getStyle('padding-' + value).toInt();
@@ -4649,7 +4649,7 @@ Element.implement({
 			}
 		}
 		//<ltIE9>
-		if (returnsBordersInWrongOrder && /^border(Top|Right|Bottom|Left)?$/.test(property) && /^#/.test(result)){
+		if (returnsBordersInWrongOrder && /^border(Top|Right|Bottom|Left)?$/.test(property) && result.startsWith("#")){
 			return result.replace(/^(.+)\s(.+)\s(.+)$/, '$2 $3 $1');
 		}
 		//</ltIE9>
@@ -5227,7 +5227,7 @@ Fx.CSS = new Class({
 				element.setStyle(property, to + unit);
 				var value = element.getComputedStyle(property);
 				// IE and Opera support pixelLeft or pixelWidth
-				if (!(/px$/.test(value))){
+				if (!(value.endsWith("px"))){
 					value = element.style[('pixel-' + property).camelCase()];
 					if (value == null){
 						// adapted from Dean Edwards' http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
@@ -5310,7 +5310,7 @@ Fx.CSS = new Class({
 				Object.each(Element.Styles, function(value, style){
 					if (!rule.style[style] || Element.ShortStyles[style]) return;
 					value = String(rule.style[style]);
-					to[style] = ((/^rgb/).test(value)) ? value.rgbToHex() : value;
+					to[style] = (value.startsWith("rgb")) ? value.rgbToHex() : value;
 				});
 			});
 		};
@@ -6097,8 +6097,8 @@ var escape = function(chr){
 };
 
 JSON.validate = function(string){
-	string = string.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').
-					replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
+	string = string.replace(/\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').
+					replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?/g, ']').
 					replace(/(?:^|:|,)(?:\s*\[)+/g, '');
 
 	return (/^[\],:{}\s]*$/).test(string);

@@ -1,8 +1,7 @@
 export function getWmtsUrl(layerId) {
   if (layerId === 'cartesign' || layerId === 'scan25') {
     return `https://data.geopf.fr/private/wmts?apikey=ign_scan_ws&SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
-  }
-  else if (layerId === 'ortho1950') {
+  } else if (layerId === 'ortho1950') {
     return `https://data.geopf.fr/wms-r?SERVICE=WMS&VERSION=1.3.0&TRANSPARENT=TRUE&EXCEPTIONS=INIMAGE&REQUEST=GetMap&CRS=EPSG%3A3857`
   }
   return `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`

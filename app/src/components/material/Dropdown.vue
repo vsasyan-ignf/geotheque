@@ -12,8 +12,7 @@
 
 <script setup>
 import { ref, watchEffect } from 'vue'
-import { defineProps, defineEmits } from 'vue'
-import { eventBus } from '../composable/eventBus';
+import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '../store/scan'
 
 const scanStore = useScanStore()
@@ -42,12 +41,13 @@ function updatestoreScansData() {
   scanStore.updateCurrentScanInfo(selected.value.collecInfo)
 }
 
-watchEffect(() => eventBus.on('criteria-reset', (payload) => {
-  if (payload?.resetDropdown) {
-    selected.value = '';
-  }
-}));
-
+watchEffect(() =>
+  eventBus.on('criteria-reset', (payload) => {
+    if (payload?.resetDropdown) {
+      selected.value = ''
+    }
+  }),
+)
 </script>
 
 <style scoped>
