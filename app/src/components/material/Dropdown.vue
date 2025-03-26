@@ -1,7 +1,7 @@
 <template>
   <div class="dropdown">
     <label for="option">{{ nameDropdown }}</label>
-    <select id="option" v-model="selected" @change="handleChange">
+    <select id="option" v-model="selected" @change="updatestoreScansData">
       <option disabled value="">Veuillez sélectionner une carte</option>
       <option v-for="val in options" :key="val.id" :value="val">
         {{ val.name }}
@@ -11,9 +11,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watchEffect } from 'vue'
 import { defineProps, defineEmits } from 'vue'
+import { eventBus } from '../composable/eventBus';
+import { useScanStore } from '../store/scan'
 
+const scanStore = useScanStore()
 const selected = ref('')
 
 const props = defineProps({
@@ -33,9 +36,18 @@ const props = defineProps({
 
 const emit = defineEmits()
 
-function handleChange() {
+function updatestoreScansData() {
   emit('update:selected', selected.value)
+  scanStore.updateSelectedScan(selected.value)
+  scanStore.updateCurrentScanInfo(selected.value.collecInfo)
 }
+
+watchEffect(() => eventBus.on('criteria-reset', (payload) => {
+  if (payload?.resetDropdown) {
+    selected.value = '';
+  }
+}));
+
 </script>
 
 <style scoped>

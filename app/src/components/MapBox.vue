@@ -353,7 +353,7 @@ onMounted(() => {
       console.log("storeSelectedScan.value:", storeSelectedScan.value)
 
       vectorScanSource.value.clear()
-
+      console.log(storeSelectedScan.value)
       if (storeSelectedScan.value && storeSelectedScan.value.geom && storeSelectedScan.value.geom.length > 0) {
         const polygon = new Feature({
           geometry: new Polygon([storeSelectedScan.value.geom[0]]),
