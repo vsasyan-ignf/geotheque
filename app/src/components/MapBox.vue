@@ -86,6 +86,7 @@ const scanLayer = ref(null)
 
 const url_test = ref(``)
 let layers = ref(layers_carto)
+const communesLayerManuallyActivated = ref(false);
 
 function getLayersActiveTab() {
   if (activeTab.value === 'carthotheque') {
@@ -217,21 +218,16 @@ async function parcour_tab_and_map(url) {
 
 
 function handleOtherLayerToggle(layer) {
-  console.log(layer)
+  console.log(layer);
   
   if (layer.id === 'departements' && departmentsLayer.value) {
-    const isVisible = departmentsLayer.value.getVisible()
-    departmentsLayer.value.setVisible(!isVisible)
-  }
-  
+    const isVisible = departmentsLayer.value.getVisible();
+    departmentsLayer.value.setVisible(!isVisible);
+  } 
   else if (layer.id === 'communes' && communesLayer.value) {
-    const isVisible = communesLayer.value.getVisible()
-
-    if (currentZoom.value < 14) {
-      communesLayer.value.setVisible(false);
-    } else {
-      communesLayer.value.setVisible(!isVisible);
-    }
+    communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value;
+    const shouldBeVisible = communesLayerManuallyActivated.value && currentZoom.value >= 12;
+    communesLayer.value.setVisible(shouldBeVisible);
   }
 }
 
@@ -357,8 +353,8 @@ onMounted(() => {
     communesLayer.value = new VectorLayer({
       source: vectorCommunesSource.value,
       visible: false,
-      maxResolution: 15,
-      minResolution: 0.29858214173896974,
+      // maxResolution: 15,
+      // minResolution: 0.29858214173896974,
       style: new Style({
         stroke: new Stroke({
           color: 'rgba(0, 0, 0, 0.7)',
@@ -369,6 +365,13 @@ onMounted(() => {
         }),
       }),
     })
+
+    watch(currentZoom, (newZoom) => {
+  if (communesLayer.value && communesLayerManuallyActivated.value) {
+    const shouldBeVisible = newZoom >= 12;
+    communesLayer.value.setVisible(shouldBeVisible);
+  }
+});
 
     vectorDepartmentsSource.value = new VectorSource({
       url: (extent) => {
