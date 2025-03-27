@@ -159,6 +159,7 @@ function toggleLayerVisibility(isVisible) {
   }
 }
 
+const communesLayerManuallyActivated = ref(false);
 
 function handleOtherLayerToggle(layer) {
   console.log(layer);
@@ -167,13 +168,12 @@ function handleOtherLayerToggle(layer) {
     const isVisible = departmentsLayer.value.getVisible();
     departmentsLayer.value.setVisible(!isVisible);
   } 
-  
   else if (layer.id === 'communes' && communesLayer.value) {
-    const isVisible = communesLayer.value.getVisible();
-    communesLayer.value.setVisible(!isVisible);
+    communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value;
+    const shouldBeVisible = communesLayerManuallyActivated.value && currentZoom.value >= 12;
+    communesLayer.value.setVisible(shouldBeVisible);
   }
 }
-
 
 
 
@@ -310,6 +310,13 @@ onMounted(() => {
       }),
     })
 
+    watch(currentZoom, (newZoom) => {
+  if (communesLayer.value && communesLayerManuallyActivated.value) {
+    const shouldBeVisible = newZoom >= 12;
+    communesLayer.value.setVisible(shouldBeVisible);
+  }
+});
+
     vectorDepartmentsSource.value = new VectorSource({
       url: (extent) => {
         const bbox = extent.join(',');
@@ -391,10 +398,6 @@ onMounted(() => {
     olView.value.on('change:resolution', () => {
       currentZoom.value = Math.round(olView.value.getZoom());
       console.log(currentZoom.value)
-      if (communesLayer.value && currentZoom.value <= 14) {
-        console.log(communesLayer.value)
-        communesLayer.value.setVisible(false);
-      }
     });
 
     olMap.value = new Map({

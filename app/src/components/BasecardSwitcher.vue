@@ -37,7 +37,7 @@
             :key="'other-' + layer.id"
             class="layer-switcher__other-layer"
             :class="{
-              'layer-switcher__other-layer--disabled': layer.id === 'communes' && props.currentZoom < 12
+              'layer-switcher__other-layer--disabled': layer.id === 'communes' && props.currentZoom <= 11
             }"
           >
             <div class="layer-switcher__other-layer-content">
@@ -53,7 +53,7 @@
               class="layer-switcher__layer-switch"
               :class="{
                 'layer-switcher__layer-switch--active': layer.visible,
-                'layer-switcher__layer-switch--disabled': layer.id === 'communes' && props.currentZoom < 12
+                'layer-switcher__layer-switch--disabled': layer.id === 'communes' && props.currentZoom <= 11
               }"
               @click.stop="handleLayerToggle(index)"
             >
@@ -101,16 +101,6 @@ function handleLayerToggle(index) {
 
   emit('other-layer-toggle', { ...layer });
 }
-
-watch(
-  () => props.currentZoom,
-  (newZoom) => {
-    const communesLayer = localOtherLayers.value.find(layer => layer.id === 'communes');
-    if (communesLayer && newZoom < 14) {
-      communesLayer.visible = false;
-    }
-  }
-)
 
 
 function toggleExpand() {
