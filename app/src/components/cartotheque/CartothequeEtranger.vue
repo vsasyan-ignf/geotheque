@@ -32,8 +32,7 @@
   </div>
 </template>
 
-<script setup >
-
+<script setup>
 import { watch } from 'vue'
 import PointSearch from './PointSearch.vue'
 import FeuilleSearch from './FeuilleSearch.vue'

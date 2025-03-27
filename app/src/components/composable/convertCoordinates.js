@@ -18,7 +18,6 @@ export function useConvertCoordinates(x, y, fromProjection, toProjection) {
   return proj4(fromProjection, toProjection, [x, y])
 }
 
-
 export function convertBbox(bbox, proj_in, proj_out) {
   //Convertion Bbox de proj_in vers proj_out
   const minX = bbox.minX

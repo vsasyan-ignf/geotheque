@@ -77,8 +77,8 @@ let searchTimeout = null
 const proj3857 = 'EPSG:3857' // Web Mercator
 const proj2154 = 'EPSG:2154' // Lambert-93
 import { useScanStore } from '@/components/store/scan'
-import {convertBbox,create_bbox } from '../composable/convertCoordinates'
-import config from '../../config';
+import { convertBbox, create_bbox } from '../composable/convertCoordinates'
+import config from '../../config'
 
 const scanStore = useScanStore()
 

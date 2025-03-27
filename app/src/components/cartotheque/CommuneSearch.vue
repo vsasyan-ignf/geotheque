@@ -62,7 +62,7 @@
   </div>
 </template>
 
-<script setup >
+<script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
@@ -70,7 +70,7 @@ import { useConvertCoordinates } from '@/components/composable/convertCoordinate
 import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 
-import config from '../../config';
+import config from '../../config'
 
 const scanStore = useScanStore()
 
