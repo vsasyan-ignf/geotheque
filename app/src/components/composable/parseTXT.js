@@ -1,3 +1,8 @@
+function roundToTwo(num) {
+    return Math.round(num * 100) / 100;
+}
+
+
 export function parcour_txt_to_tab(url) {
     //function qui retourne le tab avec tab[0]="Centre Actif",coordx,coordy 
     //Tab[1] =  "Cliche Actif",coordx,coordy,et les points delta x,y.
@@ -18,8 +23,8 @@ export function parcour_txt_to_tab(url) {
                     taille_ligne = mots.length;
                     tab2 = [];
                     if (mots.length > 3 && mots[2] == "Centre Actif") {
-                        coord_x = mots[taille_ligne - 3];
-                        coord_y = mots[taille_ligne - 2];
+                        coord_x = parseFloat(mots[taille_ligne - 3]);
+                        coord_y = parseFloat(mots[taille_ligne - 2]);
                         tab2.push("Centre Actif")
                         tab2.push(coord_x, coord_y);
 

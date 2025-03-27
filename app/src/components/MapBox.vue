@@ -51,6 +51,7 @@ import Scan25 from '@/assets/basecard/scan25.jpg'
 //test
 import {parcour_txt_to_tab } from './composable/parseTXT'
 import {useConvertCoordinates } from './composable/convertCoordinates'
+import { listenImage } from 'ol/Image'
 
 const scanStore = useScanStore()
 
@@ -120,29 +121,49 @@ function toggleLayerVisibility(isVisible) {
 }
 
 function addPointToMap(x, y) {
+  //Prend un point en parametre et l'affiche sur la carte
   const coord = [x, y];
   const feature = new Feature({
     geometry: new Point(coord),
   });
-  vectorPinSource.value.addFeature(feature);  // Ajouter le point à la source
+  vectorPinSource.value.addFeature(feature); 
 }
 
+function Add_new_polygone_to_map(tab){
+  // Prend un tableau en parametre et l'affiche sur la carte
+    const polygon = new Feature({
+            geometry: new Polygon([tab]),
+          })
+
+          vectorGeomSource.value.addFeature(polygon);
+  }
 
 
 async function parcour_tab_and_map(url) {
+   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
     try {
         const tab_test = await parcour_txt_to_tab(url);
-        let elem, i, i2, x, y,x_3857,y3857;
-        for (i = 1; i < tab_test.length; i = i + 2) {
+        let elem, i, i2, x, y,x_3857,y3857,tab_points_3857;
+        for (i = 0; i < tab_test.length; i ++) {
+            if(tab_test[i][0] == "Centre Actif"){
+              //"Centre Actif"
+              x = tab_test[i][1];
+              y = tab_test[i][2];
+              [x_3857,y3857] = useConvertCoordinates(x,y,'EPSG:2154','EPSG:3857');
+              addPointToMap(x_3857,y3857)
+            }else{
+              //"Cliche Actif"
             elem = tab_test[i];
-            for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
+            tab_points_3857 = []
+            for (i2 = 3; i2 < elem.length; i2 = i2 + 2) {
+              //Commence a 3 car en 0 il y a le type d'image et en 1 et 2 il y a le point d'origine
                 x = elem[i2];
                 y = elem[i2 + 1];
                 [x_3857,y3857] = useConvertCoordinates(x,y,'EPSG:2154','EPSG:3857');
-                //console.log(x, y);
-                addPointToMap(x_3857, y3857);
-
+                tab_points_3857.push( [x_3857,y3857])
             }
+            Add_new_polygone_to_map(tab_points_3857);
+          }
         }
           
     } catch (error) {
@@ -293,7 +314,7 @@ onMounted(() => {
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
-      parcour_tab_and_map("./1000_AERODROME CREIL_C_100.txt");
+      //parcour_tab_and_map("./1000_AERODROME CREIL_C_100.txt");
       
       if (showPin.value) {
         vectorPinSource.value.clear()

@@ -67,7 +67,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import proj4 from 'proj4'
+import {convertBbox,create_bbox } from './composable/convertCoordinates'
 
 const emit = defineEmits(['close', 'select-departement'])
 const searchDepartement = ref('')
@@ -96,44 +96,6 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   if (searchTimeout) clearTimeout(searchTimeout)
 })
-
-function create_bbox(contour) {
-  if (!contour || contour.length === 0) {
-    throw new Error('Contour invalide')
-  }
-  const coordinates = contour[0].map((point) => [point[0], point[1]])
-
-  if (coordinates.length < 3) {
-    throw new Error('Un polygone doit avoir au moins 3 points')
-  }
-  let minX = coordinates[0][0]
-  let minY = coordinates[0][1]
-  let maxX = coordinates[0][0]
-  let maxY = coordinates[0][1]
-
-  coordinates.forEach((point) => {
-    const [x, y] = point
-    minX = Math.min(minX, x)
-    minY = Math.min(minY, y)
-    maxX = Math.max(maxX, x)
-    maxY = Math.max(maxY, y)
-  })
-
-  return { minX, minY, maxX, maxY }
-}
-
-function convertBbox(bbox, proj_in, proj_out) {
-  //Convertion Bbox de proj_in vers proj_out
-  const minX = bbox.minX
-  const minY = bbox.minY
-  const maxX = bbox.maxX
-  const maxY = bbox.maxY
-
-  const minCoord = proj4(proj_in, proj_out, [minX, minY])
-  const maxCoord = proj4(proj_in, proj_out, [maxX, maxY])
-
-  return [minCoord[0], minCoord[1], maxCoord[0], maxCoord[1]]
-}
 
 function searchDepartements() {
   if (searchTimeout) {
