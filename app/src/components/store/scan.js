@@ -59,7 +59,6 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateCurrentScanInfo(collec) {
     currentCollecInfo.value = collec
-    console.log('Collection actuelle:', currentCollecInfo.value)
   }
 
   function resetCriteria() {

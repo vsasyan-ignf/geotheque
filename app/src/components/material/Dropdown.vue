@@ -2,7 +2,7 @@
   <div class="dropdown">
     <label for="option">{{ nameDropdown }}</label>
     <select id="option" v-model="selected" @change="updatestoreScansData">
-      <option disabled value="">Veuillez sélectionner une carte</option>
+      <option disabled value="" v-if="disableOption">{{ disableOption }}</option>
       <option v-for="val in options" :key="val.id" :value="val">
         {{ val.name }}
       </option>
@@ -16,7 +16,6 @@ import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '../store/scan'
 
 const scanStore = useScanStore()
-const selected = ref('')
 
 const props = defineProps({
   nameDropdown: {
@@ -31,7 +30,15 @@ const props = defineProps({
       { id: 'EPSG:2154', name: 'Lambert 93' },
     ],
   },
+  disableOption: {
+    type: String
+  },
+  defaultValue: {
+    type: Object,
+  },
 })
+
+const selected = ref('')
 
 const emit = defineEmits()
 
@@ -41,13 +48,16 @@ function updatestoreScansData() {
   scanStore.updateCurrentScanInfo(selected.value.collecInfo)
 }
 
-watchEffect(() =>
+watchEffect(() => {
+  if (props.defaultValue) {
+    selected.value = props.defaultValue
+  }
   eventBus.on('criteria-reset', (payload) => {
     if (payload?.resetDropdown) {
       selected.value = ''
     }
-  }),
-)
+  })
+})
 </script>
 
 <style scoped>
