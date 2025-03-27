@@ -124,6 +124,8 @@ const collectionOptions = ref([
   { id: '3', name: 'CASSINI' },
 ])
 
+
+
 const selectScaleMin = (scale) => {
   scaleMin.value = scale
   showScaleMinOptions.value = false
