@@ -377,7 +377,7 @@ function validateCommune() {
   color: #ddd;
 }
 
-.mdi{
+.mdi {
   margin-top: 5px;
 }
 </style>

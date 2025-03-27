@@ -79,6 +79,7 @@
         nameDropdown="Collections"
         :options="collectionOptions"
         @update:selected="updateSelectedCollection"
+        :defaultValue="{ id: '0', name: 'Toutes les collections' }"
       />
 
       <div class="button-group">
@@ -120,67 +121,66 @@ const showScaleMaxOptions = ref(false)
 
 const collectionOptions = ref([
   {
-    "id": "0",
-    "name": "Toutes les collections"
+    id: '0',
+    name: 'Toutes les collections',
   },
   {
-    "id": "1",
-    "name": "CADASTRE"
+    id: '1',
+    name: 'CADASTRE',
   },
   {
-    "id": "2",
-    "name": "CASSINI"
+    id: '2',
+    name: 'CASSINI',
   },
   {
-    "id": "3",
-    "name": "DEPARTEMENTS"
+    id: '3',
+    name: 'DEPARTEMENTS',
   },
   {
-    "id": "4",
-    "name": "EM_CARTES"
+    id: '4',
+    name: 'EM_CARTES',
   },
   {
-    "id": "5",
-    "name": "EM_MINUTES"
+    id: '5',
+    name: 'EM_MINUTES',
   },
   {
-    "id": "6",
-    "name": "FR_100K_A_200K"
+    id: '6',
+    name: 'FR_100K_A_200K',
   },
   {
-    "id": "7",
-    "name": "FR_10K_A_50K"
+    id: '7',
+    name: 'FR_10K_A_50K',
   },
   {
-    "id": "8",
-    "name": "FR_2K_A_5K"
+    id: '8',
+    name: 'FR_2K_A_5K',
   },
   {
-    "id": "9",
-    "name": "FR_THEMATIQUE_GEN"
+    id: '9',
+    name: 'FR_THEMATIQUE_GEN',
   },
   {
-    "id": "10",
-    "name": "FR_THEMATIQUE_LOC"
+    id: '10',
+    name: 'FR_THEMATIQUE_LOC',
   },
   {
-    "id": "11",
-    "name": "PLANS_DE_VILLE"
+    id: '11',
+    name: 'PLANS_DE_VILLE',
   },
   {
-    "id": "12",
-    "name": "REGION_PARISIENNE"
+    id: '12',
+    name: 'REGION_PARISIENNE',
   },
   {
-    "id": "13",
-    "name": "TOPO_DIVERS"
+    id: '13',
+    name: 'TOPO_DIVERS',
   },
   {
-    "id": "14",
-    "name": "URBANISME"
-  }
+    id: '14',
+    name: 'URBANISME',
+  },
 ])
-
 
 const selectScaleMin = (scale) => {
   scaleMin.value = scale
@@ -220,7 +220,10 @@ const handleSubmit = () => {
     yearMax: yearMax.value,
     scaleMin: scaleMin.value,
     scaleMax: scaleMax.value,
-    selectedCollection: selectedCollection.value.name === 'Toutes les collections' ? null : selectedCollection.value.name,
+    selectedCollection:
+      selectedCollection.value.name === 'Toutes les collections'
+        ? null
+        : selectedCollection.value.name,
   }
   scanStore.updateCriteria(criteria)
 }
@@ -239,7 +242,6 @@ const resetForm = () => {
 const updateSelectedCollection = (selected) => {
   selectedCollection.value = selected
 }
-
 </script>
 
 <style scoped>

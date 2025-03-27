@@ -420,7 +420,7 @@ async function getDepartementBbox(departement) {
   color: #ddd;
 }
 
-.mdi{
+.mdi {
   margin-top: 5px;
 }
 </style>

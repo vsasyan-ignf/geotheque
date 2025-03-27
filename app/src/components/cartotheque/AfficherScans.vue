@@ -1,17 +1,14 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
-      <SparkleButton
-        nameButton="Exporter les scans"
-        @click="downloadCSV"
-      >
+      <SparkleButton nameButton="Exporter les scans" @click="downloadCSV">
         <template #icon
           ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
         /></template>
       </SparkleButton>
       <div class="dropdown-container">
         <div class="dropdown-wrapper">
-          <Dropdown nameDropdown="Nom du Scan" :options="storeScansData" />
+          <Dropdown nameDropdown="Nom du Scan" :options="storeScansData" :disableOption='textDisableOption'/>
         </div>
       </div>
       <div class="button-group">
@@ -24,9 +21,7 @@
           /></template>
         </ShakingButton>
         <ShakingButton nameButton="XML" @click="downloadxml">
-          <template #icon
-            ><SvgIcon type="mdi" :path="mdiXml" class="mdicon"
-          /></template>
+          <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
         </ShakingButton>
       </div>
     </form>
@@ -34,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch} from 'vue'
 import ShakingButton from '@/components/material/ShakingButton.vue'
 import SparkleButton from '../material/SparkleButton.vue'
 import Dropdown from '@/components/material/Dropdown.vue'
@@ -46,6 +41,9 @@ const scanStore = useScanStore()
 const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)
 
 const imageUrl = ref('')
+const textDisableOption = computed( () => {
+  return storeScansData.value === null || storeScansData.value.length === 0 ? "Pas de scans résultats" : "Veuillez sélectionner un scan"
+})
 
 function generateImageUrl(info) {
   const lieu = 'METROPOLE'
@@ -62,6 +60,7 @@ function generateImageUrl(info) {
 
   return { url, name }
 }
+
 
 watch(currentCollecInfo, (newVal) => {
   if (newVal) {
@@ -151,8 +150,6 @@ function dicoToFormatCSV(arrObj) {
   })
   return csvContent
 }
-
-
 </script>
 <style scoped>
 .scan-box {
@@ -190,7 +187,6 @@ function dicoToFormatCSV(arrObj) {
   flex: 1;
   width: 100%;
 }
-
 
 .form-row {
   display: flex;

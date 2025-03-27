@@ -90,7 +90,6 @@ function getLayersActiveTab() {
 }
 
 watch(activeTab, (newValue) => {
-
   // Récupérer les nouvelles layers
   const newLayers = getLayersActiveTab()
   layers.value = newLayers
@@ -119,7 +118,6 @@ watch(activeTab, (newValue) => {
     // reset l'index à 0
     activeLayerIndex.value = 0
   }
-
 })
 
 const activeLayerIndex = ref(0)
@@ -355,7 +353,6 @@ onMounted(() => {
       }
     })
 
-    console.log('---------------------------- NEW URL ----------------------------')
     watch(storeURL, async (newValue) => {
       console.log('NEW URL:', newValue)
       vectorGeomSource.value.clear()
