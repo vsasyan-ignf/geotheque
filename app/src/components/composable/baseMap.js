@@ -112,3 +112,18 @@ export const layers_photo_monde = [
     thumbnail: Scan25,
   },
 ]
+
+export const otherLayers = [
+  {
+    id: 'communes',
+    name: 'Communes',
+    thumbnail: ortho1950,
+    visible: false
+  },
+  {
+    id: 'departements',
+    name: 'Département',
+    thumbnail: ortho1950,
+    visible: false
+  }
+];

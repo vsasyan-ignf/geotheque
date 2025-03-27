@@ -4,8 +4,11 @@
     <div ref="mapElement" class="ol-map"></div>
     <BasecardSwitcher
       :layers="layers"
+      :otherLayers="otherLayers"
       :activeLayerIndex="activeLayerIndex"
+      :currentZoom="currentZoom"
       @layer-change="changeActiveLayer"
+      @other-layer-toggle="handleOtherLayerToggle"
     />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
@@ -13,7 +16,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, provide, watch } from 'vue'
+import { ref,onMounted, nextTick, provide, watch } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
@@ -46,6 +49,7 @@ import {
   layers_carto_monde,
   layers_photo,
   layers_photo_monde,
+  otherLayers
 } from './composable/baseMap'
 import OSM from 'ol/source/OSM'
 import TileWMS from 'ol/source/TileWMS'
@@ -68,6 +72,10 @@ const pins = ref([])
 const showPin = ref(false)
 const vectorPinSource = ref(null)
 const vectorWfsSource = ref(null)
+const vectorCommunesSource = ref(null)
+const communesLayer = ref(null)
+const vectorDepartmentsSource = ref(null)
+const departmentsLayer = ref(null)
 const vectorGeomSource = ref(null)
 const geomLayer = ref(null)
 const vectorScanSource = ref(null)
@@ -89,6 +97,7 @@ function getLayersActiveTab() {
     return []
   }
 }
+
 
 watch(activeTab, (newValue) => {
   // Récupérer les nouvelles layers
@@ -136,6 +145,9 @@ const activeLayerIndex = ref(0)
 const olView = ref(null)
 const visibility_switch = ref(true)
 
+const currentZoom = ref(zoom.value);
+
+
 function toggleLayerVisibility(isVisible) {
   if (olMap.value) {
     const activeLayer = olMap.value.getLayers().getArray()[activeLayerIndex.value]
@@ -146,6 +158,28 @@ function toggleLayerVisibility(isVisible) {
     }
   }
 }
+
+
+function handleOtherLayerToggle(layer) {
+  console.log(layer)
+  
+  if (layer.id === 'departements' && departmentsLayer.value) {
+    const isVisible = departmentsLayer.value.getVisible()
+    departmentsLayer.value.setVisible(!isVisible)
+  }
+  
+  else if (layer.id === 'communes' && communesLayer.value) {
+    const isVisible = communesLayer.value.getVisible()
+
+    if (currentZoom.value < 14) {
+      communesLayer.value.setVisible(false);
+    } else {
+      communesLayer.value.setVisible(!isVisible);
+    }
+  }
+}
+
+
 
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
@@ -253,6 +287,56 @@ onMounted(() => {
       }),
     })
 
+    vectorCommunesSource.value = new VectorSource({
+      url: (extent) => {
+        const bbox = extent.join(',');
+        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`;
+      },
+      format: new GeoJSON(),
+      strategy: bboxStrategy,
+    });
+
+    
+
+    communesLayer.value = new VectorLayer({
+      source: vectorCommunesSource.value,
+      visible: false,
+      maxResolution: 15,
+      minResolution: 0.29858214173896974,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.7)',
+          width: 1,
+        }),
+        fill: new Fill({
+          color: 'rgba(200, 200, 200, 0.5)',
+        }),
+      }),
+    })
+
+    vectorDepartmentsSource.value = new VectorSource({
+      url: (extent) => {
+        const bbox = extent.join(',');
+        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`;
+      },
+      format: new GeoJSON(),
+      strategy: bboxStrategy,
+    });
+
+    departmentsLayer.value = new VectorLayer({
+      source: vectorDepartmentsSource.value,
+      visible: false,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.2)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 0, 0, 0.1)',
+        }),
+      }),
+    })
+
     vectorPinSource.value = new VectorSource()
 
     const pinLayer = new VectorLayer({
@@ -308,9 +392,13 @@ onMounted(() => {
 
     olView.value = view
 
+    olView.value.on('change:resolution', () => {
+      currentZoom.value = Math.round(olView.value.getZoom());
+    });
+
     olMap.value = new Map({
       target: mapElement.value,
-      layers: [...wmtsLayers, wfsLayer, pinLayer, geomLayer.value, scanLayer.value],
+      layers: [...wmtsLayers, wfsLayer, pinLayer, geomLayer.value, scanLayer.value, communesLayer.value, departmentsLayer.value],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
@@ -337,6 +425,10 @@ onMounted(() => {
       })
     })
 
+    olMap.value.getView().on('change:extent', () => {
+      vectorCommunesSource.value.refresh();
+    });
+    
     // Écouter les événements du bus
     eventBus.on('toggle-pin', (isVisible) => {
       showPin.value = isVisible
