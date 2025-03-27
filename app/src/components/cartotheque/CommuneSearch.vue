@@ -377,4 +377,8 @@ function validateCommune() {
   font-size: 24px;
   color: #ddd;
 }
+
+.mdi{
+  margin-top: 5px;
+}
 </style>
