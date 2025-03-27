@@ -36,7 +36,7 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS'
 import GeoJSON from 'ol/format/GeoJSON'
 import Polygon from 'ol/geom/Polygon.js'
 import { get as getProjection } from 'ol/proj'
-import { getTopLeft } from 'ol/extent'
+import { containsCoordinate, getTopLeft } from 'ol/extent'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Style, Icon, Stroke, Fill } from 'ol/style'
@@ -54,7 +54,14 @@ import {
 import OSM from 'ol/source/OSM'
 import TileWMS from 'ol/source/TileWMS'
 
+<<<<<<< HEAD
+//test
+import {parcour_txt_to_tab } from './composable/parseTXT'
+import {useConvertCoordinates } from './composable/convertCoordinates'
+import { listenImage } from 'ol/Image'
+=======
 import { parcour_txt_to_tab } from './composable/parseTXT'
+>>>>>>> origin/dev
 
 const scanStore = useScanStore()
 const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
@@ -159,6 +166,61 @@ function toggleLayerVisibility(isVisible) {
   }
 }
 
+<<<<<<< HEAD
+function addPointToMap(x, y) {
+  //Prend un point en parametre et l'affiche sur la carte
+  const coord = [x, y];
+  const feature = new Feature({
+    geometry: new Point(coord),
+  });
+  vectorPinSource.value.addFeature(feature); 
+}
+
+function Add_new_polygone_to_map(tab){
+  // Prend un tableau en parametre et l'affiche sur la carte
+    const polygon = new Feature({
+            geometry: new Polygon([tab]),
+          })
+
+          vectorGeomSource.value.addFeature(polygon);
+  }
+
+
+async function parcour_tab_and_map(url) {
+   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
+    try {
+        const tab_test = await parcour_txt_to_tab(url);
+        let elem, i, i2, x, y,x_3857,y3857,tab_points_3857;
+        for (i = 0; i < tab_test.length; i ++) {
+            if(tab_test[i][0] == "Centre Actif"){
+              //"Centre Actif"
+              x = tab_test[i][1];
+              y = tab_test[i][2];
+              [x_3857,y3857] = useConvertCoordinates(x,y,'EPSG:2154','EPSG:3857');
+              addPointToMap(x_3857,y3857)
+            }else{
+              //"Cliche Actif"
+            elem = tab_test[i];
+            tab_points_3857 = []
+            for (i2 = 3; i2 < elem.length; i2 = i2 + 2) {
+              //Commence a 3 car en 0 il y a le type d'image et en 1 et 2 il y a le point d'origine
+                x = elem[i2];
+                y = elem[i2 + 1];
+                [x_3857,y3857] = useConvertCoordinates(x,y,'EPSG:2154','EPSG:3857');
+                tab_points_3857.push( [x_3857,y3857])
+            }
+            Add_new_polygone_to_map(tab_points_3857);
+          }
+        }
+          
+    } catch (error) {
+        console.error("Erreur lors de la récupération des données :", error);
+    }
+    
+}
+
+
+=======
 
 function handleOtherLayerToggle(layer) {
   console.log(layer)
@@ -181,6 +243,7 @@ function handleOtherLayerToggle(layer) {
 
 
 
+>>>>>>> origin/dev
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
 
@@ -406,7 +469,12 @@ onMounted(() => {
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
+<<<<<<< HEAD
+      //parcour_tab_and_map("./1000_AERODROME CREIL_C_100.txt");
+      
+=======
       parcour_txt_to_tab('./1000_AERODROME CREIL_C_100.txt')
+>>>>>>> origin/dev
       if (showPin.value) {
         vectorPinSource.value.clear()
 
