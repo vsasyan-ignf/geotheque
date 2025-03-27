@@ -62,13 +62,15 @@
   </div>
 </template>
 
-<script setup>
+<script setup >
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
+
+import config from '../../config';
 
 const scanStore = useScanStore()
 
@@ -116,9 +118,9 @@ function searchCommunes() {
   let search_url = ''
   searchTimeout = setTimeout(() => {
     if (parseInt(query)) {
-      search_url = `https://geo.api.gouv.fr/communes?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+      search_url = `${config.basecommunesUrl}?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
     } else {
-      search_url = `https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+      search_url = `${config.basecommunesUrl}?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
     }
 
     fetch(search_url)
