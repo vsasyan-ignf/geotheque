@@ -39,7 +39,7 @@ import { get as getProjection } from 'ol/proj'
 import { getTopLeft } from 'ol/extent'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { Style, Icon, Stroke, Fill } from 'ol/style'
+import { Style, Icon, Stroke, Fill, Text } from 'ol/style'
 import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
@@ -121,14 +121,20 @@ function getOtherLayers() {
   }
 }
 
+function clearOtherLayers() {
+  departmentsLayer.value.setVisible(false)
+  feuilleLayer.value.setVisible(false)
+}
+
 watch(activeTab, (newValue) => {
   // Récupérer les nouvelles layers
+  
   const newLayers = getLayersActiveTab()
   layers.value = newLayers
-
   otherLayers.value = getOtherLayers()
-  console.log('---------------------activetab---------')
-  console.log(otherLayers.value)
+
+  clearOtherLayers()
+
 
   if (olMap.value) {
     // get wmts layers
@@ -419,7 +425,8 @@ onMounted(() => {
     departmentsLayer.value = new VectorLayer({
       source: vectorDepartmentsSource.value,
       visible: false,
-      style: new Style({
+      style: function(feature) {
+        return new Style({
         stroke: new Stroke({
           color: 'rgba(0, 0, 0, 0.2)',
           width: 2,
@@ -427,7 +434,14 @@ onMounted(() => {
         fill: new Fill({
           color: 'rgba(0, 0, 0, 0.1)',
         }),
-      }),
+        text: new Text({
+          text: feature.get('CODE_DEPT'),
+          font: '12px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+          offsetY: -15
+        })
+      })},
     })
 
     vectorPinSource.value = new VectorSource()

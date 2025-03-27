@@ -35,7 +35,7 @@
             class="layer-switcher__other-layer"
             :class="{
               'layer-switcher__other-layer--disabled':
-                layer.id === 'communes' && props.currentZoom <= 11,
+                layer.id === 'communes' && currentZoom <= 11,
             }"
           >
             <div class="layer-switcher__other-layer-content">
@@ -52,9 +52,9 @@
               :class="{
                 'layer-switcher__layer-switch--active': layer.visible,
                 'layer-switcher__layer-switch--disabled':
-                  layer.id === 'communes' && props.currentZoom <= 11,
+                  layer.id === 'communes' && currentZoom <= 11,
               }"
-              @click.stop="handleLayerToggle(index)"
+              @click="handleLayerToggle(index)"
             >
               <div class="layer-switcher__layer-switch-handle"></div>
             </div>
