@@ -113,7 +113,7 @@ export const layers_photo_monde = [
   },
 ]
 
-export const otherLayers = [
+export const otherLayersCartoFrance = [
   {
     id: 'communes',
     name: 'Communes',
@@ -123,6 +123,21 @@ export const otherLayers = [
   {
     id: 'departements',
     name: 'Département',
+    thumbnail: ortho1950,
+    visible: false
+  }
+];
+
+export const otherLayersCartoMonde = [
+  {
+    id: 'feuilles',
+    name: 'Feuilles',
+    thumbnail: ortho1950,
+    visible: false
+  },
+  {
+    id: 'pays',
+    name: 'Pays',
     thumbnail: ortho1950,
     visible: false
   }

@@ -33,7 +33,7 @@
         <div class="layer-switcher__other-layers-title">Autres couches</div>
         <div class="layer-switcher__other-layers-list">
           <div
-            v-for="(layer, index) in localOtherLayers"
+            v-for="(layer, index) in otherLayers"
             :key="'other-' + layer.id"
             class="layer-switcher__other-layer"
             :class="{
@@ -69,7 +69,7 @@
 
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   layers: {
@@ -93,11 +93,10 @@ const isExpanded = ref(false)
 
 const hasOtherLayers = computed(() => props.otherLayers.length > 0);
 
-const localOtherLayers = ref([...props.otherLayers]);
+const localOtherLayers = ref(props.otherLayers);
 
 function handleLayerToggle(index) {
   const layer = localOtherLayers.value[index];
-  
   if (props.currentZoom < 14) {
     if (layer.id === 'communes') {
       console.log('Zoom trop faible pour activer ce calque.');
