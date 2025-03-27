@@ -54,14 +54,10 @@ import {
 import OSM from 'ol/source/OSM'
 import TileWMS from 'ol/source/TileWMS'
 
-<<<<<<< HEAD
 //test
 import {parcour_txt_to_tab } from './composable/parseTXT'
 import {useConvertCoordinates } from './composable/convertCoordinates'
 import { listenImage } from 'ol/Image'
-=======
-import { parcour_txt_to_tab } from './composable/parseTXT'
->>>>>>> origin/dev
 
 const scanStore = useScanStore()
 const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
@@ -166,7 +162,6 @@ function toggleLayerVisibility(isVisible) {
   }
 }
 
-<<<<<<< HEAD
 function addPointToMap(x, y) {
   //Prend un point en parametre et l'affiche sur la carte
   const coord = [x, y];
@@ -220,7 +215,6 @@ async function parcour_tab_and_map(url) {
 }
 
 
-=======
 
 function handleOtherLayerToggle(layer) {
   console.log(layer)
@@ -243,7 +237,6 @@ function handleOtherLayerToggle(layer) {
 
 
 
->>>>>>> origin/dev
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
 
@@ -469,12 +462,6 @@ onMounted(() => {
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
-<<<<<<< HEAD
-      //parcour_tab_and_map("./1000_AERODROME CREIL_C_100.txt");
-      
-=======
-      parcour_txt_to_tab('./1000_AERODROME CREIL_C_100.txt')
->>>>>>> origin/dev
       if (showPin.value) {
         vectorPinSource.value.clear()
 

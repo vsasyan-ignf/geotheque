@@ -67,12 +67,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-<<<<<<< HEAD:app/src/components/DepartementSearch.vue
-import {convertBbox,create_bbox } from './composable/convertCoordinates'
-=======
-import proj4 from 'proj4'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
->>>>>>> origin/dev:app/src/components/cartotheque/DepartementSearch.vue
 
 const emit = defineEmits(['close', 'select-departement'])
 const searchDepartement = ref('')
