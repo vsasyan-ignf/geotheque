@@ -37,7 +37,7 @@
             :key="'other-' + layer.id"
             class="layer-switcher__other-layer"
             :class="{
-              'layer-switcher__other-layer--disabled': layer.id === 'communes' && props.currentZoom < 14
+              'layer-switcher__other-layer--disabled': layer.id === 'communes' && props.currentZoom < 12
             }"
           >
             <div class="layer-switcher__other-layer-content">
@@ -53,7 +53,7 @@
               class="layer-switcher__layer-switch"
               :class="{
                 'layer-switcher__layer-switch--active': layer.visible,
-                'layer-switcher__layer-switch--disabled': layer.id === 'communes' && props.currentZoom < 14
+                'layer-switcher__layer-switch--disabled': layer.id === 'communes' && props.currentZoom < 12
               }"
               @click.stop="handleLayerToggle(index)"
             >
@@ -97,18 +97,21 @@ const localOtherLayers = ref([...props.otherLayers]);
 
 function handleLayerToggle(index) {
   const layer = localOtherLayers.value[index];
-  
-  if (props.currentZoom < 14) {
-    if (layer.id === 'communes') {
-      console.log('Zoom trop faible pour activer ce calque.');
-      return;
-    }
-  }
-
   layer.visible = !layer.visible;
 
   emit('other-layer-toggle', { ...layer });
 }
+
+watch(
+  () => props.currentZoom,
+  (newZoom) => {
+    const communesLayer = localOtherLayers.value.find(layer => layer.id === 'communes');
+    if (communesLayer && newZoom < 14) {
+      communesLayer.visible = false;
+    }
+  }
+)
+
 
 function toggleExpand() {
   isExpanded.value = !isExpanded.value
