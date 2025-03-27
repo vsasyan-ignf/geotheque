@@ -84,6 +84,8 @@ import { useConvertCoordinates } from '@/components/composable/convertCoordinate
 import { useScanStore } from '@/components/store/scan'
 import { mdiInformationOutline, mdiCrosshairsGps, mdiMapMarker } from '@mdi/js'
 
+import config from '../../config';
+
 const scanStore = useScanStore()
 
 const emit = defineEmits(['close', 'go-to-point'])
@@ -101,7 +103,7 @@ const projections = [
 
 async function fetchAndConvertBbox(longitude, latitude) {
   try {
-    const url = `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
+    const url = `${config.baseNominatimUrl}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
     const response = await fetch(url)
 
     if (!response.ok) {
