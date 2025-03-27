@@ -148,28 +148,19 @@ function selectFeuille(commune) {
   showResults.value = false
 }
 
-function validateFeuille() {
-  if (repCommune) {
-    const bbox = repCommune.bbox.coordinates[0]
-    const bboxWGS84 = [bbox[0], bbox[2]]
-    const bboxLambert93 = bboxWGS84.map((point) =>
-      useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154'),
-    )
+async function validateFeuille() {
+  try {
+      const response = await fetch('http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO=%27NF%2030%20XI%27&srsName=EPSG:3857')
+      if (response.ok) {
+        const data = await response.json()
 
-    const point = {
-      x: 0,
-      y: 0,
-      bboxLambert93: bboxLambert93.flat(),
+        console.log(data.features[0].geometry.coordinates[0])
+      } else {
+        throw new Error('Failed to fetch data')
+      }
+    } catch (error) {
+      console.error('Error:', error)
     }
-
-    const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
-      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
-    )
-
-    scanStore.updateSelectedGeom(contourMercator)
-
-    emit('select-commune', point)
-  }
 }
 </script>
 

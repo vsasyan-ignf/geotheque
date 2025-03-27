@@ -360,10 +360,13 @@ onMounted(() => {
       }),
     })
 
+
+    
+
     vectorFeuilleSource.value = new VectorSource({
       url: (extent) => {
         const bbox = extent.join(',')
-        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`
+        return 'http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO=%27NF%2030%20XI%27&srsName=EPSG:3857'
       },
       format: new GeoJSON(),
       strategy: bboxStrategy,
