@@ -48,6 +48,7 @@ import {
   layers_photo_monde,
 } from './composable/baseMap'
 import OSM from 'ol/source/OSM'
+import TileWMS from 'ol/source/TileWMS'
 
 import { parcour_txt_to_tab } from './composable/parseTXT'
 
@@ -116,6 +117,17 @@ watch(activeTab, (newValue) => {
       }
     })
 
+    if (newLayers.length > wmtsLayers.length) {
+      const layersToAdd = newLayers.slice(wmtsLayers.length).map((layer, index) => {
+        return new TileLayer({
+          source: createWmtsSource(layer.id),
+          visible: wmtsLayers.length + index === 0,
+        });
+      });
+
+      layersToAdd.forEach(layer => olMap.value.addLayer(layer));
+    }
+
     scanStore.resetCriteria()
 
     // reset l'index à 0
@@ -163,12 +175,31 @@ function changeActiveLayer(index) {
 }
 
 function createWmtsSource(layerId) {
-  console.log('Layer ID:', layerId)
   if (layerId === 'osm') {
     return new OSM({
       attributions: null,
       controls: [],
     })
+  }
+  else if (layerId === 'ortho1950'){
+    return new TileWMS({
+      url: getWmtsUrl(layerId),
+      params: {
+        'LAYERS': getWmtsLayerName(layerId),
+        'VERSION': '1.3.0',
+        'TRANSPARENT': 'TRUE',
+        'FORMAT': getFormatWmtsLayer(layerId),
+        'CRS': 'EPSG:3857',
+        'EXCEPTIONS': 'INIMAGE',
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous',
+      tileLoadFunction: function (tile, src) {
+        setTimeout(() => {
+          tile.getImage().src = src;
+        }, 500); // Attendre 500ms avant de charger l'image
+      },
+    });
   } else {
     const projObj = getProjection('EPSG:3857')
     const projExtent = projObj.getExtent()
