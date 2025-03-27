@@ -1,17 +1,21 @@
 <template>
   <header class="header">
     <div class="logo">
-      <i class="mdi mdi-map"></i>
+      <SvgIcon :path="mdiMap" type="mdi" class="mdicon" />
       <span>Géothèque</span>
     </div>
 
     <nav class="header-nav">
       <button class="header-button" title="Paramètres">
-        <i class="mdi mdi-cog"></i>
+        <SvgIcon :path="mdiCog" type="mdi" class="mdicon" />
       </button>
     </nav>
   </header>
 </template>
+
+<script setup>
+import { mdiMap, mdiCog } from '@mdi/js'
+</script>
 
 <style scoped>
 .header {

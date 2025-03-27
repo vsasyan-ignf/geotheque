@@ -4,8 +4,11 @@
     <div ref="mapElement" class="ol-map"></div>
     <BasecardSwitcher
       :layers="layers"
+      :otherLayers="otherLayers"
       :activeLayerIndex="activeLayerIndex"
+      :currentZoom="currentZoom"
       @layer-change="changeActiveLayer"
+      @other-layer-toggle="handleOtherLayerToggle"
     />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
@@ -13,7 +16,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, provide, watch } from 'vue'
+import { ref,onMounted, nextTick, provide, watch } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
@@ -40,22 +43,29 @@ import { Style, Icon, Stroke, Fill } from 'ol/style'
 import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
-// Images pour les thumbnails
-import PlanIGN from '@/assets/basecard/plan_ign.png'
-import Ortho from '@/assets/basecard/ortho.jpeg'
-import BDParcellaire from '@/assets/basecard/bdparcellaire.png'
-import CartesIGN from '@/assets/basecard/cartesign.jpg'
-import Scan25 from '@/assets/basecard/scan25.jpg'
 
+import {
+  layers_carto,
+  layers_carto_monde,
+  layers_photo,
+  layers_photo_monde,
+  otherLayers
+} from './composable/baseMap'
+import OSM from 'ol/source/OSM'
+import TileWMS from 'ol/source/TileWMS'
 
+<<<<<<< HEAD
 //test
 import {parcour_txt_to_tab } from './composable/parseTXT'
 import {useConvertCoordinates } from './composable/convertCoordinates'
 import { listenImage } from 'ol/Image'
+=======
+import { parcour_txt_to_tab } from './composable/parseTXT'
+>>>>>>> origin/dev
 
 const scanStore = useScanStore()
-
-const { storeURL, storeSelectedGeom, activeSubCategory, storeSelectedScan } = storeToRefs(scanStore)
+const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
+  storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -69,45 +79,81 @@ const pins = ref([])
 const showPin = ref(false)
 const vectorPinSource = ref(null)
 const vectorWfsSource = ref(null)
+const vectorCommunesSource = ref(null)
+const communesLayer = ref(null)
+const vectorDepartmentsSource = ref(null)
+const departmentsLayer = ref(null)
 const vectorGeomSource = ref(null)
 const geomLayer = ref(null)
 const vectorScanSource = ref(null)
 const scanLayer = ref(null)
 
 const url_test = ref(``)
-const bbox = ref([0, 0, 0, 0])
+let layers = ref(layers_carto)
 
-const layers = ref([
-  {
-    id: 'plan',
-    name: 'Plan IGN',
-    thumbnail: PlanIGN,
-  },
-  {
-    id: 'ortho',
-    name: 'Ortho',
-    thumbnail: Ortho,
-  },
-  {
-    id: 'bdparcellaire',
-    name: 'BDParcellaire',
-    thumbnail: BDParcellaire,
-  },
-  {
-    id: 'cartesign',
-    name: 'Cartes IGN',
-    thumbnail: CartesIGN,
-  },
-  {
-    id: 'scan25',
-    name: 'Scan25',
-    thumbnail: Scan25,
-  },
-])
+function getLayersActiveTab() {
+  if (activeTab.value === 'carthotheque') {
+    return layers_carto
+  } else if (activeTab.value === 'carthotheque_etranger') {
+    return layers_carto_monde
+  } else if (activeTab.value === 'phototheque') {
+    return layers_photo
+  } else if (activeTab.value === 'phototheque_etranger') {
+    return layers_photo_monde
+  } else {
+    return []
+  }
+}
+
+
+watch(activeTab, (newValue) => {
+  // Récupérer les nouvelles layers
+  const newLayers = getLayersActiveTab()
+  layers.value = newLayers
+
+  if (olMap.value) {
+    // get wmts layers
+    const mapLayers = olMap.value.getLayers()
+    const wmtsLayers = mapLayers.getArray().filter((layer) => layer instanceof TileLayer)
+
+    // met à jour les wmts
+    wmtsLayers.forEach((layer, index) => {
+      if (index < newLayers.length) {
+        // Créer une nouvelle source pour cette couche
+        const newSource = createWmtsSource(newLayers[index].id)
+
+        // defined source
+        layer.setSource(newSource)
+
+        // défini la visilibité de l'index 0
+        layer.setVisible(index === 0)
+      }
+    })
+
+    if (newLayers.length > wmtsLayers.length) {
+      const layersToAdd = newLayers.slice(wmtsLayers.length).map((layer, index) => {
+        return new TileLayer({
+          source: createWmtsSource(layer.id),
+          visible: wmtsLayers.length + index === 0,
+        });
+      });
+
+      layersToAdd.forEach(layer => olMap.value.addLayer(layer));
+    }
+
+    scanStore.resetCriteria()
+
+    // reset l'index à 0
+    activeLayerIndex.value = 0
+  }
+})
 
 const activeLayerIndex = ref(0)
 const olView = ref(null)
 const visibility_switch = ref(true)
+
+const currentZoom = ref(zoom.value);
+
 
 function toggleLayerVisibility(isVisible) {
   if (olMap.value) {
@@ -120,6 +166,7 @@ function toggleLayerVisibility(isVisible) {
   }
 }
 
+<<<<<<< HEAD
 function addPointToMap(x, y) {
   //Prend un point en parametre et l'affiche sur la carte
   const coord = [x, y];
@@ -173,18 +220,46 @@ async function parcour_tab_and_map(url) {
 }
 
 
+=======
+
+function handleOtherLayerToggle(layer) {
+  console.log(layer)
+  
+  if (layer.id === 'departements' && departmentsLayer.value) {
+    const isVisible = departmentsLayer.value.getVisible()
+    departmentsLayer.value.setVisible(!isVisible)
+  }
+  
+  else if (layer.id === 'communes' && communesLayer.value) {
+    const isVisible = communesLayer.value.getVisible()
+
+    if (currentZoom.value < 14) {
+      communesLayer.value.setVisible(false);
+    } else {
+      communesLayer.value.setVisible(!isVisible);
+    }
+  }
+}
+
+
+
+>>>>>>> origin/dev
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
 
   if (olMap.value) {
-    // Changement des couches WMTS uniquement
-    const wmtsLayers = olMap.value.getLayers().getArray().slice(0, layers.value.length)
-    wmtsLayers.forEach((layer, idx) => {
-      if (visibility_switch.value === true) {
-        layer.setVisible(idx === index)
-      }
+    // recup les wmts layers
+    const wmtsLayers = olMap.value
+      .getLayers()
+      .getArray()
+      .filter((layer) => layer instanceof TileLayer)
+
+    // masque les wmts
+    wmtsLayers.forEach((layer, layerIndex) => {
+      layer.setVisible(layerIndex === index)
     })
 
+    // met à jour le setzoom
     if (olView.value) {
       olView.value.setMaxZoom(getMaxZoom(layers.value[index].id))
     }
@@ -192,41 +267,67 @@ function changeActiveLayer(index) {
 }
 
 function createWmtsSource(layerId) {
-  const projObj = getProjection('EPSG:3857')
-  const projExtent = projObj.getExtent()
-
-  const resolutions = []
-  const matrixIds = []
-
-  const maxZoom = 19
-
-  for (let i = 0; i <= maxZoom; i++) {
-    matrixIds.push(i.toString())
-    resolutions.push(156543.03392804097 / Math.pow(2, i))
+  if (layerId === 'osm') {
+    return new OSM({
+      attributions: null,
+      controls: [],
+    })
   }
+  else if (layerId === 'ortho1950'){
+    return new TileWMS({
+      url: getWmtsUrl(layerId),
+      params: {
+        'LAYERS': getWmtsLayerName(layerId),
+        'VERSION': '1.3.0',
+        'TRANSPARENT': 'TRUE',
+        'FORMAT': getFormatWmtsLayer(layerId),
+        'CRS': 'EPSG:3857',
+        'EXCEPTIONS': 'INIMAGE',
+      },
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous',
+      tileLoadFunction: function (tile, src) {
+        setTimeout(() => {
+          tile.getImage().src = src;
+        }, 500); // Attendre 500ms avant de charger l'image
+      },
+    });
+  } else {
+    const projObj = getProjection('EPSG:3857')
+    const projExtent = projObj.getExtent()
 
-  const tileGrid = new WMTSTileGrid({
-    origin: getTopLeft(projExtent),
-    resolutions: resolutions,
-    matrixIds: matrixIds,
-  })
+    const resolutions = []
+    const matrixIds = []
 
-  return new WMTS({
-    url: getWmtsUrl(layerId),
-    layer: getWmtsLayerName(layerId),
-    matrixSet: 'PM',
-    format: getFormatWmtsLayer(layerId),
-    projection: projObj,
-    tileGrid: tileGrid,
-    crossOrigin: 'anonymous',
-  })
+    const maxZoom = 19
+
+    for (let i = 0; i <= maxZoom; i++) {
+      matrixIds.push(i.toString())
+      resolutions.push(156543.03392804097 / Math.pow(2, i))
+    }
+
+    const tileGrid = new WMTSTileGrid({
+      origin: getTopLeft(projExtent),
+      resolutions: resolutions,
+      matrixIds: matrixIds,
+    })
+
+    return new WMTS({
+      url: getWmtsUrl(layerId),
+      layer: getWmtsLayerName(layerId),
+      matrixSet: 'PM',
+      format: getFormatWmtsLayer(layerId),
+      projection: projObj,
+      tileGrid: tileGrid,
+      crossOrigin: 'anonymous',
+    })
+  }
 }
 
 onMounted(() => {
   nextTick(() => {
     const wmtsLayers = layers.value.map((layer, index) => {
       const wmtsSource = createWmtsSource(layer.id)
-
       return new TileLayer({
         source: wmtsSource,
         visible: index === activeLayerIndex.value,
@@ -245,6 +346,56 @@ onMounted(() => {
         stroke: new Stroke({
           color: 'red',
           width: 0.5,
+        }),
+      }),
+    })
+
+    vectorCommunesSource.value = new VectorSource({
+      url: (extent) => {
+        const bbox = extent.join(',');
+        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`;
+      },
+      format: new GeoJSON(),
+      strategy: bboxStrategy,
+    });
+
+    
+
+    communesLayer.value = new VectorLayer({
+      source: vectorCommunesSource.value,
+      visible: false,
+      maxResolution: 15,
+      minResolution: 0.29858214173896974,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.7)',
+          width: 1,
+        }),
+        fill: new Fill({
+          color: 'rgba(200, 200, 200, 0.5)',
+        }),
+      }),
+    })
+
+    vectorDepartmentsSource.value = new VectorSource({
+      url: (extent) => {
+        const bbox = extent.join(',');
+        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`;
+      },
+      format: new GeoJSON(),
+      strategy: bboxStrategy,
+    });
+
+    departmentsLayer.value = new VectorLayer({
+      source: vectorDepartmentsSource.value,
+      visible: false,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.2)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 0, 0, 0.1)',
         }),
       }),
     })
@@ -304,9 +455,13 @@ onMounted(() => {
 
     olView.value = view
 
+    olView.value.on('change:resolution', () => {
+      currentZoom.value = Math.round(olView.value.getZoom());
+    });
+
     olMap.value = new Map({
       target: mapElement.value,
-      layers: [...wmtsLayers, wfsLayer, pinLayer, geomLayer.value, scanLayer.value],
+      layers: [...wmtsLayers, wfsLayer, pinLayer, geomLayer.value, scanLayer.value, communesLayer.value, departmentsLayer.value],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
@@ -314,8 +469,12 @@ onMounted(() => {
     // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
+<<<<<<< HEAD
       //parcour_tab_and_map("./1000_AERODROME CREIL_C_100.txt");
       
+=======
+      parcour_txt_to_tab('./1000_AERODROME CREIL_C_100.txt')
+>>>>>>> origin/dev
       if (showPin.value) {
         vectorPinSource.value.clear()
 
@@ -334,6 +493,10 @@ onMounted(() => {
       })
     })
 
+    olMap.value.getView().on('change:extent', () => {
+      vectorCommunesSource.value.refresh();
+    });
+    
     // Écouter les événements du bus
     eventBus.on('toggle-pin', (isVisible) => {
       showPin.value = isVisible
@@ -348,19 +511,19 @@ onMounted(() => {
         const currentZoom = olView.value.getZoom()
         olView.value.animate({
           zoom: currentZoom + delta,
-          duration: 250
-        });
+          duration: 250,
+        })
       }
     })
-    
+
     eventBus.on('center-map', ({ x, y }) => {
       if (olMap.value && olView.value) {
         olView.value.animate({
           center: [x, y],
-          duration: 750
-        });
+          duration: 750,
+        })
       }
-    });
+    })
 
     eventBus.on('update-coordinates', ({ x, y }) => {
       vectorPinSource.value.clear()
@@ -382,7 +545,6 @@ onMounted(() => {
       }
     })
 
-    console.log('---------------------------- NEW URL ----------------------------')
     watch(storeURL, async (newValue) => {
       console.log('NEW URL:', newValue)
       vectorGeomSource.value.clear()
@@ -412,11 +574,14 @@ onMounted(() => {
 
     watch(storeSelectedScan, (newValue) => {
       console.log('----------------- NEW SCAN SELECTED ------------------------')
-      console.log("storeSelectedScan.value:", storeSelectedScan.value)
+      console.log('storeSelectedScan.value:', storeSelectedScan.value)
 
       vectorScanSource.value.clear()
-      console.log(storeSelectedScan.value)
-      if (storeSelectedScan.value && storeSelectedScan.value.geom && storeSelectedScan.value.geom.length > 0) {
+      if (
+        storeSelectedScan.value &&
+        storeSelectedScan.value.geom &&
+        storeSelectedScan.value.geom.length > 0
+      ) {
         const polygon = new Feature({
           geometry: new Polygon([storeSelectedScan.value.geom[0]]),
         })
@@ -431,7 +596,6 @@ onMounted(() => {
         })
       }
     })
-
 
     eventBus.on('criteria-reset', () => {
       if (vectorPinSource.value) {

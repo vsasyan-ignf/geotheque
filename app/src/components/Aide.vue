@@ -22,12 +22,17 @@
       <h5>Besoin d'aide supplémentaire ?</h5>
       <p>Pour toute question ou assistance complémentaire, contactez notre support technique :</p>
       <div class="contact-info">
-        <p><i class="mdi mdi-email"></i> tsi24@ensg.eu</p>
-        <p><i class="mdi mdi-phone"></i> 01 23 45 67 89</p>
+        <p><SvgIcon type="mdi" :path="mdiEmail" /> tsi24@ensg.eu</p>
+        <p><SvgIcon type="mdi" :path="mdiPhone" /> 01 23 45 67 89</p>
       </div>
     </div>
   </div>
 </template>
+
+<script setup>
+import svgIconVue from '@jamescoyle/vue-icon'
+import { mdiEmail, mdiPhone } from '@mdi/js'
+</script>
 
 <style scoped>
 .aide-content {
