@@ -116,7 +116,6 @@ function searchCommunes() {
   let search_url = ''
   searchTimeout = setTimeout(() => {
     if (parseInt(query)) {
-      console.log('code postal')
       search_url = `https://geo.api.gouv.fr/communes?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
     } else {
       search_url = `https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`

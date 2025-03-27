@@ -40,7 +40,7 @@ import { Style, Icon, Stroke, Fill } from 'ol/style'
 import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
-// Images pour les thumbnails
+
 import {
   layers_carto,
   layers_carto_monde,
@@ -74,7 +74,6 @@ const scanLayer = ref(null)
 
 const url_test = ref(``)
 let layers = ref(layers_carto)
-console.log('layers', layers)
 
 function getLayersActiveTab() {
   if (activeTab.value === 'carthotheque') {
@@ -91,7 +90,6 @@ function getLayersActiveTab() {
 }
 
 watch(activeTab, (newValue) => {
-  console.log("🔄 Changement d'onglet détecté:", newValue)
 
   // Récupérer les nouvelles layers
   const newLayers = getLayersActiveTab()
@@ -122,7 +120,6 @@ watch(activeTab, (newValue) => {
     activeLayerIndex.value = 0
   }
 
-  console.log('✅ Nouvelles couches chargées:', layers.value)
 })
 
 const activeLayerIndex = ref(0)
@@ -163,7 +160,6 @@ function changeActiveLayer(index) {
 }
 
 function createWmtsSource(layerId) {
-  console.log('Layer ID:', layerId)
   if (layerId === 'osm') {
     return new OSM({
       attributions: null,
@@ -392,7 +388,6 @@ onMounted(() => {
       console.log('storeSelectedScan.value:', storeSelectedScan.value)
 
       vectorScanSource.value.clear()
-      console.log(storeSelectedScan.value)
       if (
         storeSelectedScan.value &&
         storeSelectedScan.value.geom &&

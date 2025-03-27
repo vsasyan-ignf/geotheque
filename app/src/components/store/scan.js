@@ -59,7 +59,6 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateCurrentScanInfo(collec) {
     currentCollecInfo.value = collec
-    console.log('Collection actuelle:', currentCollecInfo.value)
   }
 
   function resetCriteria() {
@@ -110,23 +109,6 @@ export const useScanStore = defineStore('scan', () => {
             feature.properties.ID_CARTE,
           properties: feature.properties,
         }))
-        const test = [
-          "EM_MINUTES",
-          "CADASTRE",
-          "FR_THEMATIQUE_LOC",
-          "FR_THEMATIQUE_GEN",
-          "DEPARTEMENTS",
-          "EM_CARTES",
-          "FR_10K_A_50K",
-          "FR_2K_A_5K",
-          "FR_100K_A_200K",
-          "URBANISME",
-          "PLANS_DE_VILLE",
-          "CASSINI",
-          "REGION_PARISIENNE",
-          "TOPO_DIVERS"
-        ].sort()
-
       } else {
         throw new Error('Failed to fetch data')
       }
