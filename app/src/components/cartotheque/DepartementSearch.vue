@@ -77,6 +77,7 @@ let searchTimeout = null
 const proj3857 = 'EPSG:3857' // Web Mercator
 const proj2154 = 'EPSG:2154' // Lambert-93
 import { useScanStore } from '@/components/store/scan'
+import { create_bbox, convertBbox } from '../composable/convertCoordinates'
 
 const scanStore = useScanStore()
 
@@ -170,6 +171,7 @@ async function getDepartementBbox(departement) {
     if (!contour_dep) {
       throw new Error('coordonées non trouvée dans la réponse')
     }
+    console.log('Contour du departement:', contour_dep)
     return contour_dep
   } catch (error) {
     console.error('e:', error)

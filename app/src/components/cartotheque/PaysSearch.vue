@@ -1,28 +1,30 @@
+<!-- recherche par pays -->
 <template>
   <div class="sub-category-content">
     <SubCategoryHeader title="Recherche par pays" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="pays-search">Nom</label>
+        <label for="country-search">Nom du pays</label>
         <div class="input-group">
           <input
-            id="pays-search"
-            autocomplete="off"
-            v-model="paysSelected"
+            id="country-search"
+            v-model="searchCountry"
             type="text"
-            placeholder="Ex: France"
-            @input="searchFeuille"
+            placeholder="Ex: France, Allemagne..."
+            @input="searchCountries"
             @focus="showResults = true"
           />
-          <button @click="validatePays">
+          <button @click="searchCountries">
             <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="communeResults.length > 0">Résultats ({{ communeResults.length }})</h5>
-            <h5 v-else-if="paysSelected">Aucun résultat</h5>
+            <h5 v-if="countryResults.length > 0">
+              Résultats ({{ countryResults.length }})
+            </h5>
+            <h5 v-else-if="searchCountry">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
               <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
@@ -30,28 +32,28 @@
           </div>
 
           <div class="results-content">
-            <div class="results-list" v-if="communeResults.length > 0">
+            <div class="results-list" v-if="countryResults.length > 0">
               <div
-                v-for="(commune, index) in communeResults"
-                :key="commune.code + '-' + commune.nom"
+                v-for="country in countryResults"
+                :key="country.osm_id"
                 class="result-item"
-                @click="selectFeuille(commune)"
+                @click="selectCountry(country)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ commune.nom }}</div>
-                  <div class="result-secondary">{{ commune.code }} - {{ commune.departement }}</div>
+                  <div class="result-main">{{ country.display_name }}</div>
+                  <div class="result-secondary">{{ country.type }}</div>
                 </div>
               </div>
             </div>
 
-            <div class="no-results" v-else-if="paysSelected">
+            <div class="no-results" v-else-if="searchCountry">
               <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
-              <span>Aucune commune trouvée</span>
+              <span>Aucun pays trouvé</span>
             </div>
 
             <div class="empty-search" v-else>
               <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
-              <span>Saisissez le nom ou code postal d'une commune</span>
+              <span>Saisissez le nom d'un pays</span>
             </div>
           </div>
         </div>
@@ -65,24 +67,23 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
-import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
+import { create_multibbox, convertBbox } from '../composable/convertCoordinates'
+
+const emit = defineEmits(['close', 'select-country'])
+const searchCountry = ref('')
+const countryResults = ref([])
+const showResults = ref(false)
+let searchTimeout = null
+const proj3857 = 'EPSG:3857' // Web Mercator
+const proj2154 = 'EPSG:2154' // Lambert-93
+import { useScanStore } from '@/components/store/scan'
 
 const scanStore = useScanStore()
 
-const emit = defineEmits(['close', 'select-commune'])
-
-let paysSelected = ref('')
-const communeResults = ref([])
-const showResults = ref(false)
-let searchTimeout = null
-let repCommune = ref(null)
-
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
-  const searchInput = document.getElementById('pays-search')
-
+  const searchInput = document.getElementById('country-search')
   if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
   }
@@ -97,79 +98,97 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
-function searchFeuille() {
+function searchCountries() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-
-  const query = paysSelected.value.toLowerCase().trim()
-
-  if (!query) {
-    communeResults.value = []
+  
+  const query = searchCountry.value.trim()
+  if (query.length < 2) {
+    countryResults.value = []
     return
   }
 
-  showResults.value = true
+  const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&addressdetails=1&limit=10&featuretype=country`
 
-  // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
-  let search_url = ''
   searchTimeout = setTimeout(() => {
-    if (parseInt(query)) {
-      search_url = `https://geo.api.gouv.fr/communes?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
-    } else {
-      search_url = `https://geo.api.gouv.fr/communes?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
-    }
-
-    fetch(search_url)
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.map((commune) => ({
-          nom: commune.nom,
-          code: commune.codesPostaux[0],
-          departement: commune.departement.nom,
-          bbox: commune.bbox,
-          contour: commune.contour,
-        }))
-
-        communeResults.value = newResults
+        countryResults.value = data.filter(item => 
+          item.type === 'administrative' && 
+          item.class === 'boundary' && 
+          item.addresstype === 'country'
+        )
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des communes:', error)
-        communeResults.value = []
+        console.error('Erreur lors de la récupération des pays:', error)
+        countryResults.value = []
       })
-  }, 300)
+  }, 500)
 }
+function selectCountry(country) {
+  getCountryBbox(country)
+    .then((contour) => {
+      let bbox3857 = create_multibbox(contour)
+      console.log('bbox3857:', bbox3857)
+      const bbox2154 = convertBbox(bbox3857, proj3857, proj2154)
+      const point = {
+        x: 0,
+        y: 0,
+        bboxLambert93: bbox2154,
+      }
 
-function selectFeuille(commune) {
-  paysSelected.value = commune.nom
-  repCommune = commune
+      scanStore.updateSelectedGeom(contour)
+
+      emit('select-country', point)
+    })
+    .catch((error) => {
+      console.error('Erreur lors de la récupération des controus du departements:', error)
+    })
 
   showResults.value = false
 }
 
-function validatePays() {
-  if (repCommune) {
-    const bbox = repCommune.bbox.coordinates[0]
-    const bboxWGS84 = [bbox[0], bbox[2]]
-    const bboxLambert93 = bboxWGS84.map((point) =>
-      useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154'),
-    )
+async function getCountryBbox(country) {
+  const countryName = country.display_name.split(',')[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  console.log('Recherche des contours du pays:', countryName);
+  const urlCountryBbox = 
+    `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
+    `&request=GetFeature&typeNames=pays&outputFormat=application/json` +
+    `&CQL_FILTER=NOM='${countryName}'&srsName=EPSG:3857`;
 
-    const point = {
-      x: 0,
-      y: 0,
-      bboxLambert93: bboxLambert93.flat(),
+  try {
+    const response = await fetch(urlCountryBbox);
+    if (!response.ok) {
+      throw new Error(`Erreur réseau : ${response.status}`);
     }
+    const data = await response.json();
+    
+    const contour_country = data.features[0]?.geometry?.coordinates;
+    
+    if (!contour_country) {
+      throw new Error('Coordonnées non trouvées dans la réponse');
+    }
+    const allContours = [];
+    
 
-    const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
-      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
-    )
+    for (const polygon of contour_country) {
 
-    scanStore.updateSelectedGeom(contourMercator)
-
-    emit('select-commune', point)
+      const exteriorRing = polygon[0];
+      
+      allContours.push(exteriorRing);
+      
+    }
+    
+    return allContours;
+  } catch (error) {
+    console.error('Erreur:', error);
+    throw error;
   }
 }
+
+
 </script>
 
 <style scoped>
@@ -177,7 +196,6 @@ function validatePays() {
   animation: fadeIn 0.3s ease;
   position: relative;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -374,5 +392,9 @@ function validatePays() {
 .empty-search i {
   font-size: 24px;
   color: #ddd;
+}
+
+.mdi {
+  margin-top: 5px;
 }
 </style>

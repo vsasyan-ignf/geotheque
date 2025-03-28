@@ -58,6 +58,7 @@ import TileWMS from 'ol/source/TileWMS'
 import {parcour_txt_to_tab } from './composable/parseTXT'
 import {useConvertCoordinates } from './composable/convertCoordinates'
 import { listenImage } from 'ol/Image'
+import MultiPolygon from 'ol/geom/MultiPolygon'
 
 const scanStore = useScanStore()
 const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
@@ -533,9 +534,18 @@ onMounted(() => {
       vectorScanSource.value.clear()
 
       if (storeSelectedGeom.value.length !== 0) {
-        const polygon = new Feature({
-          geometry: new Polygon([storeSelectedGeom.value]),
-        })
+        let polygon = null;
+        if (storeSelectedGeom.value[0].length === 2) {
+          polygon = new Feature({
+            geometry: new Polygon([storeSelectedGeom.value]),
+          })
+        }
+        else{
+          polygon = new Feature({
+            geometry: new MultiPolygon([storeSelectedGeom.value]),
+          })
+        }
+        
 
         vectorGeomSource.value.addFeature(polygon)
 

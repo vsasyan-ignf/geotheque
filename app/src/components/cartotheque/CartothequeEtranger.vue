@@ -21,7 +21,7 @@
     <PaysSearch
       v-if="activeSubCategory === 'pays'"
       @close="$emit('close-sub-category')"
-      @select-departement="goToPoint"
+      @select-country="goToPoint"
     />
 
     <PointSearch
