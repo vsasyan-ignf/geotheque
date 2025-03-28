@@ -30,15 +30,15 @@
         </div>
       </div>
       <div class="button-group">
-        <ShakingButton nameButton="Visualiser" @click="openIipmooviewer">
+        <ShakingButton nameButton="Visualiser" @click="openIipmooviewer" :disabled="!currentCollecInfo">
           <template #icon><SvgIcon type="mdi" :path="mdiMonitorEye" class="mdicon" /></template>
         </ShakingButton>
-        <ShakingButton nameButton="Télécharger" @click="downloadScans">
+        <ShakingButton nameButton="Télécharger" @click="downloadScans" :disabled="!currentCollecInfo">
           <template #icon
             ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
           /></template>
         </ShakingButton>
-        <ShakingButton nameButton="XML" @click="downloadxml">
+        <ShakingButton nameButton="XML" @click="downloadxml" :disabled="!currentCollecInfo">
           <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
         </ShakingButton>
       </div>
@@ -203,8 +203,6 @@ function dicoToFormatCSV(arrObj) {
   padding: 10px;
   box-sizing: border-box;
 }
-
-
 
 .export-scan-button {
   width: 100%;
