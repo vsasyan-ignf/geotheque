@@ -101,7 +101,7 @@ const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
 
 function getLayersActiveTab() {
-  if (activeTab.value === 'carthotheque') {
+  if (activeTab.value === 'cartotheque') {
     return layers_carto
   } else if (activeTab.value === 'carthotheque_etranger') {
     return layers_carto_monde
@@ -116,7 +116,7 @@ function getLayersActiveTab() {
 
 function getOtherLayers() {
   switch (activeTab.value) {
-    case 'carthotheque':
+    case 'cartotheque':
       return otherLayersCartoFrance
     case 'carthotheque_etranger':
       return otherLayersCartoMonde

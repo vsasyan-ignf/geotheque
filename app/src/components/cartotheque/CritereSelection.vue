@@ -110,8 +110,8 @@ const { storeCritereSelection } = storeToRefs(scanStore)
 
 const yearMin = ref(storeCritereSelection.value.yearMin || '')
 const yearMax = ref(storeCritereSelection.value.yearMax || '')
-const scaleMin = ref(storeCritereSelection.value.scaleMin || '500')
-const scaleMax = ref(storeCritereSelection.value.scaleMax || '100000')
+const scaleMin = ref(storeCritereSelection.value.scaleMin || '')
+const scaleMax = ref(storeCritereSelection.value.scaleMax || '')
 const selectedCollection = ref({ id: '', name: '' })
 
 const scaleOptions = ['500', '1000', '2000', '5000', '10000', '25000', '50000', '100000']
@@ -207,8 +207,8 @@ const hideScaleMaxOptionsDelayed = () => {
 const initialValues = {
   yearMin: '',
   yearMax: '',
-  scaleMin: '500',
-  scaleMax: '100000',
+  scaleMin: '',
+  scaleMax: '',
   selectedCollection: null,
 }
 
