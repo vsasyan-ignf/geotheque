@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+import config from '../../config';
+import { useConvertCoordinates } from '../composable/convertCoordinates'
+import { bbox } from 'ol/loadingstrategy';
+
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
   let storeScansData = ref(null)
@@ -20,11 +24,23 @@ export const useScanStore = defineStore('scan', () => {
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
-      const [minX, minY, maxX, maxY] = storeBbox.value
+      let emprise_requete_url = "emprisesscans";
+      let [minX, minY, maxX, maxY] = storeBbox.value
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
         storeCritereSelection.value
 
+      if (activeTab.value === 'carthotheque_etranger') {
+        minX, minY = minY, minX
+        maxX, maxY = maxX, maxY
+        emprise_requete_url = "emprisesscansmonde";
+      }
+
+
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
+
+      console.log(cqlFilter)
+
+
 
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
       if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`
@@ -33,17 +49,20 @@ export const useScanStore = defineStore('scan', () => {
 
       if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
 
+      console.log(activeTab.value)
       return (
-        `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
-        `&request=GetFeature&typeNames=emprisesscans&outputFormat=application/json` +
-        `&cql_filter=${cqlFilter}` +
-        `&srsName=EPSG:3857`
+        `${config.baseGeoserverUrl}/wfs?service=wfs&version=2.0.0` +
+        `&request=GetFeature&typeNames=${emprise_requete_url}&outputFormat=application/json` +
+        `&cql_filter=${cqlFilter}`
+        + `&srsName=EPSG:3857`
       )
+
     }
     return ''
   })
 
   function updateBbox(newBbox) {
+    console.log("test " + newBbox)
     storeBbox.value = newBbox
   }
 
