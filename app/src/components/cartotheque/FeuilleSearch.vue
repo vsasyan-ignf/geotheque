@@ -65,7 +65,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 
@@ -153,7 +152,6 @@ async function validateFeuille() {
       const response = await fetch('http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO=%27NF%2030%20XI%27&srsName=EPSG:3857')
       if (response.ok) {
         const data = await response.json()
-
         console.log(data.features[0].geometry.coordinates[0])
       } else {
         throw new Error('Failed to fetch data')
