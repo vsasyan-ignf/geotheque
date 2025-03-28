@@ -67,6 +67,7 @@ import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
+import { create_bbox, convertBbox, useConvertCoordinates } from '../composable/convertCoordinates'
 
 const scanStore = useScanStore()
 
@@ -113,7 +114,7 @@ function searchFeuille() {
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27&srsName=EPSG:3857`
+    search_url = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
     console.log(search_url)
     fetch(search_url)
       .then((response) => response.json())
@@ -123,7 +124,6 @@ function searchFeuille() {
           numero: feuille.properties.NUMERO,
           geometry: feuille.geometry.coordinates[0]
         }))
-        console.log(newResults)
         feuilleResults.value = newResults
       })
       .catch((error) => {
@@ -136,6 +136,13 @@ function searchFeuille() {
 function selectFeuille(feuille) {
   feuilleSelected.value = feuille.numero
   repFeuille.value = feuille
+  console.log('-------------FEUILLE----------------')
+  const bbox4326 = create_bbox(feuille.geometry)
+
+  const bbox = [bbox4326.minY, bbox4326.minX, bbox4326.maxY, bbox4326.maxX]
+
+
+  scanStore.updateBbox(bbox)
   showResults.value = false
 }
 

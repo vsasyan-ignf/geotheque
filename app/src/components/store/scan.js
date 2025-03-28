@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import config from '../../config';
+import { bbox } from 'ol/loadingstrategy';
 
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
@@ -51,6 +52,8 @@ export const useScanStore = defineStore('scan', () => {
   })
 
   function updateBbox(newBbox) {
+    console.log('-------NEW BBOX----------')
+    console.log(newBbox)
     storeBbox.value = newBbox
   }
 
