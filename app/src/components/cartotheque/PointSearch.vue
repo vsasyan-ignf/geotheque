@@ -90,11 +90,13 @@ import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
 
-const activeTab = storeToRefs(scanStore)
+const {activeTab} = storeToRefs(scanStore)
 
+const activeTabbis = ref('carthotheque')
 const emit = defineEmits(['close', 'go-to-point'])
 
 const searchMode = ref('map')
+
 
 const pointX = ref('')
 const pointY = ref('')
@@ -106,12 +108,15 @@ const projections = [
 ]
 
 async function fetchAndConvertBbox(longitude, latitude) {
+
   try {
     let url;
-    if(activeTab.value === 'carthotheque'){
-      url = `${config.baseNominatimUrl}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
-      // url = `${config.baseNominatimUrl}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=3&limit=1`
 
+    activeTabbis.value = activeTab && activeTab.value
+
+    console.log("test " + activeTabbis.value)
+    if(activeTabbis.value === "cartotheque"){
+      url = `${config.baseNominatimUrl}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
     }
     else{
       url = `${config.baseNominatimUrl}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=3&limit=1`
@@ -192,6 +197,10 @@ async function handleGoToPoint() {
 
 // gestion du clique sur la carte
 async function handleMapClick(coords) {
+
+  console.log("test" + activeTab.value)
+
+
   // converti le x et y dans le bon système de proj sélectionné
   if (coords.projection !== selectedProjection.value) {
     const convertedCoords = useConvertCoordinates(
@@ -208,10 +217,6 @@ async function handleMapClick(coords) {
   pointX.value = Math.round(coords.x * 100) / 100
   pointY.value = Math.round(coords.y * 100) / 100
   selectedProjection.value = coords.projection
-
-  
-
-
   const convertedCoord = useConvertCoordinates(
     parseFloat(pointX.value),
     parseFloat(pointY.value),
@@ -225,6 +230,7 @@ async function handleMapClick(coords) {
   }
 
   const bboxResult = await fetchAndConvertBbox(point.x, point.y)
+  console.log("test" + activeTab.value)
 
   if (bboxResult) {
     point.locationData = bboxResult.data
@@ -233,7 +239,14 @@ async function handleMapClick(coords) {
   }
 
   bboxState.value = point.bboxLambert93
-  scanStore.updateBbox(point.bboxWGS84)
+  console.log(bboxState.value)
+  if(activeTab.value === 'carthotheque'){
+    scanStore.updateBbox(point.bboxLambert93)
+  }
+  else{
+    scanStore.updateBbox(point.bboxWGS84)
+  }
+  
 
   searchMode.value = 'map'
 }
@@ -254,6 +267,7 @@ watch(selectedProjection, (newProjection, oldProjection) => {
 
 // monte le bus d'événement
 onMounted(() => {
+  
   eventBus.on('map-clicked', handleMapClick)
   eventBus.emit('toggle-pin', true)
 })

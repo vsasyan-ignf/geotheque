@@ -29,25 +29,19 @@ export const useScanStore = defineStore('scan', () => {
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
         storeCritereSelection.value
 
-      if (activeTab.value === 'carthotheque_etranger') {
-        minX, minY = minY, minX
-        maxX, maxY = maxX, maxY
-        emprise_requete_url = "emprisesscansmonde";
-      }
-
 
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
-
-      console.log(cqlFilter)
-
-
-
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
       if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`
       if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`
       if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`
 
       if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
+
+      if (activeTab.value === 'carthotheque_etranger') {
+        emprise_requete_url = "emprisesscansmonde";
+        cqlFilter = `BBOX(the_geom,${minY},${minX},${maxY},${maxX})`
+      }
 
       console.log(activeTab.value)
       return (
