@@ -35,13 +35,13 @@
             <div class="results-list" v-if="countryResults.length > 0">
               <div
                 v-for="country in countryResults"
-                :key="country.osm_id"
+                :key="country.code"
                 class="result-item"
                 @click="selectCountry(country)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ country.display_name }}</div>
-                  <div class="result-secondary">{{ country.type }}</div>
+                  <div class="result-main">{{ country.nom }}</div>
+                  <div class="result-secondary">{{ country.code }}</div>
                 </div>
               </div>
             </div>
@@ -104,23 +104,20 @@ function searchCountries() {
     clearTimeout(searchTimeout)
   }
   
-  const query = searchCountry.value.trim()
-  if (query.length < 2) {
-    countryResults.value = []
-    return
-  }
+  const query = searchCountry.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase()
+  console.log('Recherche des pays:', query)
 
-  const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&addressdetails=1&limit=10&featuretype=country`
+  const url = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=pays&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
 
   searchTimeout = setTimeout(() => {
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        countryResults.value = data.filter(item => 
-          item.type === 'administrative' && 
-          item.class === 'boundary' && 
-          item.addresstype === 'country'
-        )
+        const newResults = data.features.map((pays) => ({
+          nom: pays.properties.NOM,
+          code: pays.properties.CODE_PAYS,
+        }))
+        countryResults.value = newResults
       })
       .catch((error) => {
         console.error('Erreur lors de la récupération des pays:', error)
@@ -152,7 +149,7 @@ function selectCountry(country) {
 }
 
 async function getCountryBbox(country) {
-  const countryName = country.display_name.split(',')[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  const countryName = country.nom.split(',')[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
   console.log('Recherche des contours du pays:', countryName);
   const urlCountryBbox = 
     `${config.baseGeoserverUrl}/wfs?service=wfs&version=2.0.0` +
