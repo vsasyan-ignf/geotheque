@@ -77,7 +77,8 @@ let searchTimeout = null
 const proj3857 = 'EPSG:3857' // Web Mercator
 const proj2154 = 'EPSG:2154' // Lambert-93
 import { useScanStore } from '@/components/store/scan'
-import { create_bbox, convertBbox } from '../composable/convertCoordinates'
+import { convertBbox, create_bbox } from '../composable/convertCoordinates'
+import config from '../../config'
 
 const scanStore = useScanStore()
 
@@ -106,9 +107,9 @@ function searchDepartements() {
   const query = searchDepartement.value.toLowerCase().trim()
   const numbner_dep = parseInt(query)
   if (!isNaN(numbner_dep)) {
-    url_dep = `https://geo.api.gouv.fr/departements?code=${query}&fields=nom,code,region`
+    url_dep = `${config.basedepartementsUrl}?code=${query}&fields=nom,code,region`
   } else {
-    url_dep = `https://geo.api.gouv.fr/departements?nom=${query}&fields=nom,code,region`
+    url_dep = `${config.basedepartementsUrl}?nom=${query}&fields=nom,code,region`
   }
 
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
@@ -157,7 +158,7 @@ function selectDepartement(departement) {
 async function getDepartementBbox(departement) {
   const depCode = departement.code.toString()
   const urlDepBbox =
-    `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0
+    `${config.baseGeoserverUrl}/wfs?service=wfs&version=2.0.0
   ` +
     `&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=CODE_DEPT='${depCode}'&srsName=EPSG:3857`
 

@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { ref,onMounted, nextTick, provide, watch } from 'vue'
+import { ref, onMounted, nextTick, provide, watch } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
@@ -36,7 +36,7 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS'
 import GeoJSON from 'ol/format/GeoJSON'
 import Polygon from 'ol/geom/Polygon.js'
 import { get as getProjection } from 'ol/proj'
-import { containsCoordinate, getTopLeft } from 'ol/extent'
+import { getTopLeft } from 'ol/extent'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Style, Icon, Stroke, Fill } from 'ol/style'
@@ -49,8 +49,10 @@ import {
   layers_carto_monde,
   layers_photo,
   layers_photo_monde,
-  otherLayers
+  otherLayersCartoFrance,
+  otherLayersCartoMonde,
 } from './composable/baseMap'
+
 import OSM from 'ol/source/OSM'
 import TileWMS from 'ol/source/TileWMS'
 
@@ -69,24 +71,32 @@ const projection = ref('EPSG:3857')
 const zoom = ref(6)
 const rotation = ref(0)
 
-// Références et états
 const mapElement = ref(null)
 const olMap = ref(null)
 const pins = ref([])
 const showPin = ref(false)
+
 const vectorPinSource = ref(null)
 const vectorWfsSource = ref(null)
-const vectorCommunesSource = ref(null)
-const communesLayer = ref(null)
-const vectorDepartmentsSource = ref(null)
-const departmentsLayer = ref(null)
 const vectorGeomSource = ref(null)
 const geomLayer = ref(null)
 const vectorScanSource = ref(null)
 const scanLayer = ref(null)
 
+// layers cartothèque france
+const vectorCommunesSource = ref(null)
+const communesLayer = ref(null)
+const vectorDepartmentsSource = ref(null)
+const departmentsLayer = ref(null)
+
+// layers cartothèque etranger
+const vectorFeuilleSource = ref(null)
+const feuilleLayer = ref(null)
+
 const url_test = ref(``)
 let layers = ref(layers_carto)
+const communesLayerManuallyActivated = ref(false)
+const otherLayers = ref(otherLayersCartoFrance)
 
 function getLayersActiveTab() {
   if (activeTab.value === 'carthotheque') {
@@ -102,10 +112,25 @@ function getLayersActiveTab() {
   }
 }
 
+function getOtherLayers() {
+  switch (activeTab.value) {
+    case 'carthotheque':
+      return otherLayersCartoFrance
+    case 'carthotheque_etranger':
+      return otherLayersCartoMonde
+    default:
+      return otherLayersCartoFrance // à modifier
+  }
+}
+
 
 watch(activeTab, (newValue) => {
   const newLayers = getLayersActiveTab();
   layers.value = newLayers;
+
+  otherLayers.value = getOtherLayers()
+  console.log('---------------------activetab---------')
+  console.log(otherLayers.value)
 
   if (olMap.value) {
     const mapLayers = olMap.value.getLayers();
@@ -143,9 +168,7 @@ watch(activeTab, (newValue) => {
 const activeLayerIndex = ref(0)
 const olView = ref(null)
 const visibility_switch = ref(true)
-
-const currentZoom = ref(zoom.value);
-
+const currentZoom = ref(zoom.value)
 
 function toggleLayerVisibility(isVisible) {
   if (olMap.value) {
@@ -160,78 +183,69 @@ function toggleLayerVisibility(isVisible) {
 
 function addPointToMap(x, y) {
   //Prend un point en parametre et l'affiche sur la carte
-  const coord = [x, y];
+  const coord = [x, y]
   const feature = new Feature({
     geometry: new Point(coord),
-  });
-  vectorPinSource.value.addFeature(feature); 
+  })
+  vectorPinSource.value.addFeature(feature)
 }
 
-function Add_new_polygone_to_map(tab){
+function Add_new_polygone_to_map(tab) {
   // Prend un tableau en parametre et l'affiche sur la carte
-    const polygon = new Feature({
-            geometry: new Polygon([tab]),
-          })
+  const polygon = new Feature({
+    geometry: new Polygon([tab]),
+  })
 
-          vectorGeomSource.value.addFeature(polygon);
-  }
-
+  vectorGeomSource.value.addFeature(polygon)
+}
 
 async function parcour_tab_and_map(url) {
-   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
-    try {
-        const tab_test = await parcour_txt_to_tab(url);
-        let elem, i, i2, x, y,x_3857,y3857,tab_points_3857;
-        for (i = 0; i < tab_test.length; i ++) {
-            if(tab_test[i][0] == "Centre Actif"){
-              //"Centre Actif"
-              x = tab_test[i][1];
-              y = tab_test[i][2];
-              [x_3857,y3857] = useConvertCoordinates(x,y,'EPSG:2154','EPSG:3857');
-              addPointToMap(x_3857,y3857)
-            }else{
-              //"Cliche Actif"
-            elem = tab_test[i];
-            tab_points_3857 = []
-            for (i2 = 3; i2 < elem.length; i2 = i2 + 2) {
-              //Commence a 3 car en 0 il y a le type d'image et en 1 et 2 il y a le point d'origine
-                x = elem[i2];
-                y = elem[i2 + 1];
-                [x_3857,y3857] = useConvertCoordinates(x,y,'EPSG:2154','EPSG:3857');
-                tab_points_3857.push( [x_3857,y3857])
-            }
-            Add_new_polygone_to_map(tab_points_3857);
-          }
+  //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
+  try {
+    const tab_test = await parcour_txt_to_tab(url)
+    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857
+    for (i = 0; i < tab_test.length; i++) {
+      if (tab_test[i][0] == 'Centre Actif') {
+        //"Centre Actif"
+        x = tab_test[i][1]
+        y = tab_test[i][2]
+        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+        addPointToMap(x_3857, y3857)
+      } else {
+        //"Cliche Actif"
+        elem = tab_test[i]
+        tab_points_3857 = []
+        for (i2 = 3; i2 < elem.length; i2 = i2 + 2) {
+          //Commence a 3 car en 0 il y a le type d'image et en 1 et 2 il y a le point d'origine
+          x = elem[i2]
+          y = elem[i2 + 1]
+          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          tab_points_3857.push([x_3857, y3857])
         }
-          
-    } catch (error) {
-        console.error("Erreur lors de la récupération des données :", error);
+        Add_new_polygone_to_map(tab_points_3857)
+      }
     }
-    
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données :', error)
+  }
 }
-
-
 
 function handleOtherLayerToggle(layer) {
   console.log(layer)
-  
+
   if (layer.id === 'departements' && departmentsLayer.value) {
     const isVisible = departmentsLayer.value.getVisible()
     departmentsLayer.value.setVisible(!isVisible)
   }
-  
-  else if (layer.id === 'communes' && communesLayer.value) {
-    const isVisible = communesLayer.value.getVisible()
-
-    if (currentZoom.value < 14) {
-      communesLayer.value.setVisible(false);
-    } else {
-      communesLayer.value.setVisible(!isVisible);
-    }
+  if (layer.id === 'feuilles' && feuilleLayer.value) {
+    const isVisible = feuilleLayer.value.getVisible()
+    feuilleLayer.value.setVisible(!isVisible)
+  } else if (layer.id === 'communes' && communesLayer.value) {
+    communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value
+    const shouldBeVisible = communesLayerManuallyActivated.value && currentZoom.value >= 12
+    communesLayer.value.setVisible(shouldBeVisible)
   }
 }
-
-
 
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
@@ -261,26 +275,25 @@ function createWmtsSource(layerId) {
       attributions: null,
       controls: [],
     })
-  }
-  else if (layerId === 'ortho1950'){
+  } else if (layerId === 'ortho1950') {
     return new TileWMS({
       url: getWmtsUrl(layerId),
       params: {
-        'LAYERS': getWmtsLayerName(layerId),
-        'VERSION': '1.3.0',
-        'TRANSPARENT': 'TRUE',
-        'FORMAT': getFormatWmtsLayer(layerId),
-        'CRS': 'EPSG:3857',
-        'EXCEPTIONS': 'INIMAGE',
+        LAYERS: getWmtsLayerName(layerId),
+        VERSION: '1.3.0',
+        TRANSPARENT: 'TRUE',
+        FORMAT: getFormatWmtsLayer(layerId),
+        CRS: 'EPSG:3857',
+        EXCEPTIONS: 'INIMAGE',
       },
       serverType: 'geoserver',
       crossOrigin: 'anonymous',
       tileLoadFunction: function (tile, src) {
         setTimeout(() => {
-          tile.getImage().src = src;
-        }, 500); // Attendre 500ms avant de charger l'image
+          tile.getImage().src = src
+        }, 500) // Attendre 500ms avant de charger l'image
       },
-    });
+    })
   } else {
     const projObj = getProjection('EPSG:3857')
     const projExtent = projObj.getExtent()
@@ -339,22 +352,41 @@ onMounted(() => {
       }),
     })
 
-    vectorCommunesSource.value = new VectorSource({
+    vectorFeuilleSource.value = new VectorSource({
       url: (extent) => {
-        const bbox = extent.join(',');
-        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`;
+        const bbox = extent.join(',')
+        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`
       },
       format: new GeoJSON(),
       strategy: bboxStrategy,
-    });
+    })
 
-    
+    feuilleLayer.value = new VectorLayer({
+      source: vectorFeuilleSource.value,
+      visible: false,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.5)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 255, 0, 0.1)',
+        }),
+      }),
+    })
+
+    vectorCommunesSource.value = new VectorSource({
+      url: (extent) => {
+        const bbox = extent.join(',')
+        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`
+      },
+      format: new GeoJSON(),
+      strategy: bboxStrategy,
+    })
 
     communesLayer.value = new VectorLayer({
       source: vectorCommunesSource.value,
       visible: false,
-      maxResolution: 15,
-      minResolution: 0.29858214173896974,
       style: new Style({
         stroke: new Stroke({
           color: 'rgba(0, 0, 0, 0.7)',
@@ -366,14 +398,21 @@ onMounted(() => {
       }),
     })
 
+    watch(currentZoom, (newZoom) => {
+      if (communesLayer.value && communesLayerManuallyActivated.value) {
+        const shouldBeVisible = newZoom >= 12
+        communesLayer.value.setVisible(shouldBeVisible)
+      }
+    })
+
     vectorDepartmentsSource.value = new VectorSource({
       url: (extent) => {
-        const bbox = extent.join(',');
-        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`;
+        const bbox = extent.join(',')
+        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`
       },
       format: new GeoJSON(),
       strategy: bboxStrategy,
-    });
+    })
 
     departmentsLayer.value = new VectorLayer({
       source: vectorDepartmentsSource.value,
@@ -445,12 +484,21 @@ onMounted(() => {
     olView.value = view
 
     olView.value.on('change:resolution', () => {
-      currentZoom.value = Math.round(olView.value.getZoom());
-    });
+      currentZoom.value = Math.round(olView.value.getZoom())
+    })
 
     olMap.value = new Map({
       target: mapElement.value,
-      layers: [...wmtsLayers, wfsLayer, pinLayer, geomLayer.value, scanLayer.value, communesLayer.value, departmentsLayer.value],
+      layers: [
+        ...wmtsLayers,
+        wfsLayer,
+        pinLayer,
+        geomLayer.value,
+        scanLayer.value,
+        communesLayer.value,
+        departmentsLayer.value,
+        feuilleLayer.value,
+      ],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
@@ -477,9 +525,9 @@ onMounted(() => {
     })
 
     olMap.value.getView().on('change:extent', () => {
-      vectorCommunesSource.value.refresh();
-    });
-    
+      vectorCommunesSource.value.refresh()
+    })
+
     // Écouter les événements du bus
     eventBus.on('toggle-pin', (isVisible) => {
       showPin.value = isVisible

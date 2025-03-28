@@ -1,7 +1,6 @@
 function roundToTwo(num) {
-    return Math.round(num * 100) / 100;
+  return Math.round(num * 100) / 100
 }
-
 
 export function parcour_txt_to_tab(url) {
   //function qui retourne le tab avec tab[0]="Centre Actif",coordx,coordy

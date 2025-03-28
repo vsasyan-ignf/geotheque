@@ -8,7 +8,11 @@
       </SparkleButton>
       <div class="dropdown-container">
         <div class="dropdown-wrapper">
-          <Dropdown nameDropdown="Nom du Scan" :options="storeScansData" :disableOption='textDisableOption'/>
+          <Dropdown
+            nameDropdown="Nom du Scan"
+            :options="storeScansData"
+            :disableOption="textDisableOption"
+          />
         </div>
       </div>
       <div class="button-group">
@@ -29,7 +33,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch} from 'vue'
+import { computed, ref, watch } from 'vue'
 import ShakingButton from '@/components/material/ShakingButton.vue'
 import SparkleButton from '../material/SparkleButton.vue'
 import Dropdown from '@/components/material/Dropdown.vue'
@@ -41,8 +45,10 @@ const scanStore = useScanStore()
 const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)
 
 const imageUrl = ref('')
-const textDisableOption = computed( () => {
-  return storeScansData.value === null || storeScansData.value.length === 0 ? "Pas de scans résultats" : "Veuillez sélectionner un scan"
+const textDisableOption = computed(() => {
+  return storeScansData.value === null || storeScansData.value.length === 0
+    ? 'Pas de scans résultats'
+    : 'Veuillez sélectionner un scan'
 })
 
 function generateImageUrl(info) {
@@ -60,7 +66,6 @@ function generateImageUrl(info) {
 
   return { url, name }
 }
-
 
 watch(currentCollecInfo, (newVal) => {
   if (newVal) {

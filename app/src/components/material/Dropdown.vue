@@ -31,7 +31,7 @@ const props = defineProps({
     ],
   },
   disableOption: {
-    type: String
+    type: String,
   },
   defaultValue: {
     type: Object,
