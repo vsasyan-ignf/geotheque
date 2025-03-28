@@ -196,6 +196,7 @@ function dicoToFormatCSV(arrObj) {
   align-items: center;
   gap: 5px;
   width: 100%;
+  margin-bottom: 40px;
 }
 
 .scan-export-container {
