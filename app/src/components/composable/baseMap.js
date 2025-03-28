@@ -118,27 +118,27 @@ export const otherLayersCartoFrance = [
     id: 'communes',
     name: 'Communes',
     thumbnail: ortho1950,
-    visible: false
+    visible: false,
   },
   {
     id: 'departements',
     name: 'Département',
     thumbnail: ortho1950,
-    visible: false
-  }
-];
+    visible: false,
+  },
+]
 
 export const otherLayersCartoMonde = [
   {
     id: 'feuilles',
     name: 'Feuilles',
     thumbnail: ortho1950,
-    visible: false
+    visible: false,
   },
   {
     id: 'pays',
     name: 'Pays',
     thumbnail: ortho1950,
-    visible: false
-  }
-];
+    visible: false,
+  },
+]

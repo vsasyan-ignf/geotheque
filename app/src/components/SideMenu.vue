@@ -29,6 +29,15 @@
           />
         </template>
 
+        <template v-if="activeTab === 'phototheque'">
+          <PhotothequeFrance
+            :activeSubCategory="activeSubCategory"
+            :subCategories="subCategoriesPhototheque"
+            @select-sub-category="selectSubCategory"
+            @close-sub-category="closeSubCategory"
+          />
+        </template>
+
         <template v-else-if="activeTab === 'aide'">
           <Aide />
         </template>
@@ -43,6 +52,7 @@ import SidebarTabs from './SidebarTabs.vue'
 import TabContent from './TabContent.vue'
 import CartothequeFrance from './cartotheque/CartothequeFrance.vue'
 import CartothequeEtranger from './cartotheque/CartothequeEtranger.vue'
+import PhotothequeFrance from './phototheque/PhotothequeFrance.vue'
 import Aide from './Aide.vue'
 import { useScanStore } from './store/scan'
 
@@ -70,6 +80,14 @@ const subCategoriesEtranger = [
   { id: 'feuilles', icon: 'feuille', title: 'Feuilles' },
   { id: 'pays', icon: 'pays', title: 'Pays' },
   { id: 'point', icon: 'point', title: 'Point XY' },
+]
+
+const subCategoriesPhototheque = [
+  { id: 'commune', icon: 'commune', title: 'Commune' },
+  { id: 'departement', icon: 'departement', title: 'Département' },
+  { id: 'feuilles', icon: 'feuille', title: 'Feuilles' },
+  { id: 'point', icon: 'point', title: 'Point XY' },
+  { id: 'autre', icon: 'autre', title: 'Autre' },
 ]
 
 const activeTabTitle = computed(() => {
@@ -133,4 +151,5 @@ function closeSubCategory() {
 .sidebar-content.open {
   width: 400px;
 }
+
 </style>

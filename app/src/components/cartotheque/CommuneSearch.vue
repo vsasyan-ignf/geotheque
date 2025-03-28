@@ -62,7 +62,7 @@
   </div>
 </template>
 
-<script setup >
+<script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
@@ -70,7 +70,7 @@ import { useConvertCoordinates } from '@/components/composable/convertCoordinate
 import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 
-import config from '../../config';
+import config from '../../config'
 
 const scanStore = useScanStore()
 
@@ -163,6 +163,7 @@ function validateCommune() {
       y: 0,
       bboxLambert93: bboxLambert93.flat(),
     }
+
 
     const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
       useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),

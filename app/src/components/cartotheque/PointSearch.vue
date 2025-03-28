@@ -84,7 +84,7 @@ import { useConvertCoordinates } from '@/components/composable/convertCoordinate
 import { useScanStore } from '@/components/store/scan'
 import { mdiInformationOutline, mdiCrosshairsGps, mdiMapMarker } from '@mdi/js'
 
-import config from '../../config';
+import config from '../../config'
 
 import { storeToRefs } from 'pinia'
 

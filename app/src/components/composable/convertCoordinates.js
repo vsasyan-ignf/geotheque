@@ -18,7 +18,6 @@ export function useConvertCoordinates(x, y, fromProjection, toProjection) {
   return proj4(fromProjection, toProjection, [x, y])
 }
 
-
 export function convertBbox(bbox, proj_in, proj_out) {
   //Convertion Bbox de proj_in vers proj_out
   const minX = bbox.minX
@@ -55,4 +54,46 @@ export function create_bbox(contour) {
   })
 
   return { minX, minY, maxX, maxY }
+}
+
+export function create_multibbox(contours) {
+  if (!contours || contours.length === 0) {
+    throw new Error('Contours invalides');
+  }
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  const processPoints = (points) => {
+    points.forEach(point => {
+      const [x, y] = point;
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    });
+  };
+
+  if (Array.isArray(contours[0][0])) {
+    if (typeof contours[0][0][0] === 'number') {
+      contours.forEach(polygon => {
+        processPoints(polygon);
+      });
+    } else {
+      contours.forEach(polygon => {
+        polygon.forEach(ring => {
+          processPoints(ring);
+        });
+      });
+    }
+  } else {
+    processPoints(contours);
+  }
+  if (minX === Infinity || minY === Infinity || maxX === -Infinity || maxY === -Infinity) {
+    throw new Error('Aucun point valide trouvé dans les contours');
+  }
+
+  return { minX, minY, maxX, maxY };
 }

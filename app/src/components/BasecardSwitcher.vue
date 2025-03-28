@@ -26,10 +26,7 @@
         <span class="layer-switcher__label">{{ layer.name }}</span>
       </div>
 
-      <div 
-        v-if="hasOtherLayers" 
-        class="layer-switcher__other-layers-section"
-      >
+      <div v-if="hasOtherLayers" class="layer-switcher__other-layers-section">
         <div class="layer-switcher__other-layers-title">Autres couches</div>
         <div class="layer-switcher__other-layers-list">
           <div
@@ -37,7 +34,8 @@
             :key="'other-' + layer.id"
             class="layer-switcher__other-layer"
             :class="{
-              'layer-switcher__other-layer--disabled': layer.id === 'communes' && props.currentZoom <= 11
+              'layer-switcher__other-layer--disabled':
+                layer.id === 'communes' && currentZoom <= 11,
             }"
           >
             <div class="layer-switcher__other-layer-content">
@@ -49,24 +47,23 @@
                 </span>
               </span>
             </div>
-            <div 
+            <div
               class="layer-switcher__layer-switch"
               :class="{
                 'layer-switcher__layer-switch--active': layer.visible,
-                'layer-switcher__layer-switch--disabled': layer.id === 'communes' && props.currentZoom <= 11
+                'layer-switcher__layer-switch--disabled':
+                  layer.id === 'communes' && currentZoom <= 11,
               }"
-              @click.stop="handleLayerToggle(index)"
+              @click="handleLayerToggle(index)"
             >
               <div class="layer-switcher__layer-switch-handle"></div>
             </div>
           </div>
         </div>
       </div>
-      
     </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
@@ -85,23 +82,20 @@ const props = defineProps({
     default: 0,
   },
   currentZoom: Number,
-});
+})
 
 const emit = defineEmits(['layer-change', 'other-layer-toggle'])
 
 const isExpanded = ref(false)
 
-const hasOtherLayers = computed(() => props.otherLayers.length > 0);
-
-const localOtherLayers = ref(props.otherLayers);
+const hasOtherLayers = computed(() => props.otherLayers.length > 0)
 
 function handleLayerToggle(index) {
-  const layer = localOtherLayers.value[index];
-  layer.visible = !layer.visible;
+  const layer = props.otherLayers[index]
+  layer.visible = !layer.visible
 
-  emit('other-layer-toggle', { ...layer });
+  emit('other-layer-toggle', { ...layer })
 }
-
 
 function toggleExpand() {
   isExpanded.value = !isExpanded.value
@@ -259,12 +253,12 @@ onUnmounted(() => {
   height: 18px;
   background-color: white;
   border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
 }
 
 .layer-switcher__layer-switch--active {
-  background-color: #4CAF50;
+  background-color: #4caf50;
 }
 
 .layer-switcher__layer-switch--active .layer-switcher__layer-switch-handle {
