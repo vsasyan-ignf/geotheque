@@ -11,7 +11,7 @@
         :title="activeTabTitle"
         @close="closeTab"
       >
-        <template v-if="activeTab === 'carthotheque'">
+        <template v-if="activeTab === 'cartotheque'">
           <CartothequeFrance
             :activeSubCategory="activeSubCategory"
             :subCategories="subCategories"
@@ -48,12 +48,12 @@ import { useScanStore } from './store/scan'
 
 const scanStore = useScanStore()
 
-const activeTab = ref('carthotheque')
+const activeTab = ref('cartotheque')
 const isSidebarOpen = ref(true)
 const activeSubCategory = ref(null)
 
 const tabs = [
-  { id: 'carthotheque', icon: 'layers', title: 'Cartothèque France' },
+  { id: 'cartotheque', icon: 'layers', title: 'Cartothèque France' },
   { id: 'carthotheque_etranger', icon: 'layers', title: 'Cartothèque Étranger' },
   { id: 'phototheque', icon: 'camera', title: 'Photothèque France' },
   { id: 'phototheque_etranger', icon: 'camera', title: 'Photothèque Étranger' },

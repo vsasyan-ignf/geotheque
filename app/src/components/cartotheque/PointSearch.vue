@@ -92,7 +92,6 @@ const scanStore = useScanStore()
 
 const {activeTab} = storeToRefs(scanStore)
 
-const activeTabbis = ref('carthotheque')
 const emit = defineEmits(['close', 'go-to-point'])
 
 const searchMode = ref('map')
@@ -112,10 +111,7 @@ async function fetchAndConvertBbox(longitude, latitude) {
   try {
     let url;
 
-    activeTabbis.value = activeTab && activeTab.value
-
-    console.log("test " + activeTabbis.value)
-    if(activeTabbis.value === "cartotheque"){
+    if(activeTab.value === "cartotheque"){
       url = `${config.baseNominatimUrl}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
     }
     else{
@@ -239,8 +235,8 @@ async function handleMapClick(coords) {
   }
 
   bboxState.value = point.bboxLambert93
-  console.log(bboxState.value)
-  if(activeTab.value === 'carthotheque'){
+
+  if(activeTab.value === 'cartotheque'){
     scanStore.updateBbox(point.bboxLambert93)
   }
   else{

@@ -12,7 +12,7 @@ export const useScanStore = defineStore('scan', () => {
   let storeSelectedScan = ref(null)
   let currentCollecInfo = ref(null)
   let activeSubCategory = ref(null)
-  let activeTab = ref(null)
+  let activeTab = ref("cartotheque")
 
   let storeCritereSelection = ref({
     yearMin: null,
@@ -43,7 +43,6 @@ export const useScanStore = defineStore('scan', () => {
         cqlFilter = `BBOX(the_geom,${minY},${minX},${maxY},${maxX})`
       }
 
-      console.log(activeTab.value)
       return (
         `${config.baseGeoserverUrl}/wfs?service=wfs&version=2.0.0` +
         `&request=GetFeature&typeNames=${emprise_requete_url}&outputFormat=application/json` +
