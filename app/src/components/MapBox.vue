@@ -103,7 +103,7 @@ const otherLayers = ref(otherLayersCartoFrance)
 function getLayersActiveTab() {
   if (activeTab.value === 'cartotheque') {
     return layers_carto
-  } else if (activeTab.value === 'carthotheque_etranger') {
+  } else if (activeTab.value === 'cartotheque_etranger') {
     return layers_carto_monde
   } else if (activeTab.value === 'phototheque') {
     return layers_photo
@@ -118,7 +118,7 @@ function getOtherLayers() {
   switch (activeTab.value) {
     case 'cartotheque':
       return otherLayersCartoFrance
-    case 'carthotheque_etranger':
+    case 'cartotheque_etranger':
       return otherLayersCartoMonde
     default:
       return otherLayersCartoFrance

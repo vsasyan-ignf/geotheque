@@ -137,8 +137,8 @@ async function fetchAndConvertBbox(longitude, latitude) {
     ]
 
     console.log(bboxWGS84)
-    const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:2154')
 
+    const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:2154')
     const northEast = useConvertCoordinates(bboxWGS84[2], bboxWGS84[3], 'EPSG:4326', 'EPSG:2154')
 
     const bboxLambert93 = [southWest[0], southWest[1], northEast[0], northEast[1]]
@@ -194,9 +194,6 @@ async function handleGoToPoint() {
 // gestion du clique sur la carte
 async function handleMapClick(coords) {
 
-  console.log("test" + activeTab.value)
-
-
   // converti le x et y dans le bon système de proj sélectionné
   if (coords.projection !== selectedProjection.value) {
     const convertedCoords = useConvertCoordinates(
@@ -226,7 +223,6 @@ async function handleMapClick(coords) {
   }
 
   const bboxResult = await fetchAndConvertBbox(point.x, point.y)
-  console.log("test" + activeTab.value)
 
   if (bboxResult) {
     point.locationData = bboxResult.data
@@ -240,9 +236,10 @@ async function handleMapClick(coords) {
     scanStore.updateBbox(point.bboxLambert93)
   }
   else{
-    scanStore.updateBbox(point.bboxWGS84)
+    const coord = point.bboxWGS84
+    const bboxLatLon = [coord[1], coord[0], coord[3], coord[2]]
+    scanStore.updateBbox(bboxLatLon)
   }
-  
 
   searchMode.value = 'map'
 }
