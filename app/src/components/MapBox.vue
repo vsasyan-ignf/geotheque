@@ -39,7 +39,7 @@ import { get as getProjection } from 'ol/proj'
 import { getTopLeft } from 'ol/extent'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { Style, Icon, Stroke, Fill } from 'ol/style'
+import { Style, Icon, Stroke, Fill, Text } from 'ol/style'
 import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import { getWmtsUrl, getWmtsLayerName, getMaxZoom, getFormatWmtsLayer } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
@@ -121,48 +121,56 @@ function getOtherLayers() {
     case 'carthotheque_etranger':
       return otherLayersCartoMonde
     default:
-      return otherLayersCartoFrance // à modifier
+      return otherLayersCartoFrance
   }
 }
 
+function hideOtherLayers() {
+  departmentsLayer.value.setVisible(false)
+  feuilleLayer.value.setVisible(false)
+  otherLayers.value.forEach( layers => layers.visible = false)
+}
 
 watch(activeTab, (newValue) => {
   const newLayers = getLayersActiveTab();
   layers.value = newLayers;
 
   otherLayers.value = getOtherLayers()
-  console.log('---------------------activetab---------')
-  console.log(otherLayers.value)
+  hideOtherLayers()
 
   if (olMap.value) {
     const mapLayers = olMap.value.getLayers();
     const wmtsLayers = mapLayers.getArray().filter((layer) => layer instanceof TileLayer);
 
-    newLayers.forEach((newLayer, index) => {
-      if (index < wmtsLayers.length) {
-        // Mettre à jour la source de la couche existante
-        const newSource = createWmtsSource(newLayer.id);
-        wmtsLayers[index].setSource(newSource);
-        wmtsLayers[index].setVisible(index === 0);
-      } else {
-        // Ajouter une nouvelle couche si nécessaire
-        const newTileLayer = new TileLayer({
-          source: createWmtsSource(newLayer.id),
-          visible: index === 0,
-        });
-        olMap.value.addLayer(newTileLayer);
-      }
-    });
+    // met à jour les wmts
+    wmtsLayers.forEach((layer, index) => {
+      if (index < newLayers.length) {
+        // Créer une nouvelle source pour cette couche
+        const newSource = createWmtsSource(newLayers[index].id)
 
-    // Supprimer les couches en trop si nécessaire
-    if (wmtsLayers.length > newLayers.length) {
-      wmtsLayers.slice(newLayers.length).forEach((layer) => {
-        olMap.value.removeLayer(layer);
-      });
+        // defined source
+        layer.setSource(newSource)
+
+        // défini la visilibité de l'index 0
+        layer.setVisible(index === 0)
+      }
+    })
+
+    if (newLayers.length > wmtsLayers.length) {
+      const layersToAdd = newLayers.slice(wmtsLayers.length).map((layer, index) => {
+        return new TileLayer({
+          source: createWmtsSource(layer.id),
+          visible: wmtsLayers.length + index === 0,
+        })
+      })
+
+      layersToAdd.forEach((layer) => olMap.value.addLayer(layer))
     }
 
-    scanStore.resetCriteria();
-    activeLayerIndex.value = 0;
+    scanStore.resetCriteria()
+
+    // reset l'index à 0
+    activeLayerIndex.value = 0
   }
 });
 
@@ -233,8 +241,6 @@ async function parcour_tab_and_map(url) {
 }
 
 function handleOtherLayerToggle(layer) {
-  console.log("layerrrrrrrrrrrrrrrrr", layer)
-
   if (layer.id === 'departements' && departmentsLayer.value) {
     const isVisible = departmentsLayer.value.getVisible()
     departmentsLayer.value.setVisible(!isVisible)
@@ -362,7 +368,7 @@ onMounted(() => {
     vectorFeuilleSource.value = new VectorSource({
       url: (extent) => {
         const bbox = extent.join(',')
-        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`
+        return 'http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857'
       },
       format: new GeoJSON(),
       strategy: bboxStrategy,
@@ -371,15 +377,22 @@ onMounted(() => {
     feuilleLayer.value = new VectorLayer({
       source: vectorFeuilleSource.value,
       visible: false,
-      style: new Style({
+      style: function(feature) {
+        return new Style({
         stroke: new Stroke({
           color: 'rgba(0, 0, 0, 0.5)',
           width: 2,
         }),
         fill: new Fill({
-          color: 'rgba(0, 255, 0, 0.1)',
+          color: 'rgba(0, 255, 0, 0.2)',
         }),
-      }),
+        text: new Text({
+          text: feature.get('NUMERO'),
+          font: '12px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+        })
+      })},
     })
 
     vectorCommunesSource.value = new VectorSource({
@@ -424,7 +437,8 @@ onMounted(() => {
     departmentsLayer.value = new VectorLayer({
       source: vectorDepartmentsSource.value,
       visible: false,
-      style: new Style({
+      style: function(feature) {
+        return new Style({
         stroke: new Stroke({
           color: 'rgba(0, 0, 0, 0.2)',
           width: 2,
@@ -432,7 +446,13 @@ onMounted(() => {
         fill: new Fill({
           color: 'rgba(0, 0, 0, 0.1)',
         }),
-      }),
+        text: new Text({
+          text: feature.get('CODE_DEPT'),
+          font: '12px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+        })
+      })},
     })
 
     vectorPaysSource.value = new VectorSource({
