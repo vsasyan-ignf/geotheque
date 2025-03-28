@@ -1,9 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-
 import config from '../../config';
-import { useConvertCoordinates } from '../composable/convertCoordinates'
-import { bbox } from 'ol/loadingstrategy';
 
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
@@ -25,6 +22,11 @@ export const useScanStore = defineStore('scan', () => {
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
       let empriseURL = "emprisesscans";
+
+      if (activeTab.value === 'cartotheque_etranger') {
+        empriseURL = "emprisesscansmonde";
+      }
+
       let [minX, minY, maxX, maxY] = storeBbox.value
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
         storeCritereSelection.value
@@ -36,10 +38,6 @@ export const useScanStore = defineStore('scan', () => {
       if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`
 
       if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
-
-      if (activeTab.value === 'cartotheque_etranger') {
-        empriseURL = "emprisesscansmonde";
-      }
 
       return (
         `${config.baseGeoserverUrl}/wfs?service=wfs&version=2.0.0` +
@@ -53,7 +51,6 @@ export const useScanStore = defineStore('scan', () => {
   })
 
   function updateBbox(newBbox) {
-    console.log("test " + newBbox)
     storeBbox.value = newBbox
   }
 
@@ -88,7 +85,6 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateSelectedGeom(newVal) {
-    console.log(newVal)
     storeSelectedGeom.value = newVal
   }
 

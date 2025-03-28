@@ -114,7 +114,7 @@ const scaleMin = ref(storeCritereSelection.value.scaleMin || '')
 const scaleMax = ref(storeCritereSelection.value.scaleMax || '')
 const selectedCollection = ref({ id: '', name: '' })
 
-const scaleOptions = ['500', '1000', '2000', '5000', '10000', '25000', '50000', '100000']
+const scaleOptions = ['500', '1000', '2000', '5000', '10000', '25000', '50000', '80000', '100000', '200000', '250000', '500000', '1000000', '5000000', '10000000']
 
 const showScaleMinOptions = ref(false)
 const showScaleMaxOptions = ref(false)
