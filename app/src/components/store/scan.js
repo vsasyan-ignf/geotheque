@@ -134,7 +134,6 @@ export const useScanStore = defineStore('scan', () => {
     storeSelectedGeom,
     updateSelectedGeom,
     resetCriteria,
-    resetCriteria,
     activeTab,
     updateActiveTab,
   }
