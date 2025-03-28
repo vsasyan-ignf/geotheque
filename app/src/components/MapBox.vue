@@ -122,7 +122,6 @@ function getOtherLayers() {
       return otherLayersCartoMonde
     default:
       return otherLayersCartoFrance
-      return otherLayersCartoFrance // à modifier
   }
 }
 
@@ -131,14 +130,6 @@ function hideOtherLayers() {
   feuilleLayer.value.setVisible(false)
   otherLayers.value.forEach( layers => layers.visible = false)
 }
-
-function hideOtherLayers() {
-  departmentsLayer.value.setVisible(false)
-  feuilleLayer.value.setVisible(false)
-  otherLayers.value.forEach( layers => layers.visible = false)
-}
-
-
 
 watch(activeTab, (newValue) => {
   const newLayers = getLayersActiveTab();
@@ -250,8 +241,6 @@ async function parcour_tab_and_map(url) {
 }
 
 function handleOtherLayerToggle(layer) {
-  console.log("layerrrrrrrrrrrrrrrrr", layer)
-
   if (layer.id === 'departements' && departmentsLayer.value) {
     const isVisible = departmentsLayer.value.getVisible()
     departmentsLayer.value.setVisible(!isVisible)
@@ -457,7 +446,13 @@ onMounted(() => {
         fill: new Fill({
           color: 'rgba(0, 0, 0, 0.1)',
         }),
-      }),
+        text: new Text({
+          text: feature.get('CODE_DEPT'),
+          font: '12px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+        })
+      })},
     })
 
     vectorPaysSource.value = new VectorSource({
