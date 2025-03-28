@@ -134,8 +134,8 @@ watch(activeTab, (newValue) => {
   otherLayers.value = getOtherLayers()
 
   clearOtherLayers()
-
-
+  otherLayers.value[1].visible = false
+  otherLayers.value[0].visible = false
   if (olMap.value) {
     // get wmts layers
     const mapLayers = olMap.value.getLayers()
