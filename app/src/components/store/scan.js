@@ -76,6 +76,7 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateSelectedGeom(newVal) {
+    console.log(newVal)
     storeSelectedGeom.value = newVal
   }
 

@@ -617,6 +617,33 @@ onMounted(() => {
       await scanStore.storeGet(newValue)
     })
 
+
+    watch(storeSelectedGeom, async (newValue) => {
+      vectorGeomSource.value.clear()
+      vectorScanSource.value.clear()
+
+      if (storeSelectedGeom.value.length !== 0) {
+        const polygon = new Feature({
+          geometry: new Polygon([storeSelectedGeom.value]),
+        })
+
+        vectorGeomSource.value.addFeature(polygon)
+
+        const extent = polygon.getGeometry().getExtent()
+
+        olMap.value.getView().fit(extent, {
+          padding: [50, 50, 50, 50 + 400],
+          minResolution: 200,
+          duration: 2_000,
+        })
+      }
+
+    })
+
+
+
+
+
     watch(storeSelectedScan, (newValue) => {
       console.log('----------------- NEW SCAN SELECTED ------------------------')
       console.log('storeSelectedScan.value:', storeSelectedScan.value)

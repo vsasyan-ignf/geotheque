@@ -3,14 +3,14 @@
     <SubCategoryHeader title="Recherche par feuilles" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="feuille-search">Nom</label>
+        <label for="feuille-search">Numero</label>
         <div class="input-group">
           <input
             id="feuille-search"
             autocomplete="off"
             v-model="feuilleSelected"
             type="text"
-            placeholder="Ex: NE-XVIII ou NC-XII"
+            placeholder="Ex: NE 28 XVIII ou NB 29 VI"
             @input="searchFeuille"
             @focus="showResults = true"
           />
@@ -38,8 +38,8 @@
                 @click="selectFeuille(feuille)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ feuille.nom }}</div>
-                  <div class="result-secondary"> NUMERO : {{ feuille.numero }}</div>
+                  <div class="result-main">{{ feuille.numero }}</div>
+                  <div class="result-secondary"> Nom de la feuille : {{ feuille.nom }}</div>
                 </div>
               </div>
             </div>
@@ -76,7 +76,7 @@ const feuilleSelected = ref('')
 const feuilleResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-let repCommune = ref(null)
+let repFeuille = ref(null)
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
@@ -113,8 +113,7 @@ function searchFeuille() {
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   let search_url = ''
   searchTimeout = setTimeout(() => {
-
-    search_url = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
+    search_url = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27&srsName=EPSG:3857`
     console.log(search_url)
     fetch(search_url)
       .then((response) => response.json())
@@ -125,7 +124,6 @@ function searchFeuille() {
           geometry: feuille.geometry.coordinates[0]
         }))
         console.log(newResults)
-
         feuilleResults.value = newResults
       })
       .catch((error) => {
@@ -136,13 +134,15 @@ function searchFeuille() {
 }
 
 function selectFeuille(feuille) {
-  feuilleSelected.value = feuille.nom
-  repCommune = feuille
+  feuilleSelected.value = feuille.numero
+  repFeuille.value = feuille
   showResults.value = false
 }
 
-async function validateFeuille() {
-  
+function validateFeuille() {
+  if (repFeuille){
+    scanStore.updateSelectedGeom(repFeuille.value.geometry[0])
+  }
 
 }
 </script>
