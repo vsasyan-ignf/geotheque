@@ -117,25 +117,23 @@ function getOtherLayers() {
     case 'carthotheque_etranger':
       return otherLayersCartoMonde
     default:
-      return ''
+      return otherLayersCartoFrance
   }
 }
 
-function clearOtherLayers() {
+function hideOtherLayers() {
   departmentsLayer.value.setVisible(false)
   feuilleLayer.value.setVisible(false)
+  otherLayers.value.forEach( layers => layers.visible = false)
 }
 
 watch(activeTab, (newValue) => {
   // Récupérer les nouvelles layers
   
-  const newLayers = getLayersActiveTab()
-  layers.value = newLayers
+  layers.value = getLayersActiveTab()
   otherLayers.value = getOtherLayers()
+  hideOtherLayers()
 
-  clearOtherLayers()
-  otherLayers.value[1].visible = false
-  otherLayers.value[0].visible = false
   if (olMap.value) {
     // get wmts layers
     const mapLayers = olMap.value.getLayers()
@@ -143,9 +141,9 @@ watch(activeTab, (newValue) => {
 
     // met à jour les wmts
     wmtsLayers.forEach((layer, index) => {
-      if (index < newLayers.length) {
+      if (index < layers.value.length) {
         // Créer une nouvelle source pour cette couche
-        const newSource = createWmtsSource(newLayers[index].id)
+        const newSource = createWmtsSource(layers.value[index].id)
 
         // defined source
         layer.setSource(newSource)
@@ -155,8 +153,8 @@ watch(activeTab, (newValue) => {
       }
     })
 
-    if (newLayers.length > wmtsLayers.length) {
-      const layersToAdd = newLayers.slice(wmtsLayers.length).map((layer, index) => {
+    if (layers.value.length > wmtsLayers.length) {
+      const layersToAdd = layers.value.slice(wmtsLayers.length).map((layer, index) => {
         return new TileLayer({
           source: createWmtsSource(layer.id),
           visible: wmtsLayers.length + index === 0,
@@ -359,9 +357,6 @@ onMounted(() => {
         }),
       }),
     })
-
-
-    
 
     vectorFeuilleSource.value = new VectorSource({
       url: (extent) => {
