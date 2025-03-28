@@ -69,6 +69,7 @@ import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 import { create_multibbox, convertBbox } from '../composable/convertCoordinates'
+import config from '../../config'
 
 const emit = defineEmits(['close', 'select-country'])
 const searchCountry = ref('')
@@ -154,7 +155,7 @@ async function getCountryBbox(country) {
   const countryName = country.display_name.split(',')[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
   console.log('Recherche des contours du pays:', countryName);
   const urlCountryBbox = 
-    `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0` +
+    `${config.baseGeoserverUrl}/wfs?service=wfs&version=2.0.0` +
     `&request=GetFeature&typeNames=pays&outputFormat=application/json` +
     `&CQL_FILTER=NOM='${countryName}'&srsName=EPSG:3857`;
 
