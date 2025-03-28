@@ -1,11 +1,25 @@
 <template>
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
-      <SparkleButton nameButton="Exporter les scans" @click="downloadCSV">
-        <template #icon
-          ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
-        /></template>
-      </SparkleButton>
+      <div class="scan-export-container">
+        <button 
+          class="export-scan-button" 
+          @click="downloadCSV" 
+          :disabled="!isDataAvailable > 0"
+        >
+          <div class="button-content">
+            <div class="icon-wrapper">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="export-icon">
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+              </svg>
+              <div v-if="isDataAvailable" class="scan-badge">
+                {{ storeScansData.length }}
+              </div>
+            </div>
+            <span class="button-text">Exporter tous les scans</span>
+          </div>
+        </button>
+      </div>
       <div class="dropdown-container">
         <div class="dropdown-wrapper">
           <Dropdown
@@ -16,15 +30,15 @@
         </div>
       </div>
       <div class="button-group">
-        <ShakingButton nameButton="Visualiser" @click="openIipmooviewer">
+        <ShakingButton nameButton="Visualiser" @click="openIipmooviewer" :disabled="!currentCollecInfo">
           <template #icon><SvgIcon type="mdi" :path="mdiMonitorEye" class="mdicon" /></template>
         </ShakingButton>
-        <ShakingButton nameButton="Télécharger" @click="downloadScans">
+        <ShakingButton nameButton="Télécharger" @click="downloadScans" :disabled="!currentCollecInfo">
           <template #icon
             ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
           /></template>
         </ShakingButton>
-        <ShakingButton nameButton="XML" @click="downloadxml">
+        <ShakingButton nameButton="XML" @click="downloadxml" :disabled="!currentCollecInfo">
           <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
         </ShakingButton>
       </div>
@@ -43,6 +57,12 @@ import { mdiMonitorEye, mdiBriefcaseDownload, mdiXml } from '@mdi/js'
 
 const scanStore = useScanStore()
 const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)
+
+const isDataAvailable = computed(() => 
+  storeScansData.value &&
+  storeScansData.value.length > 0
+)
+
 
 const imageUrl = ref('')
 const textDisableOption = computed(() => {
@@ -176,6 +196,144 @@ function dicoToFormatCSV(arrObj) {
   align-items: center;
   gap: 5px;
   width: 100%;
+}
+
+.scan-export-container {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.export-scan-button {
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+  color: #5e7a10;
+  border: 2px dashed #5e7a10; 
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 
+    all 0.3s ease,
+    transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+
+
+.export-scan-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(94, 122, 16, 0.05);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+
+
+.export-scan-button:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+}
+
+
+
+.export-scan-button:hover::before {
+  opacity: 1;
+}
+
+
+
+.export-scan-button:active {
+  transform: scale(0.98) translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.export-scan-button:disabled {
+  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+  color: #999;
+  border-color: #bbb;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+
+.button-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  z-index: 1;
+}
+
+
+
+.icon-wrapper {
+  position: relative;
+  background-color: rgba(94, 122, 16, 0.1);
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+
+}
+
+.scan-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: #ff4d4d;
+  color: white;
+  border-radius: 16px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  border: 2px solid white;
+  z-index: 10;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.export-scan-button:hover .icon-wrapper {
+  background-color: rgba(94, 122, 16, 0.2);
+}
+
+
+
+.export-icon {
+  width: 28px;
+  height: 28px;
+  fill: #5e7a10;
+}
+
+
+
+.button-text {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .dropdown-container {
