@@ -57,8 +57,10 @@ import OSM from 'ol/source/OSM'
 import TileWMS from 'ol/source/TileWMS'
 
 //test
-import { parcour_txt_to_tab } from './composable/parseTXT'
-import { useConvertCoordinates } from './composable/convertCoordinates'
+import {parcour_txt_to_tab } from './composable/parseTXT'
+import {useConvertCoordinates } from './composable/convertCoordinates'
+import { listenImage } from 'ol/Image'
+import MultiPolygon from 'ol/geom/MultiPolygon'
 
 const scanStore = useScanStore()
 const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
@@ -90,6 +92,8 @@ const departmentsLayer = ref(null)
 // layers cartothèque etranger
 const vectorFeuilleSource = ref(null)
 const feuilleLayer = ref(null)
+const vectorPaysSource = ref(null)
+const paysLayer = ref(null)
 
 const url_test = ref(``)
 let layers = ref(layers_carto)
@@ -118,6 +122,7 @@ function getOtherLayers() {
       return otherLayersCartoMonde
     default:
       return otherLayersCartoFrance
+      return otherLayersCartoFrance // à modifier
   }
 }
 
@@ -127,23 +132,30 @@ function hideOtherLayers() {
   otherLayers.value.forEach( layers => layers.visible = false)
 }
 
+function hideOtherLayers() {
+  departmentsLayer.value.setVisible(false)
+  feuilleLayer.value.setVisible(false)
+  otherLayers.value.forEach( layers => layers.visible = false)
+}
+
+
+
 watch(activeTab, (newValue) => {
-  // Récupérer les nouvelles layers
-  
-  layers.value = getLayersActiveTab()
+  const newLayers = getLayersActiveTab();
+  layers.value = newLayers;
+
   otherLayers.value = getOtherLayers()
   hideOtherLayers()
 
   if (olMap.value) {
-    // get wmts layers
-    const mapLayers = olMap.value.getLayers()
-    const wmtsLayers = mapLayers.getArray().filter((layer) => layer instanceof TileLayer)
+    const mapLayers = olMap.value.getLayers();
+    const wmtsLayers = mapLayers.getArray().filter((layer) => layer instanceof TileLayer);
 
     // met à jour les wmts
     wmtsLayers.forEach((layer, index) => {
-      if (index < layers.value.length) {
+      if (index < newLayers.length) {
         // Créer une nouvelle source pour cette couche
-        const newSource = createWmtsSource(layers.value[index].id)
+        const newSource = createWmtsSource(newLayers[index].id)
 
         // defined source
         layer.setSource(newSource)
@@ -153,8 +165,8 @@ watch(activeTab, (newValue) => {
       }
     })
 
-    if (layers.value.length > wmtsLayers.length) {
-      const layersToAdd = layers.value.slice(wmtsLayers.length).map((layer, index) => {
+    if (newLayers.length > wmtsLayers.length) {
+      const layersToAdd = newLayers.slice(wmtsLayers.length).map((layer, index) => {
         return new TileLayer({
           source: createWmtsSource(layer.id),
           visible: wmtsLayers.length + index === 0,
@@ -169,7 +181,8 @@ watch(activeTab, (newValue) => {
     // reset l'index à 0
     activeLayerIndex.value = 0
   }
-})
+});
+
 
 const activeLayerIndex = ref(0)
 const olView = ref(null)
@@ -237,7 +250,7 @@ async function parcour_tab_and_map(url) {
 }
 
 function handleOtherLayerToggle(layer) {
-  console.log(layer)
+  console.log("layerrrrrrrrrrrrrrrrr", layer)
 
   if (layer.id === 'departements' && departmentsLayer.value) {
     const isVisible = departmentsLayer.value.getVisible()
@@ -246,7 +259,12 @@ function handleOtherLayerToggle(layer) {
   if (layer.id === 'feuilles' && feuilleLayer.value) {
     const isVisible = feuilleLayer.value.getVisible()
     feuilleLayer.value.setVisible(!isVisible)
-  } else if (layer.id === 'communes' && communesLayer.value) {
+  } 
+  if (layer.id === 'pays' && paysLayer.value) {
+    const isVisible = paysLayer.value.getVisible()
+    paysLayer.value.setVisible(!isVisible)
+  }
+  else if (layer.id === 'communes' && communesLayer.value) {
     communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value
     const shouldBeVisible = communesLayerManuallyActivated.value && currentZoom.value >= 12
     communesLayer.value.setVisible(shouldBeVisible)
@@ -439,13 +457,30 @@ onMounted(() => {
         fill: new Fill({
           color: 'rgba(0, 0, 0, 0.1)',
         }),
-        text: new Text({
-          text: feature.get('CODE_DEPT'),
-          font: '12px Calibri,sans-serif',
-          fill: new Fill({ color: '#000' }),
-          stroke: new Stroke({ color: '#fff', width: 2 }),
-        })
-      })},
+      }),
+    })
+
+    vectorPaysSource.value = new VectorSource({
+      url: (extent) => {
+        const bbox = extent.join(',')
+        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox=${bbox},EPSG:3857`
+      },
+      format: new GeoJSON(),
+      strategy: bboxStrategy,
+    })
+
+    paysLayer.value = new VectorLayer({
+      source: vectorPaysSource.value,
+      visible: false,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.5)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 255, 0, 0.1)',
+        }),
+      }),
     })
 
     vectorPinSource.value = new VectorSource()
@@ -518,6 +553,7 @@ onMounted(() => {
         communesLayer.value,
         departmentsLayer.value,
         feuilleLayer.value,
+        paysLayer.value,
       ],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
@@ -602,9 +638,18 @@ onMounted(() => {
       vectorScanSource.value.clear()
 
       if (storeSelectedGeom.value.length !== 0) {
-        const polygon = new Feature({
-          geometry: new Polygon([storeSelectedGeom.value]),
-        })
+        let polygon = null;
+        if (storeSelectedGeom.value[0].length === 2) {
+          polygon = new Feature({
+            geometry: new Polygon([storeSelectedGeom.value]),
+          })
+        }
+        else{
+          polygon = new Feature({
+            geometry: new MultiPolygon([storeSelectedGeom.value]),
+          })
+        }
+        
 
         vectorGeomSource.value.addFeature(polygon)
 
