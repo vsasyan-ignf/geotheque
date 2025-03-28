@@ -370,15 +370,22 @@ onMounted(() => {
     feuilleLayer.value = new VectorLayer({
       source: vectorFeuilleSource.value,
       visible: false,
-      style: new Style({
+      style: function(feature) {
+        return new Style({
         stroke: new Stroke({
           color: 'rgba(0, 0, 0, 0.5)',
           width: 2,
         }),
         fill: new Fill({
-          color: 'rgba(0, 255, 0, 0.1)',
+          color: 'rgba(0, 255, 0, 0.2)',
         }),
-      }),
+        text: new Text({
+          text: feature.get('NUMERO'),
+          font: '12px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+        })
+      })},
     })
 
     vectorCommunesSource.value = new VectorSource({
@@ -437,7 +444,6 @@ onMounted(() => {
           font: '12px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
-          offsetY: -15
         })
       })},
     })
