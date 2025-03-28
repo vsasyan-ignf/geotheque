@@ -92,6 +92,8 @@ const departmentsLayer = ref(null)
 // layers cartothèque etranger
 const vectorFeuilleSource = ref(null)
 const feuilleLayer = ref(null)
+const vectorPaysSource = ref(null)
+const paysLayer = ref(null)
 
 const url_test = ref(``)
 let layers = ref(layers_carto)
@@ -231,7 +233,7 @@ async function parcour_tab_and_map(url) {
 }
 
 function handleOtherLayerToggle(layer) {
-  console.log(layer)
+  console.log("layerrrrrrrrrrrrrrrrr", layer)
 
   if (layer.id === 'departements' && departmentsLayer.value) {
     const isVisible = departmentsLayer.value.getVisible()
@@ -240,7 +242,12 @@ function handleOtherLayerToggle(layer) {
   if (layer.id === 'feuilles' && feuilleLayer.value) {
     const isVisible = feuilleLayer.value.getVisible()
     feuilleLayer.value.setVisible(!isVisible)
-  } else if (layer.id === 'communes' && communesLayer.value) {
+  } 
+  if (layer.id === 'pays' && paysLayer.value) {
+    const isVisible = paysLayer.value.getVisible()
+    paysLayer.value.setVisible(!isVisible)
+  }
+  else if (layer.id === 'communes' && communesLayer.value) {
     communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value
     const shouldBeVisible = communesLayerManuallyActivated.value && currentZoom.value >= 12
     communesLayer.value.setVisible(shouldBeVisible)
@@ -428,6 +435,29 @@ onMounted(() => {
       }),
     })
 
+    vectorPaysSource.value = new VectorSource({
+      url: (extent) => {
+        const bbox = extent.join(',')
+        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox=${bbox},EPSG:3857`
+      },
+      format: new GeoJSON(),
+      strategy: bboxStrategy,
+    })
+
+    paysLayer.value = new VectorLayer({
+      source: vectorPaysSource.value,
+      visible: false,
+      style: new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.5)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 255, 0, 0.1)',
+        }),
+      }),
+    })
+
     vectorPinSource.value = new VectorSource()
 
     const pinLayer = new VectorLayer({
@@ -498,6 +528,7 @@ onMounted(() => {
         communesLayer.value,
         departmentsLayer.value,
         feuilleLayer.value,
+        paysLayer.value,
       ],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
