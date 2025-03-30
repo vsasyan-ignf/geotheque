@@ -74,8 +74,6 @@ const searchCountry = ref('')
 const countryResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-const proj3857 = 'EPSG:3857' // Web Mercator
-const proj2154 = 'EPSG:2154' // Lambert-93
 import { useScanStore } from '@/components/store/scan'
 
 const scanStore = useScanStore()
@@ -106,7 +104,6 @@ function searchCountries() {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toUpperCase()
-  console.log('Recherche des pays:', query)
 
   const url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=pays&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
 
@@ -129,21 +126,18 @@ function searchCountries() {
 function selectCountry(country) {
   getCountryBbox(country)
     .then((contour) => {
-      let bbox3857 = create_multibbox(contour)
-      console.log('bbox3857:', bbox3857)
-      const bbox2154 = convertBbox(bbox3857, proj3857, proj2154)
-      const point = {
-        x: 0,
-        y: 0,
-        bboxLambert93: bbox2154,
-      }
+      const bbox3857 = create_multibbox(contour)
+      const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
 
+      console.log(bbox4326)
+
+      const bbox = [bbox4326[1], bbox4326[0], bbox4326[3], bbox4326[2]]
+
+      scanStore.updateBbox(bbox)
       scanStore.updateSelectedGeom(contour)
-
-      emit('select-country', point)
     })
     .catch((error) => {
-      console.error('Erreur lors de la récupération des controus du departements:', error)
+      console.error('Erreur lors de la récupération des contours du pays:', error)
     })
 
   showResults.value = false
@@ -155,7 +149,7 @@ async function getCountryBbox(country) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toUpperCase()
-  console.log('Recherche des contours du pays:', countryName)
+
   const urlCountryBbox =
     `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
     `&request=GetFeature&typeNames=pays&outputFormat=application/json` +
