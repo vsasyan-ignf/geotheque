@@ -4,6 +4,13 @@ import WMTS from 'ol/source/WMTS'
 import WMTSTileGrid from 'ol/tilegrid/WMTS'
 import { get as getProjection } from 'ol/proj'
 import { getTopLeft } from 'ol/extent'
+import { Style, Stroke, Fill, Text } from 'ol/style'
+import { bbox as bboxStrategy } from 'ol/loadingstrategy'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+
+import GeoJSON from 'ol/format/GeoJSON'
+import config from '@/config'
 
 function getWmtsUrl(layerId) {
   if (layerId === 'cartesign' || layerId === 'scan25') {
@@ -140,25 +147,72 @@ function getVectorURL(vectorID, bbox){
   }
 }
 
-export function createVectorSource(vectorID) {
-  const source = new VectorSource({
+function createVectorSource(urlTemplate, format = new GeoJSON(), strategy = bboxStrategy) {
+  return new VectorSource({
     url: (extent) => {
-      const bbox = extent.join(",");
-      return getVectorURL(vectorID, bbox);
+      const bbox = extent.join(',');
+      return urlTemplate.replace('{bbox}', bbox);
     },
-    format: new GeoJSON(),
-    strategy: bboxStrategy,
+    format,
+    strategy,
   });
-  return source;
 }
 
 
-function createVectorLayer(name, source, style, visible = false) {
-  const layer = new VectorLayer({
+function createVectorLayer(source, style, visible = false) {
+  return new VectorLayer({
     source,
     visible,
     style,
   });
-  vectorLayers.value[name] = layer;
-  return layer;
 }
+
+
+const layersConfig = [
+  {
+    name: 'communes',
+    url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox={bbox},EPSG:3857`,
+    style: new Style({
+      stroke: new Stroke({
+        color: 'rgba(0, 0, 0, 0.7)',
+        width: 1,
+      }),
+      fill: new Fill({
+        color: 'rgba(200, 200, 200, 0.5)',
+      }),
+    }),
+  },
+  {
+    name: 'departments',
+    url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox={bbox},EPSG:3857`,
+    style: new Style({
+      stroke: new Stroke({
+        color: 'rgba(0, 0, 0, 0.2)',
+        width: 2,
+      }),
+      fill: new Fill({
+        color: 'rgba(0, 0, 0, 0.1)',
+      }),
+      text: new Text({
+        text: 'CODE_DEPT',
+        font: '12px Calibri,sans-serif',
+        fill: new Fill({ color: '#000' }),
+        stroke: new Stroke({ color: '#fff', width: 2 }),
+      }),
+    }),
+  },
+];
+
+export function initLayers(){
+  return layersConfig.map((layerConfig) => {
+    const source = createVectorSource(layerConfig.url);
+    return createVectorLayer(source, layerConfig.style);
+  })
+}
+
+
+// layersConfig.forEach((layerConfig) => {
+//   const source = createVectorSource(layerConfig.url);
+//   const layer = createVectorLayer(source, layerConfig.style);
+//   olMap.value.addLayer(layer);
+// });

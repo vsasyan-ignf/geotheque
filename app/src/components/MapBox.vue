@@ -40,7 +40,7 @@ import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
 import { Style, Icon, Stroke, Fill, Text } from 'ol/style'
 import { bbox as bboxStrategy } from 'ol/loadingstrategy'
-import { getMaxZoom, createWmtsSource } from './composable/getWMTS'
+import { getMaxZoom, createWmtsSource, initLayers } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 
 import {
@@ -94,7 +94,7 @@ let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
 
-const vectorLayers = ref({})
+const vectorLayers = ref(null)
 
 function getLayersActiveTab() {
   if (activeTab.value === 'cartotheque') {
