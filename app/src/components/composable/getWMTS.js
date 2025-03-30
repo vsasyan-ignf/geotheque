@@ -124,3 +124,41 @@ export function createWmtsSource(layerId) {
     })
   }
 }
+
+function getVectorURL(vectorID, bbox){
+  switch (vectorID) {
+    case 'communes':
+      return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`;
+    case 'departements':
+      return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`;
+    case 'feuilles':
+      return `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`;
+    case 'pays':
+      return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox=${bbox},EPSG:3857`;
+    default:
+      return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox=${bbox},EPSG:3857`;
+  }
+}
+
+export function createVectorSource(vectorID) {
+  const source = new VectorSource({
+    url: (extent) => {
+      const bbox = extent.join(",");
+      return getVectorURL(vectorID, bbox);
+    },
+    format: new GeoJSON(),
+    strategy: bboxStrategy,
+  });
+  return source;
+}
+
+
+function createVectorLayer(name, source, style, visible = false) {
+  const layer = new VectorLayer({
+    source,
+    visible,
+    style,
+  });
+  vectorLayers.value[name] = layer;
+  return layer;
+}

@@ -25,6 +25,7 @@ import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
+import config from '@/config'
 
 import Map from 'ol/Map'
 import View from 'ol/View'
@@ -92,6 +93,8 @@ const paysLayer = ref(null)
 let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
+
+const vectorLayers = ref({})
 
 function getLayersActiveTab() {
   if (activeTab.value === 'cartotheque') {
