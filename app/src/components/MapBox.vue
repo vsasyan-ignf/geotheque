@@ -54,7 +54,6 @@ import {
 //test
 import { parcour_txt_to_tab } from './composable/parseTXT'
 import { useConvertCoordinates } from './composable/convertCoordinates'
-import { listenImage } from 'ol/Image'
 import MultiPolygon from 'ol/geom/MultiPolygon'
 
 const scanStore = useScanStore()
@@ -90,7 +89,6 @@ const feuilleLayer = ref(null)
 const vectorPaysSource = ref(null)
 const paysLayer = ref(null)
 
-const url_test = ref(``)
 let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
@@ -286,7 +284,6 @@ onMounted(() => {
     })
 
     vectorWfsSource.value = new VectorSource({
-      url: url_test.value,
       format: new GeoJSON(),
       strategy: bboxStrategy,
     })
