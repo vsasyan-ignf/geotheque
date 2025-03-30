@@ -39,7 +39,7 @@
               >
                 <div class="result-content">
                   <div class="result-main">{{ feuille.numero }}</div>
-                  <div class="result-secondary"> Nom de la feuille : {{ feuille.nom }}</div>
+                  <div class="result-secondary">Nom de la feuille : {{ feuille.nom }}</div>
                 </div>
               </div>
             </div>
@@ -115,14 +115,13 @@ function searchFeuille() {
   let search_url = ''
   searchTimeout = setTimeout(() => {
     search_url = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
-    console.log(search_url)
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
         const newResults = data.features.map((feuille) => ({
           nom: feuille.properties.NOM,
           numero: feuille.properties.NUMERO,
-          geometry: feuille.geometry.coordinates[0]
+          geometry: feuille.geometry.coordinates[0],
         }))
         feuilleResults.value = newResults
       })
@@ -136,21 +135,20 @@ function searchFeuille() {
 function selectFeuille(feuille) {
   feuilleSelected.value = feuille.numero
   repFeuille.value = feuille
-  console.log('-------------FEUILLE----------------')
-  const bbox4326 = create_bbox(feuille.geometry)
-
-  const bbox = [bbox4326.minY, bbox4326.minX, bbox4326.maxY, bbox4326.maxX]
-
-
-  scanStore.updateBbox(bbox)
   showResults.value = false
 }
 
 function validateFeuille() {
-  if (repFeuille){
-    scanStore.updateSelectedGeom(repFeuille.value.geometry[0])
-  }
+  if (repFeuille) {
+    const bbox4326 = create_bbox(repFeuille.value.geometry)
+    const bbox = [bbox4326.minY, bbox4326.minX, bbox4326.maxY, bbox4326.maxX]
+    scanStore.updateBbox(bbox)
 
+    const contourMercator = repFeuille.value.geometry[0].map((coord) =>
+      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
+    )
+    scanStore.updateSelectedGeom(contourMercator)
+  }
 }
 </script>
 

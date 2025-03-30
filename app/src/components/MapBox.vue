@@ -57,8 +57,8 @@ import OSM from 'ol/source/OSM'
 import TileWMS from 'ol/source/TileWMS'
 
 //test
-import {parcour_txt_to_tab } from './composable/parseTXT'
-import {useConvertCoordinates } from './composable/convertCoordinates'
+import { parcour_txt_to_tab } from './composable/parseTXT'
+import { useConvertCoordinates } from './composable/convertCoordinates'
 import { listenImage } from 'ol/Image'
 import MultiPolygon from 'ol/geom/MultiPolygon'
 
@@ -128,19 +128,19 @@ function getOtherLayers() {
 function hideOtherLayers() {
   departmentsLayer.value.setVisible(false)
   feuilleLayer.value.setVisible(false)
-  otherLayers.value.forEach( layers => layers.visible = false)
+  otherLayers.value.forEach((layers) => (layers.visible = false))
 }
 
 watch(activeTab, (newValue) => {
-  const newLayers = getLayersActiveTab();
-  layers.value = newLayers;
+  const newLayers = getLayersActiveTab()
+  layers.value = newLayers
 
   otherLayers.value = getOtherLayers()
   hideOtherLayers()
 
   if (olMap.value) {
-    const mapLayers = olMap.value.getLayers();
-    const wmtsLayers = mapLayers.getArray().filter((layer) => layer instanceof TileLayer);
+    const mapLayers = olMap.value.getLayers()
+    const wmtsLayers = mapLayers.getArray().filter((layer) => layer instanceof TileLayer)
 
     // met à jour les wmts
     wmtsLayers.forEach((layer, index) => {
@@ -172,8 +172,7 @@ watch(activeTab, (newValue) => {
     // reset l'index à 0
     activeLayerIndex.value = 0
   }
-});
-
+})
 
 const activeLayerIndex = ref(0)
 const olView = ref(null)
@@ -248,12 +247,11 @@ function handleOtherLayerToggle(layer) {
   if (layer.id === 'feuilles' && feuilleLayer.value) {
     const isVisible = feuilleLayer.value.getVisible()
     feuilleLayer.value.setVisible(!isVisible)
-  } 
+  }
   if (layer.id === 'pays' && paysLayer.value) {
     const isVisible = paysLayer.value.getVisible()
     paysLayer.value.setVisible(!isVisible)
-  }
-  else if (layer.id === 'communes' && communesLayer.value) {
+  } else if (layer.id === 'communes' && communesLayer.value) {
     communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value
     const shouldBeVisible = communesLayerManuallyActivated.value && currentZoom.value >= 12
     communesLayer.value.setVisible(shouldBeVisible)
@@ -377,22 +375,23 @@ onMounted(() => {
     feuilleLayer.value = new VectorLayer({
       source: vectorFeuilleSource.value,
       visible: false,
-      style: function(feature) {
+      style: function (feature) {
         return new Style({
-        stroke: new Stroke({
-          color: 'rgba(0, 0, 0, 0.5)',
-          width: 2,
-        }),
-        fill: new Fill({
-          color: 'rgba(0, 255, 0, 0.2)',
-        }),
-        text: new Text({
-          text: feature.get('NUMERO'),
-          font: '12px Calibri,sans-serif',
-          fill: new Fill({ color: '#000' }),
-          stroke: new Stroke({ color: '#fff', width: 2 }),
+          stroke: new Stroke({
+            color: 'rgba(0, 0, 0, 0.5)',
+            width: 2,
+          }),
+          fill: new Fill({
+            color: 'rgba(0, 255, 0, 0.2)',
+          }),
+          text: new Text({
+            text: feature.get('NUMERO'),
+            font: '12px Calibri,sans-serif',
+            fill: new Fill({ color: '#000' }),
+            stroke: new Stroke({ color: '#fff', width: 2 }),
+          }),
         })
-      })},
+      },
     })
 
     vectorCommunesSource.value = new VectorSource({
@@ -437,22 +436,23 @@ onMounted(() => {
     departmentsLayer.value = new VectorLayer({
       source: vectorDepartmentsSource.value,
       visible: false,
-      style: function(feature) {
+      style: function (feature) {
         return new Style({
-        stroke: new Stroke({
-          color: 'rgba(0, 0, 0, 0.2)',
-          width: 2,
-        }),
-        fill: new Fill({
-          color: 'rgba(0, 0, 0, 0.1)',
-        }),
-        text: new Text({
-          text: feature.get('CODE_DEPT'),
-          font: '12px Calibri,sans-serif',
-          fill: new Fill({ color: '#000' }),
-          stroke: new Stroke({ color: '#fff', width: 2 }),
+          stroke: new Stroke({
+            color: 'rgba(0, 0, 0, 0.2)',
+            width: 2,
+          }),
+          fill: new Fill({
+            color: 'rgba(0, 0, 0, 0.1)',
+          }),
+          text: new Text({
+            text: feature.get('CODE_DEPT'),
+            font: '12px Calibri,sans-serif',
+            fill: new Fill({ color: '#000' }),
+            stroke: new Stroke({ color: '#fff', width: 2 }),
+          }),
         })
-      })},
+      },
     })
 
     vectorPaysSource.value = new VectorSource({
@@ -633,18 +633,17 @@ onMounted(() => {
       vectorScanSource.value.clear()
 
       if (storeSelectedGeom.value.length !== 0) {
-        let polygon = null;
+        let polygon = null
         if (storeSelectedGeom.value[0].length === 2) {
+          console.log('Polygon')
           polygon = new Feature({
             geometry: new Polygon([storeSelectedGeom.value]),
           })
-        }
-        else{
+        } else {
           polygon = new Feature({
             geometry: new MultiPolygon([storeSelectedGeom.value]),
           })
         }
-        
 
         vectorGeomSource.value.addFeature(polygon)
 

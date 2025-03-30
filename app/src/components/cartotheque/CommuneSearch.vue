@@ -164,7 +164,6 @@ function validateCommune() {
       bboxLambert93: bboxLambert93.flat(),
     }
 
-
     const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
       useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
     )

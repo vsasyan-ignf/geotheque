@@ -52,8 +52,6 @@ export const useScanStore = defineStore('scan', () => {
   })
 
   function updateBbox(newBbox) {
-    console.log('-------NEW BBOX----------')
-    console.log(newBbox)
     storeBbox.value = newBbox
   }
 
