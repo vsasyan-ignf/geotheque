@@ -70,7 +70,7 @@ import { useConvertCoordinates } from '@/components/composable/convertCoordinate
 import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 
-import config from '../../config'
+import config from '@/config'
 
 const scanStore = useScanStore()
 
@@ -118,9 +118,9 @@ function searchCommunes() {
   let search_url = ''
   searchTimeout = setTimeout(() => {
     if (parseInt(query)) {
-      search_url = `${config.basecommunesUrl}?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+      search_url = `${config.COMMUNE_URL}?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
     } else {
-      search_url = `${config.basecommunesUrl}?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+      search_url = `${config.COMMUNE_URL}?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
     }
 
     fetch(search_url)

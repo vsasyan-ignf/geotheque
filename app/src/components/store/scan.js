@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import config from '../../config';
-import { bbox } from 'ol/loadingstrategy';
+import config from '@/config';
 
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
@@ -41,7 +40,7 @@ export const useScanStore = defineStore('scan', () => {
       if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
 
       return (
-        `${config.baseGeoserverUrl}/wfs?service=wfs&version=2.0.0` +
+        `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
         `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
         `&cql_filter=${cqlFilter}`
         + `&srsName=EPSG:3857`

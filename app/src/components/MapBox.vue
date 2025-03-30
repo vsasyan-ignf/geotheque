@@ -366,7 +366,7 @@ onMounted(() => {
     vectorFeuilleSource.value = new VectorSource({
       url: (extent) => {
         const bbox = extent.join(',')
-        return 'http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857'
+        return '${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857'
       },
       format: new GeoJSON(),
       strategy: bboxStrategy,
@@ -397,7 +397,7 @@ onMounted(() => {
     vectorCommunesSource.value = new VectorSource({
       url: (extent) => {
         const bbox = extent.join(',')
-        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`
+        return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`
       },
       format: new GeoJSON(),
       strategy: bboxStrategy,
@@ -427,7 +427,7 @@ onMounted(() => {
     vectorDepartmentsSource.value = new VectorSource({
       url: (extent) => {
         const bbox = extent.join(',')
-        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`
+        return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`
       },
       format: new GeoJSON(),
       strategy: bboxStrategy,
@@ -458,7 +458,7 @@ onMounted(() => {
     vectorPaysSource.value = new VectorSource({
       url: (extent) => {
         const bbox = extent.join(',')
-        return `http://localhost:8088/geoserver/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox=${bbox},EPSG:3857`
+        return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox=${bbox},EPSG:3857`
       },
       format: new GeoJSON(),
       strategy: bboxStrategy,
@@ -628,6 +628,7 @@ onMounted(() => {
     })
 
     watch(storeURL, async (newValue) => {
+      console.log('--------- REQUETE GEOSERVER --------')
       console.log('NEW URL:', newValue)
       vectorGeomSource.value.clear()
       vectorScanSource.value.clear()
@@ -635,7 +636,6 @@ onMounted(() => {
       if (storeSelectedGeom.value.length !== 0) {
         let polygon = null
         if (storeSelectedGeom.value[0].length === 2) {
-          console.log('Polygon')
           polygon = new Feature({
             geometry: new Polygon([storeSelectedGeom.value]),
           })
@@ -663,8 +663,7 @@ onMounted(() => {
     })
 
     watch(storeSelectedScan, (newValue) => {
-      console.log('----------------- NEW SCAN SELECTED ------------------------')
-      console.log('storeSelectedScan.value:', storeSelectedScan.value)
+      console.log('----------- NEW SCAN SELECTED -------------')
 
       vectorScanSource.value.clear()
       if (

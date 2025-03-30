@@ -84,18 +84,17 @@ import { useConvertCoordinates } from '@/components/composable/convertCoordinate
 import { useScanStore } from '@/components/store/scan'
 import { mdiInformationOutline, mdiCrosshairsGps, mdiMapMarker } from '@mdi/js'
 
-import config from '../../config'
+import config from '@/config'
 
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
 
-const {activeTab} = storeToRefs(scanStore)
+const { activeTab } = storeToRefs(scanStore)
 
 const emit = defineEmits(['close', 'go-to-point'])
 
 const searchMode = ref('map')
-
 
 const pointX = ref('')
 const pointY = ref('')
@@ -107,18 +106,16 @@ const projections = [
 ]
 
 async function fetchAndConvertBbox(longitude, latitude) {
-
   try {
-    let url;
+    let url
 
-    if(activeTab.value === "cartotheque"){
-      url = `${config.baseNominatimUrl}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
-    }
-    else{
-      url = `${config.baseNominatimUrl}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=3&limit=1`
+    if (activeTab.value === 'cartotheque') {
+      url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
+    } else {
+      url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=3&limit=1`
       console.log(url)
     }
-    
+
     const response = await fetch(url)
 
     if (!response.ok) {
@@ -135,8 +132,6 @@ async function fetchAndConvertBbox(longitude, latitude) {
       parseFloat(bbox[3]),
       parseFloat(bbox[1]),
     ]
-
-    console.log(bboxWGS84)
 
     const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:2154')
     const northEast = useConvertCoordinates(bboxWGS84[2], bboxWGS84[3], 'EPSG:4326', 'EPSG:2154')
@@ -187,13 +182,12 @@ async function handleGoToPoint() {
 
   eventBus.emit('update-coordinates', { x: mapCoords[0], y: mapCoords[1] })
   eventBus.emit('center-map', { x: mapCoords[0], y: mapCoords[1] })
-  
+
   emit('go-to-point', point)
 }
 
 // gestion du clique sur la carte
 async function handleMapClick(coords) {
-
   // converti le x et y dans le bon système de proj sélectionné
   if (coords.projection !== selectedProjection.value) {
     const convertedCoords = useConvertCoordinates(
@@ -232,10 +226,9 @@ async function handleMapClick(coords) {
 
   bboxState.value = point.bboxLambert93
 
-  if(activeTab.value === 'cartotheque'){
+  if (activeTab.value === 'cartotheque') {
     scanStore.updateBbox(point.bboxLambert93)
-  }
-  else{
+  } else {
     const coord = point.bboxWGS84
     const bboxLatLon = [coord[1], coord[0], coord[3], coord[2]]
     scanStore.updateBbox(bboxLatLon)
@@ -260,7 +253,6 @@ watch(selectedProjection, (newProjection, oldProjection) => {
 
 // monte le bus d'événement
 onMounted(() => {
-  
   eventBus.on('map-clicked', handleMapClick)
   eventBus.emit('toggle-pin', true)
 })

@@ -51,7 +51,7 @@
 
             <div class="empty-search" v-else>
               <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
-              <span>Saisissez le nom d'une feuille</span>
+              <span>Saisissez le numéro d'une feuille</span>
             </div>
           </div>
         </div>
@@ -67,7 +67,8 @@ import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { create_bbox, convertBbox, useConvertCoordinates } from '../composable/convertCoordinates'
+import { create_bbox, useConvertCoordinates } from '@/components/composable/convertCoordinates'
+import config from '@/config'
 
 const scanStore = useScanStore()
 
@@ -114,19 +115,19 @@ function searchFeuille() {
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
+    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
         const newResults = data.features.map((feuille) => ({
           nom: feuille.properties.NOM,
           numero: feuille.properties.NUMERO,
-          geometry: feuille.geometry.coordinates[0],
+          geometry: feuille.geometry.coordinates[0][0],
         }))
         feuilleResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des communes:', error)
+        console.error('Erreur lors de la récupération des feuilles:', error)
         feuilleResults.value = []
       })
   }, 300)
@@ -140,11 +141,11 @@ function selectFeuille(feuille) {
 
 function validateFeuille() {
   if (repFeuille) {
-    const bbox4326 = create_bbox(repFeuille.value.geometry)
+    const bbox4326 = create_bbox([repFeuille.value.geometry])
     const bbox = [bbox4326.minY, bbox4326.minX, bbox4326.maxY, bbox4326.maxX]
     scanStore.updateBbox(bbox)
 
-    const contourMercator = repFeuille.value.geometry[0].map((coord) =>
+    const contourMercator = repFeuille.value.geometry.map((coord) =>
       useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
     )
     scanStore.updateSelectedGeom(contourMercator)
