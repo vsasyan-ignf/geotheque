@@ -229,9 +229,7 @@ async function handleMapClick(coords) {
   if (activeTab.value === 'cartotheque') {
     scanStore.updateBbox(point.bboxLambert93)
   } else {
-    const coord = point.bboxWGS84
-    const bboxLatLon = [coord[1], coord[0], coord[3], coord[2]]
-    scanStore.updateBbox(bboxLatLon)
+    scanStore.updateBbox(point.bboxWGS84)
   }
 
   searchMode.value = 'map'

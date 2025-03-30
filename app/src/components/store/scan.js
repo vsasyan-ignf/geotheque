@@ -22,12 +22,16 @@ export const useScanStore = defineStore('scan', () => {
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
       let empriseURL = "emprisesscans";
+      let [minX, minY, maxX, maxY] = storeBbox.value
 
       if (activeTab.value === 'cartotheque_etranger') {
         empriseURL = "emprisesscansmonde";
+        // inverse les coordonnées : lon/lat to lat/lon
+        [minX, minY] = [minY, minX];
+        [maxX, maxY] = [maxY, maxX];
       }
 
-      let [minX, minY, maxX, maxY] = storeBbox.value
+
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
         storeCritereSelection.value
 

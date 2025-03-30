@@ -142,8 +142,8 @@ function selectFeuille(feuille) {
 function validateFeuille() {
   if (repFeuille) {
     const bbox4326 = create_bbox([repFeuille.value.geometry])
-    const bbox = [bbox4326.minY, bbox4326.minX, bbox4326.maxY, bbox4326.maxX]
-    scanStore.updateBbox(bbox)
+    const bboxLonLat = [bbox4326.minX, bbox4326.minY, bbox4326.maxX, bbox4326.maxY]
+    scanStore.updateBbox(bboxLonLat)
 
     const contourMercator = repFeuille.value.geometry.map((coord) =>
       useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
