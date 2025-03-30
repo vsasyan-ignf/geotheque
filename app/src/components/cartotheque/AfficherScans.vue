@@ -2,15 +2,11 @@
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
       <div class="scan-export-container">
-        <button 
-          class="export-scan-button" 
-          @click="downloadCSV" 
-          :disabled="!isDataAvailable > 0"
-        >
+        <button class="export-scan-button" @click="downloadCSV" :disabled="!isDataAvailable > 0">
           <div class="button-content">
             <div class="icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="export-icon">
-                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
               </svg>
               <div v-if="isDataAvailable" class="scan-badge">
                 {{ storeScansData.length }}
@@ -30,10 +26,18 @@
         </div>
       </div>
       <div class="button-group">
-        <ShakingButton nameButton="Visualiser" @click="openIipmooviewer" :disabled="!currentCollecInfo">
+        <ShakingButton
+          nameButton="Visualiser"
+          @click="openIipmooviewer"
+          :disabled="!currentCollecInfo"
+        >
           <template #icon><SvgIcon type="mdi" :path="mdiMonitorEye" class="mdicon" /></template>
         </ShakingButton>
-        <ShakingButton nameButton="Télécharger" @click="downloadScans" :disabled="!currentCollecInfo">
+        <ShakingButton
+          nameButton="Télécharger"
+          @click="downloadScans"
+          :disabled="!currentCollecInfo"
+        >
           <template #icon
             ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
           /></template>
@@ -49,20 +53,16 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import ShakingButton from '@/components/material/ShakingButton.vue'
-import SparkleButton from '../material/SparkleButton.vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiMonitorEye, mdiBriefcaseDownload, mdiXml } from '@mdi/js'
+import config from '@/config'
 
 const scanStore = useScanStore()
 const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)
 
-const isDataAvailable = computed(() => 
-  storeScansData.value &&
-  storeScansData.value.length > 0
-)
-
+const isDataAvailable = computed(() => storeScansData.value && storeScansData.value.length > 0)
 
 const imageUrl = ref('')
 const textDisableOption = computed(() => {
@@ -77,10 +77,10 @@ function generateImageUrl(info) {
   let url = ''
 
   if (info[1] !== '') {
-    url = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[1]}/${info[2]}.JP2&CVT=jpeg`
+    url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[1]}/${info[2]}.JP2&CVT=jpeg`
     name = info[2]
   } else {
-    url = `http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[2]}.JP2&CVT=jpeg`
+    url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[2]}.JP2&CVT=jpeg`
     name = info[1]
   }
 
@@ -134,11 +134,11 @@ function downloadxml() {
     const info = currentCollecInfo.value.split('/')
     const lieu = 'METROPOLE'
     if (info.length == 3) {
-      url_xml = `http://localhost:8082/Cartes/${lieu}/${info[0]}/${info[1]}/Fiches/${info[2]}.xml`
+      url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info[0]}/${info[1]}/Fiches/${info[2]}.xml`
     } else {
-      url_xml = `http://localhost:8082/Cartes/${lieu}/${info[0]}/Fiches/${info[1]}.xml`
+      url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info[0]}/Fiches/${info[1]}.xml`
     }
-    console.log('url_xml:', url_xml)
+    console.log('url_xml: ', url_xml)
     window.open(url_xml, 'xml')
   }
 }
@@ -210,10 +210,10 @@ function dicoToFormatCSV(arrObj) {
   height: 100px;
   background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
   color: #5e7a10;
-  border: 2px dashed #5e7a10; 
+  border: 2px dashed #5e7a10;
   border-radius: 20px;
   cursor: pointer;
-  transition: 
+  transition:
     all 0.3s ease,
     transform 0.2s;
   display: flex;
@@ -223,8 +223,6 @@ function dicoToFormatCSV(arrObj) {
   position: relative;
   overflow: hidden;
 }
-
-
 
 .export-scan-button::before {
   content: '';
@@ -238,27 +236,19 @@ function dicoToFormatCSV(arrObj) {
   transition: opacity 0.3s ease;
 }
 
-
-
 .export-scan-button:hover {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
   transform: translateY(-3px);
 }
 
-
-
 .export-scan-button:hover::before {
   opacity: 1;
 }
-
-
 
 .export-scan-button:active {
   transform: scale(0.98) translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
-
 
 .export-scan-button:disabled {
   background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
@@ -267,8 +257,6 @@ function dicoToFormatCSV(arrObj) {
   cursor: not-allowed;
   box-shadow: none;
 }
-
-
 
 .button-content {
   display: flex;
@@ -280,8 +268,6 @@ function dicoToFormatCSV(arrObj) {
   z-index: 1;
 }
 
-
-
 .icon-wrapper {
   position: relative;
   background-color: rgba(94, 122, 16, 0.1);
@@ -291,7 +277,6 @@ function dicoToFormatCSV(arrObj) {
   align-items: center;
   justify-content: center;
   transition: background-color 0.3s ease;
-
 }
 
 .scan-badge {
@@ -320,15 +305,11 @@ function dicoToFormatCSV(arrObj) {
   background-color: rgba(94, 122, 16, 0.2);
 }
 
-
-
 .export-icon {
   width: 28px;
   height: 28px;
   fill: #5e7a10;
 }
-
-
 
 .button-text {
   font-size: 14px;

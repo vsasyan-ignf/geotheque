@@ -21,9 +21,7 @@
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="countryResults.length > 0">
-              Résultats ({{ countryResults.length }})
-            </h5>
+            <h5 v-if="countryResults.length > 0">Résultats ({{ countryResults.length }})</h5>
             <h5 v-else-if="searchCountry">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
@@ -69,15 +67,13 @@ import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 import { create_multibbox, convertBbox } from '../composable/convertCoordinates'
-import config from '../../config'
+import config from '@/config'
 
 const emit = defineEmits(['close', 'select-country'])
 const searchCountry = ref('')
 const countryResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-const proj3857 = 'EPSG:3857' // Web Mercator
-const proj2154 = 'EPSG:2154' // Lambert-93
 import { useScanStore } from '@/components/store/scan'
 
 const scanStore = useScanStore()
@@ -103,11 +99,13 @@ function searchCountries() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-  
-  const query = searchCountry.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase()
-  console.log('Recherche des pays:', query)
 
-  const url = `http://localhost:8088/geoserver/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=pays&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
+  const query = searchCountry.value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+
+  const url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=pays&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
 
   searchTimeout = setTimeout(() => {
     fetch(url)
@@ -125,68 +123,63 @@ function searchCountries() {
       })
   }, 500)
 }
+
 function selectCountry(country) {
   getCountryBbox(country)
     .then((contour) => {
-      let bbox3857 = create_multibbox(contour)
-      console.log('bbox3857:', bbox3857)
-      const bbox2154 = convertBbox(bbox3857, proj3857, proj2154)
-      const point = {
-        x: 0,
-        y: 0,
-        bboxLambert93: bbox2154,
-      }
+      const bbox3857 = create_multibbox(contour)
+      const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
 
+      console.log('bbox4326 : ', bbox4326)
+
+      scanStore.updateBbox(bbox4326)
       scanStore.updateSelectedGeom(contour)
-
-      emit('select-country', point)
     })
     .catch((error) => {
-      console.error('Erreur lors de la récupération des controus du departements:', error)
+      console.error('Erreur lors de la récupération des contours du pays:', error)
     })
 
   showResults.value = false
 }
 
 async function getCountryBbox(country) {
-  const countryName = country.nom.split(',')[0].normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-  console.log('Recherche des contours du pays:', countryName);
-  const urlCountryBbox = 
-    `${config.baseGeoserverUrl}/wfs?service=wfs&version=2.0.0` +
+  const countryName = country.nom
+    .split(',')[0]
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+
+  const urlCountryBbox =
+    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
     `&request=GetFeature&typeNames=pays&outputFormat=application/json` +
-    `&CQL_FILTER=NOM='${countryName}'&srsName=EPSG:3857`;
+    `&CQL_FILTER=NOM='${countryName}'&srsName=EPSG:3857`
 
   try {
-    const response = await fetch(urlCountryBbox);
+    const response = await fetch(urlCountryBbox)
     if (!response.ok) {
-      throw new Error(`Erreur réseau : ${response.status}`);
+      throw new Error(`Erreur réseau : ${response.status}`)
     }
-    const data = await response.json();
-    
-    const contour_country = data.features[0]?.geometry?.coordinates;
-    
+    const data = await response.json()
+
+    const contour_country = data.features[0]?.geometry?.coordinates
+
     if (!contour_country) {
-      throw new Error('Coordonnées non trouvées dans la réponse');
+      throw new Error('Coordonnées non trouvées dans la réponse')
     }
-    const allContours = [];
-    
+    const allContours = []
 
     for (const polygon of contour_country) {
+      const exteriorRing = polygon[0]
 
-      const exteriorRing = polygon[0];
-      
-      allContours.push(exteriorRing);
-      
+      allContours.push(exteriorRing)
     }
-    
-    return allContours;
+
+    return allContours
   } catch (error) {
-    console.error('Erreur:', error);
-    throw error;
+    console.error('Erreur:', error)
+    throw error
   }
 }
-
-
 </script>
 
 <style scoped>

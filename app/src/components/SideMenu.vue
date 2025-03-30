@@ -20,7 +20,7 @@
           />
         </template>
 
-        <template v-if="activeTab === 'carthotheque_etranger'">
+        <template v-if="activeTab === 'cartotheque_etranger'">
           <CartothequeEtranger
             :activeSubCategory="activeSubCategory"
             :subCategories="subCategoriesEtranger"
@@ -64,7 +64,7 @@ const activeSubCategory = ref(null)
 
 const tabs = [
   { id: 'cartotheque', icon: 'layers', title: 'Cartothèque France' },
-  { id: 'carthotheque_etranger', icon: 'layers', title: 'Cartothèque Étranger' },
+  { id: 'cartotheque_etranger', icon: 'layers', title: 'Cartothèque Étranger' },
   { id: 'phototheque', icon: 'camera', title: 'Photothèque France' },
   { id: 'phototheque_etranger', icon: 'camera', title: 'Photothèque Étranger' },
   { id: 'aide', icon: 'lightbulb-on', title: 'Aide' },

@@ -113,6 +113,8 @@ export const layers_photo_monde = [
   },
 ]
 
+/**************************** OTHERS LAYERS ************************** */
+
 export const otherLayersCartoFrance = [
   {
     id: 'communes',

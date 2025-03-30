@@ -1,9 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-
-import config from '../../config';
-import { useConvertCoordinates } from '../composable/convertCoordinates'
-import { bbox } from 'ol/loadingstrategy';
+import config from '@/config';
 
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
@@ -17,18 +14,26 @@ export const useScanStore = defineStore('scan', () => {
   let storeCritereSelection = ref({
     yearMin: null,
     yearMax: null,
-    scaleMin: 500,
-    scaleMax: 100000,
+    scaleMin: null,
+    scaleMax: null,
     selectedCollection: null,
   })
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
-      let emprise_requete_url = "emprisesscans";
+      let empriseURL = "emprisesscans";
       let [minX, minY, maxX, maxY] = storeBbox.value
+
+      if (activeTab.value === 'cartotheque_etranger') {
+        empriseURL = "emprisesscansmonde";
+        // inverse les coordonnées : lon/lat to lat/lon
+        [minX, minY] = [minY, minX];
+        [maxX, maxY] = [maxY, maxX];
+      }
+
+
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
         storeCritereSelection.value
-
 
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
@@ -38,14 +43,9 @@ export const useScanStore = defineStore('scan', () => {
 
       if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
 
-      if (activeTab.value === 'carthotheque_etranger') {
-        emprise_requete_url = "emprisesscansmonde";
-        cqlFilter = `BBOX(the_geom,${minY},${minX},${maxY},${maxX})`
-      }
-
       return (
-        `${config.baseGeoserverUrl}/wfs?service=wfs&version=2.0.0` +
-        `&request=GetFeature&typeNames=${emprise_requete_url}&outputFormat=application/json` +
+        `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
+        `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
         `&cql_filter=${cqlFilter}`
         + `&srsName=EPSG:3857`
       )
@@ -55,7 +55,7 @@ export const useScanStore = defineStore('scan', () => {
   })
 
   function updateBbox(newBbox) {
-    console.log("test " + newBbox)
+    console.log(newBbox)
     storeBbox.value = newBbox
   }
 
@@ -74,13 +74,15 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function resetCriteria() {
+
     storeCritereSelection.value = {
       yearMin: null,
       yearMax: null,
-      scaleMin: 500,
-      scaleMax: 100000,
+      scaleMin: null,
+      scaleMax: null,
       selectedCollection: null,
     }
+
     storeSelectedGeom.value = []
     storeBbox.value = []
     storeScansData.value = null
@@ -88,7 +90,6 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateSelectedGeom(newVal) {
-    console.log(newVal)
     storeSelectedGeom.value = newVal
   }
 

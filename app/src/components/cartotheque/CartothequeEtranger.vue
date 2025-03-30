@@ -12,17 +12,9 @@
       </div>
     </div>
 
-    <FeuilleSearch
-      v-if="activeSubCategory === 'feuilles'"
-      @close="$emit('close-sub-category')"
-      @select-commune="goToPoint"
-    />
+    <FeuilleSearch v-if="activeSubCategory === 'feuilles'" @close="$emit('close-sub-category')" />
 
-    <PaysSearch
-      v-if="activeSubCategory === 'pays'"
-      @close="$emit('close-sub-category')"
-      @select-country="goToPoint"
-    />
+    <PaysSearch v-if="activeSubCategory === 'pays'" @close="$emit('close-sub-category')" />
 
     <PointSearch
       v-if="activeSubCategory === 'point'"
@@ -64,8 +56,6 @@ const props = defineProps({
 defineEmits(['select-sub-category', 'close-sub-category'])
 
 function goToPoint(point) {
-  console.log("oui");
-  console.log(point);
   if (point.bboxWGS84) {
     scanStore.updateBbox(point.bboxWGS84)
   }
