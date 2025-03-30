@@ -123,17 +123,16 @@ function searchCountries() {
       })
   }, 500)
 }
+
 function selectCountry(country) {
   getCountryBbox(country)
     .then((contour) => {
       const bbox3857 = create_multibbox(contour)
       const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
 
-      console.log(bbox4326)
+      console.log('bbox4326 : ', bbox4326)
 
-      const bbox = [bbox4326[1], bbox4326[0], bbox4326[3], bbox4326[2]]
-
-      scanStore.updateBbox(bbox)
+      scanStore.updateBbox(bbox4326)
       scanStore.updateSelectedGeom(contour)
     })
     .catch((error) => {
