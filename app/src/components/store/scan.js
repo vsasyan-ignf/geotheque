@@ -27,8 +27,8 @@ export const useScanStore = defineStore('scan', () => {
       if (activeTab.value === 'cartotheque_etranger') {
         empriseURL = 'emprisesscansmonde'
         // inverse les coordonnées : lon/lat to lat/lon
-        ;[minX, minY] = [minY, minX]
-        ;[maxX, maxY] = [maxY, maxX]
+        [minX, minY] = [minY, minX]
+        [maxX, maxY] = [maxY, maxX]
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =

@@ -29,20 +29,20 @@
         <ShakingButton
           nameButton="Visualiser"
           @click="openIipmooviewer"
-          :disabled="!currentCollecInfo"
+          :disabled="!storeSelectedScan"
         >
           <template #icon><SvgIcon type="mdi" :path="mdiMonitorEye" class="mdicon" /></template>
         </ShakingButton>
         <ShakingButton
           nameButton="Télécharger"
           @click="downloadScans"
-          :disabled="!currentCollecInfo"
+          :disabled="!storeSelectedScan"
         >
           <template #icon
             ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
           /></template>
         </ShakingButton>
-        <ShakingButton nameButton="XML" @click="downloadxml" :disabled="!currentCollecInfo">
+        <ShakingButton nameButton="XML" @click="downloadxml" :disabled="!storeSelectedScan">
           <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
         </ShakingButton>
       </div>
@@ -60,7 +60,7 @@ import { mdiMonitorEye, mdiBriefcaseDownload, mdiXml } from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { storeScansData, currentCollecInfo } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
 
 const isDataAvailable = computed(() => storeScansData.value && storeScansData.value.length > 0)
 
@@ -76,20 +76,23 @@ function generateImageUrl(info) {
   let name = ''
   let url = ''
 
-  if (info[1] !== '') {
-    url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[1]}/${info[2]}.JP2&CVT=jpeg`
-    name = info[2]
+  if (info.SOUS_COLL !== '') {
+    url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
+    name = info.ID_CARTE
   } else {
-    url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info[0]}/${info[2]}.JP2&CVT=jpeg`
-    name = info[1]
+    url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
+    name = info.SOUS_COLL
   }
 
   return { url, name }
 }
 
-watch(currentCollecInfo, (newVal) => {
+watch(storeSelectedScan, (newVal) => {
   if (newVal) {
-    const info = currentCollecInfo.value.split('/')
+    const info = storeSelectedScan.value.properties
+    console.log('COLLECTION : ', info.COLLECTION)
+    console.log('SOUS COLLECTION : ', info.SOUS_COLL)
+    console.log('ID CARTE : ', info.ID_CARTE)
     const { url, name } = generateImageUrl(info)
     imageUrl.value = url
   }
@@ -107,8 +110,8 @@ function openIipmooviewer() {
 }
 
 function downloadScans() {
-  if (currentCollecInfo.value) {
-    const info = currentCollecInfo.value.split('/')
+  if (storeSelectedScan.value) {
+    const info = storeSelectedScan.value.properties
     const { url, name } = generateImageUrl(info)
 
     fetch(url)
@@ -130,16 +133,16 @@ function downloadScans() {
 let url_xml = ref(``)
 
 function downloadxml() {
-  if (currentCollecInfo.value) {
-    const info = currentCollecInfo.value.split('/')
+  if (storeSelectedScan.value) {
+    const info = storeSelectedScan.value.properties
     const lieu = 'METROPOLE'
-    if (info.length == 3) {
-      url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info[0]}/${info[1]}/Fiches/${info[2]}.xml`
+    if (info.SOUS_COLL !== '') {
+      url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/Fiches/${info.ID_CARTE}.xml`
     } else {
-      url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info[0]}/Fiches/${info[1]}.xml`
+      url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info.COLLECTION}/Fiches/${info.ID_CARTE}.xml`
     }
-    console.log('url_xml: ', url_xml)
-    window.open(url_xml, 'xml')
+    console.log('URL_XML : ', url_xml)
+    // window.open(url_xml, 'xml')
   }
 }
 
