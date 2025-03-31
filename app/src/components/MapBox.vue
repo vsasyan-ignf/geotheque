@@ -232,6 +232,7 @@ function Add_new_polygone_to_map(tab) {
             x = elem[i2];
             y = elem[i2 + 1];
             [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
+            //addPointToMap(x_3857, y3857);
             tab_points_3857.push([x_3857, y3857])
           }
           Add_new_polygone_to_map(tab_points_3857)

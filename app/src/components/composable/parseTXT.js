@@ -12,7 +12,7 @@ export async function parcour_txt_to_tab(url) {
 
     let lignes = data.split('\n')
     let taille_file = lignes.length
-    let i, y, taille_ligne, mots, coord_x, coord_y, base_x, base_y
+    let i, y, taille_ligne, mots, coord_x, coord_y, base_x, base_y, centre_x, centre_y;
     let tab2
     let tab_fin = []
 
@@ -22,19 +22,22 @@ export async function parcour_txt_to_tab(url) {
       taille_ligne = mots.length
       tab2 = []
       if (mots.length > 3 && mots[2] == 'Centre Actif') {
-        coord_x = roundToTwo(parseFloat(mots[taille_ligne - 3]))
-        coord_y = roundToTwo(parseFloat(mots[taille_ligne - 2]))
+        centre_x = roundToTwo(parseFloat(mots[taille_ligne - 3]))
+        centre_y = roundToTwo(parseFloat(mots[taille_ligne - 2]))
         tab2.push('Centre Actif')
-        tab2.push(coord_x, coord_y)
+        tab2.push(centre_x, centre_y)
 
         tab_fin.push(tab2)
       } else if (mots.length > 3 && mots[2] == 'Cliche Actif') {
         if (mots.length < 28) {
           console.error('Problème longueur Cliche Actif')
         }
-        tab2.push('Cliche Actif')
+        tab2.push('Cliche Actif') /** 
         base_x = roundToTwo(parseFloat(mots[11]))
         base_y = roundToTwo(parseFloat(mots[12]))
+        **/
+        base_x = centre_x;
+        base_y = centre_y;
         tab2.push(base_x, base_y)
 
         for (y = 14; y < mots.length - 3; y = y + 2) {
@@ -42,9 +45,9 @@ export async function parcour_txt_to_tab(url) {
           coord_y = roundToTwo(base_y + parseFloat(mots[y + 1]))
           tab2.push(coord_x, coord_y)
         }
-        coord_x = roundToTwo(parseFloat(mots[mots.length - 2]))
-        coord_y = roundToTwo(parseFloat(mots[mots.length - 1].split('\r')[0]))
-        tab2.push(base_x + coord_x, base_y + coord_y)
+        coord_x = parseFloat(mots[mots.length - 2])
+        coord_y = parseFloat(mots[mots.length - 1].split('\r')[0])
+        tab2.push(roundToTwo(base_x + coord_x), roundToTwo(base_y + coord_y))
         tab_fin.push(tab2)
       }
     }
