@@ -55,30 +55,16 @@
       </div>
       
       <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-        <div class="modal-container">
-          <div class="modal-header">
-            <h2>{{ getMissionName() }} - Détails complets</h2>
-            <button class="close-button" @click="closeModal">&times;</button>
-          </div>
-          
-          <div class="modal-content">
-            <div class="details-grid">
-              <div v-for="(detail, index) in allMissionDetails" :key="index" class="modal-detail-item">
-                <div class="detail-label">{{ detail.label }}</div>
-                <div class="detail-value">{{ detail.value }}</div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="modal-footer">
-            <button class="download-button" @click="downloadDetails">
-              Télécharger les informations
-            </button>
-            <button class="close-modal-button" @click="closeModal">
-              Fermer
-            </button>
-          </div>
-        </div>
+        
+        <MissionDetailsModal 
+            :isOpen="isModalOpen" 
+            :title="`${getMissionName()} - Détails complets`"
+            :details="allMissionDetails"
+            @close="closeModal"
+            @download="downloadDetails" 
+        />
+
+
       </div>
     </div>
   </template>
@@ -86,7 +72,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import Dropdown from '../material/Dropdown.vue'
-
+import MissionDetailsModal from './MissionDetailsModal.vue'
 const missions = ref([
   { id: '1', name: 'Mission Alpha' },
   { id: '2', name: 'Mission Beta' },
