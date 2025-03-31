@@ -133,7 +133,7 @@ function addPointToMap(x, y) {
   const feature = new Feature({
     geometry: new Point(coord),
   })
-  vectorLayers.value.pin.value.addFeature(feature)
+  vectorLayers.value.pin.getSource().addFeature(feature)
 }
 
 function Add_new_polygone_to_map(tab) {
@@ -304,7 +304,7 @@ onMounted(() => {
       const feature = new Feature({
         geometry: new Point([x, y]),
       })
-      vectorLayers.value.pin.value.addFeature(feature)
+      vectorLayers.value.pin.getSource().addFeature(feature)
       pins.value = [[x, y]]
     })
 
@@ -379,7 +379,7 @@ onMounted(() => {
     })
 
     eventBus.on('criteria-reset', () => {
-      if (vectorLayers.value.pin.value) {
+      if (vectorLayers.value.pin) {
         vectorLayers.value.pin.getSource().clear()
       }
       if (vectorLayers.value.emprises.getSource()) {
