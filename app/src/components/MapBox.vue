@@ -209,60 +209,6 @@ onMounted(() => {
 
     vectorOtherLayers.value = initLayers();
 
-    vectorFeuilleSource.value = new VectorSource({
-      url: (extent) => {
-        const bbox = extent.join(',')
-        return `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`
-      },
-      format: new GeoJSON(),
-      strategy: bboxStrategy,
-    })
-
-    feuilleLayer.value = new VectorLayer({
-      source: vectorFeuilleSource.value,
-      visible: false,
-      style: function (feature) {
-        return new Style({
-          stroke: new Stroke({
-            color: 'rgba(0, 0, 0, 0.5)',
-            width: 2,
-          }),
-          fill: new Fill({
-            color: 'rgba(0, 255, 0, 0.2)',
-          }),
-          text: new Text({
-            text: feature.get('NUMERO'),
-            font: '12px Calibri,sans-serif',
-            fill: new Fill({ color: '#000' }),
-            stroke: new Stroke({ color: '#fff', width: 2 }),
-          }),
-        })
-      },
-    })
-
-    vectorCommunesSource.value = new VectorSource({
-      url: (extent) => {
-        const bbox = extent.join(',')
-        return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`
-      },
-      format: new GeoJSON(),
-      strategy: bboxStrategy,
-    })
-
-    communesLayer.value = new VectorLayer({
-      source: vectorCommunesSource.value,
-      visible: false,
-      style: new Style({
-        stroke: new Stroke({
-          color: 'rgba(0, 0, 0, 0.7)',
-          width: 1,
-        }),
-        fill: new Fill({
-          color: 'rgba(200, 200, 200, 0.5)',
-        }),
-      }),
-    })
-
     watch(currentZoom, (newZoom) => {
       if (vectorOtherLayers.value?.communes && communesLayerManuallyActivated.value) {
         const shouldBeVisible = newZoom >= 12
