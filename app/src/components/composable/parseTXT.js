@@ -22,27 +22,28 @@ export async function parcour_txt_to_tab(url) {
       taille_ligne = mots.length
       tab2 = []
       if (mots.length > 3 && mots[2] == 'Centre Actif') {
-        coord_x = parseFloat(mots[taille_ligne - 3])
-        coord_y = parseFloat(mots[taille_ligne - 2])
+        coord_x = roundToTwo(parseFloat(mots[taille_ligne - 3]))
+        coord_y = roundToTwo(parseFloat(mots[taille_ligne - 2]))
         tab2.push('Centre Actif')
         tab2.push(coord_x, coord_y)
 
         tab_fin.push(tab2)
       } else if (mots.length > 3 && mots[2] == 'Cliche Actif') {
-        tab2.push('Cliche Actif')
-        base_x = parseFloat(mots[11])
-        base_y = parseFloat(mots[12])
-        tab2.push(base_x, base_y)
         if (mots.length < 28) {
           console.error('Problème longueur Cliche Actif')
         }
+        tab2.push('Cliche Actif')
+        base_x = roundToTwo(parseFloat(mots[11]))
+        base_y = roundToTwo(parseFloat(mots[12]))
+        tab2.push(base_x, base_y)
+
         for (y = 14; y < mots.length - 3; y = y + 2) {
-          coord_x = base_x + parseFloat(mots[y])
-          coord_y = base_y + parseFloat(mots[y + 1])
+          coord_x = roundToTwo(base_x + parseFloat(mots[y]))
+          coord_y = roundToTwo(base_y + parseFloat(mots[y + 1]))
           tab2.push(coord_x, coord_y)
         }
-        coord_x = parseFloat(mots[mots.length - 2])
-        coord_y = parseFloat(mots[mots.length - 1].split('\r')[0])
+        coord_x = roundToTwo(parseFloat(mots[mots.length - 2]))
+        coord_y = roundToTwo(parseFloat(mots[mots.length - 1].split('\r')[0]))
         tab2.push(base_x + coord_x, base_y + coord_y)
         tab_fin.push(tab2)
       }

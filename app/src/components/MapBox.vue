@@ -231,7 +231,7 @@ function Add_new_polygone_to_map(tab) {
             //Commence a 3 car en 0 il y a le type d'image et en 1 et 2 il y a le point d'origine
             x = elem[i2];
             y = elem[i2 + 1];
-            ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+            [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
             tab_points_3857.push([x_3857, y3857])
           }
           Add_new_polygone_to_map(tab_points_3857)
