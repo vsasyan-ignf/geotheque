@@ -78,18 +78,6 @@ const geomLayer = ref(null)
 const vectorScanSource = ref(null)
 const scanLayer = ref(null)
 
-// layers cartothèque france
-const vectorCommunesSource = ref(null)
-const communesLayer = ref(null)
-const vectorDepartmentsSource = ref(null)
-const departmentsLayer = ref(null)
-
-// layers cartothèque etranger
-const vectorFeuilleSource = ref(null)
-const feuilleLayer = ref(null)
-const vectorPaysSource = ref(null)
-const paysLayer = ref(null)
-
 let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
@@ -122,8 +110,9 @@ function getOtherLayers() {
 }
 
 function hideOtherLayers() {
-  departmentsLayer.value.setVisible(false)
-  feuilleLayer.value.setVisible(false)
+  Object.values(vectorLayers.value).forEach((layer) => {
+    layer.setVisible(false);
+  });
   otherLayers.value.forEach((layers) => (layers.visible = false))
 }
 
@@ -236,22 +225,18 @@ async function parcour_tab_and_map(url) {
 }
 
 function handleOtherLayerToggle(layer) {
-  if (layer.id === 'departements' && departmentsLayer.value) {
-    const isVisible = departmentsLayer.value.getVisible()
-    departmentsLayer.value.setVisible(!isVisible)
-  }
-  if (layer.id === 'feuilles' && feuilleLayer.value) {
-    const isVisible = feuilleLayer.value.getVisible()
-    feuilleLayer.value.setVisible(!isVisible)
-  }
-  if (layer.id === 'pays' && paysLayer.value) {
-    const isVisible = paysLayer.value.getVisible()
-    paysLayer.value.setVisible(!isVisible)
-  } else if (layer.id === 'communes' && communesLayer.value) {
+
+  if (layer.id === 'communes' && vectorLayers.value?.communes) {
     communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value
     const shouldBeVisible = communesLayerManuallyActivated.value && currentZoom.value >= 12
-    communesLayer.value.setVisible(shouldBeVisible)
+    vectorLayers.value?.communes.setVisible(shouldBeVisible)
   }
+  else if (vectorLayers.value?.[layer.id]){
+    const isVisible = vectorLayers.value?.[layer.id].getVisible()
+    vectorLayers.value?.[layer.id].setVisible(!isVisible)
+
+  }
+
 }
 
 function changeActiveLayer(index) {
@@ -286,6 +271,10 @@ onMounted(() => {
       })
     })
 
+    vectorLayers.value = initLayers();
+
+    console.log(vectorLayers.value)
+
     vectorWfsSource.value = new VectorSource({
       format: new GeoJSON(),
       strategy: bboxStrategy,
@@ -301,119 +290,12 @@ onMounted(() => {
       }),
     })
 
-    vectorFeuilleSource.value = new VectorSource({
-      url: (extent) => {
-        const bbox = extent.join(',')
-        return `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`
-      },
-      format: new GeoJSON(),
-      strategy: bboxStrategy,
-    })
-
-    feuilleLayer.value = new VectorLayer({
-      source: vectorFeuilleSource.value,
-      visible: false,
-      style: function (feature) {
-        return new Style({
-          stroke: new Stroke({
-            color: 'rgba(0, 0, 0, 0.5)',
-            width: 2,
-          }),
-          fill: new Fill({
-            color: 'rgba(0, 255, 0, 0.2)',
-          }),
-          text: new Text({
-            text: feature.get('NUMERO'),
-            font: '12px Calibri,sans-serif',
-            fill: new Fill({ color: '#000' }),
-            stroke: new Stroke({ color: '#fff', width: 2 }),
-          }),
-        })
-      },
-    })
-
-    vectorCommunesSource.value = new VectorSource({
-      url: (extent) => {
-        const bbox = extent.join(',')
-        return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`
-      },
-      format: new GeoJSON(),
-      strategy: bboxStrategy,
-    })
-
-    communesLayer.value = new VectorLayer({
-      source: vectorCommunesSource.value,
-      visible: false,
-      style: new Style({
-        stroke: new Stroke({
-          color: 'rgba(0, 0, 0, 0.7)',
-          width: 1,
-        }),
-        fill: new Fill({
-          color: 'rgba(200, 200, 200, 0.5)',
-        }),
-      }),
-    })
 
     watch(currentZoom, (newZoom) => {
-      if (communesLayer.value && communesLayerManuallyActivated.value) {
+      if (vectorLayers.value?.communes && communesLayerManuallyActivated.value) {
         const shouldBeVisible = newZoom >= 12
-        communesLayer.value.setVisible(shouldBeVisible)
+        vectorLayers.value?.communes.setVisible(shouldBeVisible)
       }
-    })
-
-    vectorDepartmentsSource.value = new VectorSource({
-      url: (extent) => {
-        const bbox = extent.join(',')
-        return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`
-      },
-      format: new GeoJSON(),
-      strategy: bboxStrategy,
-    })
-
-    departmentsLayer.value = new VectorLayer({
-      source: vectorDepartmentsSource.value,
-      visible: false,
-      style: function (feature) {
-        return new Style({
-          stroke: new Stroke({
-            color: 'rgba(0, 0, 0, 0.2)',
-            width: 2,
-          }),
-          fill: new Fill({
-            color: 'rgba(0, 0, 0, 0.1)',
-          }),
-          text: new Text({
-            text: feature.get('CODE_DEPT'),
-            font: '12px Calibri,sans-serif',
-            fill: new Fill({ color: '#000' }),
-            stroke: new Stroke({ color: '#fff', width: 2 }),
-          }),
-        })
-      },
-    })
-
-    vectorPaysSource.value = new VectorSource({
-      url: (extent) => {
-        const bbox = extent.join(',')
-        return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox=${bbox},EPSG:3857`
-      },
-      format: new GeoJSON(),
-      strategy: bboxStrategy,
-    })
-
-    paysLayer.value = new VectorLayer({
-      source: vectorPaysSource.value,
-      visible: false,
-      style: new Style({
-        stroke: new Stroke({
-          color: 'rgba(0, 0, 0, 0.5)',
-          width: 2,
-        }),
-        fill: new Fill({
-          color: 'rgba(0, 255, 0, 0.1)',
-        }),
-      }),
     })
 
     vectorPinSource.value = new VectorSource()
@@ -483,10 +365,7 @@ onMounted(() => {
         pinLayer,
         geomLayer.value,
         scanLayer.value,
-        communesLayer.value,
-        departmentsLayer.value,
-        feuilleLayer.value,
-        paysLayer.value,
+        ...Object.values(vectorLayers.value)
       ],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
