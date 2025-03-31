@@ -8,6 +8,7 @@ import { Style, Stroke, Fill, Text } from 'ol/style'
 import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
+import TileLayer from 'ol/layer/Tile'
 
 import GeoJSON from 'ol/format/GeoJSON'
 import config from '@/config'
@@ -210,9 +211,55 @@ export function initLayers(){
   })
 }
 
+export function createInitialWMTSLayers (layers, activeLayerIndex) {
+  return layers.map((layer, index) => {
+    const wmtsSource = createWmtsSource(layer.id)
+    return new TileLayer({
+      source: wmtsSource,
+      visible: index === activeLayerIndex,
+    })
+  })
+}
 
-// layersConfig.forEach((layerConfig) => {
-//   const source = createVectorSource(layerConfig.url);
-//   const layer = createVectorLayer(source, layerConfig.style);
-//   olMap.value.addLayer(layer);
-// });
+export function updateWMTSLayers(olMap, newLayers) {
+  if (!olMap) return
+
+  const mapLayers = olMap.getLayers()
+  const wmtsLayers = mapLayers.getArray().filter((layer) => layer instanceof TileLayer)
+
+  wmtsLayers.forEach((layer, index) => {
+    if (index < newLayers.length) {
+      const newSource = createWmtsSource(newLayers[index].id)
+      layer.setSource(newSource)
+      layer.setVisible(index === 0)
+    }
+  })
+
+  if (newLayers.length > wmtsLayers.length) {
+    const layersToAdd = newLayers.slice(wmtsLayers.length).map((layer, index) => {
+      return new TileLayer({
+        source: createWmtsSource(layer.id),
+        visible: wmtsLayers.length + index === 0,
+      })
+    })
+
+    layersToAdd.forEach((layer) => olMap.addLayer(layer))
+  }
+}
+
+export function changeActiveWMTSLayer (olMap, olView, layers, newIndex) {
+  if (!olMap) return
+
+  const wmtsLayers = olMap
+    .getLayers()
+    .getArray()
+    .filter((layer) => layer instanceof TileLayer)
+
+  wmtsLayers.forEach((layer, layerIndex) => {
+    layer.setVisible(layerIndex === newIndex)
+  })
+
+  if (olView && layers[newIndex]) {
+    olView.setMaxZoom(getMaxZoom(layers[newIndex].id))
+  }
+}

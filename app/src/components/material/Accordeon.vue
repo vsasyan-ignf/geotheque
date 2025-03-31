@@ -36,6 +36,7 @@ function toggleAccordion() {
 .accordion {
   width: 100%;
   margin-top: 20px;
+  color: #333;
 }
 
 .accordion-header {
