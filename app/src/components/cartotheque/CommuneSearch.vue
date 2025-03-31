@@ -146,7 +146,7 @@ function searchCommunes() {
 function selectCommune(commune) {
   searchCommune.value = commune.nom
   repCommune = commune
-
+  validateCommune()
   showResults.value = false
 }
 

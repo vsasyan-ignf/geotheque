@@ -151,7 +151,7 @@ function selectDepartement(departement) {
     .catch((error) => {
       console.error('Erreur lors de la récupération des controus du departements:', error)
     })
-
+  searchDepartement.value = departement.nom
   showResults.value = false
 }
 

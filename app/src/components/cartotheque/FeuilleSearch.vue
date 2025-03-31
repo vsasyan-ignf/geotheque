@@ -136,6 +136,7 @@ function searchFeuille() {
 function selectFeuille(feuille) {
   feuilleSelected.value = feuille.numero
   repFeuille.value = feuille
+  validateFeuille()
   showResults.value = false
 }
 
