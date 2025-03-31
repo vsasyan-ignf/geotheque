@@ -6,8 +6,8 @@ defineProps({
   },
   disabled: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 </script>
 

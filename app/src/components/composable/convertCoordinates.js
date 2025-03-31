@@ -58,42 +58,42 @@ export function create_bbox(contour) {
 
 export function create_multibbox(contours) {
   if (!contours || contours.length === 0) {
-    throw new Error('Contours invalides');
+    throw new Error('Contours invalides')
   }
 
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
 
   const processPoints = (points) => {
-    points.forEach(point => {
-      const [x, y] = point;
-      minX = Math.min(minX, x);
-      minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x);
-      maxY = Math.max(maxY, y);
-    });
-  };
+    points.forEach((point) => {
+      const [x, y] = point
+      minX = Math.min(minX, x)
+      minY = Math.min(minY, y)
+      maxX = Math.max(maxX, x)
+      maxY = Math.max(maxY, y)
+    })
+  }
 
   if (Array.isArray(contours[0][0])) {
     if (typeof contours[0][0][0] === 'number') {
-      contours.forEach(polygon => {
-        processPoints(polygon);
-      });
+      contours.forEach((polygon) => {
+        processPoints(polygon)
+      })
     } else {
-      contours.forEach(polygon => {
-        polygon.forEach(ring => {
-          processPoints(ring);
-        });
-      });
+      contours.forEach((polygon) => {
+        polygon.forEach((ring) => {
+          processPoints(ring)
+        })
+      })
     }
   } else {
-    processPoints(contours);
+    processPoints(contours)
   }
   if (minX === Infinity || minY === Infinity || maxX === -Infinity || maxY === -Infinity) {
-    throw new Error('Aucun point valide trouvé dans les contours');
+    throw new Error('Aucun point valide trouvé dans les contours')
   }
 
-  return { minX, minY, maxX, maxY };
+  return { minX, minY, maxX, maxY }
 }

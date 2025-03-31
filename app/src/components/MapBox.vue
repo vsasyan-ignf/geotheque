@@ -33,21 +33,25 @@ import Polygon from 'ol/geom/Polygon.js'
 
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { 
-  getMaxZoom, 
-  createInitialWMTSLayers, 
+import {
+  getMaxZoom,
+  createInitialWMTSLayers,
   updateWMTSLayers,
-  changeActiveWMTSLayer } from './composable/getWMTS'
+  changeActiveWMTSLayer,
+} from './composable/getWMTS'
 
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
 
-import {
-  layers_carto,
-  otherLayersCartoFrance,
-} from './composable/baseMap'
+import { layers_carto, otherLayersCartoFrance } from './composable/baseMap'
 
-import { createPinLayer, createGeomLayer, createScanLayer, createWFSLayer, initLayers } from './composable/getVectorLayer'
+import {
+  createPinLayer,
+  createGeomLayer,
+  createScanLayer,
+  createWFSLayer,
+  initOtherVectorLayers,
+} from './composable/getVectorLayer'
 //test
 import { parcour_txt_to_tab } from './composable/parseTXT'
 import { useConvertCoordinates } from './composable/convertCoordinates'
@@ -77,7 +81,7 @@ const vectorLayers = ref({
   pin: null,
   geom: null,
   scan: null,
-  emprises: null
+  emprises: null,
 })
 
 const vectorOtherLayers = ref(null)
@@ -92,8 +96,8 @@ function getOtherLayers() {
 
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
-    layer.setVisible(false);
-  });
+    layer.setVisible(false)
+  })
   otherLayers.value.forEach((layers) => (layers.visible = false))
 }
 
@@ -106,7 +110,7 @@ watch(activeTab, (newValue) => {
   updateWMTSLayers(olMap.value, newLayers)
 
   scanStore.resetCriteria()
-  
+
   // Reset l'index à 0
   activeLayerIndex.value = 0
 })
@@ -177,18 +181,14 @@ async function parcour_tab_and_map(url) {
 }
 
 function handleOtherLayerToggle(layer) {
-
   if (layer.id === 'communes' && vectorOtherLayers.value?.communes) {
     communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value
     const shouldBeVisible = communesLayerManuallyActivated.value && currentZoom.value >= 12
     vectorOtherLayers.value?.communes.setVisible(shouldBeVisible)
-  }
-  else if (vectorOtherLayers.value?.[layer.id]){
+  } else if (vectorOtherLayers.value?.[layer.id]) {
     const isVisible = vectorOtherLayers.value?.[layer.id].getVisible()
     vectorOtherLayers.value?.[layer.id].setVisible(!isVisible)
-
   }
-
 }
 
 function changeActiveLayer(index) {
@@ -207,7 +207,7 @@ onMounted(() => {
       emprises: createWFSLayer(),
     }
 
-    vectorOtherLayers.value = initLayers();
+    vectorOtherLayers.value = initOtherVectorLayers()
 
     watch(currentZoom, (newZoom) => {
       if (vectorOtherLayers.value?.communes && communesLayerManuallyActivated.value) {
@@ -240,7 +240,7 @@ onMounted(() => {
         vectorLayers.value.pin,
         vectorLayers.value.geom,
         vectorLayers.value.scan,
-        ...Object.values(vectorOtherLayers.value)
+        ...Object.values(vectorOtherLayers.value),
       ],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),

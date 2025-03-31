@@ -72,7 +72,6 @@
 
     <CartothequeSubMenu v-if="['cartotheque', 'cartotheque_etranger'].includes(activeTab)" />
     <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
-
   </div>
 </template>
 

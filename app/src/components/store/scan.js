@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import config from '@/config';
+import config from '@/config'
 
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
@@ -9,7 +9,7 @@ export const useScanStore = defineStore('scan', () => {
   let storeSelectedScan = ref(null)
   let currentCollecInfo = ref(null)
   let activeSubCategory = ref(null)
-  let activeTab = ref("cartotheque")
+  let activeTab = ref('cartotheque')
 
   let storeCritereSelection = ref({
     yearMin: null,
@@ -21,16 +21,15 @@ export const useScanStore = defineStore('scan', () => {
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
-      let empriseURL = "emprisesscans";
+      let empriseURL = 'emprisesscans'
       let [minX, minY, maxX, maxY] = storeBbox.value
 
       if (activeTab.value === 'cartotheque_etranger') {
-        empriseURL = "emprisesscansmonde";
+        empriseURL = 'emprisesscansmonde'
         // inverse les coordonnées : lon/lat to lat/lon
-        [minX, minY] = [minY, minX];
-        [maxX, maxY] = [maxY, maxX];
+        ;[minX, minY] = [minY, minX]
+        ;[maxX, maxY] = [maxY, maxX]
       }
-
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
         storeCritereSelection.value
@@ -46,10 +45,9 @@ export const useScanStore = defineStore('scan', () => {
       return (
         `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
         `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
-        `&cql_filter=${cqlFilter}`
-        + `&srsName=EPSG:3857`
+        `&cql_filter=${cqlFilter}` +
+        `&srsName=EPSG:3857`
       )
-
     }
     return ''
   })
@@ -74,7 +72,6 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function resetCriteria() {
-
     storeCritereSelection.value = {
       yearMin: null,
       yearMax: null,

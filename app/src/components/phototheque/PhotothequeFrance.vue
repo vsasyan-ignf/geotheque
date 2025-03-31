@@ -27,12 +27,7 @@
 
     <FeuilleSearch v-if="activeSubCategory === 'feuilles'" @close="$emit('close-sub-category')" />
 
-    <PointSearch
-      v-if="activeSubCategory === 'point'"
-      @close="$emit('close-sub-category')"
-    />
-    
-
+    <PointSearch v-if="activeSubCategory === 'point'" @close="$emit('close-sub-category')" />
   </div>
 </template>
 
@@ -44,7 +39,7 @@ import { mdiCity, mdiMap, mdiCrosshairsGps, mdiLeaf } from '@mdi/js'
 
 import CommuneSearch from '../cartotheque/CommuneSearch.vue'
 import DepartementSearch from '../cartotheque/DepartementSearch.vue'
-import FeuilleSearch from '../cartotheque/FeuilleSearch.vue';
+import FeuilleSearch from '../cartotheque/FeuilleSearch.vue'
 import PointSearch from '../cartotheque/PointSearch.vue'
 
 const scanStore = useScanStore()
@@ -54,7 +49,7 @@ const mdiIcons = {
   departement: mdiMap,
   feuille: mdiLeaf,
   point: mdiCrosshairsGps,
-  autre:mdiCrosshairsGps
+  autre: mdiCrosshairsGps,
 }
 
 const props = defineProps({
@@ -106,7 +101,7 @@ watch(
   width: calc(33.33% - 20px);
 }
 
-.sub-category:nth-child(n+4) {
+.sub-category:nth-child(n + 4) {
   width: calc(50% - 20px);
   max-width: calc(33.33% - 20px);
 }
@@ -122,7 +117,7 @@ watch(
   transform: scale(1.05);
 }
 
-.sub-category:nth-child(n+4):hover {
+.sub-category:nth-child(n + 4):hover {
   transform: scale(1.05);
 }
 
@@ -139,7 +134,7 @@ watch(
   font-size: 28px;
 }
 
-.sub-category:nth-child(n+4):hover .icon {
+.sub-category:nth-child(n + 4):hover .icon {
   font-size: 28px;
 }
 

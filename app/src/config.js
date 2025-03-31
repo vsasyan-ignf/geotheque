@@ -4,6 +4,5 @@ export default {
   NOMINATIM_URL: 'https://nominatim.openstreetmap.org',
   GEOSERVER_URL: 'http://localhost:8088/geoserver',
   APACHE_IMG_URL: 'http://localhost:8082',
-  IIPSRV_URL: 'http://localhost:8080'
-
+  IIPSRV_URL: 'http://localhost:8080',
 }

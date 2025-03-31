@@ -126,8 +126,7 @@ export function createWmtsSource(layerId) {
   }
 }
 
-
-export function createInitialWMTSLayers (layers, activeLayerIndex) {
+export function createInitialWMTSLayers(layers, activeLayerIndex) {
   return layers.map((layer, index) => {
     const wmtsSource = createWmtsSource(layer.id)
     return new TileLayer({
@@ -163,7 +162,7 @@ export function updateWMTSLayers(olMap, newLayers) {
   }
 }
 
-export function changeActiveWMTSLayer (olMap, olView, layers, newIndex) {
+export function changeActiveWMTSLayer(olMap, olView, layers, newIndex) {
   if (!olMap) return
 
   const wmtsLayers = olMap

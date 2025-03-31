@@ -1,59 +1,55 @@
 <template>
-    <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-container">
-        <div class="modal-header">
-          <h2>{{ title }}</h2>
-          <button class="close-button" @click="closeModal">&times;</button>
-        </div>
-        
-        <div class="modal-content">
-          <div class="details-grid">
-            <div v-for="(detail, index) in details" :key="index" class="modal-detail-item">
-              <div class="detail-label">{{ detail.label }}</div>
-              <div class="detail-value">{{ detail.value }}</div>
-            </div>
+  <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2>{{ title }}</h2>
+        <button class="close-button" @click="closeModal">&times;</button>
+      </div>
+
+      <div class="modal-content">
+        <div class="details-grid">
+          <div v-for="(detail, index) in details" :key="index" class="modal-detail-item">
+            <div class="detail-label">{{ detail.label }}</div>
+            <div class="detail-value">{{ detail.value }}</div>
           </div>
         </div>
-        
-        <div class="modal-footer">
-          <button class="download-button" @click="downloadDetails">
-            Télécharger les informations
-          </button>
-          <button class="close-modal-button" @click="closeModal">
-            Fermer
-          </button>
-        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="download-button" @click="downloadDetails">
+          Télécharger les informations
+        </button>
+        <button class="close-modal-button" @click="closeModal">Fermer</button>
       </div>
     </div>
+  </div>
 </template>
-  
-<script setup>
-import { defineProps, defineEmits } from 'vue';
 
+<script setup>
 const props = defineProps({
   isOpen: {
     type: Boolean,
-    required: true
+    required: true,
   },
   title: {
     type: String,
-    required: true
+    required: true,
   },
   details: {
     type: Array,
-    required: true
-  }
-});
+    required: true,
+  },
+})
 
-const emit = defineEmits(['close', 'download']);
+const emit = defineEmits(['close', 'download'])
 
 const closeModal = () => {
-  emit('close');
-};
+  emit('close')
+}
 
 const downloadDetails = () => {
-  emit('download');
-};
+  emit('download')
+}
 </script>
 
 <style scoped>

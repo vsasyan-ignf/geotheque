@@ -58,10 +58,8 @@
       </div>
     </div>
 
-
     <CartothequeSubMenu v-if="activeTab === 'cartotheque'" />
-    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'"/>
-
+    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
   </div>
 </template>
 
@@ -79,7 +77,6 @@ import config from '@/config'
 
 const scanStore = useScanStore()
 const { activeTab } = storeToRefs(scanStore)
-
 
 const emit = defineEmits(['close', 'select-commune'])
 

@@ -1,74 +1,61 @@
 <template>
-    <div class="phototheque-submenu">
-      <div class="mission-selection">
-        <div class="selection-header">
-          <label for="mission-select">Sélectionner une mission</label>
-          <span class="mission-count">{{ missions.length }} missions trouvées</span>
-        </div>
-        <Dropdown
+  <div class="phototheque-submenu">
+    <div class="mission-selection">
+      <div class="selection-header">
+        <label for="mission-select">Sélectionner une mission</label>
+        <span class="mission-count">{{ missions.length }} missions trouvées</span>
+      </div>
+      <Dropdown
         :options="missions"
         disableOption="Choisissez une mission"
         @update:selected="handleMissionSelected"
       />
-      </div>
-  
-      <div v-if="selectedMission" class="mission-preview slide-in">
-        <div class="mission-card">
-          
-          <div class="preview-details">
-            <div v-for="(detail, index) in essentialDetails" :key="index"
-                class="detail-item" 
-                :style="{ 'animation-delay': `${index * 0.05}s` }">
-              <div class="detail-label">{{ detail.label }}</div>
-              <div class="detail-value">{{ detail.value }}</div>
-            </div>
-          </div>
-          
-          <div class="action-buttons">
-            <button class="view-details-button" @click="openModal">
-              Voir tous les détails
-            </button>
-            <button class="download-button" @click="downloadDetails">
-              Télécharger
-            </button>
-          </div>
-        </div>
-      </div>
-  
-      <div class="mission-options">
-        <div class="options-label">Options de sélection</div>
-        <div class="checkbox-group">
-          <label 
-            v-for="(option, index) in checkboxOptions" 
-            :key="index" 
-            class="checkbox-label"
+    </div>
+
+    <div v-if="selectedMission" class="mission-preview slide-in">
+      <div class="mission-card">
+        <div class="preview-details">
+          <div
+            v-for="(detail, index) in essentialDetails"
+            :key="index"
+            class="detail-item"
+            :style="{ 'animation-delay': `${index * 0.05}s` }"
           >
-            <input 
-              type="checkbox" 
-              v-model="selectedOptions[option.key]"
-              class="checkbox-input"
-            >
-            <span class="custom-checkbox"></span>
-            {{ option.label }}
-          </label>
+            <div class="detail-label">{{ detail.label }}</div>
+            <div class="detail-value">{{ detail.value }}</div>
+          </div>
         </div>
-      </div>
-      
-      <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-        
-        <MissionDetailsModal 
-            :isOpen="isModalOpen" 
-            :title="`${getMissionName()} - Détails complets`"
-            :details="allMissionDetails"
-            @close="closeModal"
-            @download="downloadDetails" 
-        />
 
-
+        <div class="action-buttons">
+          <button class="view-details-button" @click="openModal">Voir tous les détails</button>
+          <button class="download-button" @click="downloadDetails">Télécharger</button>
+        </div>
       </div>
     </div>
-  </template>
-  
+
+    <div class="mission-options">
+      <div class="options-label">Options de sélection</div>
+      <div class="checkbox-group">
+        <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
+          <input type="checkbox" v-model="selectedOptions[option.key]" class="checkbox-input" />
+          <span class="custom-checkbox"></span>
+          {{ option.label }}
+        </label>
+      </div>
+    </div>
+
+    <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
+      <MissionDetailsModal
+        :isOpen="isModalOpen"
+        :title="`${getMissionName()} - Détails complets`"
+        :details="allMissionDetails"
+        @close="closeModal"
+        @download="downloadDetails"
+      />
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import Dropdown from '../material/Dropdown.vue'
@@ -76,7 +63,7 @@ import MissionDetailsModal from './MissionDetailsModal.vue'
 const missions = ref([
   { id: '1', name: 'Mission Alpha' },
   { id: '2', name: 'Mission Beta' },
-  { id: '3', name: 'Mission Gamma' }
+  { id: '3', name: 'Mission Gamma' },
 ])
 
 const allMissionDetails = reactive([
@@ -97,11 +84,11 @@ const allMissionDetails = reactive([
   { label: 'Producteur', value: 'NaN', essential: false },
   { label: 'Style', value: 'NaN', essential: false },
   { label: 'Émulsion', value: 'NaN', essential: false },
-  { label: 'Qualité PDV', value: 'NaN', essential: false }
+  { label: 'Qualité PDV', value: 'NaN', essential: false },
 ])
 
 const essentialDetails = computed(() => {
-  return allMissionDetails.filter(detail => detail.essential)
+  return allMissionDetails.filter((detail) => detail.essential)
 })
 
 const selectedMission = ref('')
@@ -112,7 +99,7 @@ const selectedOptions = reactive({
   alphanumeric: false,
   popup: false,
   sheetNumber: false,
-  countryName: false
+  countryName: false,
 })
 
 const checkboxOptions = [
@@ -120,7 +107,7 @@ const checkboxOptions = [
   { key: 'alphanumeric', label: 'Alphanumérique' },
   { key: 'popup', label: 'Popup' },
   { key: 'sheetNumber', label: 'N° Feuille' },
-  { key: 'countryName', label: 'Nom Pays' }
+  { key: 'countryName', label: 'Nom Pays' },
 ]
 
 const openModal = () => {
@@ -138,19 +125,16 @@ const downloadDetails = () => {
 }
 
 const getMissionName = () => {
-  const mission = missions.value.find(mission => mission.id === selectedMission.value);
-  return mission.name;
-};
-
-
-const handleMissionSelected = (mission) => {
-  selectedMission.value = mission.id  
+  const mission = missions.value.find((mission) => mission.id === selectedMission.value)
+  return mission.name
 }
 
+const handleMissionSelected = (mission) => {
+  selectedMission.value = mission.id
+}
 </script>
 
 <style scoped>
-
 @keyframes slideInRight {
   from {
     opacity: 0;
@@ -163,8 +147,12 @@ const handleMissionSelected = (mission) => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideInUp {
@@ -228,7 +216,7 @@ const handleMissionSelected = (mission) => {
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
 }
 

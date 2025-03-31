@@ -34,8 +34,7 @@
             :key="'other-' + layer.id"
             class="layer-switcher__other-layer"
             :class="{
-              'layer-switcher__other-layer--disabled':
-                layer.id === 'communes' && currentZoom <= 11,
+              'layer-switcher__other-layer--disabled': layer.id === 'communes' && currentZoom <= 11,
             }"
           >
             <div class="layer-switcher__other-layer-content">

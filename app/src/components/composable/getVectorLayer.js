@@ -71,27 +71,24 @@ export function createWFSLayer() {
   })
 }
 
-
 function createVectorSource(urlTemplate, format = new GeoJSON(), strategy = bboxStrategy) {
   return new VectorSource({
     url: (extent) => {
-      const bbox = extent.join(',');
-      return urlTemplate.replace('{bbox}', bbox);
+      const bbox = extent.join(',')
+      return urlTemplate.replace('{bbox}', bbox)
     },
     format,
     strategy,
-  });
+  })
 }
-
 
 function createVectorLayer(source, style, visible = false) {
   return new VectorLayer({
     source,
     visible,
     style,
-  });
+  })
 }
-
 
 const layersConfig = [
   {
@@ -169,15 +166,15 @@ const layersConfig = [
         color: 'rgba(0, 255, 0, 0.1)',
       }),
     }),
-  }
-];
+  },
+]
 
-export function initLayers() {
-  const layers = {};
+export function initOtherVectorLayers() {
+  const layers = {}
   layersConfig.forEach((layerConfig) => {
-    const source = createVectorSource(layerConfig.url);
-    const layer = createVectorLayer(source, layerConfig.style);
-    layers[layerConfig.name] = layer;
-  });
-  return layers;
+    const source = createVectorSource(layerConfig.url)
+    const layer = createVectorLayer(source, layerConfig.style)
+    layers[layerConfig.name] = layer
+  })
+  return layers
 }

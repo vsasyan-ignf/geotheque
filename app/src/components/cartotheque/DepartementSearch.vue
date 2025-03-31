@@ -61,8 +61,7 @@
     </div>
 
     <CartothequeSubMenu v-if="activeTab === 'cartotheque'" />
-    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'"/>
-  
+    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
   </div>
 </template>
 
@@ -77,7 +76,6 @@ import { useScanStore } from '@/components/store/scan'
 import { convertBbox, create_bbox } from '../composable/convertCoordinates'
 import config from '@/config'
 import { storeToRefs } from 'pinia'
-
 
 const emit = defineEmits(['close', 'select-departement'])
 const searchDepartement = ref('')
