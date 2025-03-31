@@ -37,7 +37,7 @@ import {
   getMaxZoom, 
   createInitialWMTSLayers, 
   updateWMTSLayers,
-  changeActiveWMTSLayer, initLayers } from './composable/getWMTS'
+  changeActiveWMTSLayer } from './composable/getWMTS'
 
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
@@ -47,7 +47,7 @@ import {
   otherLayersCartoFrance,
 } from './composable/baseMap'
 
-import { createPinLayer, createGeomLayer, createScanLayer, createWFSLayer } from './composable/getVectorLayer'
+import { createPinLayer, createGeomLayer, createScanLayer, createWFSLayer, initLayers } from './composable/getVectorLayer'
 //test
 import { parcour_txt_to_tab } from './composable/parseTXT'
 import { useConvertCoordinates } from './composable/convertCoordinates'
