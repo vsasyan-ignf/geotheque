@@ -70,7 +70,9 @@
       </Accordeon>
     </div>
 
-    <CartothequeSubMenu />
+    <CartothequeSubMenu v-if="['cartotheque', 'cartotheque_etranger'].includes(activeTab)" />
+    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
+
   </div>
 </template>
 
@@ -79,6 +81,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import { bboxState, eventBus } from '@/components/composable/eventBus'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
+import PhotothequeSubMenu from '../phototheque/PhotothequeSubMenu.vue'
 import Accordeon from '@/components/material/Accordeon.vue'
 import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import { useScanStore } from '@/components/store/scan'

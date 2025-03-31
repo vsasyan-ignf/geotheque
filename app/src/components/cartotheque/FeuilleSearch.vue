@@ -57,7 +57,10 @@
         </div>
       </div>
     </div>
-    <CartothequeSubMenu />
+
+    <CartothequeSubMenu v-if="activeTab === 'cartotheque_etranger'" />
+    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'"/>
+  
   </div>
 </template>
 
@@ -65,12 +68,15 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
+import PhotothequeSubMenu from '../phototheque/PhotothequeSubMenu.vue'
 import { useScanStore } from '@/components/store/scan'
+import { storeToRefs } from 'pinia'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 import { create_bbox, useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import config from '@/config'
 
 const scanStore = useScanStore()
+const { activeTab } = storeToRefs(scanStore)
 
 const emit = defineEmits(['close', 'select-commune'])
 

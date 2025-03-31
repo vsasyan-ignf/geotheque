@@ -1,5 +1,4 @@
-<!-- contenu specifique a cartothequeFrance -->
-
+<!-- faudra changer la logique de goToPoint dans ce composant pour les submits des résultats -->
 <template>
   <div>
     <div v-if="!activeSubCategory" class="sub-categories">
@@ -14,6 +13,26 @@
       </div>
     </div>
 
+    <CommuneSearch
+      v-if="activeSubCategory === 'commune'"
+      @close="$emit('close-sub-category')"
+      @select-commune="goToPoint"
+    />
+
+    <DepartementSearch
+      v-if="activeSubCategory === 'departement'"
+      @close="$emit('close-sub-category')"
+      @select-departement="goToPoint"
+    />
+
+    <FeuilleSearch v-if="activeSubCategory === 'feuilles'" @close="$emit('close-sub-category')" />
+
+    <PointSearch
+      v-if="activeSubCategory === 'point'"
+      @close="$emit('close-sub-category')"
+    />
+    
+
   </div>
 </template>
 
@@ -22,6 +41,11 @@ import { watch } from 'vue'
 import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { mdiCity, mdiMap, mdiCrosshairsGps, mdiLeaf } from '@mdi/js'
+
+import CommuneSearch from '../cartotheque/CommuneSearch.vue'
+import DepartementSearch from '../cartotheque/DepartementSearch.vue'
+import FeuilleSearch from '../cartotheque/FeuilleSearch.vue';
+import PointSearch from '../cartotheque/PointSearch.vue'
 
 const scanStore = useScanStore()
 
