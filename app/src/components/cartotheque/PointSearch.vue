@@ -112,8 +112,8 @@ async function fetchAndConvertBbox(longitude, latitude) {
     if (activeTab.value === 'cartotheque') {
       url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
     } else {
-      url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=3&limit=1`
-      console.log(url)
+      url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&zoom=3&limit=1`
+      console.log(url);
     }
 
     const response = await fetch(url)

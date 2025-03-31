@@ -9,14 +9,14 @@ export function parcour_txt_to_tab(url) {
   fetch(url)
     .then((response) => response.text())
     .then((data) => {
-      var lignes = data.split('\n')
-      var taille_file = lignes.length
-      var i, y, taille_ligne, mots, coord_x, coord_y, base_x, base_y
+      let lignes = data.split('\n')
+      let taille_file = lignes.length
+      let i, y, taille_ligne, mots, coord_x, coord_y, base_x, base_y
       let tab2
       let tab_fin = []
 
       for (i = 0; i < taille_file; i++) {
-        var line = lignes[i]
+        let line = lignes[i]
         mots = line.split('\t')
         taille_ligne = mots.length
         tab2 = []
@@ -46,6 +46,7 @@ export function parcour_txt_to_tab(url) {
           tab_fin.push(tab2)
         }
       }
+      console.log(" tab fin:")
       console.log(tab_fin)
       return tab_fin
     })
