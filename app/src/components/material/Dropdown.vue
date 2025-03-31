@@ -45,7 +45,6 @@ const emit = defineEmits()
 function updatestoreScansData() {
   emit('update:selected', selected.value)
   scanStore.updateSelectedScan(selected.value)
-  scanStore.updateCurrentScanInfo(selected.value.collecInfo)
 }
 
 watchEffect(() => {

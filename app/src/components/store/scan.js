@@ -7,7 +7,6 @@ export const useScanStore = defineStore('scan', () => {
   let storeScansData = ref(null)
   let storeSelectedGeom = ref([])
   let storeSelectedScan = ref(null)
-  let currentCollecInfo = ref(null)
   let activeSubCategory = ref(null)
   let activeTab = ref('cartotheque')
 
@@ -67,10 +66,6 @@ export const useScanStore = defineStore('scan', () => {
     console.log('Sous-catégorie active:', activeSubCategory.value)
   }
 
-  function updateCurrentScanInfo(collec) {
-    currentCollecInfo.value = collec
-  }
-
   function resetCriteria() {
     storeCritereSelection.value = {
       yearMin: null,
@@ -83,7 +78,7 @@ export const useScanStore = defineStore('scan', () => {
     storeSelectedGeom.value = []
     storeBbox.value = []
     storeScansData.value = null
-    currentCollecInfo.value = null
+    storeSelectedScan.value = null
   }
 
   function updateSelectedGeom(newVal) {
@@ -112,12 +107,6 @@ export const useScanStore = defineStore('scan', () => {
           id: index,
           geom: feature.geometry.coordinates[0],
           name: feature.properties.ID_CARTE,
-          collecInfo:
-            feature.properties.COLLECTION +
-            '/' +
-            feature.properties.SOUS_COLL +
-            '/' +
-            feature.properties.ID_CARTE,
           properties: feature.properties,
         }))
       } else {
@@ -140,8 +129,6 @@ export const useScanStore = defineStore('scan', () => {
     updateCriteria,
     updateActiveSubCategory,
     activeSubCategory,
-    updateCurrentScanInfo,
-    currentCollecInfo,
     storeSelectedGeom,
     updateSelectedGeom,
     resetCriteria,

@@ -90,9 +90,6 @@ function generateImageUrl(info) {
 watch(storeSelectedScan, (newVal) => {
   if (newVal) {
     const info = storeSelectedScan.value.properties
-    console.log('COLLECTION : ', info.COLLECTION)
-    console.log('SOUS COLLECTION : ', info.SOUS_COLL)
-    console.log('ID CARTE : ', info.ID_CARTE)
     const { url, name } = generateImageUrl(info)
     imageUrl.value = url
   }
@@ -100,6 +97,7 @@ watch(storeSelectedScan, (newVal) => {
 
 function openIipmooviewer() {
   if (imageUrl.value) {
+    console.log(imageUrl.value)
     const urlParams = new URLSearchParams(new URL(imageUrl.value).search)
     const imageUrlServ = urlParams.get('FIF')
     sessionStorage.setItem('imageUrl', imageUrlServ)
@@ -142,7 +140,7 @@ function downloadxml() {
       url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info.COLLECTION}/Fiches/${info.ID_CARTE}.xml`
     }
     console.log('URL_XML : ', url_xml)
-    // window.open(url_xml, 'xml')
+    window.open(url_xml, 'xml')
   }
 }
 
