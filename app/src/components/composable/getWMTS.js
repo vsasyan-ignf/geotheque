@@ -8,6 +8,7 @@ import { Style, Stroke, Fill, Text } from 'ol/style'
 import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
+import TileLayer from 'ol/layer/Tile'
 
 import GeoJSON from 'ol/format/GeoJSON'
 import config from '@/config'
@@ -132,20 +133,6 @@ export function createWmtsSource(layerId) {
   }
 }
 
-function getVectorURL(vectorID, bbox){
-  switch (vectorID) {
-    case 'communes':
-      return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`;
-    case 'departements':
-      return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`;
-    case 'feuilles':
-      return `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`;
-    case 'pays':
-      return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox=${bbox},EPSG:3857`;
-    default:
-      return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox=${bbox},EPSG:3857`;
-  }
-}
 
 function createVectorSource(urlTemplate, format = new GeoJSON(), strategy = bboxStrategy) {
   return new VectorSource({
@@ -172,47 +159,140 @@ const layersConfig = [
   {
     name: 'communes',
     url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox={bbox},EPSG:3857`,
-    style: new Style({
-      stroke: new Stroke({
-        color: 'rgba(0, 0, 0, 0.7)',
-        width: 1,
-      }),
-      fill: new Fill({
-        color: 'rgba(200, 200, 200, 0.5)',
-      }),
-    }),
+    style: function (feature) {
+      return new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.2)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 0, 0, 0.1)',
+        }),
+        text: new Text({
+          text: feature.get('NOM_COM'),
+          font: '12px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+        }),
+      })
+    },
   },
   {
-    name: 'departments',
+    name: 'departements',
     url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox={bbox},EPSG:3857`,
+    style: function (feature) {
+      return new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.2)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 0, 0, 0.1)',
+        }),
+        text: new Text({
+          text: feature.get('CODE_DEPT'),
+          font: '12px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+        }),
+      })
+    },
+  },
+  {
+    name: 'feuilles',
+    url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`,
+    style: function (feature) {
+      return new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.5)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(0, 255, 0, 0.2)',
+        }),
+        text: new Text({
+          text: feature.get('NUMERO'),
+          font: '12px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+        }),
+      })
+    },
+  },
+  {
+    name: 'pays',
+    url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox={bbox},EPSG:3857`,
     style: new Style({
       stroke: new Stroke({
-        color: 'rgba(0, 0, 0, 0.2)',
+        color: 'rgba(0, 0, 0, 0.5)',
         width: 2,
       }),
       fill: new Fill({
-        color: 'rgba(0, 0, 0, 0.1)',
-      }),
-      text: new Text({
-        text: 'CODE_DEPT',
-        font: '12px Calibri,sans-serif',
-        fill: new Fill({ color: '#000' }),
-        stroke: new Stroke({ color: '#fff', width: 2 }),
+        color: 'rgba(0, 255, 0, 0.1)',
       }),
     }),
-  },
+  }
 ];
 
-export function initLayers(){
-  return layersConfig.map((layerConfig) => {
+export function initLayers() {
+  const layers = {};
+  layersConfig.forEach((layerConfig) => {
     const source = createVectorSource(layerConfig.url);
-    return createVectorLayer(source, layerConfig.style);
+    const layer = createVectorLayer(source, layerConfig.style);
+    layers[layerConfig.name] = layer;
+  });
+  return layers;
+}
+
+export function createInitialWMTSLayers (layers, activeLayerIndex) {
+  return layers.map((layer, index) => {
+    const wmtsSource = createWmtsSource(layer.id)
+    return new TileLayer({
+      source: wmtsSource,
+      visible: index === activeLayerIndex,
+    })
   })
 }
 
+export function updateWMTSLayers(olMap, newLayers) {
+  if (!olMap) return
 
-// layersConfig.forEach((layerConfig) => {
-//   const source = createVectorSource(layerConfig.url);
-//   const layer = createVectorLayer(source, layerConfig.style);
-//   olMap.value.addLayer(layer);
-// });
+  const mapLayers = olMap.getLayers()
+  const wmtsLayers = mapLayers.getArray().filter((layer) => layer instanceof TileLayer)
+
+  wmtsLayers.forEach((layer, index) => {
+    if (index < newLayers.length) {
+      const newSource = createWmtsSource(newLayers[index].id)
+      layer.setSource(newSource)
+      layer.setVisible(index === 0)
+    }
+  })
+
+  if (newLayers.length > wmtsLayers.length) {
+    const layersToAdd = newLayers.slice(wmtsLayers.length).map((layer, index) => {
+      return new TileLayer({
+        source: createWmtsSource(layer.id),
+        visible: wmtsLayers.length + index === 0,
+      })
+    })
+
+    layersToAdd.forEach((layer) => olMap.addLayer(layer))
+  }
+}
+
+export function changeActiveWMTSLayer (olMap, olView, layers, newIndex) {
+  if (!olMap) return
+
+  const wmtsLayers = olMap
+    .getLayers()
+    .getArray()
+    .filter((layer) => layer instanceof TileLayer)
+
+  wmtsLayers.forEach((layer, layerIndex) => {
+    layer.setVisible(layerIndex === newIndex)
+  })
+
+  if (olView && layers[newIndex]) {
+    olView.setMaxZoom(getMaxZoom(layers[newIndex].id))
+  }
+}
