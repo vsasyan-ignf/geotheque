@@ -59,7 +59,10 @@
         </div>
       </div>
     </div>
-    <CartothequeSubMenu />
+
+    <CartothequeSubMenu v-if="activeTab === 'cartotheque'" />
+    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'"/>
+  
   </div>
 </template>
 
@@ -67,7 +70,14 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
+import PhotothequeSubMenu from '../phototheque/PhotothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
+
+import { useScanStore } from '@/components/store/scan'
+import { convertBbox, create_bbox } from '../composable/convertCoordinates'
+import config from '@/config'
+import { storeToRefs } from 'pinia'
+
 
 const emit = defineEmits(['close', 'select-departement'])
 const searchDepartement = ref('')
@@ -76,11 +86,9 @@ const showResults = ref(false)
 let searchTimeout = null
 const proj3857 = 'EPSG:3857' // Web Mercator
 const proj2154 = 'EPSG:2154' // Lambert-93
-import { useScanStore } from '@/components/store/scan'
-import { convertBbox, create_bbox } from '../composable/convertCoordinates'
-import config from '@/config'
 
 const scanStore = useScanStore()
+const { activeTab } = storeToRefs(scanStore)
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')

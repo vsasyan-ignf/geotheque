@@ -30,7 +30,6 @@ import { mdiMap, mdiCog } from '@mdi/js'
   color: white;
   padding: 10px 20px;
   height: 60px;
-  z-index: 99999;
 }
 
 .logo {
