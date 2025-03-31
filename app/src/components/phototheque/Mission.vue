@@ -5,23 +5,11 @@
           <label for="mission-select">Sélectionner une mission</label>
           <span class="mission-count">{{ missions.length }} missions trouvées</span>
         </div>
-        <div class="input-group">
-          <select 
-            id="mission-select" 
-            v-model="selectedMission" 
-            class="mission-dropdown"
-            @change="loadMissionDetails"
-          >
-            <option value="" disabled>Choisissez une mission</option>
-            <option 
-              v-for="mission in missions" 
-              :key="mission.id" 
-              :value="mission.id"
-            >
-              {{ mission.name }}
-            </option>
-          </select>
-        </div>
+        <Dropdown
+        :options="missions"
+        disableOption="Choisissez une mission"
+        @update:selected="handleMissionSelected"
+      />
       </div>
   
       <div v-if="selectedMission" class="mission-preview slide-in">
@@ -97,6 +85,7 @@
   
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import Dropdown from '../material/Dropdown.vue'
 
 const missions = ref([
   { id: '1', name: 'Mission Alpha' },
@@ -148,10 +137,6 @@ const checkboxOptions = [
   { key: 'countryName', label: 'Nom Pays' }
 ]
 
-const loadMissionDetails = () => {
-  console.log('Mission sélectionnée:', selectedMission.value)
-}
-
 const openModal = () => {
   isModalOpen.value = true
   document.body.style.overflow = 'hidden'
@@ -163,12 +148,17 @@ const closeModal = () => {
 }
 
 const downloadDetails = () => {
-  console.log('Téléchargement des détails...')
+  console.log('fonction dl')
 }
 
 const getMissionName = () => {
   const mission = missions.value.find(mission => mission.id === selectedMission.value);
-  return mission.name
+  return mission.name;
+};
+
+
+const handleMissionSelected = (mission) => {
+  selectedMission.value = mission.id  
 }
 
 </script>
