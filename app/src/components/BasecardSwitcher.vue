@@ -99,7 +99,6 @@ function handleLayerToggle(index) {
 
 function toggleExpand() {
   isExpanded.value = !isExpanded.value
-  console.log('layer value du switch', props.layers)
 }
 
 function selectLayer(index) {

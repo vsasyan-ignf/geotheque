@@ -25,25 +25,20 @@ import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
-import config from '@/config'
 
 import Map from 'ol/Map'
 import View from 'ol/View'
-import VectorLayer from 'ol/layer/Vector'
-import VectorSource from 'ol/source/Vector'
 
-import GeoJSON from 'ol/format/GeoJSON'
 import Polygon from 'ol/geom/Polygon.js'
 
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { Style, Icon, Stroke, Fill, Text } from 'ol/style'
-import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import { 
   getMaxZoom, 
   createInitialWMTSLayers, 
   updateWMTSLayers,
-  changeActiveWMTSLayer } from './composable/getWMTS'
+  changeActiveWMTSLayer, initLayers } from './composable/getWMTS'
+
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
 
@@ -74,18 +69,6 @@ const showPin = ref(false)
 
 const geomLayer = ref(null)
 
-// layers cartothèque france
-const vectorCommunesSource = ref(null)
-const communesLayer = ref(null)
-const vectorDepartmentsSource = ref(null)
-const departmentsLayer = ref(null)
-
-// layers cartothèque etranger
-const vectorFeuilleSource = ref(null)
-const feuilleLayer = ref(null)
-const vectorPaysSource = ref(null)
-const paysLayer = ref(null)
-
 let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
@@ -97,6 +80,7 @@ const vectorLayers = ref({
   emprises: null
 })
 
+const vectorOtherLayers = ref(null)
 
 function getLayersActiveTab() {
   return getLayersForActiveTab(activeTab.value)
@@ -107,8 +91,9 @@ function getOtherLayers() {
 }
 
 function hideOtherLayers() {
-  departmentsLayer.value.setVisible(false)
-  feuilleLayer.value.setVisible(false)
+  Object.values(vectorOtherLayers.value).forEach((layer) => {
+    layer.setVisible(false);
+  });
   otherLayers.value.forEach((layers) => (layers.visible = false))
 }
 
@@ -192,22 +177,18 @@ async function parcour_tab_and_map(url) {
 }
 
 function handleOtherLayerToggle(layer) {
-  if (layer.id === 'departements' && departmentsLayer.value) {
-    const isVisible = departmentsLayer.value.getVisible()
-    departmentsLayer.value.setVisible(!isVisible)
-  }
-  if (layer.id === 'feuilles' && feuilleLayer.value) {
-    const isVisible = feuilleLayer.value.getVisible()
-    feuilleLayer.value.setVisible(!isVisible)
-  }
-  if (layer.id === 'pays' && paysLayer.value) {
-    const isVisible = paysLayer.value.getVisible()
-    paysLayer.value.setVisible(!isVisible)
-  } else if (layer.id === 'communes' && communesLayer.value) {
+
+  if (layer.id === 'communes' && vectorOtherLayers.value?.communes) {
     communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value
     const shouldBeVisible = communesLayerManuallyActivated.value && currentZoom.value >= 12
-    communesLayer.value.setVisible(shouldBeVisible)
+    vectorOtherLayers.value?.communes.setVisible(shouldBeVisible)
   }
+  else if (vectorOtherLayers.value?.[layer.id]){
+    const isVisible = vectorOtherLayers.value?.[layer.id].getVisible()
+    vectorOtherLayers.value?.[layer.id].setVisible(!isVisible)
+
+  }
+
 }
 
 function changeActiveLayer(index) {
@@ -225,6 +206,8 @@ onMounted(() => {
       scan: createScanLayer(),
       emprises: createWFSLayer(),
     }
+
+    vectorOtherLayers.value = initLayers();
 
     vectorFeuilleSource.value = new VectorSource({
       url: (extent) => {
@@ -281,64 +264,10 @@ onMounted(() => {
     })
 
     watch(currentZoom, (newZoom) => {
-      if (communesLayer.value && communesLayerManuallyActivated.value) {
+      if (vectorOtherLayers.value?.communes && communesLayerManuallyActivated.value) {
         const shouldBeVisible = newZoom >= 12
-        communesLayer.value.setVisible(shouldBeVisible)
+        vectorOtherLayers.value?.communes.setVisible(shouldBeVisible)
       }
-    })
-
-    vectorDepartmentsSource.value = new VectorSource({
-      url: (extent) => {
-        const bbox = extent.join(',')
-        return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox=${bbox},EPSG:3857`
-      },
-      format: new GeoJSON(),
-      strategy: bboxStrategy,
-    })
-
-    departmentsLayer.value = new VectorLayer({
-      source: vectorDepartmentsSource.value,
-      visible: false,
-      style: function (feature) {
-        return new Style({
-          stroke: new Stroke({
-            color: 'rgba(0, 0, 0, 0.2)',
-            width: 2,
-          }),
-          fill: new Fill({
-            color: 'rgba(0, 0, 0, 0.1)',
-          }),
-          text: new Text({
-            text: feature.get('CODE_DEPT'),
-            font: '12px Calibri,sans-serif',
-            fill: new Fill({ color: '#000' }),
-            stroke: new Stroke({ color: '#fff', width: 2 }),
-          }),
-        })
-      },
-    })
-
-    vectorPaysSource.value = new VectorSource({
-      url: (extent) => {
-        const bbox = extent.join(',')
-        return `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox=${bbox},EPSG:3857`
-      },
-      format: new GeoJSON(),
-      strategy: bboxStrategy,
-    })
-
-    paysLayer.value = new VectorLayer({
-      source: vectorPaysSource.value,
-      visible: false,
-      style: new Style({
-        stroke: new Stroke({
-          color: 'rgba(0, 0, 0, 0.5)',
-          width: 2,
-        }),
-        fill: new Fill({
-          color: 'rgba(0, 255, 0, 0.1)',
-        }),
-      }),
     })
 
     /***************************************** Create source and layer for scan selected ******************************* */
@@ -365,10 +294,7 @@ onMounted(() => {
         vectorLayers.value.pin,
         vectorLayers.value.geom,
         vectorLayers.value.scan,
-        communesLayer.value,
-        departmentsLayer.value,
-        feuilleLayer.value,
-        paysLayer.value,
+        ...Object.values(vectorOtherLayers.value)
       ],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
@@ -513,7 +439,7 @@ onMounted(() => {
       if (vectorLayers.value.emprises.getSource()) {
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
-        olMap.value.removeLayer(wfsLayer)
+        olMap.value.removeLayer(vectorLayers.value.emprises)
       }
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()
