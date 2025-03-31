@@ -82,7 +82,7 @@ let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
 
-const vectorLayers = ref(null)
+const vectorOtherLayers = ref(null)
 
 function getLayersActiveTab() {
   if (activeTab.value === 'cartotheque') {
@@ -110,7 +110,7 @@ function getOtherLayers() {
 }
 
 function hideOtherLayers() {
-  Object.values(vectorLayers.value).forEach((layer) => {
+  Object.values(vectorOtherLayers.value).forEach((layer) => {
     layer.setVisible(false);
   });
   otherLayers.value.forEach((layers) => (layers.visible = false))
@@ -226,14 +226,14 @@ async function parcour_tab_and_map(url) {
 
 function handleOtherLayerToggle(layer) {
 
-  if (layer.id === 'communes' && vectorLayers.value?.communes) {
+  if (layer.id === 'communes' && vectorOtherLayers.value?.communes) {
     communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value
     const shouldBeVisible = communesLayerManuallyActivated.value && currentZoom.value >= 12
-    vectorLayers.value?.communes.setVisible(shouldBeVisible)
+    vectorOtherLayers.value?.communes.setVisible(shouldBeVisible)
   }
-  else if (vectorLayers.value?.[layer.id]){
-    const isVisible = vectorLayers.value?.[layer.id].getVisible()
-    vectorLayers.value?.[layer.id].setVisible(!isVisible)
+  else if (vectorOtherLayers.value?.[layer.id]){
+    const isVisible = vectorOtherLayers.value?.[layer.id].getVisible()
+    vectorOtherLayers.value?.[layer.id].setVisible(!isVisible)
 
   }
 
@@ -271,9 +271,9 @@ onMounted(() => {
       })
     })
 
-    vectorLayers.value = initLayers();
+    vectorOtherLayers.value = initLayers();
 
-    console.log(vectorLayers.value)
+    console.log(vectorOtherLayers.value)
 
     vectorWfsSource.value = new VectorSource({
       format: new GeoJSON(),
@@ -292,9 +292,9 @@ onMounted(() => {
 
 
     watch(currentZoom, (newZoom) => {
-      if (vectorLayers.value?.communes && communesLayerManuallyActivated.value) {
+      if (vectorOtherLayers.value?.communes && communesLayerManuallyActivated.value) {
         const shouldBeVisible = newZoom >= 12
-        vectorLayers.value?.communes.setVisible(shouldBeVisible)
+        vectorOtherLayers.value?.communes.setVisible(shouldBeVisible)
       }
     })
 
@@ -365,7 +365,7 @@ onMounted(() => {
         pinLayer,
         geomLayer.value,
         scanLayer.value,
-        ...Object.values(vectorLayers.value)
+        ...Object.values(vectorOtherLayers.value)
       ],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
