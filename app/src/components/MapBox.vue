@@ -45,12 +45,6 @@ import { createPinLayer, createGeomLayer, createScanLayer, createWFSLayer, initO
 import { parcour_txt_to_tab } from './composable/parseTXT'
 import { useConvertCoordinates } from './composable/convertCoordinates'
 import MultiPolygon from 'ol/geom/MultiPolygon'
-// Import des modules pour gérer l'intersection
-import { Vector as VectorSource } from 'ol/source';
-import { Vector as VectorLayer } from 'ol/layer';
-import { Style, Fill, Stroke } from 'ol/style';
-import { getArea, getLength } from 'ol/sphere';
-import { intersects, containsExtent } from 'ol/extent';
 import { initializeIntersectionLayer, findIntersections, clearIntersection } from './composable/intersectionDraw'
 
 const scanStore = useScanStore()
@@ -71,7 +65,6 @@ const geomLayer = ref(null)
 
 const drawModeActive = ref(false);
 const lastDrawFeature = ref(null);
-const intersectedFeatures = ref([]);
 
 let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
@@ -233,7 +226,6 @@ onMounted(() => {
     }
 
     vectorOtherLayers.value = initOtherVectorLayers()
-    console.log(vectorOtherLayers.value)
 
     watch(currentZoom, (newZoom) => {
       if (vectorOtherLayers.value?.communes && communesLayerManuallyActivated.value) {
