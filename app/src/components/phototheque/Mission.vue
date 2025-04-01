@@ -37,7 +37,8 @@
       <div class="options-label">Options de sélection</div>
       <div class="checkbox-group">
         <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
-          <input type="checkbox" v-model="selectedOptions[option.key]" class="checkbox-input" />
+          <input type="checkbox" v-model="selectedOptions[option.key]" class="checkbox-input" 
+          @change="handleCheckboxChange(option.key)"/>
           <span class="custom-checkbox"></span>
           {{ option.label }}
         </label>
@@ -110,6 +111,38 @@ const checkboxOptions = [
   { key: 'countryName', label: 'Nom Pays' },
 ]
 
+// Fonction qui gère l'activation/désactivation des cases
+const handleCheckboxChange = (optionKey) => {
+      const isSelected = selectedOptions[optionKey];
+      if (isSelected) {
+        if(optionKey ==='couplesStereo'){
+          console.log("Ok");
+        }
+        else if(optionKey ==='alphanumeric'){
+          console.log("al");
+        }
+        else if(optionKey ==='popup'){
+          console.log("pp");
+        }
+        else if(optionKey ==='sheetNumber'){
+          console.log("sn");
+        }
+        else if(optionKey ==='countryName'){
+          console.log("cn");
+        }
+        else{
+          console.log("probleme");
+        }
+      } else {
+        console.log(`${optionKey} désactivé`);
+      }
+    };
+
+    
+
+
+
+
 const openModal = () => {
   isModalOpen.value = true
   document.body.style.overflow = 'hidden'
@@ -132,6 +165,10 @@ const getMissionName = () => {
 const handleMissionSelected = (mission) => {
   selectedMission.value = mission.id
 }
+
+
+
+
 </script>
 
 <style scoped>

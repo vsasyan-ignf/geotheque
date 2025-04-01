@@ -208,7 +208,7 @@ onMounted(() => {
     }
 
     vectorOtherLayers.value = initOtherVectorLayers()
-
+    console.log(vectorOtherLayers.value)
     watch(currentZoom, (newZoom) => {
       if (vectorOtherLayers.value?.communes && communesLayerManuallyActivated.value) {
         const shouldBeVisible = newZoom >= 12
