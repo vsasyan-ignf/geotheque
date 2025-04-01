@@ -149,6 +149,7 @@ export function createRealContour(contour) {
   let newcontour = contour.map(polygon => polygon.map(([x, y]) => olProj.transform([x, y], 'EPSG:3857', 'EPSG:4326')))
   newcontour = newcontour.map(polygon => polygon.map(([x, y]) => [y.toFixed(2), x.toFixed(2)]))
 
+
   const simplePolygon = newcontour.map(polygonCoords => {
     const polygon = new Polygon([polygonCoords])
     return polygon.simplify(getDynamicTolerance(polygonCoords))

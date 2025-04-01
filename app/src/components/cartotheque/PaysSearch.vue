@@ -155,12 +155,13 @@ function selectCountry(country) {
         contour =[longestSubArray]
       }
 
-      scanStore.updateCountryGeom(createRealContour(contour))
+      
 
       if (country.code === "US"){
-          contour = [[["-124.980469", "25.324167"], ["-124.98", "48.89"], ["-66.445313", "48.922499"], ["-66.44", "25.32"], ["-124.980469", "25.324167"]]]
-        }
+        contour = [[["-13912762.1682", "2915614.0653"], ["-13912762.1682", "6261721.3124"], ["-7396658.4088", "6261721.3124"], ["-7396658.4088", "2915614.0653"], ["-13912762.1682", "2915614.0653"]]]
+      }
 
+      scanStore.updateCountryGeom(createRealContour(contour))
     })
     .catch((error) => {
       console.error('Erreur lors de la récupération des contours du pays:', error)
