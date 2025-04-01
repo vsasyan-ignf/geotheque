@@ -1,28 +1,30 @@
+<!-- recherche par departement -->
 <template>
   <div class="sub-category-content">
-    <SubCategoryHeader title="Recherche par feuilles" @close="$emit('close')" />
+    <SubCategoryHeader title="Recherche par département" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="feuille-search">Numero</label>
+        <label for="departement-search">Nom ou numéro</label>
         <div class="input-group">
           <input
-            id="feuille-search"
-            autocomplete="off"
-            v-model="feuilleSelected"
+            id="departement-search"
+            v-model="searchDepartement"
             type="text"
-            placeholder="Ex: NE 28 XVIII ou NB 29 VI"
-            @input="searchFeuille"
+            placeholder="Ex: Rhône ou 69"
+            @input="searchDepartements"
             @focus="showResults = true"
           />
-          <button @click="validateFeuille">
+          <button @click="searchDepartements">
             <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="feuilleResults.length > 0">Résultats ({{ feuilleResults.length }})</h5>
-            <h5 v-else-if="feuilleSelected">Aucun résultat</h5>
+            <h5 v-if="departementResults.length > 0">
+              Résultats ({{ departementResults.length }})
+            </h5>
+            <h5 v-else-if="searchDepartement">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
               <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
@@ -30,35 +32,35 @@
           </div>
 
           <div class="results-content">
-            <div class="results-list" v-if="feuilleResults.length > 0">
+            <div class="results-list" v-if="departementResults.length > 0">
               <div
-                v-for="(feuille, index) in feuilleResults"
-                :key="feuille.nom + '-' + index"
+                v-for="dept in departementResults"
+                :key="dept.code"
                 class="result-item"
-                @click="selectFeuille(feuille)"
+                @click="selectDepartement(dept)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ feuille.numero }}</div>
-                  <div class="result-secondary">Nom de la feuille : {{ feuille.nom }}</div>
+                  <div class="result-main">{{ dept.nom }}</div>
+                  <div class="result-secondary">{{ dept.code }} - {{ dept.region }}</div>
                 </div>
               </div>
             </div>
 
-            <div class="no-results" v-else-if="feuilleSelected">
+            <div class="no-results" v-else-if="searchDepartement">
               <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
-              <span>Aucune feuilles trouvées</span>
+              <span>Aucun Département trouvée</span>
             </div>
 
             <div class="empty-search" v-else>
               <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
-              <span>Saisissez le numéro d'une feuille</span>
+              <span>Saisissez le nom ou code d'un Département</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <CartothequeSubMenu v-if="activeTab === 'cartotheque_etranger'" />
+    <CartothequeSubMenu v-if="activeTab === 'cartotheque'" />
     <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
   </div>
 </template>
@@ -66,29 +68,29 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import PhotothequeSubMenu from '../phototheque/PhotothequeSubMenu.vue'
-import { useScanStore } from '@/components/store/scan'
-import { storeToRefs } from 'pinia'
+import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
+import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { create_bbox, useConvertCoordinates } from '@/components/composable/convertCoordinates'
+
+import { useScanStore } from '@/components/store/scan'
+import { convertBbox, create_bbox } from '@/components/composable/convertCoordinates'
 import config from '@/config'
+import { storeToRefs } from 'pinia'
+
+const emit = defineEmits(['close', 'select-departement'])
+const searchDepartement = ref('')
+const departementResults = ref([])
+const showResults = ref(false)
+let searchTimeout = null
+const proj3857 = 'EPSG:3857' // Web Mercator
+const proj2154 = 'EPSG:2154' // Lambert-93
 
 const scanStore = useScanStore()
 const { activeTab } = storeToRefs(scanStore)
 
-const emit = defineEmits(['close', 'select-commune'])
-
-const feuilleSelected = ref('')
-const feuilleResults = ref([])
-const showResults = ref(false)
-let searchTimeout = null
-let repFeuille = ref(null)
-
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
-  const searchInput = document.getElementById('feuille-search')
-
+  const searchInput = document.getElementById('departement-search')
   if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
   }
@@ -103,58 +105,84 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
-function searchFeuille() {
+function searchDepartements() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-
-  const query = feuilleSelected.value
-
-  if (!query) {
-    feuilleResults.value = []
-    return
+  let url_dep
+  const query = searchDepartement.value.toLowerCase().trim()
+  const numbner_dep = parseInt(query)
+  if (!isNaN(numbner_dep)) {
+    url_dep = `${config.DEPARTEMENT_URL}?code=${query}&fields=nom,code,region`
+  } else {
+    url_dep = `${config.DEPARTEMENT_URL}?nom=${query}&fields=nom,code,region`
   }
 
-  showResults.value = true
-
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
-  let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
-    fetch(search_url)
+    fetch(url_dep)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.features.map((feuille) => ({
-          nom: feuille.properties.NOM,
-          numero: feuille.properties.NUMERO,
-          geometry: feuille.geometry.coordinates[0][0],
+        const newResults = data.map((departement) => ({
+          nom: departement.nom,
+          code: departement.code,
+          region: departement.region.nom,
         }))
-        feuilleResults.value = newResults
+        departementResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des feuilles:', error)
-        feuilleResults.value = []
+        console.error('Erreur lors de la récupération des departements:', error)
+        departementResults.value = []
       })
   }, 300)
 }
 
-function selectFeuille(feuille) {
-  feuilleSelected.value = feuille.numero
-  repFeuille.value = feuille
-  validateFeuille()
+function selectDepartement(departement) {
+  getDepartementBbox(departement)
+    .then((contour) => {
+      let bbox3857 = create_bbox(contour)
+      const bbox2154 = convertBbox(bbox3857, proj3857, proj2154)
+      const point = {
+        x: 0,
+        y: 0,
+        bboxLambert93: bbox2154,
+      }
+
+      const coordinates = contour[0].map((point) => [point[0], point[1]])
+
+      scanStore.updateSelectedGeom(coordinates)
+
+      emit('select-departement', point)
+    })
+    .catch((error) => {
+      console.error('Erreur lors de la récupération des controus du departements:', error)
+    })
+  searchDepartement.value = departement.nom
   showResults.value = false
 }
 
-function validateFeuille() {
-  if (repFeuille) {
-    const bbox4326 = create_bbox([repFeuille.value.geometry])
-    const bboxLonLat = [bbox4326.minX, bbox4326.minY, bbox4326.maxX, bbox4326.maxY]
-    scanStore.updateBbox(bboxLonLat)
+async function getDepartementBbox(departement) {
+  const depCode = departement.code.toString()
+  const urlDepBbox =
+    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0
+  ` +
+    `&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=CODE_DEPT='${depCode}'&srsName=EPSG:3857`
 
-    const contourMercator = repFeuille.value.geometry.map((coord) =>
-      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
-    )
-    scanStore.updateSelectedGeom(contourMercator)
+  try {
+    const response = await fetch(urlDepBbox)
+    if (!response.ok) {
+      throw new Error(`rrreur réseau : ${response.status}`)
+    }
+    const data = await response.json()
+    const contour_dep = data.features[0]?.geometry?.coordinates[0]
+    if (!contour_dep) {
+      throw new Error('coordonées non trouvée dans la réponse')
+    }
+    console.log('Contour du departement:', contour_dep)
+    return contour_dep
+  } catch (error) {
+    console.error('e:', error)
+    throw error
   }
 }
 </script>
@@ -164,7 +192,6 @@ function validateFeuille() {
   animation: fadeIn 0.3s ease;
   position: relative;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -361,5 +388,9 @@ function validateFeuille() {
 .empty-search i {
   font-size: 24px;
   color: #ddd;
+}
+
+.mdi {
+  margin-top: 5px;
 }
 </style>

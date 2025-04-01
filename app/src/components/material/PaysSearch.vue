@@ -1,30 +1,28 @@
-<!-- recherche par departement -->
+<!-- recherche par pays -->
 <template>
   <div class="sub-category-content">
-    <SubCategoryHeader title="Recherche par département" @close="$emit('close')" />
+    <SubCategoryHeader title="Recherche par pays" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="departement-search">Nom ou numéro</label>
+        <label for="country-search">Nom du pays</label>
         <div class="input-group">
           <input
-            id="departement-search"
-            v-model="searchDepartement"
+            id="country-search"
+            v-model="searchCountry"
             type="text"
-            placeholder="Ex: Rhône ou 69"
-            @input="searchDepartements"
+            placeholder="Ex: France, Allemagne..."
+            @input="searchCountries"
             @focus="showResults = true"
           />
-          <button @click="searchDepartements">
+          <button @click="searchCountries">
             <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="departementResults.length > 0">
-              Résultats ({{ departementResults.length }})
-            </h5>
-            <h5 v-else-if="searchDepartement">Aucun résultat</h5>
+            <h5 v-if="countryResults.length > 0">Résultats ({{ countryResults.length }})</h5>
+            <h5 v-else-if="searchCountry">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
               <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
@@ -32,65 +30,62 @@
           </div>
 
           <div class="results-content">
-            <div class="results-list" v-if="departementResults.length > 0">
+            <div class="results-list" v-if="countryResults.length > 0">
               <div
-                v-for="dept in departementResults"
-                :key="dept.code"
+                v-for="country in countryResults"
+                :key="country.code"
                 class="result-item"
-                @click="selectDepartement(dept)"
+                @click="selectCountry(country)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ dept.nom }}</div>
-                  <div class="result-secondary">{{ dept.code }} - {{ dept.region }}</div>
+                  <div class="result-main">{{ country.nom }}</div>
+                  <div class="result-secondary">{{ country.code }}</div>
                 </div>
               </div>
             </div>
 
-            <div class="no-results" v-else-if="searchDepartement">
+            <div class="no-results" v-else-if="searchCountry">
               <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
-              <span>Aucun Département trouvée</span>
+              <span>Aucun pays trouvé</span>
             </div>
 
             <div class="empty-search" v-else>
               <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
-              <span>Saisissez le nom ou code d'un Département</span>
+              <span>Saisissez le nom d'un pays</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <CartothequeSubMenu v-if="activeTab === 'cartotheque'" />
-    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
+    <CartothequeSubMenu />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import PhotothequeSubMenu from '../phototheque/PhotothequeSubMenu.vue'
+import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-
-import { useScanStore } from '@/components/store/scan'
-import { convertBbox, create_bbox } from '../composable/convertCoordinates'
+import { create_multibbox, convertBbox, getDynamicTolerance, roundCoordinates, createRealContour } from '../composable/convertCoordinates'
 import config from '@/config'
-import { storeToRefs } from 'pinia'
+import { useScanStore } from '@/components/store/scan'
 
-const emit = defineEmits(['close', 'select-departement'])
-const searchDepartement = ref('')
-const departementResults = ref([])
+
+
+
+
+const emit = defineEmits(['close', 'select-country'])
+const searchCountry = ref('')
+const countryResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-const proj3857 = 'EPSG:3857' // Web Mercator
-const proj2154 = 'EPSG:2154' // Lambert-93
+
 
 const scanStore = useScanStore()
-const { activeTab } = storeToRefs(scanStore)
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
-  const searchInput = document.getElementById('departement-search')
+  const searchInput = document.getElementById('country-search')
   if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
   }
@@ -105,83 +100,110 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
-function searchDepartements() {
+function searchCountries() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-  let url_dep
-  const query = searchDepartement.value.toLowerCase().trim()
-  const numbner_dep = parseInt(query)
-  if (!isNaN(numbner_dep)) {
-    url_dep = `${config.DEPARTEMENT_URL}?code=${query}&fields=nom,code,region`
-  } else {
-    url_dep = `${config.DEPARTEMENT_URL}?nom=${query}&fields=nom,code,region`
-  }
 
-  // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
+  const query = searchCountry.value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+
+  const url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=pays&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
+
   searchTimeout = setTimeout(() => {
-    fetch(url_dep)
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.map((departement) => ({
-          nom: departement.nom,
-          code: departement.code,
-          region: departement.region.nom,
+        const newResults = data.features.map((pays) => ({
+          nom: pays.properties.NOM,
+          code: pays.properties.CODE_PAYS,
         }))
-        departementResults.value = newResults
+        countryResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des departements:', error)
-        departementResults.value = []
+        console.error('Erreur lors de la récupération des pays:', error)
+        countryResults.value = []
       })
-  }, 300)
+  }, 500)
 }
 
-function selectDepartement(departement) {
-  getDepartementBbox(departement)
+function getLongestSubArray(arr) {
+    return arr.reduce((longest, current) => 
+        current.length > longest.length ? current : longest
+    , []);
+}
+
+
+
+function selectCountry(country) {
+  getCountryBbox(country)
     .then((contour) => {
-      let bbox3857 = create_bbox(contour)
-      const bbox2154 = convertBbox(bbox3857, proj3857, proj2154)
-      const point = {
-        x: 0,
-        y: 0,
-        bboxLambert93: bbox2154,
+      
+      const bbox3857 = create_multibbox(contour)
+      const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
+      
+      scanStore.updateBbox(bbox4326)
+      scanStore.updateSelectedGeom(contour)
+
+      if (contour.length > 10) {
+        const longestSubArray = getLongestSubArray(contour)
+        contour =[longestSubArray]
       }
 
-      const coordinates = contour[0].map((point) => [point[0], point[1]])
+      
 
-      scanStore.updateSelectedGeom(coordinates)
+      if (country.code === "US"){
+        contour = [[["-13912762.1682", "2915614.0653"], ["-13912762.1682", "6261721.3124"], ["-7396658.4088", "6261721.3124"], ["-7396658.4088", "2915614.0653"], ["-13912762.1682", "2915614.0653"]]]
+      }
 
-      emit('select-departement', point)
+      scanStore.updateWKT(createRealContour(contour))
     })
     .catch((error) => {
-      console.error('Erreur lors de la récupération des controus du departements:', error)
+      console.error('Erreur lors de la récupération des contours du pays:', error)
     })
-  searchDepartement.value = departement.nom
+
   showResults.value = false
 }
 
-async function getDepartementBbox(departement) {
-  const depCode = departement.code.toString()
-  const urlDepBbox =
-    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0
-  ` +
-    `&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=CODE_DEPT='${depCode}'&srsName=EPSG:3857`
+async function getCountryBbox(country) {
+  const countryCode = country.code
+    .split(',')[0]
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+
+
+  const urlCountryBbox =
+    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
+    `&request=GetFeature&typeNames=pays&outputFormat=application/json` +
+    `&CQL_FILTER=CODE_PAYS='${countryCode}'&srsName=EPSG:3857`
+  
 
   try {
-    const response = await fetch(urlDepBbox)
+    const response = await fetch(urlCountryBbox)
     if (!response.ok) {
-      throw new Error(`rrreur réseau : ${response.status}`)
+      throw new Error(`Erreur réseau : ${response.status}`)
     }
     const data = await response.json()
-    const contour_dep = data.features[0]?.geometry?.coordinates[0]
-    if (!contour_dep) {
-      throw new Error('coordonées non trouvée dans la réponse')
+
+    const contour_country = data.features[0]?.geometry?.coordinates
+
+    if (!contour_country) {
+      throw new Error('Coordonnées non trouvées dans la réponse')
     }
-    console.log('Contour du departement:', contour_dep)
-    return contour_dep
+    const allContours = []
+
+    for (const polygon of contour_country) {
+      const exteriorRing = polygon[0]
+
+      allContours.push(exteriorRing)
+    }
+
+    return allContours
   } catch (error) {
-    console.error('e:', error)
+    console.error('Erreur:', error)
     throw error
   }
 }

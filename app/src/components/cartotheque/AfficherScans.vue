@@ -89,7 +89,7 @@ function generateImageUrl(info) {
 
 watch(storeSelectedScan, (newVal) => {
   if (newVal) {
-    const info = storeSelectedScan.value.properties
+    const info = storeSelectedScan.value?.properties
     const { url, name } = generateImageUrl(info)
     imageUrl.value = url
   }
@@ -109,7 +109,7 @@ function openIipmooviewer() {
 
 function downloadScans() {
   if (storeSelectedScan.value) {
-    const info = storeSelectedScan.value.properties
+    const info = storeSelectedScan.value?.properties
     const { url, name } = generateImageUrl(info)
 
     fetch(url)
@@ -132,7 +132,7 @@ let url_xml = ref(``)
 
 function downloadxml() {
   if (storeSelectedScan.value) {
-    const info = storeSelectedScan.value.properties
+    const info = storeSelectedScan.value?.properties
     const lieu = 'METROPOLE'
     if (info.SOUS_COLL !== '') {
       url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/Fiches/${info.ID_CARTE}.xml`

@@ -37,10 +37,10 @@ import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { mdiCity, mdiMap, mdiCrosshairsGps, mdiLeaf } from '@mdi/js'
 
-import CommuneSearch from '../cartotheque/CommuneSearch.vue'
-import DepartementSearch from '../cartotheque/DepartementSearch.vue'
-import FeuilleSearch from '../cartotheque/FeuilleSearch.vue'
-import PointSearch from '../cartotheque/PointSearch.vue'
+import CommuneSearch from '@/components/material/CommuneSearch.vue'
+import DepartementSearch from '@/components/material/DepartementSearch.vue'
+import FeuilleSearch from '@/components/material/FeuilleSearch.vue'
+import PointSearch from '@/components/material/PointSearch.vue'
 
 const scanStore = useScanStore()
 
