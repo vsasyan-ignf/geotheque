@@ -25,9 +25,15 @@ export const useScanStore = defineStore('scan', () => {
 
       if (activeTab.value === 'cartotheque_etranger') {
         empriseURL = 'emprisesscansmonde'
-        // inverse les coordonnées : lon/lat to lat/lon
-        [minX, minY] = [minY, minX]
-        [maxX, maxY] = [maxY, maxX]
+          // inverse les coordonnées : lon/lat to lat/lon
+          ;[minX, minY] = [minY, minX]
+          ;[maxX, maxY] = [maxY, maxX]
+
+          console.log()
+      }
+
+      if (activeTab.value === 'phototheque') {
+        empriseURL = 'PVALambert93'
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
@@ -106,9 +112,15 @@ export const useScanStore = defineStore('scan', () => {
         storeScansData.value = data.features.map((feature, index) => ({
           id: index,
           geom: feature.geometry.coordinates[0],
-          name: feature.properties.ID_CARTE,
+          name: feature.properties.ID_CARTE ?? feature.properties.NOM, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
           properties: feature.properties,
         }))
+
+
+        const test = storeScansData.value.map((feature) => feature.properties)
+        console.log(test)
+
+
       } else {
         throw new Error('Failed to fetch data')
       }

@@ -163,8 +163,6 @@ function validateCommune() {
     )
 
     const point = {
-      x: 0,
-      y: 0,
       bboxLambert93: bboxLambert93.flat(),
     }
 

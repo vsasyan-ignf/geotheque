@@ -3,10 +3,10 @@
     <div class="mission-selection">
       <div class="selection-header">
         <label for="mission-select">Sélectionner une mission</label>
-        <span class="mission-count">{{ missions.length }} missions trouvées</span>
+        <span class="mission-count">{{ storeScansData?.length }} missions trouvées</span>
       </div>
       <Dropdown
-        :options="missions"
+        :options="storeScansData"
         disableOption="Choisissez une mission"
         @update:selected="handleMissionSelected"
       />
@@ -58,8 +58,15 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
-import Dropdown from '../material/Dropdown.vue'
+import Dropdown from '@/components/material/Dropdown.vue'
 import MissionDetailsModal from './MissionDetailsModal.vue'
+import { useScanStore } from '@/components/store/scan'
+import { storeToRefs } from 'pinia'
+
+
+const scanStore = useScanStore()
+const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
+
 const missions = ref([
   { id: '1', name: 'Mission Alpha' },
   { id: '2', name: 'Mission Beta' },
@@ -131,6 +138,7 @@ const getMissionName = () => {
 
 const handleMissionSelected = (mission) => {
   selectedMission.value = mission.id
+  console.log(selectedMission.value)
 }
 </script>
 
