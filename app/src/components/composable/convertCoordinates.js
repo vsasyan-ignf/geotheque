@@ -1,4 +1,11 @@
 import proj4 from 'proj4'
+import * as olProj from 'ol/proj'
+import WKT from 'ol/format/WKT'
+import MultiPolygon from 'ol/geom/MultiPolygon'
+import Polygon from 'ol/geom/Polygon'
+import { useScanStore } from '@/components/store/scan'
+
+
 
 // définit les systèmes de projection
 proj4.defs([
@@ -96,4 +103,65 @@ export function create_multibbox(contours) {
   }
 
   return { minX, minY, maxX, maxY }
+}
+
+export function getDynamicTolerance(polygon) {
+  const len = polygon.length
+
+  if (len > 50 && len <= 100) {
+    return 0.3
+  } else if (len > 20 && len <= 50) {
+    return 0.1
+  } else if (len > 10 && len <= 20) {
+    return 0.05
+  } else if (len > 100 && len <= 1000) {
+    return 1
+  } else if (len > 1000 && len <= 2000) {
+    return 5
+  } else if (len > 2000 && len <= 5000) {
+    return 10
+  } else if (len > 5000) {
+    return 20
+  }
+
+  return len > 20 ? 2 : 0.001;
+}
+
+export function roundCoordinates(multiPolygon, precision = 6) {
+  return multiPolygon.getCoordinates().map(polygon =>
+    polygon.map(ring =>
+      ring.map(coord => {
+        const longitude = parseFloat(coord[0]);
+        const latitude = parseFloat(coord[1]);
+
+        return [
+          longitude.toFixed(precision),
+          latitude.toFixed(precision)
+        ];
+      })
+    )
+  );
+}
+
+
+export function createRealContour(contour) {
+
+  let newcontour = contour.map(polygon => polygon.map(([x, y]) => olProj.transform([x, y], 'EPSG:3857', 'EPSG:4326')))
+  newcontour = newcontour.map(polygon => polygon.map(([x, y]) => [y.toFixed(2), x.toFixed(2)]))
+
+
+  const simplePolygon = newcontour.map(polygonCoords => {
+    const polygon = new Polygon([polygonCoords])
+    return polygon.simplify(getDynamicTolerance(polygonCoords))
+  })
+
+  const simplified_multipolygon = new MultiPolygon(simplePolygon)
+
+  const roundedCoordinates = roundCoordinates(simplified_multipolygon, 2)
+  simplified_multipolygon.setCoordinates(roundedCoordinates)
+
+  const wktformat = new WKT()
+  const wkt = wktformat.writeGeometry(simplified_multipolygon)
+  // scanStore.updateCountryGeom(wkt)
+  return wkt
 }

@@ -37,7 +37,8 @@
       <div class="options-label">Options de sélection</div>
       <div class="checkbox-group">
         <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
-          <input type="checkbox" v-model="selectedOptions[option.key]" class="checkbox-input" />
+          <input type="checkbox" v-model="selectedOptions[option.key]" class="checkbox-input" 
+          @change="handleCheckboxChange(option.key)"/>
           <span class="custom-checkbox"></span>
           {{ option.label }}
         </label>
@@ -60,6 +61,7 @@
 import { ref, reactive, computed } from 'vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 import MissionDetailsModal from './MissionDetailsModal.vue'
+import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 
@@ -152,6 +154,85 @@ const checkboxOptions = [
   { key: 'sheetNumber', label: 'N° Feuille' },
   { key: 'countryName', label: 'Nom Pays' },
 ]
+
+// Fonction qui gère l'activation/désactivation des cases
+const handleCheckboxChange = (optionKey) => {
+      const isSelected = selectedOptions[optionKey];
+      if (isSelected) {
+        if(optionKey ==='couplesStereo'){
+          console.log("Ok");
+        }
+        else if(optionKey ==='alphanumeric'){
+          console.log("al");
+        }
+        else if(optionKey ==='popup'){
+          console.log("pp");
+        }
+        else if(optionKey ==='sheetNumber'){
+          eventBus.emit('sheetNumber',{
+            type:'sheetNumber',
+            visibility:isSelected
+          })
+        }
+        else if(optionKey ==='countryName'){
+          eventBus.emit('countryName',{
+            type:'paysNameOnly',
+            visibility:isSelected
+          })
+
+        }
+        else{
+          console.log("probleme");
+        }
+      } else {
+        if(optionKey ==='countryName'){
+          eventBus.emit('countryName',{
+            type:'paysNameOnly',
+            visibility:isSelected
+          })
+
+        }
+        else if(optionKey ==='sheetNumber'){
+          eventBus.emit('sheetNumber',{
+            type:'sheetNumber',
+            visibility:isSelected
+          })
+        }
+
+
+        console.log(`${optionKey} désactivé`);
+      }
+    };
+
+    
+
+
+
+
+const openModal = () => {
+  isModalOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+  document.body.style.overflow = ''
+}
+
+const downloadDetails = () => {
+  console.log('fonction dl')
+}
+
+const getMissionName = () => {
+  const mission = missions.value.find((mission) => mission.id === selectedMission.value)
+  return mission.name
+}
+
+const handleMissionSelected = (mission) => {
+  selectedMission.value = mission.id
+}
+
+
 
 
 </script>

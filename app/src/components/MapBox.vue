@@ -12,11 +12,17 @@
     />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
+    <DrawControl 
+      :map="olMap"
+      :isDrawModeActive="drawModeActive"
+      @draw-complete="handleDrawComplete"
+      @draw-mode-activated="handleDrawModeActivated"
+      @deactivate-draw-mode="handleDeactivateDrawMode" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, provide, watch } from 'vue'
+import { ref, onMounted, nextTick, provide, watch, computed } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
@@ -25,37 +31,21 @@ import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
-
+import DrawControl from './DrawControl.vue'
 import Map from 'ol/Map'
 import View from 'ol/View'
-
 import Polygon from 'ol/geom/Polygon.js'
-
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import {
-  getMaxZoom,
-  createInitialWMTSLayers,
-  updateWMTSLayers,
-  changeActiveWMTSLayer,
-} from './composable/getWMTS'
-
+import { getMaxZoom, createInitialWMTSLayers, updateWMTSLayers, changeActiveWMTSLayer } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
-
 import { layers_carto, otherLayersCartoFrance } from './composable/baseMap'
-
-import {
-  createPinLayer,
-  createGeomLayer,
-  createScanLayer,
-  createWFSLayer,
-  initOtherVectorLayers,
-} from './composable/getVectorLayer'
-//test
+import { createPinLayer, createGeomLayer, createScanLayer, createWFSLayer, initOtherVectorLayers } from './composable/getVectorLayer'
 import { parcour_txt_to_tab } from './composable/parseTXT'
 import { useConvertCoordinates } from './composable/convertCoordinates'
 import MultiPolygon from 'ol/geom/MultiPolygon'
+import { initializeIntersectionLayer, findIntersections, clearIntersection } from './composable/intersectionDraw'
 
 const scanStore = useScanStore()
 const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
@@ -72,6 +62,9 @@ const pins = ref([])
 const showPin = ref(false)
 
 const geomLayer = ref(null)
+
+const drawModeActive = ref(false);
+const lastDrawFeature = ref(null);
 
 let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
@@ -111,7 +104,6 @@ watch(activeTab, (newValue) => {
 
   scanStore.resetCriteria()
 
-  // Reset l'index à 0
   activeLayerIndex.value = 0
 })
 
@@ -132,7 +124,6 @@ function toggleLayerVisibility(isVisible) {
 }
 
 function addPointToMap(x, y) {
-  //Prend un point en parametre et l'affiche sur la carte
   const coord = [x, y]
   const feature = new Feature({
     geometry: new Point(coord),
@@ -141,7 +132,6 @@ function addPointToMap(x, y) {
 }
 
 function Add_new_polygone_to_map(tab) {
-  // Prend un tableau en parametre et l'affiche sur la carte
   const polygon = new Feature({
     geometry: new Polygon([tab]),
   })
@@ -150,23 +140,19 @@ function Add_new_polygone_to_map(tab) {
 }
 
 async function parcour_tab_and_map(url) {
-  //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
     const tab_test = await parcour_txt_to_tab(url)
     let elem, i, i2, x, y, x_3857, y3857, tab_points_3857
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
-        //"Centre Actif"
         x = tab_test[i][1]
         y = tab_test[i][2]
         ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
         addPointToMap(x_3857, y3857)
       } else {
-        //"Cliche Actif"
         elem = tab_test[i]
         tab_points_3857 = []
         for (i2 = 3; i2 < elem.length; i2 = i2 + 2) {
-          //Commence a 3 car en 0 il y a le type d'image et en 1 et 2 il y a le point d'origine
           x = elem[i2]
           y = elem[i2 + 1]
           ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
@@ -194,6 +180,38 @@ function handleOtherLayerToggle(layer) {
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
   changeActiveWMTSLayer(olMap.value, olView.value, layers.value, index)
+}
+
+function handleDrawComplete(drawData) {
+  console.log('Dessin terminé:', drawData);
+  
+  let drawGeometry;
+  if (drawData.type === 'Rectangle' || drawData.type === 'Polygon') {
+    drawGeometry = new Polygon(drawData.coordinates);
+    console.log(drawGeometry)
+  } else if (drawData.type === 'Circle') {
+    drawGeometry = new Polygon(drawData.coordinates);
+  }
+  
+  lastDrawFeature.value = new Feature({
+    geometry: drawGeometry
+  });
+  
+  const extent = findIntersections(drawGeometry, vectorOtherLayers.value);
+  console.log(extent)
+}
+
+function handleDrawModeActivated(mode) {
+  console.log('Mode de dessin activé:', mode);
+  drawModeActive.value = true;
+  
+  clearIntersection();
+}
+
+function handleDeactivateDrawMode() {
+  console.log('Mode de dessin désactivé');
+  drawModeActive.value = false;
+  clearIntersection();
 }
 
 onMounted(() => {
@@ -243,8 +261,9 @@ onMounted(() => {
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
+    
+    initializeIntersectionLayer(olMap);
 
-    // Gestionnaire d'événements de clic
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
       if (showPin.value) {
@@ -265,11 +284,6 @@ onMounted(() => {
       })
     })
 
-    olMap.value.getView().on('change:extent', () => {
-      vectorCommunesSource.value.refresh()
-    })
-
-    // Écouter les événements du bus
     eventBus.on('toggle-pin', (isVisible) => {
       showPin.value = isVisible
       if (!isVisible) {
@@ -308,6 +322,7 @@ onMounted(() => {
 
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
+        scanStore.resetCriteria()
         vectorLayers.value.pin.getSource().clear()
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
@@ -322,7 +337,6 @@ onMounted(() => {
       console.log('--------- REQUETE GEOSERVER --------')
       console.log('NEW URL:', newValue)
       vectorLayers.value.geom.getSource().clear()
-      vectorLayers.value.scan.getSource().clear()
 
       if (storeSelectedGeom.value.length !== 0) {
         let polygon = null
@@ -343,7 +357,7 @@ onMounted(() => {
         olMap.value.getView().fit(extent, {
           padding: [50, 50, 50, 50 + 400],
           minResolution: 200,
-          duration: 2_000,
+          duration: 2000,
         })
       }
 
@@ -372,7 +386,7 @@ onMounted(() => {
 
         olMap.value.getView().fit(extent, {
           padding: [50, 50, 50, 50 + 400],
-          duration: 1_000,
+          duration: 1000,
         })
       }
     })
@@ -390,10 +404,24 @@ onMounted(() => {
         vectorLayers.value.geom.getSource().clear()
         olMap.value.removeLayer(geomLayer)
       }
+      
+      clearIntersection();
     })
 
     window.dispatchEvent(new Event('resize'))
   })
+})
+
+eventBus.on('countryName', ({ type, visibility }) => {
+  if(vectorOtherLayers.value[type]){
+    vectorOtherLayers.value?.[type].setVisible(visibility)
+  }
+})
+
+eventBus.on('sheetNumber', ({ type, visibility }) => {
+  if(vectorOtherLayers.value[type]){
+    vectorOtherLayers.value?.[type].setVisible(visibility)
+  }
 })
 
 provide('eventBus', eventBus)
