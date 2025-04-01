@@ -149,8 +149,9 @@ function downloadCSV() {
 
   if (data) {
     const newData = data.map((scan) => scan.properties)
+    console.log(newData)
     const csvContent = dicoToFormatCSV(newData)
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' })
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
     const objUrl = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.setAttribute('href', objUrl)

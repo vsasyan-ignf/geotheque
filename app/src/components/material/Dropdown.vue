@@ -43,7 +43,7 @@ const selected = ref('')
 const emit = defineEmits()
 
 function updatestoreScansData() {
-  emit('update:selected', selected.value)
+  emit('update:selected', selected.value) // pour choisir la collection
   scanStore.updateSelectedScan(selected.value)
 }
 

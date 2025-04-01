@@ -328,6 +328,8 @@ onMounted(() => {
         vectorLayers.value.emprises.getSource().setUrl('')
         vectorLayers.value.geom.getSource().clear()
         vectorLayers.value.scan.getSource().clear()
+        scanStore.updateSelectedGeom([])
+        
       }
     })
 

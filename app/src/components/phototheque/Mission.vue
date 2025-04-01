@@ -3,12 +3,12 @@
     <div class="mission-selection">
       <div class="selection-header">
         <label for="mission-select">Sélectionner une mission</label>
-        <span class="mission-count">{{ missions.length }} missions trouvées</span>
+        <span class="mission-count">{{ storeScansData?.length }} missions trouvées</span>
       </div>
       <Dropdown
-        :options="missions"
+        :options="storeScansData"
         disableOption="Choisissez une mission"
-        @update:selected="handleMissionSelected"
+
       />
     </div>
 
@@ -16,13 +16,13 @@
       <div class="mission-card">
         <div class="preview-details">
           <div
-            v-for="(detail, index) in essentialDetails"
-            :key="index"
+            v-for="(val, key, index) in essentialDetails"
+            :key="key"
             class="detail-item"
             :style="{ 'animation-delay': `${index * 0.05}s` }"
           >
-            <div class="detail-label">{{ detail.label }}</div>
-            <div class="detail-value">{{ detail.value }}</div>
+            <div class="detail-label">{{ key }}</div>
+            <div class="detail-value">{{ val }}</div>
           </div>
         </div>
 
@@ -48,8 +48,8 @@
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
       <MissionDetailsModal
         :isOpen="isModalOpen"
-        :title="`${getMissionName()} - Détails complets`"
-        :details="allMissionDetails"
+        :title="`${missionName} - Détails complets`"
+        :details="allDetails"
         @close="closeModal"
         @download="downloadDetails"
       />
@@ -59,42 +59,85 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
-import Dropdown from '../material/Dropdown.vue'
+import Dropdown from '@/components/material/Dropdown.vue'
 import MissionDetailsModal from './MissionDetailsModal.vue'
 import { eventBus } from '../composable/eventBus'
-const missions = ref([
-  { id: '1', name: 'Mission Alpha' },
-  { id: '2', name: 'Mission Beta' },
-  { id: '3', name: 'Mission Gamma' },
-])
+import { useScanStore } from '@/components/store/scan'
+import { storeToRefs } from 'pinia'
 
-const allMissionDetails = reactive([
-  { label: 'Désignation', value: 'NaN', essential: true },
-  { label: 'Dispo Photothèque', value: 'NaN', essential: false },
-  { label: 'Échelle', value: 'NaN', essential: false },
-  { label: 'Format', value: 'NaN', essential: true },
-  { label: 'Nombre de clichés', value: 'NaN', essential: true },
-  { label: 'Support', value: 'NaN', essential: false },
-  { label: 'Note', value: 'NaN', essential: false },
-  { label: 'Disponibilité internet', value: 'NaN', essential: false },
-  { label: 'Nom générique', value: 'NaN', essential: false },
-  { label: 'Année', value: 'NaN', essential: true },
-  { label: 'Numéro SAA', value: 'NaN', essential: false },
-  { label: 'Thème', value: 'NaN', essential: false },
-  { label: 'Thème géographique', value: 'NaN', essential: false },
-  { label: 'Commanditaire', value: 'NaN', essential: false },
-  { label: 'Producteur', value: 'NaN', essential: false },
-  { label: 'Style', value: 'NaN', essential: false },
-  { label: 'Émulsion', value: 'NaN', essential: false },
-  { label: 'Qualité PDV', value: 'NaN', essential: false },
-])
+const scanStore = useScanStore()
+const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
 
-const essentialDetails = computed(() => {
-  return allMissionDetails.filter((detail) => detail.essential)
+const selectedMission = computed(() => storeSelectedScan.value?.properties)
+const missionName = computed(() => storeSelectedScan.value?.name)
+
+
+// real key : key bien écrit pour afficher dans modal
+
+const all_keys = {
+  NOM: 'NOM',
+  CHANTIER: 'CHANTIER',
+  NUMÉRO_SA: 'NUMÉRO_SA',
+  ANNÉE: 'ANNÉE',
+  THÈME: 'THÈME',
+  THÈME_GÉ: 'THÈME GÉNÉRAL',
+  COMMANDITA: 'COMMANDITAIRE',
+  PRODUCTEUR: 'PRODUCTEUR',
+  STYLE: 'STYLE',
+  SUPPORT:'SUPPORT',
+  EMULSION: 'EMULTION',
+  RÉSOLUTIO: 'RÉSOLUTION',
+  NOMBRE_DE_: 'NOMBRE DE PVA',
+  QUALITÉ_P: 'QUALITÉ P',
+  RÉFÉRENC: 'RÉFÉRENCE',
+  NOTES: 'NOTES',
+  ENVELOPPE_: 'ENVELOPPE',
+  INTERSECTE: 'INTERSECTE',
+  DISPO_PHOT: 'DISPO PHOTO',
+  DISPO_INTE: 'DISPO INTER',
+  DÉSIGNATI: 'DÉSIGNATION',
+  NOM_GÉNÉ: 'NOM GÉNÉ',
+  IDENTIFIAN: 'IDENTIFIANT', 
+  FORMAT: 'FORMAT',
+  FOCALE: 'FOCALE'
+}
+
+const allDetails = computed(() => {
+  const details = {};
+  for (const key of Object.keys(all_keys)) {
+    details[all_keys[key]] = selectedMission.value?.[key] === '' ? 'No data' : selectedMission.value?.[key];
+  }
+  return details;
 })
 
-const selectedMission = ref('')
+const essential_keys = ['DÉSIGNATION', 'FORMAT', 'ANNÉE', 'NOMBRE DE PVA']
+
+const essentialDetails = computed(() => {
+  const details = {};
+  for (const key of essential_keys) {
+    details[key] = allDetails.value?.[key];
+  }
+  return details;
+})
+
+
 const isModalOpen = ref(false)
+
+const openModal = () => {
+  isModalOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+  document.body.style.overflow = ''
+}
+
+const downloadDetails = () => {
+  console.log('fonction dl')
+}
+
+/********************** CHECKBOX ************************* */
 
 const selectedOptions = reactive({
   couplesStereo: false,
@@ -109,7 +152,7 @@ const checkboxOptions = [
   { key: 'alphanumeric', label: 'Alphanumérique' },
   { key: 'popup', label: 'Popup' },
   { key: 'sheetNumber', label: 'N° Feuille' },
-  { key: 'countryName', label: 'Nom Pays' },
+  { key: 'countryName', label: 'Nom Département' },
 ]
 
 // Fonction qui gère l'activation/désactivation des cases
@@ -156,41 +199,9 @@ const handleCheckboxChange = (optionKey) => {
           })
         }
 
-
         console.log(`${optionKey} désactivé`);
       }
     };
-
-    
-
-
-
-
-const openModal = () => {
-  isModalOpen.value = true
-  document.body.style.overflow = 'hidden'
-}
-
-const closeModal = () => {
-  isModalOpen.value = false
-  document.body.style.overflow = ''
-}
-
-const downloadDetails = () => {
-  console.log('fonction dl')
-}
-
-const getMissionName = () => {
-  const mission = missions.value.find((mission) => mission.id === selectedMission.value)
-  return mission.name
-}
-
-const handleMissionSelected = (mission) => {
-  selectedMission.value = mission.id
-}
-
-
-
 
 </script>
 

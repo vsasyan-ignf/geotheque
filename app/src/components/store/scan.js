@@ -21,13 +21,13 @@ export const useScanStore = defineStore('scan', () => {
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
-      let empriseURL = 'emprisesscans'
-      let [minX, minY, maxX, maxY] = storeBbox.value
+      let empriseURL = 'emprisesscans';
+      let [minX, minY, maxX, maxY] = storeBbox.value;
 
       if (activeTab.value === 'cartotheque_etranger') {
         empriseURL = 'emprisesscansmonde';
         // inverse les coordonnées : lon/lat to lat/lon
-        [minX, minY] = [minY, minX];
+        [minX, minY] = [minY, minX];;
         [maxX, maxY] = [maxY, maxX];
 
       }
@@ -50,6 +50,12 @@ export const useScanStore = defineStore('scan', () => {
       if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`
 
       if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
+
+
+      if (activeTab.value === 'phototheque') {
+        empriseURL = 'PVALambert93';
+        cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
+      }
 
       return (
         `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
@@ -120,9 +126,10 @@ export const useScanStore = defineStore('scan', () => {
         storeScansData.value = data.features.map((feature, index) => ({
           id: index,
           geom: feature.geometry.coordinates[0],
-          name: feature.properties.ID_CARTE,
+          name: feature.properties.ID_CARTE ?? feature.properties.NOM, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
           properties: feature.properties,
         }))
+        storeSelectedScan.value = null
       } else {
         throw new Error('Failed to fetch data')
       }
