@@ -24,15 +24,18 @@ export const useScanStore = defineStore('scan', () => {
       let [minX, minY, maxX, maxY] = storeBbox.value
 
       if (activeTab.value === 'cartotheque_etranger') {
-        empriseURL = 'emprisesscansmonde'
+        empriseURL = 'emprisesscansmonde';
         // inverse les coordonnées : lon/lat to lat/lon
-        [minX, minY] = [minY, minX]
-        [maxX, maxY] = [maxY, maxX]
+        [minX, minY] = [minY, minX];
+        [maxX, maxY] = [maxY, maxX];
       }
 
-      const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
+      const { yearMin, yearMax, selectedCollection } =
         storeCritereSelection.value
 
+      const scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      const scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
+      
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
       if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`
