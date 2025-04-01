@@ -199,41 +199,9 @@ const handleCheckboxChange = (optionKey) => {
           })
         }
 
-
         console.log(`${optionKey} désactivé`);
       }
     };
-
-    
-
-
-
-
-const openModal = () => {
-  isModalOpen.value = true
-  document.body.style.overflow = 'hidden'
-}
-
-const closeModal = () => {
-  isModalOpen.value = false
-  document.body.style.overflow = ''
-}
-
-const downloadDetails = () => {
-  console.log('fonction dl')
-}
-
-const getMissionName = () => {
-  const mission = missions.value.find((mission) => mission.id === selectedMission.value)
-  return mission.name
-}
-
-const handleMissionSelected = (mission) => {
-  selectedMission.value = mission.id
-}
-
-
-
 
 </script>
 

@@ -36,7 +36,7 @@ const props = defineProps({
     required: true,
   },
   details: {
-    type: Array,
+    type: Object,
     required: true,
   },
 })

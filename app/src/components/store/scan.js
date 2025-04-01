@@ -32,11 +32,6 @@ export const useScanStore = defineStore('scan', () => {
 
       }
 
-      if (activeTab.value === 'phototheque') {
-        empriseURL = 'PVALambert93';
-
-      }
-
       const { yearMin, yearMax, selectedCollection } =
         storeCritereSelection.value
 
@@ -55,6 +50,12 @@ export const useScanStore = defineStore('scan', () => {
       if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`
 
       if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
+
+
+      if (activeTab.value === 'phototheque') {
+        empriseURL = 'PVALambert93';
+        cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
+      }
 
       return (
         `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
