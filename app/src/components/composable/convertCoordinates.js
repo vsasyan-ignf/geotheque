@@ -1,4 +1,11 @@
 import proj4 from 'proj4'
+import * as olProj from 'ol/proj'
+import WKT from 'ol/format/WKT'
+import MultiPolygon from 'ol/geom/MultiPolygon'
+import Polygon from 'ol/geom/Polygon'
+import { useScanStore } from '@/components/store/scan'
+
+
 
 // définit les systèmes de projection
 proj4.defs([
@@ -134,4 +141,26 @@ export function roundCoordinates(multiPolygon, precision = 6) {
       })
     )
   );
+}
+
+
+export function createRealContour(contour) {
+
+  let newcontour = contour.map(polygon => polygon.map(([x, y]) => olProj.transform([x, y], 'EPSG:3857', 'EPSG:4326')))
+  newcontour = newcontour.map(polygon => polygon.map(([x, y]) => [y.toFixed(2), x.toFixed(2)]))
+
+  const simplePolygon = newcontour.map(polygonCoords => {
+    const polygon = new Polygon([polygonCoords])
+    return polygon.simplify(getDynamicTolerance(polygonCoords))
+  })
+
+  const simplified_multipolygon = new MultiPolygon(simplePolygon)
+
+  const roundedCoordinates = roundCoordinates(simplified_multipolygon, 2)
+  simplified_multipolygon.setCoordinates(roundedCoordinates)
+
+  const wktformat = new WKT()
+  const wkt = wktformat.writeGeometry(simplified_multipolygon)
+  // scanStore.updateCountryGeom(wkt)
+  return wkt
 }

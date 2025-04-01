@@ -66,7 +66,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { create_multibbox, convertBbox, getDynamicTolerance, roundCoordinates } from '../composable/convertCoordinates'
+import { create_multibbox, convertBbox, getDynamicTolerance, roundCoordinates, createRealContour } from '../composable/convertCoordinates'
 import config from '@/config'
 import WKT from 'ol/format/WKT'
 import MultiPolygon from 'ol/geom/MultiPolygon'
@@ -155,26 +155,11 @@ function selectCountry(country) {
         contour =[longestSubArray]
       }
 
-      let newcontour = contour.map(polygon => polygon.map(([x,y]) => olProj.transform([x, y], 'EPSG:3857', 'EPSG:4326')))
-      newcontour = newcontour.map(polygon => polygon.map(([x,y]) => [y.toFixed(2),x.toFixed(2)]))
+      scanStore.updateCountryGeom(createRealContour(contour))
 
       if (country.code === "US"){
-          newcontour = [[["25.324167", "-124.980469"], ["48.89", "-124.98"], ["48.922499", "-66.445313"], ["25.32", "-66.44"], ["25.324167", "-124.980469"]]]
+          contour = [[["-124.980469", "25.324167"], ["-124.98", "48.89"], ["-66.445313", "48.922499"], ["-66.44", "25.32"], ["-124.980469", "25.324167"]]]
         }
-
-      const simplePolygon = newcontour.map(polygonCoords => {
-        const polygon = new Polygon([polygonCoords])
-        return polygon.simplify(getDynamicTolerance(polygonCoords))
-      })
-
-      const simplified_multipolygon = new MultiPolygon(simplePolygon)
-
-      const roundedCoordinates = roundCoordinates(simplified_multipolygon, 2)
-      simplified_multipolygon.setCoordinates(roundedCoordinates)
-
-      const wktformat = new WKT()
-      const wkt = wktformat.writeGeometry(simplified_multipolygon)
-      scanStore.updateCountryGeom(wkt)
 
     })
     .catch((error) => {
