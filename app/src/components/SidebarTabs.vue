@@ -12,13 +12,21 @@
       @mouseleave="tab.showTooltip = false"
       :title="tab.title"
     >
-      <i :class="'mdi mdi-' + tab.icon + ' icon-large'"></i>
+      <SvgIcon v-if="mdiIcons[tab.icon]" :path="mdiIcons[tab.icon]" class="icon" type="mdi" />
       <div class="tooltip" v-show="activeTab !== tab.id">{{ tab.title }}</div>
     </button>
   </div>
 </template>
 
 <script setup>
+import { mdiLayers, mdiCamera, mdiLightbulbOn } from '@mdi/js'
+
+const mdiIcons = {
+  layers: mdiLayers,
+  camera: mdiCamera,
+  'lightbulb-on': mdiLightbulbOn,
+}
+
 defineProps({
   tabs: {
     type: Array,
@@ -96,5 +104,16 @@ function hideTooltip(tab) {
 
 .tab-button.active .tooltip {
   opacity: 0;
+}
+
+.icon {
+  width: 27px;
+  height: 27px;
+  color: #555;
+  transition: color 0.3s;
+}
+
+.tab-button.active .icon {
+  color: white;
 }
 </style>

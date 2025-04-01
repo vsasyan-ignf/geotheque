@@ -15,7 +15,7 @@ export default defineConfig({
     allowedHosts: true
   },
   cors: {
-    origin: /http?:\/\/([A-Za-z0-9\-\.]+)?(\.ddev\.site)(?::\d+)?$/,
+    origin: /http?:\/\/([A-Za-z0-9\-.]+)?(\.ddev\.site)(?::\d+)?$/,
   },
   resolve: {
     alias: {
