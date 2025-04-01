@@ -54,14 +54,15 @@
 
     // L'image complète sur le serveur, ici l'URL de votre image JPEG2000
     var image = sessionStorage.getItem('imageUrl') // Chemin de l'image sur le serveur
-    // Copyright ou message d'information
-    var credit = '&copy; Copyright ou message d\'information';
 
+    if (image) {
+      var imageName = image.split('/').pop();
+      document.title = imageName;
+    }
     // Créer l'objet IIPMooViewer
     new IIPMooViewer("viewer", {
       server: server,
-      image: image,
-      credit: credit
+      image: image
     });
   </script>
 
