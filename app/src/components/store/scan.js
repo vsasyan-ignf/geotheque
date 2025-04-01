@@ -9,6 +9,7 @@ export const useScanStore = defineStore('scan', () => {
   let storeSelectedScan = ref(null)
   let activeSubCategory = ref(null)
   let activeTab = ref('cartotheque')
+  let countryGeom = ref(null)
 
   let storeCritereSelection = ref({
     yearMin: null,
@@ -23,17 +24,20 @@ export const useScanStore = defineStore('scan', () => {
       let empriseURL = 'emprisesscans'
       let [minX, minY, maxX, maxY] = storeBbox.value
 
+      let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
+
       if (activeTab.value === 'cartotheque_etranger') {
         empriseURL = 'emprisesscansmonde';
         // inverse les coordonnées : lon/lat to lat/lon
         [minX, minY] = [minY, minX];
         [maxX, maxY] = [maxY, maxX];
+        cqlFilter = `INTERSECTS(the_geom,${countryGeom.value})`
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
         storeCritereSelection.value
 
-      let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
+
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
       if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`
       if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`
@@ -94,6 +98,10 @@ export const useScanStore = defineStore('scan', () => {
     console.log('tab selected : ', activeTab.value)
   }
 
+  function updateCountryGeom(newVal) {
+    countryGeom.value = newVal
+  }
+
   async function storeGet(url) {
     if (!url) {
       return
@@ -134,5 +142,7 @@ export const useScanStore = defineStore('scan', () => {
     resetCriteria,
     activeTab,
     updateActiveTab,
+    countryGeom,
+    updateCountryGeom,
   }
 })
