@@ -209,6 +209,7 @@ onMounted(() => {
 
     vectorOtherLayers.value = initOtherVectorLayers()
     console.log(vectorOtherLayers.value)
+
     watch(currentZoom, (newZoom) => {
       if (vectorOtherLayers.value?.communes && communesLayerManuallyActivated.value) {
         const shouldBeVisible = newZoom >= 12
@@ -395,6 +396,18 @@ onMounted(() => {
 
     window.dispatchEvent(new Event('resize'))
   })
+})
+
+eventBus.on('countryName', ({ type, visibility }) => {
+  if(vectorOtherLayers.value[type]){
+    vectorOtherLayers.value?.[type].setVisible(visibility)
+  }
+})
+
+eventBus.on('sheetNumber', ({ type, visibility }) => {
+  if(vectorOtherLayers.value[type]){
+    vectorOtherLayers.value?.[type].setVisible(visibility)
+  }
 })
 
 provide('eventBus', eventBus)

@@ -61,6 +61,7 @@
 import { ref, reactive, computed } from 'vue'
 import Dropdown from '../material/Dropdown.vue'
 import MissionDetailsModal from './MissionDetailsModal.vue'
+import { eventBus } from '../composable/eventBus'
 const missions = ref([
   { id: '1', name: 'Mission Alpha' },
   { id: '2', name: 'Mission Beta' },
@@ -125,15 +126,37 @@ const handleCheckboxChange = (optionKey) => {
           console.log("pp");
         }
         else if(optionKey ==='sheetNumber'){
-          console.log("sn");
+          eventBus.emit('sheetNumber',{
+            type:'sheetNumber',
+            visibility:isSelected
+          })
         }
         else if(optionKey ==='countryName'){
-          console.log("cn");
+          eventBus.emit('countryName',{
+            type:'paysNameOnly',
+            visibility:isSelected
+          })
+
         }
         else{
           console.log("probleme");
         }
       } else {
+        if(optionKey ==='countryName'){
+          eventBus.emit('countryName',{
+            type:'paysNameOnly',
+            visibility:isSelected
+          })
+
+        }
+        else if(optionKey ==='sheetNumber'){
+          eventBus.emit('sheetNumber',{
+            type:'sheetNumber',
+            visibility:isSelected
+          })
+        }
+
+
         console.log(`${optionKey} désactivé`);
       }
     };
