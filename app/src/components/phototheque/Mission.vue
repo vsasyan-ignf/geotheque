@@ -37,7 +37,8 @@
       <div class="options-label">Options de sélection</div>
       <div class="checkbox-group">
         <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
-          <input type="checkbox" v-model="selectedOptions[option.key]" class="checkbox-input" />
+          <input type="checkbox" v-model="selectedOptions[option.key]" class="checkbox-input" 
+          @change="handleCheckboxChange(option.key)"/>
           <span class="custom-checkbox"></span>
           {{ option.label }}
         </label>
@@ -60,6 +61,7 @@
 import { ref, reactive, computed } from 'vue'
 import Dropdown from '../material/Dropdown.vue'
 import MissionDetailsModal from './MissionDetailsModal.vue'
+import { eventBus } from '../composable/eventBus'
 const missions = ref([
   { id: '1', name: 'Mission Alpha' },
   { id: '2', name: 'Mission Beta' },
@@ -110,6 +112,60 @@ const checkboxOptions = [
   { key: 'countryName', label: 'Nom Pays' },
 ]
 
+// Fonction qui gère l'activation/désactivation des cases
+const handleCheckboxChange = (optionKey) => {
+      const isSelected = selectedOptions[optionKey];
+      if (isSelected) {
+        if(optionKey ==='couplesStereo'){
+          console.log("Ok");
+        }
+        else if(optionKey ==='alphanumeric'){
+          console.log("al");
+        }
+        else if(optionKey ==='popup'){
+          console.log("pp");
+        }
+        else if(optionKey ==='sheetNumber'){
+          eventBus.emit('sheetNumber',{
+            type:'sheetNumber',
+            visibility:isSelected
+          })
+        }
+        else if(optionKey ==='countryName'){
+          eventBus.emit('countryName',{
+            type:'paysNameOnly',
+            visibility:isSelected
+          })
+
+        }
+        else{
+          console.log("probleme");
+        }
+      } else {
+        if(optionKey ==='countryName'){
+          eventBus.emit('countryName',{
+            type:'paysNameOnly',
+            visibility:isSelected
+          })
+
+        }
+        else if(optionKey ==='sheetNumber'){
+          eventBus.emit('sheetNumber',{
+            type:'sheetNumber',
+            visibility:isSelected
+          })
+        }
+
+
+        console.log(`${optionKey} désactivé`);
+      }
+    };
+
+    
+
+
+
+
 const openModal = () => {
   isModalOpen.value = true
   document.body.style.overflow = 'hidden'
@@ -132,6 +188,10 @@ const getMissionName = () => {
 const handleMissionSelected = (mission) => {
   selectedMission.value = mission.id
 }
+
+
+
+
 </script>
 
 <style scoped>

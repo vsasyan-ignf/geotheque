@@ -31,7 +31,10 @@ export const useScanStore = defineStore('scan', () => {
         // inverse les coordonnées : lon/lat to lat/lon
         [minX, minY] = [minY, minX];
         [maxX, maxY] = [maxY, maxX];
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/dev
       }
 
       const { yearMin, yearMax, selectedCollection } =
