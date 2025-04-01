@@ -20,16 +20,15 @@ export const useScanStore = defineStore('scan', () => {
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
-      let empriseURL = 'emprisesscans'
-      let [minX, minY, maxX, maxY] = storeBbox.value
+      let empriseURL = 'emprisesscans';
+      let [minX, minY, maxX, maxY] = storeBbox.value;
 
       if (activeTab.value === 'cartotheque_etranger') {
-        empriseURL = 'emprisesscansmonde'
-          // inverse les coordonnées : lon/lat to lat/lon
-          ;[minX, minY] = [minY, minX]
-          ;[maxX, maxY] = [maxY, maxX]
+        empriseURL = 'emprisesscansmonde';
+        // inverse les coordonnées : lon/lat to lat/lon
+        [minX, minY] = [minY, minX];
+        [maxX, maxY] = [maxY, maxX];
 
-          console.log()
       }
 
       if (activeTab.value === 'phototheque') {
@@ -115,12 +114,7 @@ export const useScanStore = defineStore('scan', () => {
           name: feature.properties.ID_CARTE ?? feature.properties.NOM, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
           properties: feature.properties,
         }))
-
-
-        const test = storeScansData.value.map((feature) => feature.properties)
-        console.log(test)
-
-
+        storeSelectedScan.value = null
       } else {
         throw new Error('Failed to fetch data')
       }

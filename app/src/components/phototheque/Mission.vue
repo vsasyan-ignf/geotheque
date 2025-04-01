@@ -8,7 +8,7 @@
       <Dropdown
         :options="storeScansData"
         disableOption="Choisissez une mission"
-        @update:selected="handleMissionSelected"
+
       />
     </div>
 
@@ -16,13 +16,13 @@
       <div class="mission-card">
         <div class="preview-details">
           <div
-            v-for="(detail, index) in essentialDetails"
-            :key="index"
+            v-for="(val, key, index) in essentialDetails"
+            :key="key"
             class="detail-item"
             :style="{ 'animation-delay': `${index * 0.05}s` }"
           >
-            <div class="detail-label">{{ detail.label }}</div>
-            <div class="detail-value">{{ detail.value }}</div>
+            <div class="detail-label">{{ key }}</div>
+            <div class="detail-value">{{ val }}</div>
           </div>
         </div>
 
@@ -47,7 +47,7 @@
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
       <MissionDetailsModal
         :isOpen="isModalOpen"
-        :title="`${getMissionName()} - Détails complets`"
+        :title="`${missionName} - Détails complets`"
         :details="allMissionDetails"
         @close="closeModal"
         @download="downloadDetails"
@@ -57,49 +57,55 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 import MissionDetailsModal from './MissionDetailsModal.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 
-
 const scanStore = useScanStore()
 const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
 
-const missions = ref([
-  { id: '1', name: 'Mission Alpha' },
-  { id: '2', name: 'Mission Beta' },
-  { id: '3', name: 'Mission Gamma' },
-])
+const selectedMission = computed(() => storeSelectedScan.value?.properties)
+const missionName = computed(() => storeSelectedScan.value?.name)
 
-const allMissionDetails = reactive([
-  { label: 'Désignation', value: 'NaN', essential: true },
-  { label: 'Dispo Photothèque', value: 'NaN', essential: false },
-  { label: 'Échelle', value: 'NaN', essential: false },
-  { label: 'Format', value: 'NaN', essential: true },
-  { label: 'Nombre de clichés', value: 'NaN', essential: true },
-  { label: 'Support', value: 'NaN', essential: false },
-  { label: 'Note', value: 'NaN', essential: false },
-  { label: 'Disponibilité internet', value: 'NaN', essential: false },
-  { label: 'Nom générique', value: 'NaN', essential: false },
-  { label: 'Année', value: 'NaN', essential: true },
-  { label: 'Numéro SAA', value: 'NaN', essential: false },
-  { label: 'Thème', value: 'NaN', essential: false },
-  { label: 'Thème géographique', value: 'NaN', essential: false },
-  { label: 'Commanditaire', value: 'NaN', essential: false },
-  { label: 'Producteur', value: 'NaN', essential: false },
-  { label: 'Style', value: 'NaN', essential: false },
-  { label: 'Émulsion', value: 'NaN', essential: false },
-  { label: 'Qualité PDV', value: 'NaN', essential: false },
-])
-
-const essentialDetails = computed(() => {
-  return allMissionDetails.filter((detail) => detail.essential)
+watch(storeSelectedScan, (val) => {
+  console.log('--------------- new selected -----------')
+  console.log(val)
 })
 
-const selectedMission = ref('')
+const essential_keys = {
+  DÉSIGNATI: 'DÉSIGNATION', 
+  FORMAT: 'FORMAT',
+  ANNÉE: 'ANNÉE', 
+  NOMBRE_DE_: 'NOMBRE DE PVA'
+}
+
+const essentialDetails = computed(() => {
+  const details = {};
+  for (const key of Object.keys(essential_keys)) {
+    details[essential_keys[key]] = selectedMission.value?.[key];
+  }
+  return details;
+})
+
 const isModalOpen = ref(false)
+
+const openModal = () => {
+  isModalOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+
+const closeModal = () => {
+  isModalOpen.value = false
+  document.body.style.overflow = ''
+}
+
+const downloadDetails = () => {
+  console.log('fonction dl')
+}
+
+/********************** CHECKBOX ************************* */
 
 const selectedOptions = reactive({
   couplesStereo: false,
@@ -117,29 +123,7 @@ const checkboxOptions = [
   { key: 'countryName', label: 'Nom Pays' },
 ]
 
-const openModal = () => {
-  isModalOpen.value = true
-  document.body.style.overflow = 'hidden'
-}
 
-const closeModal = () => {
-  isModalOpen.value = false
-  document.body.style.overflow = ''
-}
-
-const downloadDetails = () => {
-  console.log('fonction dl')
-}
-
-const getMissionName = () => {
-  const mission = missions.value.find((mission) => mission.id === selectedMission.value)
-  return mission.name
-}
-
-const handleMissionSelected = (mission) => {
-  selectedMission.value = mission.id
-  console.log(selectedMission.value)
-}
 </script>
 
 <style scoped>

@@ -216,8 +216,6 @@ onMounted(() => {
       }
     })
 
-    /***************************************** Create source and layer for scan selected ******************************* */
-
     const view = new View({
       center: center.value,
       zoom: zoom.value,
