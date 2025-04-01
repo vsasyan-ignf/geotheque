@@ -68,11 +68,8 @@ import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 import { create_multibbox, convertBbox, getDynamicTolerance, roundCoordinates, createRealContour } from '../composable/convertCoordinates'
 import config from '@/config'
-import WKT from 'ol/format/WKT'
-import MultiPolygon from 'ol/geom/MultiPolygon'
-import Polygon from 'ol/geom/Polygon'
 import { useScanStore } from '@/components/store/scan'
-import * as olProj from 'ol/proj'
+
 
 
 
@@ -161,7 +158,7 @@ function selectCountry(country) {
         contour = [[["-13912762.1682", "2915614.0653"], ["-13912762.1682", "6261721.3124"], ["-7396658.4088", "6261721.3124"], ["-7396658.4088", "2915614.0653"], ["-13912762.1682", "2915614.0653"]]]
       }
 
-      scanStore.updateCountryGeom(createRealContour(contour))
+      scanStore.updateWKT(createRealContour(contour))
     })
     .catch((error) => {
       console.error('Erreur lors de la récupération des contours du pays:', error)

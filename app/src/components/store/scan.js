@@ -9,7 +9,7 @@ export const useScanStore = defineStore('scan', () => {
   let storeSelectedScan = ref(null)
   let activeSubCategory = ref(null)
   let activeTab = ref('cartotheque')
-  let countryGeom = ref(null)
+  let wkt = ref(null)
 
   let storeCritereSelection = ref({
     yearMin: null,
@@ -39,7 +39,7 @@ export const useScanStore = defineStore('scan', () => {
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
 
       if (activeSubCategory.value === "pays") {
-        cqlFilter = `INTERSECTS(the_geom,${countryGeom.value})`
+        cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
       }
 
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
@@ -102,8 +102,8 @@ export const useScanStore = defineStore('scan', () => {
     console.log('tab selected : ', activeTab.value)
   }
 
-  function updateCountryGeom(newVal) {
-    countryGeom.value = newVal
+  function updateWKT(newVal) {
+    wkt.value = newVal
   }
 
   async function storeGet(url) {
@@ -146,7 +146,7 @@ export const useScanStore = defineStore('scan', () => {
     resetCriteria,
     activeTab,
     updateActiveTab,
-    countryGeom,
-    updateCountryGeom,
+    wkt,
+    updateWKT,
   }
 })
