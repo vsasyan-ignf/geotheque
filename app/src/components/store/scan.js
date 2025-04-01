@@ -31,7 +31,9 @@ export const useScanStore = defineStore('scan', () => {
         // inverse les coordonnées : lon/lat to lat/lon
         [minX, minY] = [minY, minX];
         [maxX, maxY] = [maxY, maxX];
-        cqlFilter = `INTERSECTS(the_geom,${countryGeom.value})`
+        if (activeSubCategory.value === "pays") {
+          cqlFilter = `INTERSECTS(the_geom,${countryGeom.value})`
+        }
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
