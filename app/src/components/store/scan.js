@@ -30,9 +30,12 @@ export const useScanStore = defineStore('scan', () => {
         [maxX, maxY] = [maxY, maxX];
       }
 
-      const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
+      const { yearMin, yearMax, selectedCollection } =
         storeCritereSelection.value
 
+      const scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      const scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
+      
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
       if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`
