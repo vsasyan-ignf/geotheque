@@ -66,7 +66,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from './CartothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { create_multibbox, convertBbox } from '../composable/convertCoordinates'
+import { create_multibbox, convertBbox, getDynamicTolerance, roundCoordinates } from '../composable/convertCoordinates'
 import config from '@/config'
 import WKT from 'ol/format/WKT'
 import MultiPolygon from 'ol/geom/MultiPolygon'
@@ -138,43 +138,7 @@ function getLongestSubArray(arr) {
     , []);
 }
 
-function getDynamicTolerance(polygon) {
-    const len = polygon.length
 
-    if (len > 50 && len <= 100) {
-        return 0.3
-    } else if (len > 20 && len <= 50) {
-        return 0.1
-    } else if (len > 10 && len <= 20) {
-        return 0.05
-    } else if (len > 100 && len <= 1000) {
-        return 1
-    } else if (len > 1000 && len <= 2000) {
-        return 5
-    } else if (len > 2000 && len <= 5000) {
-        return 10
-    } else if (len > 5000){
-      return 20
-    }
-
-    return len > 20 ? 2 : 0.001;
-}
-
-function roundCoordinates(multiPolygon, precision = 6) {
-    return multiPolygon.getCoordinates().map(polygon =>
-        polygon.map(ring =>
-            ring.map(coord => {
-              const longitude = parseFloat(coord[0]);
-              const latitude = parseFloat(coord[1]);
-
-              return [
-                    longitude.toFixed(precision),
-                    latitude.toFixed(precision)
-                ];
-            })
-        )
-    );
-}
 
 function selectCountry(country) {
   getCountryBbox(country)
