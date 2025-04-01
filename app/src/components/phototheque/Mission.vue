@@ -110,12 +110,12 @@ const allDetails = computed(() => {
   return details;
 })
 
-const essential_keys = ['DÉSIGNATI', 'FORMAT', 'ANNÉE', 'NOMBRE_DE_']
+const essential_keys = ['DÉSIGNATION', 'FORMAT', 'ANNÉE', 'NOMBRE DE PVA']
 
 const essentialDetails = computed(() => {
   const details = {};
   for (const key of essential_keys) {
-    details[all_keys[key]] = selectedMission.value?.[key];
+    details[key] = allDetails.value?.[key];
   }
   return details;
 })
@@ -152,7 +152,7 @@ const checkboxOptions = [
   { key: 'alphanumeric', label: 'Alphanumérique' },
   { key: 'popup', label: 'Popup' },
   { key: 'sheetNumber', label: 'N° Feuille' },
-  { key: 'countryName', label: 'Nom Pays' },
+  { key: 'countryName', label: 'Nom Département' },
 ]
 
 // Fonction qui gère l'activation/désactivation des cases
