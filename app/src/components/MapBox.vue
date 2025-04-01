@@ -314,6 +314,7 @@ onMounted(() => {
         vectorLayers.value.geom.getSource().clear()
         vectorLayers.value.scan.getSource().clear()
         scanStore.updateSelectedGeom([])
+        
       }
     })
 

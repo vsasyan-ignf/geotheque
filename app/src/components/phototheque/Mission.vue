@@ -48,7 +48,7 @@
       <MissionDetailsModal
         :isOpen="isModalOpen"
         :title="`${missionName} - Détails complets`"
-        :details="allMissionDetails"
+        :details="allDetails"
         @close="closeModal"
         @download="downloadDetails"
       />
@@ -57,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 import MissionDetailsModal from './MissionDetailsModal.vue'
 import { useScanStore } from '@/components/store/scan'
@@ -69,25 +69,55 @@ const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
 
-watch(storeSelectedScan, (val) => {
-  console.log('--------------- new selected -----------')
-  console.log(val)
-})
 
-const essential_keys = {
-  DÉSIGNATI: 'DÉSIGNATION', 
+// real key : key bien écrit pour afficher dans modal
+
+const all_keys = {
+  NOM: 'NOM',
+  CHANTIER: 'CHANTIER',
+  NUMÉRO_SA: 'NUMÉRO_SA',
+  ANNÉE: 'ANNÉE',
+  THÈME: 'THÈME',
+  THÈME_GÉ: 'THÈME GÉNÉRAL',
+  COMMANDITA: 'COMMANDITAIRE',
+  PRODUCTEUR: 'PRODUCTEUR',
+  STYLE: 'STYLE',
+  SUPPORT:'SUPPORT',
+  EMULSION: 'EMULTION',
+  RÉSOLUTIO: 'RÉSOLUTION',
+  NOMBRE_DE_: 'NOMBRE DE PVA',
+  QUALITÉ_P: 'QUALITÉ P',
+  RÉFÉRENC: 'RÉFÉRENCE',
+  NOTES: 'NOTES',
+  ENVELOPPE_: 'ENVELOPPE',
+  INTERSECTE: 'INTERSECTE',
+  DISPO_PHOT: 'DISPO PHOTO',
+  DISPO_INTE: 'DISPO INTER',
+  DÉSIGNATI: 'DÉSIGNATION',
+  NOM_GÉNÉ: 'NOM GÉNÉ',
+  IDENTIFIAN: 'IDENTIFIANT', 
   FORMAT: 'FORMAT',
-  ANNÉE: 'ANNÉE', 
-  NOMBRE_DE_: 'NOMBRE DE PVA'
+  FOCALE: 'FOCALE'
 }
 
-const essentialDetails = computed(() => {
+const allDetails = computed(() => {
   const details = {};
-  for (const key of Object.keys(essential_keys)) {
-    details[essential_keys[key]] = selectedMission.value?.[key];
+  for (const key of Object.keys(all_keys)) {
+    details[all_keys[key]] = selectedMission.value?.[key] === '' ? 'No data' : selectedMission.value?.[key];
   }
   return details;
 })
+
+const essential_keys = ['DÉSIGNATI', 'FORMAT', 'ANNÉE', 'NOMBRE_DE_']
+
+const essentialDetails = computed(() => {
+  const details = {};
+  for (const key of essential_keys) {
+    details[all_keys[key]] = selectedMission.value?.[key];
+  }
+  return details;
+})
+
 
 const isModalOpen = ref(false)
 

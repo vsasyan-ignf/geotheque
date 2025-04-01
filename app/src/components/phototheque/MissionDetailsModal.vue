@@ -8,9 +8,9 @@
 
       <div class="modal-content">
         <div class="details-grid">
-          <div v-for="(detail, index) in details" :key="index" class="modal-detail-item">
-            <div class="detail-label">{{ detail.label }}</div>
-            <div class="detail-value">{{ detail.value }}</div>
+          <div v-for="(val, key) in details" :key="key" class="modal-detail-item">
+            <div class="detail-label">{{ key }}</div>
+            <div class="detail-value">{{ val }}</div>
           </div>
         </div>
       </div>
