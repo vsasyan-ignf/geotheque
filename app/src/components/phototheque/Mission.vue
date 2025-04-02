@@ -142,21 +142,22 @@ const selectedOptions = reactive({
   couplesStereo: false,
   alphanumeric: false,
   popup: false,
-  feuille: true,
-  countryName: false,
+  feuilles: true,
+  departements: true,
 })
 
 const checkboxOptions = [
   { key: 'couplesStereo', label: 'Couples Stéréo' },
   { key: 'alphanumeric', label: 'Alphanumérique' },
   { key: 'popup', label: 'Popup' },
-  { key: 'feuille', label: 'N° Feuille' },
-  { key: 'countryName', label: 'Nom Département' },
+  { key: 'feuilles', label: 'N° Feuille' },
+  { key: 'departements', label: 'N° Département' },
 ]
 
 // Fonction qui gère l'activation/désactivation des cases
 const handleCheckboxChange = (optionKey) => {
   const isChecked = selectedOptions[optionKey]
+  console.log('-----------in mission--------------')
   console.log(optionKey, isChecked)
 
   if (optionKey === 'couplesStereo') {
@@ -165,13 +166,10 @@ const handleCheckboxChange = (optionKey) => {
     console.log('click alpha')
   } else if (optionKey === 'popup') {
     console.log('click popup')
-  } else if (optionKey === 'feuille') {
-    eventBus.emit('feuille', isChecked)
-  } else if (optionKey === 'countryName') {
-    eventBus.emit('countryName', {
-      type: 'paysNameOnly',
-      visibility: isSelected,
-    })
+  } else if (optionKey === 'feuilles') {
+    eventBus.emit('feuilles', isChecked)
+  } else if (optionKey === 'departements') {
+    eventBus.emit('departements', isChecked)
   }
 }
 </script>

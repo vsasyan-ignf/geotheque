@@ -433,15 +433,9 @@ onMounted(() => {
   })
 })
 
-eventBus.on('countryName', ({ type, visibility }) => {
-  if (vectorOtherLayers.value[type]) {
-    vectorOtherLayers.value?.[type].setVisible(visibility)
-  }
-})
-
-eventBus.on('feuille', (checked) => {
-  const currentLayer = checked ? 'feuilles_france' : 'feuilles_france_with_no_name'
-  const previousLayer = checked ? 'feuilles_france_with_no_name' : 'feuilles_france'
+eventBus.on('departements', (isChecked) => {
+  const currentLayer = isChecked ? 'departements' : 'departements_with_no_name'
+  const previousLayer = isChecked ? 'departements_with_no_name' : 'departements'
 
   if (vectorOtherLayers.value?.[previousLayer]) {
     const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
@@ -451,7 +445,25 @@ eventBus.on('feuille', (checked) => {
     }
     // changer la layer dans le BaseCardSwitcher
     if (otherLayers.value) {
-      otherLayers.value.at(2).id = currentLayer // j'ai mis 2 car je connais l'index mais à change avec un map
+      otherLayers.value.at(1).id = currentLayer // j'ai mis 1 car je connais l'index mais à change avec un map
+    }
+  }
+})
+
+eventBus.on('feuilles', (isChecked) => {
+  const currentLayer = isChecked ? 'feuilles_france' : 'feuilles_france_with_no_name'
+  const previousLayer = isChecked ? 'feuilles_france_with_no_name' : 'feuilles_france'
+
+  if (vectorOtherLayers.value?.[previousLayer]) {
+    const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
+    console.log(previousLayer, isVisible)
+    if (isVisible) {
+      vectorOtherLayers.value[previousLayer].setVisible(false)
+      vectorOtherLayers.value[currentLayer].setVisible(true)
+    }
+    // changer la layer dans le BaseCardSwitcher
+    if (otherLayers.value?.length >= 2) {
+      otherLayers.value.at(2).id = currentLayer
     }
   }
 })

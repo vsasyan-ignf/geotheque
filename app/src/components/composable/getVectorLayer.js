@@ -214,34 +214,6 @@ export const layersConfig = [
       }),
     }),
   },
-  {
-    name: 'paysNameOnly',
-    url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox={bbox},EPSG:3857`,
-    style: function (feature) {
-      return new Style({
-        text: new Text({
-          text: feature.get('NOM').split(',')[0],
-          font: '12px Calibri,sans-serif',
-          fill: new Fill({ color: '#000' }),
-          stroke: new Stroke({ color: '#fff', width: 2 }),
-        }),
-      })
-    },
-  },
-  {
-    name: 'sheetNumber',
-    url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`,
-    style: function (feature) {
-      return new Style({
-        text: new Text({
-          text: feature.get('NUMERO').split(',')[0],
-          font: '12px Calibri,sans-serif',
-          fill: new Fill({ color: '#000' }),
-          stroke: new Stroke({ color: '#fff', width: 2 }),
-        }),
-      })
-    },
-  },
 ]
 
 export function initOtherVectorLayers() {
