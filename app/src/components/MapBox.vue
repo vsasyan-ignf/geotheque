@@ -323,12 +323,12 @@ onMounted(() => {
 
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
-        scanStore.resetCriteria()
         vectorLayers.value.pin.getSource().clear()
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
         vectorLayers.value.geom.getSource().clear()
         vectorLayers.value.scan.getSource().clear()
+        scanStore.resetCriteria()
         scanStore.updateSelectedGeom([])
         
       }
@@ -399,7 +399,7 @@ onMounted(() => {
       if (vectorLayers.value.emprises.getSource()) {
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
-        olMap.value.removeLayer(vectorLayers.value.emprises)
+        // olMap.value.removeLayer(vectorLayers.value.emprises)
       }
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()

@@ -32,18 +32,15 @@ export const useScanStore = defineStore('scan', () => {
 
       }
 
-      const { yearMin, yearMax, selectedCollection } =
+      const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
         storeCritereSelection.value
-
-      const scaleMin = storeCritereSelection.value.scaleMin ?? 500;
-      const scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
-
+                
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
-
+      
       if (activeSubCategory.value === "pays") {
         cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
       }
-
+      
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
       if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`
       if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`
@@ -56,30 +53,51 @@ export const useScanStore = defineStore('scan', () => {
         empriseURL = 'PVALambert93';
         cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
       }
-
+      
       return (
         `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
         `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
         `&cql_filter=${cqlFilter}` +
         `&srsName=EPSG:3857`
-      )
+        )
+      }
+      return ''
+    })
+    
+  function updateScaleRange() {
+    if (activeTab.value === 'cartotheque') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
+    } else if (activeTab.value === "cartotheque_etranger") {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 200000;
+    } 
+    else if (activeTab.value === 'phototheque') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
+    } else if (activeTab.value === 'cartotheque_etranger') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 2000;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 10000000;
+    } else {
+      storeCritereSelection.value.scaleMin = null;
+      storeCritereSelection.value.scaleMax = null;
     }
-    return ''
-  })
+  }
 
   function updateBbox(newBbox) {
-    console.log(newBbox)
-    storeBbox.value = newBbox
+      console.log(newBbox)
+      storeBbox.value = newBbox
   }
 
   function updateCriteria(newCriteria) {
     storeCritereSelection.value = { ...newCriteria }
     console.log('Updated criteria:', storeCritereSelection.value)
   }
-
+  
   function updateActiveSubCategory(subCategory) {
     activeSubCategory.value = subCategory
     console.log('Sous-catégorie active:', activeSubCategory.value)
+    updateScaleRange();
   }
 
   function resetCriteria() {
@@ -93,8 +111,9 @@ export const useScanStore = defineStore('scan', () => {
 
     storeSelectedGeom.value = []
     storeBbox.value = []
-    storeScansData.value = null
+    storeScansData.value = []
     storeSelectedScan.value = null
+
   }
 
   function updateSelectedGeom(newVal) {
@@ -104,6 +123,7 @@ export const useScanStore = defineStore('scan', () => {
   function updateSelectedScan(newVal) {
     storeSelectedScan.value = newVal
   }
+
 
   function updateActiveTab(newVal) {
     activeTab.value = newVal
