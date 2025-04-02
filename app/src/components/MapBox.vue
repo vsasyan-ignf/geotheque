@@ -141,31 +141,44 @@ function Add_new_polygone_to_map(tab) {
 }
 
 async function parcour_tab_and_map(url) {
-  try {
-    const tab_test = await parcour_txt_to_tab(url)
-    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857
-    for (i = 0; i < tab_test.length; i++) {
-      if (tab_test[i][0] == 'Centre Actif') {
-        x = tab_test[i][1]
-        y = tab_test[i][2]
-        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-        addPointToMap(x_3857, y3857)
-      } else {
-        elem = tab_test[i]
-        tab_points_3857 = []
-        for (i2 = 3; i2 < elem.length; i2 = i2 + 2) {
-          x = elem[i2]
-          y = elem[i2 + 1]
-          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-          tab_points_3857.push([x_3857, y3857])
-        }
-        Add_new_polygone_to_map(tab_points_3857)
+    //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
+    try {
+      console.log("url : "+url)
+      const tab_test = await parcour_txt_to_tab(url);
+
+      if (!tab_test || tab_test.length === 0) {
+        throw new Error("Le tableau récupéré est vide ou invalide.");
       }
+
+      console.log("Tab test récupéré :", tab_test);
+      let elem, i, i2, x, y, x_3857, y3857, tab_points_3857
+      for (i = 0; i < tab_test.length; i++) {
+        if (tab_test[i][0] == 'Centre Actif') {
+          //"Centre Actif"
+          x = tab_test[i][1];
+          y = tab_test[i][2];
+          [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
+          addPointToMap(x_3857, y3857);
+        } else {
+          //"Cliche Actif"
+          elem = tab_test[i];
+          tab_points_3857 = [];
+          for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
+            //Commence a 1 car en 0 il y a le type d'image 
+            x = elem[i2];
+            y = elem[i2 + 1];
+            [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
+            //addPointToMap(x_3857, y3857);
+            tab_points_3857.push([x_3857, y3857])
+          }
+
+          Add_new_polygone_to_map(tab_points_3857)
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données :', error)
     }
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données :', error)
   }
-}
 
 function handleOtherLayerToggle(layer) {
   if (layer.id === 'communes' && vectorOtherLayers.value?.communes) {
