@@ -66,9 +66,10 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { create_multibbox, convertBbox, getDynamicTolerance, roundCoordinates, createRealContour } from '../composable/convertCoordinates'
+import { create_multibbox, convertBbox, createRealContour, getLongestSubArray, transformMultiPolygon } from '../composable/convertCoordinates'
 import config from '@/config'
 import { useScanStore } from '@/components/store/scan'
+import * as olProj from 'ol/proj'
 
 
 
@@ -129,17 +130,14 @@ function searchCountries() {
   }, 500)
 }
 
-function getLongestSubArray(arr) {
-    return arr.reduce((longest, current) => 
-        current.length > longest.length ? current : longest
-    , []);
-}
+
 
 
 
 function selectCountry(country) {
   getCountryBbox(country)
     .then((contour) => {
+      console.log('contour', contour)
       
       const bbox3857 = create_multibbox(contour)
       const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
@@ -157,8 +155,9 @@ function selectCountry(country) {
       if (country.code === "US"){
         contour = [[["-13912762.1682", "2915614.0653"], ["-13912762.1682", "6261721.3124"], ["-7396658.4088", "6261721.3124"], ["-7396658.4088", "2915614.0653"], ["-13912762.1682", "2915614.0653"]]]
       }
+      let newcontour = contour.map(polygon => polygon.map(([x, y]) => olProj.transform([x, y], 'EPSG:3857', 'EPSG:4326')))
 
-      scanStore.updateWKT(createRealContour(contour))
+      scanStore.updateWKT(createRealContour(newcontour))
     })
     .catch((error) => {
       console.error('Erreur lors de la récupération des contours du pays:', error)
@@ -193,15 +192,8 @@ async function getCountryBbox(country) {
     if (!contour_country) {
       throw new Error('Coordonnées non trouvées dans la réponse')
     }
-    const allContours = []
 
-    for (const polygon of contour_country) {
-      const exteriorRing = polygon[0]
-
-      allContours.push(exteriorRing)
-    }
-
-    return allContours
+    return transformMultiPolygon(contour_country)
   } catch (error) {
     console.error('Erreur:', error)
     throw error

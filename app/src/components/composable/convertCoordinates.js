@@ -1,9 +1,7 @@
 import proj4 from 'proj4'
-import * as olProj from 'ol/proj'
 import WKT from 'ol/format/WKT'
 import MultiPolygon from 'ol/geom/MultiPolygon'
 import Polygon from 'ol/geom/Polygon'
-import { useScanStore } from '@/components/store/scan'
 
 
 
@@ -127,6 +125,12 @@ export function getDynamicTolerance(polygon) {
   return len > 20 ? 2 : 0.001;
 }
 
+export function getLongestSubArray(arr) {
+  return arr.reduce((longest, current) =>
+    current.length > longest.length ? current : longest
+    , []);
+}
+
 export function roundCoordinates(multiPolygon, precision = 6) {
   return multiPolygon.getCoordinates().map(polygon =>
     polygon.map(ring =>
@@ -146,8 +150,7 @@ export function roundCoordinates(multiPolygon, precision = 6) {
 
 export function createRealContour(contour) {
 
-  let newcontour = contour.map(polygon => polygon.map(([x, y]) => olProj.transform([x, y], 'EPSG:3857', 'EPSG:4326')))
-  newcontour = newcontour.map(polygon => polygon.map(([x, y]) => [y.toFixed(2), x.toFixed(2)]))
+  let newcontour = contour.map(polygon => polygon.map(([x, y]) => [y, x]))
 
 
   const simplePolygon = newcontour.map(polygonCoords => {
@@ -157,11 +160,19 @@ export function createRealContour(contour) {
 
   const simplified_multipolygon = new MultiPolygon(simplePolygon)
 
-  const roundedCoordinates = roundCoordinates(simplified_multipolygon, 2)
-  simplified_multipolygon.setCoordinates(roundedCoordinates)
-
   const wktformat = new WKT()
   const wkt = wktformat.writeGeometry(simplified_multipolygon)
   // scanStore.updateCountryGeom(wkt)
   return wkt
+}
+
+export function transformMultiPolygon(contour_country) {
+  let allContours = []
+  for (const polygon of contour_country) {
+    const exteriorRing = polygon[0]
+
+    allContours.push(exteriorRing)
+  }
+
+  return allContours
 }

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import config from '@/config'
+import { mdiConsoleNetworkOutline } from '@mdi/js'
 
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
@@ -40,8 +41,10 @@ export const useScanStore = defineStore('scan', () => {
 
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
 
-      if (activeSubCategory.value === "pays") {
-        cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
+      if (activeTab.value === 'cartotheque_etranger') {
+        if (activeSubCategory.value === "pays" || activeSubCategory.value === "point") {
+          cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
+        }
       }
 
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
