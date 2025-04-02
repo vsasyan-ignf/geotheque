@@ -5,7 +5,7 @@ import {
   layers_photo_monde,
   otherLayersCartoFrance,
   otherLayersCartoMonde,
-  otherLayersPhotoFrance
+  otherLayersPhotoFrance,
 } from './baseMap'
 
 export function getLayersForActiveTab(activeTab) {

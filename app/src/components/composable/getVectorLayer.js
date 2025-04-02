@@ -144,8 +144,8 @@ export const layersConfig = [
       fill: new Fill({
         color: 'rgba(  228, 22, 169 , 0.2)',
       }),
-    })
-    },
+    }),
+  },
   {
     name: 'feuilles_monde',
     url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`,

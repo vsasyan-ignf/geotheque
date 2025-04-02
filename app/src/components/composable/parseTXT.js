@@ -1,6 +1,6 @@
 function roundToTwo(num) {
-  //function qui arondit a 10 puissance-2 
-  return Math.round(num * 100) / 100;
+  //function qui arondit a 10 puissance-2
+  return Math.round(num * 100) / 100
 }
 
 export async function parcour_txt_to_tab(url) {
@@ -13,7 +13,18 @@ export async function parcour_txt_to_tab(url) {
 
     let lignes = data.split('\n')
     let taille_file = lignes.length
-    let i, y, taille_ligne, mots, coord_x, coord_y, base_x, base_y, centre_x, centre_y, previous_x, previous_y;
+    let i,
+      y,
+      taille_ligne,
+      mots,
+      coord_x,
+      coord_y,
+      base_x,
+      base_y,
+      centre_x,
+      centre_y,
+      previous_x,
+      previous_y
     let tab2
     let tab_fin = []
 
@@ -37,8 +48,8 @@ export async function parcour_txt_to_tab(url) {
         base_x = roundToTwo(parseFloat(mots[11]))
         base_y = roundToTwo(parseFloat(mots[12]))
 
-        previous_x = base_x;
-        previous_y = base_y;
+        previous_x = base_x
+        previous_y = base_y
 
         tab2.push(base_x, base_y)
 
@@ -47,9 +58,8 @@ export async function parcour_txt_to_tab(url) {
           coord_y = roundToTwo(previous_y + parseFloat(mots[y + 1]))
           tab2.push(coord_x, coord_y)
 
-          previous_x = coord_x;
-          previous_y = coord_y;
-
+          previous_x = coord_x
+          previous_y = coord_y
         }
         coord_x = parseFloat(mots[mots.length - 2])
         coord_y = parseFloat(mots[mots.length - 1].split('\r')[0])
@@ -57,11 +67,10 @@ export async function parcour_txt_to_tab(url) {
         tab_fin.push(tab2)
       }
     }
-    console.log(" tab fin:")
+    console.log(' tab fin:')
     console.log(tab_fin)
     return tab_fin
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Erreur lors de la lecture du fichier :', error)
   }
 }

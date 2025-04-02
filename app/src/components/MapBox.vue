@@ -456,7 +456,7 @@ eventBus.on('feuilles', (isChecked) => {
 
   if (vectorOtherLayers.value?.[previousLayer]) {
     const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
-    console.log(previousLayer, isVisible)
+
     if (isVisible) {
       vectorOtherLayers.value[previousLayer].setVisible(false)
       vectorOtherLayers.value[currentLayer].setVisible(true)

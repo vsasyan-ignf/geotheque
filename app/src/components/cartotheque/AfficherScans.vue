@@ -100,10 +100,13 @@ function openIipmooviewer() {
     console.log(imageUrl.value)
     const urlParams = new URLSearchParams(new URL(imageUrl.value).search)
     const imageUrlServ = urlParams.get('FIF')
-    const imageName = imageUrlServ.split('/').pop();
+    const imageName = imageUrlServ.split('/').pop()
 
-    localStorage.setItem('imageUrl', imageUrlServ)    
-    window.open(`/geotheque/iipmooviewer/index.html?image=${encodeURIComponent(imageName)}`, '_blank')
+    localStorage.setItem('imageUrl', imageUrlServ)
+    window.open(
+      `/geotheque/iipmooviewer/index.html?image=${encodeURIComponent(imageName)}`,
+      '_blank',
+    )
   } else {
     console.error("L'URL de l'image est indéfinie.")
   }
@@ -167,26 +170,25 @@ function dicoToFormatCSV(arrObj) {
   const refinedData = []
   refinedData.push(titleKeys)
 
-  arrObj.forEach(item => {
+  arrObj.forEach((item) => {
     refinedData.push(Object.values(item))
-  });
+  })
 
   let csvContent = ''
 
-  refinedData.forEach(row => {
-    const formattedRow = row.map(field => {
+  refinedData.forEach((row) => {
+    const formattedRow = row.map((field) => {
       if (field.includes(',')) {
         return `"${field.replace(/"/g, '""')}"`
       }
       return field
-    });
-    
+    })
+
     csvContent += formattedRow.join(';') + '\n'
-  });
+  })
 
-  return csvContent.trim();
+  return csvContent.trim()
 }
-
 </script>
 <style scoped>
 .scan-box {
