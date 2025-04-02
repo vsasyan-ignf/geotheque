@@ -112,7 +112,7 @@ async function fetchAndConvertBbox(longitude, latitude) {
   try {
     let url
 
-    if (activeTab.value === 'cartotheque') {
+    if (activeTab.value === 'cartotheque' || activeTab.value === 'phototheque') {
       url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
     } else {
       // url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&zoom=3&limit=1`
@@ -130,7 +130,7 @@ async function fetchAndConvertBbox(longitude, latitude) {
 
     const data = await response.json()
 
-    if (activeTab.value === 'cartotheque') {
+    if (activeTab.value === 'cartotheque' || activeTab.value === 'phototheque') {
       const bbox = data.boundingbox
 
       const bboxWGS84 = [
@@ -278,11 +278,8 @@ async function handleMapClick(coords) {
 
   bboxState.value = point.bboxLambert93
 
-  if (activeTab.value === 'cartotheque') {
-    scanStore.updateBbox(point.bboxLambert93)
-  } else {
-    scanStore.updateBbox(point.bboxWGS84)
-  }
+
+  emit('go-to-point', point)
 
   searchMode.value = 'map'
 }
