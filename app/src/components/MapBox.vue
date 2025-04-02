@@ -102,7 +102,7 @@ watch(activeTab, (newValue) => {
   hideOtherLayers()
 
   updateWMTSLayers(olMap.value, newLayers)
-
+  
   scanStore.resetCriteria()
 
   activeLayerIndex.value = 0
@@ -343,7 +343,6 @@ onMounted(() => {
         vectorLayers.value.scan.getSource().clear()
         scanStore.resetCriteria()
         scanStore.updateSelectedGeom([])
-        
       }
     })
 
