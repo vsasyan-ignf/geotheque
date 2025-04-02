@@ -100,8 +100,10 @@ function openIipmooviewer() {
     console.log(imageUrl.value)
     const urlParams = new URLSearchParams(new URL(imageUrl.value).search)
     const imageUrlServ = urlParams.get('FIF')
-    sessionStorage.setItem('imageUrl', imageUrlServ)
-    window.open('/geotheque/iipmooviewer/index.html', '_blank')
+    const imageName = imageUrlServ.split('/').pop();
+
+    localStorage.setItem('imageUrl', imageUrlServ)    
+    window.open(`/geotheque/iipmooviewer/index.html?image=${encodeURIComponent(imageName)}`, '_blank')
   } else {
     console.error("L'URL de l'image est indéfinie.")
   }

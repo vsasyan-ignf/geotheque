@@ -53,17 +53,22 @@
     var server = 'http://localhost:8080/fcgi-bin/iipsrv.fcgi'; // Chemin du serveur iipsrv
 
     // L'image complète sur le serveur, ici l'URL de votre image JPEG2000
-    var image = sessionStorage.getItem('imageUrl') // Chemin de l'image sur le serveur
-
+    var image = localStorage.getItem('imageUrl')
     if (image) {
       var imageName = image.split('/').pop();
       document.title = imageName;
     }
     // Créer l'objet IIPMooViewer
-    new IIPMooViewer("viewer", {
-      server: server,
-      image: image
-    });
+    window.onload = function() {
+            if (image) {
+                new IIPMooViewer("viewer", {
+                    server: server,
+                    image: image
+                });
+            } else {
+                document.getElementById('viewer').innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial;color:#333">Aucune image spécifiée</div>';
+            }
+        };
   </script>
 
 </head>
