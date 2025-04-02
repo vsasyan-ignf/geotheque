@@ -12,13 +12,14 @@
     />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
-    <DrawControl 
+    <DrawControl
       v-if="activeTab === 'phototheque'"
       :map="olMap"
       :isDrawModeActive="drawModeActive"
       @draw-complete="handleDrawComplete"
       @draw-mode-activated="handleDrawModeActivated"
-      @deactivate-draw-mode="handleDeactivateDrawMode" />
+      @deactivate-draw-mode="handleDeactivateDrawMode"
+    />
   </div>
 </template>
 
@@ -38,17 +39,30 @@ import View from 'ol/View'
 import Polygon from 'ol/geom/Polygon.js'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { Style, Icon, Stroke, Fill, Text } from 'ol/style'
-import { getMaxZoom, createInitialWMTSLayers, updateWMTSLayers, changeActiveWMTSLayer } from './composable/getWMTS'
+import {
+  getMaxZoom,
+  createInitialWMTSLayers,
+  updateWMTSLayers,
+  changeActiveWMTSLayer,
+} from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
 import { layers_carto, otherLayersCartoFrance } from './composable/baseMap'
-import { createPinLayer, createGeomLayer, createScanLayer, createWFSLayer, initOtherVectorLayers, layersConfig } from './composable/getVectorLayer'
+import {
+  createPinLayer,
+  createGeomLayer,
+  createScanLayer,
+  createWFSLayer,
+  initOtherVectorLayers,
+} from './composable/getVectorLayer'
 import { parcour_txt_to_tab } from './composable/parseTXT'
 import { useConvertCoordinates } from './composable/convertCoordinates'
 import MultiPolygon from 'ol/geom/MultiPolygon'
-import { initializeIntersectionLayer, findIntersections, clearIntersection } from './composable/intersectionDraw'
-
+import {
+  initializeIntersectionLayer,
+  findIntersections,
+  clearIntersection,
+} from './composable/intersectionDraw'
 
 const scanStore = useScanStore()
 const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
@@ -66,8 +80,8 @@ const showPin = ref(false)
 
 const geomLayer = ref(null)
 
-const drawModeActive = ref(false);
-const lastDrawFeature = ref(null);
+const drawModeActive = ref(false)
+const lastDrawFeature = ref(null)
 
 let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
@@ -82,14 +96,6 @@ const vectorLayers = ref({
 
 const vectorOtherLayers = ref(null)
 
-function getLayersActiveTab() {
-  return getLayersForActiveTab(activeTab.value)
-}
-
-function getOtherLayers() {
-  return getOtherLayersForActiveTab(activeTab.value)
-}
-
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
     layer.setVisible(false)
@@ -98,13 +104,13 @@ function hideOtherLayers() {
 }
 
 watch(activeTab, (newValue) => {
-  const newLayers = getLayersForActiveTab(newValue)
+  const newLayers = getLayersForActiveTab(activeTab.value)
   layers.value = newLayers
-  otherLayers.value = getOtherLayersForActiveTab(newValue)
+  otherLayers.value = getOtherLayersForActiveTab(activeTab.value)
   hideOtherLayers()
 
   updateWMTSLayers(olMap.value, newLayers)
-  
+
   scanStore.resetCriteria()
 
   activeLayerIndex.value = 0
@@ -143,44 +149,44 @@ function Add_new_polygone_to_map(tab) {
 }
 
 async function parcour_tab_and_map(url) {
-    //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
-    try {
-      console.log("url : "+url)
-      const tab_test = await parcour_txt_to_tab(url);
+  //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
+  try {
+    console.log('url : ' + url)
+    const tab_test = await parcour_txt_to_tab(url)
 
-      if (!tab_test || tab_test.length === 0) {
-        throw new Error("Le tableau récupéré est vide ou invalide.");
-      }
-
-      console.log("Tab test récupéré :", tab_test);
-      let elem, i, i2, x, y, x_3857, y3857, tab_points_3857
-      for (i = 0; i < tab_test.length; i++) {
-        if (tab_test[i][0] == 'Centre Actif') {
-          //"Centre Actif"
-          x = tab_test[i][1];
-          y = tab_test[i][2];
-          [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
-          addPointToMap(x_3857, y3857);
-        } else {
-          //"Cliche Actif"
-          elem = tab_test[i];
-          tab_points_3857 = [];
-          for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
-            //Commence a 1 car en 0 il y a le type d'image 
-            x = elem[i2];
-            y = elem[i2 + 1];
-            [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
-            //addPointToMap(x_3857, y3857);
-            tab_points_3857.push([x_3857, y3857])
-          }
-
-          Add_new_polygone_to_map(tab_points_3857)
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la récupération des données :', error)
+    if (!tab_test || tab_test.length === 0) {
+      throw new Error('Le tableau récupéré est vide ou invalide.')
     }
+
+    console.log('Tab test récupéré :', tab_test)
+    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857
+    for (i = 0; i < tab_test.length; i++) {
+      if (tab_test[i][0] == 'Centre Actif') {
+        //"Centre Actif"
+        x = tab_test[i][1]
+        y = tab_test[i][2]
+        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+        addPointToMap(x_3857, y3857)
+      } else {
+        //"Cliche Actif"
+        elem = tab_test[i]
+        tab_points_3857 = []
+        for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
+          //Commence a 1 car en 0 il y a le type d'image
+          x = elem[i2]
+          y = elem[i2 + 1]
+          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          //addPointToMap(x_3857, y3857);
+          tab_points_3857.push([x_3857, y3857])
+        }
+
+        Add_new_polygone_to_map(tab_points_3857)
+      }
+    }
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données :', error)
   }
+}
 
 function handleOtherLayerToggle(layer) {
   if (layer.id === 'communes' && vectorOtherLayers.value?.communes) {
@@ -199,35 +205,35 @@ function changeActiveLayer(index) {
 }
 
 function handleDrawComplete(drawData) {
-  console.log('Dessin terminé:', drawData);
-  
-  let drawGeometry;
+  console.log('Dessin terminé:', drawData)
+
+  let drawGeometry
   if (drawData.type === 'Rectangle' || drawData.type === 'Polygon') {
-    drawGeometry = new Polygon(drawData.coordinates);
+    drawGeometry = new Polygon(drawData.coordinates)
     console.log(drawGeometry)
   } else if (drawData.type === 'Circle') {
-    drawGeometry = new Polygon(drawData.coordinates);
+    drawGeometry = new Polygon(drawData.coordinates)
   }
-  
+
   lastDrawFeature.value = new Feature({
-    geometry: drawGeometry
-  });
-  
-  const extent = findIntersections(drawGeometry, vectorOtherLayers.value);
+    geometry: drawGeometry,
+  })
+
+  const extent = findIntersections(drawGeometry, vectorOtherLayers.value)
   console.log(extent)
 }
 
 function handleDrawModeActivated(mode) {
-  console.log('Mode de dessin activé:', mode);
-  drawModeActive.value = true;
-  
-  clearIntersection();
+  console.log('Mode de dessin activé:', mode)
+  drawModeActive.value = true
+
+  clearIntersection()
 }
 
 function handleDeactivateDrawMode() {
-  console.log('Mode de dessin désactivé');
-  drawModeActive.value = false;
-  clearIntersection();
+  console.log('Mode de dessin désactivé')
+  drawModeActive.value = false
+  clearIntersection()
 }
 
 onMounted(() => {
@@ -277,8 +283,8 @@ onMounted(() => {
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
-    
-    initializeIntersectionLayer(olMap);
+
+    initializeIntersectionLayer(olMap)
 
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
@@ -419,8 +425,8 @@ onMounted(() => {
         vectorLayers.value.geom.getSource().clear()
         olMap.value.removeLayer(geomLayer)
       }
-      
-      clearIntersection();
+
+      clearIntersection()
     })
 
     window.dispatchEvent(new Event('resize'))
@@ -428,15 +434,25 @@ onMounted(() => {
 })
 
 eventBus.on('countryName', ({ type, visibility }) => {
-  if(vectorOtherLayers.value[type]){
+  if (vectorOtherLayers.value[type]) {
     vectorOtherLayers.value?.[type].setVisible(visibility)
   }
 })
 
+eventBus.on('feuille', (checked) => {
+  const currentLayer = checked ? 'feuilles_france' : 'feuilles_france_with_no_name'
+  const previousLayer = checked ? 'feuilles_france_with_no_name' : 'feuilles_france'
 
-eventBus.on('sheetNumber', ({ type, visibility }) => {
-  if(vectorOtherLayers.value[type]){
-    vectorOtherLayers.value?.[type].setVisible(visibility)
+  if (vectorOtherLayers.value?.[previousLayer]) {
+    const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
+    if (isVisible) {
+      vectorOtherLayers.value[previousLayer].setVisible(false)
+      vectorOtherLayers.value[currentLayer].setVisible(true)
+    }
+    // changer la layer dans le BaseCardSwitcher
+    if (otherLayers.value) {
+      otherLayers.value.at(2).id = currentLayer // j'ai mis 2 car je connais l'index mais à change avec un map
+    }
   }
 })
 provide('eventBus', eventBus)

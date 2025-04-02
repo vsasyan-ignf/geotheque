@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import config from '@/config'
-import { mdiConsoleNetworkOutline } from '@mdi/js'
 
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])

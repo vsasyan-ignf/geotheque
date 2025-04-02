@@ -5,11 +5,7 @@
         <label for="mission-select">Sélectionner une mission</label>
         <span class="mission-count">{{ storeScansData?.length }} missions trouvées</span>
       </div>
-      <Dropdown
-        :options="storeScansData"
-        disableOption="Choisissez une mission"
-
-      />
+      <Dropdown :options="storeScansData" disableOption="Choisissez une mission" />
     </div>
 
     <div v-if="selectedMission" class="mission-preview slide-in">
@@ -37,8 +33,12 @@
       <div class="options-label">Options de sélection</div>
       <div class="checkbox-group">
         <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
-          <input type="checkbox" v-model="selectedOptions[option.key]" class="checkbox-input" 
-          @change="handleCheckboxChange(option.key)"/>
+          <input
+            type="checkbox"
+            v-model="selectedOptions[option.key]"
+            class="checkbox-input"
+            @change="handleCheckboxChange(option.key)"
+          />
           <span class="custom-checkbox"></span>
           {{ option.label }}
         </label>
@@ -66,11 +66,10 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan, activeTab } = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
-
 
 // real key : key bien écrit pour afficher dans modal
 
@@ -84,7 +83,7 @@ const all_keys = {
   COMMANDITA: 'COMMANDITAIRE',
   PRODUCTEUR: 'PRODUCTEUR',
   STYLE: 'STYLE',
-  SUPPORT:'SUPPORT',
+  SUPPORT: 'SUPPORT',
   EMULSION: 'EMULTION',
   RÉSOLUTIO: 'RÉSOLUTION',
   NOMBRE_DE_: 'NOMBRE DE PVA',
@@ -97,29 +96,29 @@ const all_keys = {
   DISPO_INTE: 'DISPO INTER',
   DÉSIGNATI: 'DÉSIGNATION',
   NOM_GÉNÉ: 'NOM GÉNÉ',
-  IDENTIFIAN: 'IDENTIFIANT', 
+  IDENTIFIAN: 'IDENTIFIANT',
   FORMAT: 'FORMAT',
-  FOCALE: 'FOCALE'
+  FOCALE: 'FOCALE',
 }
 
 const allDetails = computed(() => {
-  const details = {};
+  const details = {}
   for (const key of Object.keys(all_keys)) {
-    details[all_keys[key]] = selectedMission.value?.[key] === '' ? 'No data' : selectedMission.value?.[key];
+    details[all_keys[key]] =
+      selectedMission.value?.[key] === '' ? 'No data' : selectedMission.value?.[key]
   }
-  return details;
+  return details
 })
 
 const essential_keys = ['DÉSIGNATION', 'FORMAT', 'ANNÉE', 'NOMBRE DE PVA']
 
 const essentialDetails = computed(() => {
-  const details = {};
+  const details = {}
   for (const key of essential_keys) {
-    details[key] = allDetails.value?.[key];
+    details[key] = allDetails.value?.[key]
   }
-  return details;
+  return details
 })
-
 
 const isModalOpen = ref(false)
 
@@ -143,7 +142,7 @@ const selectedOptions = reactive({
   couplesStereo: false,
   alphanumeric: false,
   popup: false,
-  sheetNumber: false,
+  feuille: true,
   countryName: false,
 })
 
@@ -151,59 +150,30 @@ const checkboxOptions = [
   { key: 'couplesStereo', label: 'Couples Stéréo' },
   { key: 'alphanumeric', label: 'Alphanumérique' },
   { key: 'popup', label: 'Popup' },
-  { key: 'sheetNumber', label: 'N° Feuille' },
+  { key: 'feuille', label: 'N° Feuille' },
   { key: 'countryName', label: 'Nom Département' },
 ]
 
 // Fonction qui gère l'activation/désactivation des cases
 const handleCheckboxChange = (optionKey) => {
-      const isSelected = selectedOptions[optionKey];
-      if (isSelected) {
-        if(optionKey ==='couplesStereo'){
-          console.log("Ok");
-        }
-        else if(optionKey ==='alphanumeric'){
-          console.log("al");
-        }
-        else if(optionKey ==='popup'){
-          console.log("pp");
-        }
-        else if(optionKey ==='sheetNumber'){
-          eventBus.emit('sheetNumber',{
-            type:'sheetNumber',
-            visibility:isSelected
-          })
-        }
-        else if(optionKey ==='countryName'){
-          eventBus.emit('countryName',{
-            type:'paysNameOnly',
-            visibility:isSelected
-          })
+  const isChecked = selectedOptions[optionKey]
+  console.log(optionKey, isChecked)
 
-        }
-        else{
-          console.log("probleme");
-        }
-      } else {
-        if(optionKey ==='countryName'){
-          eventBus.emit('countryName',{
-            type:'paysNameOnly',
-            visibility:isSelected
-          })
-
-        }
-        else if(optionKey ==='sheetNumber'){
-          eventBus.emit('sheetNumber',{
-            type:'sheetNumber',
-            visibility:isSelected
-          })
-        }
-
-
-        console.log(`${optionKey} désactivé`);
-      }
-    };
-
+  if (optionKey === 'couplesStereo') {
+    console.log('click couplesStereo')
+  } else if (optionKey === 'alphanumeric') {
+    console.log('click alpha')
+  } else if (optionKey === 'popup') {
+    console.log('click popup')
+  } else if (optionKey === 'feuille') {
+    eventBus.emit('feuille', isChecked)
+  } else if (optionKey === 'countryName') {
+    eventBus.emit('countryName', {
+      type: 'paysNameOnly',
+      visibility: isSelected,
+    })
+  }
+}
 </script>
 
 <style scoped>
