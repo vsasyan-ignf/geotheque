@@ -42,6 +42,13 @@ fetch('http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100
 fetch('http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt', {cache: "no-cache"}).then((x)=>x).then(console.log)
 ```
 
+
+```js
+  fetch('http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt')
+    .then((x)=>x.text())
+    .then(console.log)
+``
+
 ## Développement
 
 À partir de là vous pouvez commencer le développement en utilisant les applicatifs comme si vous étiez en prod !
