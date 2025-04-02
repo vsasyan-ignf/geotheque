@@ -5,6 +5,7 @@ import {
   layers_photo_monde,
   otherLayersCartoFrance,
   otherLayersCartoMonde,
+  otherLayersPhotoFrance
 } from './baseMap'
 
 export function getLayersForActiveTab(activeTab) {
@@ -28,6 +29,8 @@ export function getOtherLayersForActiveTab(activeTab) {
       return otherLayersCartoFrance
     case 'cartotheque_etranger':
       return otherLayersCartoMonde
+    case 'phototheque':
+      return otherLayersPhotoFrance
     default:
       return otherLayersCartoFrance
   }

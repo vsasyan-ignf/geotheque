@@ -96,9 +96,9 @@ function hideOtherLayers() {
 }
 
 watch(activeTab, (newValue) => {
-  const newLayers = getLayersActiveTab()
+  const newLayers = getLayersForActiveTab(newValue)
   layers.value = newLayers
-  otherLayers.value = getOtherLayers()
+  otherLayers.value = getOtherLayersForActiveTab(newValue)
   hideOtherLayers()
 
   updateWMTSLayers(olMap.value, newLayers)
