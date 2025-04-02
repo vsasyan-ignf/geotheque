@@ -12,12 +12,13 @@
     />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
-    <DrawControl 
+    <DrawControl
       :map="olMap"
       :isDrawModeActive="drawModeActive"
       @draw-complete="handleDrawComplete"
       @draw-mode-activated="handleDrawModeActivated"
-      @deactivate-draw-mode="handleDeactivateDrawMode" />
+      @deactivate-draw-mode="handleDeactivateDrawMode"
+    />
   </div>
 </template>
 
@@ -37,15 +38,30 @@ import View from 'ol/View'
 import Polygon from 'ol/geom/Polygon.js'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { getMaxZoom, createInitialWMTSLayers, updateWMTSLayers, changeActiveWMTSLayer } from './composable/getWMTS'
+import {
+  getMaxZoom,
+  createInitialWMTSLayers,
+  updateWMTSLayers,
+  changeActiveWMTSLayer,
+} from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
 import { layers_carto, otherLayersCartoFrance } from './composable/baseMap'
-import { createPinLayer, createGeomLayer, createScanLayer, createWFSLayer, initOtherVectorLayers } from './composable/getVectorLayer'
+import {
+  createPinLayer,
+  createGeomLayer,
+  createScanLayer,
+  createWFSLayer,
+  initOtherVectorLayers,
+} from './composable/getVectorLayer'
 import { parcour_txt_to_tab } from './composable/parseTXT'
 import { useConvertCoordinates } from './composable/convertCoordinates'
 import MultiPolygon from 'ol/geom/MultiPolygon'
-import { initializeIntersectionLayer, findIntersections, clearIntersection } from './composable/intersectionDraw'
+import {
+  initializeIntersectionLayer,
+  findIntersections,
+  clearIntersection,
+} from './composable/intersectionDraw'
 
 const scanStore = useScanStore()
 const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
@@ -63,8 +79,8 @@ const showPin = ref(false)
 
 const geomLayer = ref(null)
 
-const drawModeActive = ref(false);
-const lastDrawFeature = ref(null);
+const drawModeActive = ref(false)
+const lastDrawFeature = ref(null)
 
 let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
@@ -183,40 +199,46 @@ function changeActiveLayer(index) {
 }
 
 function handleDrawComplete(drawData) {
-  console.log('Dessin terminé:', drawData);
-  
-  let drawGeometry;
+  console.log('Dessin terminé:', drawData)
+
+  let drawGeometry
   if (drawData.type === 'Rectangle' || drawData.type === 'Polygon') {
-    drawGeometry = new Polygon(drawData.coordinates);
+    drawGeometry = new Polygon(drawData.coordinates)
     console.log(drawGeometry)
   } else if (drawData.type === 'Circle') {
-    drawGeometry = new Polygon(drawData.coordinates);
+    drawGeometry = new Polygon(drawData.coordinates)
   }
-  
+
   lastDrawFeature.value = new Feature({
-    geometry: drawGeometry
-  });
-  
-  const extent = findIntersections(drawGeometry, vectorOtherLayers.value);
+    geometry: drawGeometry,
+  })
+
+  const extent = findIntersections(drawGeometry, vectorOtherLayers.value)
   console.log(extent)
 }
 
 function handleDrawModeActivated(mode) {
-  console.log('Mode de dessin activé:', mode);
-  drawModeActive.value = true;
-  
-  clearIntersection();
+  console.log('Mode de dessin activé:', mode)
+  drawModeActive.value = true
+
+  clearIntersection()
 }
 
 function handleDeactivateDrawMode() {
-  console.log('Mode de dessin désactivé');
-  drawModeActive.value = false;
-  clearIntersection();
+  console.log('Mode de dessin désactivé')
+  drawModeActive.value = false
+  clearIntersection()
 }
 
 onMounted(() => {
   nextTick(() => {
     const wmtsLayers = createInitialWMTSLayers(layers.value, activeLayerIndex.value)
+
+    fetch(
+      'http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt',
+    )
+      .then((x) => x.text())
+      .then(console.log)
 
     vectorLayers.value = {
       pin: createPinLayer(markerIcon),
@@ -261,8 +283,8 @@ onMounted(() => {
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
-    
-    initializeIntersectionLayer(olMap);
+
+    initializeIntersectionLayer(olMap)
 
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
@@ -329,7 +351,6 @@ onMounted(() => {
         vectorLayers.value.geom.getSource().clear()
         vectorLayers.value.scan.getSource().clear()
         scanStore.updateSelectedGeom([])
-        
       }
     })
 
@@ -404,8 +425,8 @@ onMounted(() => {
         vectorLayers.value.geom.getSource().clear()
         olMap.value.removeLayer(geomLayer)
       }
-      
-      clearIntersection();
+
+      clearIntersection()
     })
 
     window.dispatchEvent(new Event('resize'))
@@ -413,13 +434,13 @@ onMounted(() => {
 })
 
 eventBus.on('countryName', ({ type, visibility }) => {
-  if(vectorOtherLayers.value[type]){
+  if (vectorOtherLayers.value[type]) {
     vectorOtherLayers.value?.[type].setVisible(visibility)
   }
 })
 
 eventBus.on('sheetNumber', ({ type, visibility }) => {
-  if(vectorOtherLayers.value[type]){
+  if (vectorOtherLayers.value[type]) {
     vectorOtherLayers.value?.[type].setVisible(visibility)
   }
 })

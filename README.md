@@ -37,17 +37,19 @@ Pour tester il est possible de lancer depuis une console JS dans Firefox/Chrome 
 
 ```js
 // Est censé fonctionner
-fetch('http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt').then((x)=>x).then(console.log)
+fetch(
+  "http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt"
+)
+  .then((x) => x)
+  .then(console.log);
 // Fonctionne (cf. https://stackoverflow.com/a/42518434)
-fetch('http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt', {cache: "no-cache"}).then((x)=>x).then(console.log)
+fetch(
+  "http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt",
+  { cache: "no-cache" }
+)
+  .then((x) => x)
+  .then(console.log);
 ```
-
-
-```js
-  fetch('http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt')
-    .then((x)=>x.text())
-    .then(console.log)
-``
 
 ## Développement
 
