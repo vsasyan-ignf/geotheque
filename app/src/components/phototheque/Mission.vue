@@ -199,6 +199,7 @@ const handleCheckboxChange = (optionKey) => {
           })
         }
 
+
         console.log(`${optionKey} désactivé`);
       }
     };
