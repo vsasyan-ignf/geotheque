@@ -151,7 +151,6 @@ function downloadCSV() {
 
   if (data) {
     const newData = data.map((scan) => scan.properties)
-    console.log(newData)
     const csvContent = dicoToFormatCSV(newData)
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
     const objUrl = URL.createObjectURL(blob)
@@ -168,17 +167,26 @@ function dicoToFormatCSV(arrObj) {
   const refinedData = []
   refinedData.push(titleKeys)
 
-  arrObj.forEach((item) => {
+  arrObj.forEach(item => {
     refinedData.push(Object.values(item))
-  })
+  });
 
   let csvContent = ''
 
-  refinedData.forEach((row) => {
-    csvContent += row.join(';') + '\n'
-  })
-  return csvContent
+  refinedData.forEach(row => {
+    const formattedRow = row.map(field => {
+      if (field.includes(',')) {
+        return `"${field.replace(/"/g, '""')}"`
+      }
+      return field
+    });
+    
+    csvContent += formattedRow.join(';') + '\n'
+  });
+
+  return csvContent.trim();
 }
+
 </script>
 <style scoped>
 .scan-box {
