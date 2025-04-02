@@ -145,13 +145,14 @@ function selectCountry(country) {
       scanStore.updateBbox(bbox4326)
       scanStore.updateSelectedGeom(contour)
 
+      // Cas spécial des pays avec trop de petites îles
       if (contour.length > 10) {
         const longestSubArray = getLongestSubArray(contour)
         contour =[longestSubArray]
       }
 
       
-
+      // Cas spéciale des USA
       if (country.code === "US"){
         contour = [[["-13912762.1682", "2915614.0653"], ["-13912762.1682", "6261721.3124"], ["-7396658.4088", "6261721.3124"], ["-7396658.4088", "2915614.0653"], ["-13912762.1682", "2915614.0653"]]]
       }
@@ -186,13 +187,14 @@ async function getCountryBbox(country) {
       throw new Error(`Erreur réseau : ${response.status}`)
     }
     const data = await response.json()
-
+    
     const contour_country = data.features[0]?.geometry?.coordinates
 
     if (!contour_country) {
       throw new Error('Coordonnées non trouvées dans la réponse')
     }
 
+    // transformation de l'array en array plus simple
     return transformMultiPolygon(contour_country)
   } catch (error) {
     console.error('Erreur:', error)

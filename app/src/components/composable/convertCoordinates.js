@@ -61,6 +61,12 @@ export function create_bbox(contour) {
   return { minX, minY, maxX, maxY }
 }
 
+
+/**
+ * retourne la bbox d'un multi polygon
+ * @param {*} contours 
+ * @returns 
+ */
 export function create_multibbox(contours) {
   if (!contours || contours.length === 0) {
     throw new Error('Contours invalides')
@@ -103,6 +109,11 @@ export function create_multibbox(contours) {
   return { minX, minY, maxX, maxY }
 }
 
+/**
+ * retourne la bonne tolérance pour chaque longueur de tableau
+ * @param {*} polygon 
+ * @returns 
+ */
 export function getDynamicTolerance(polygon) {
   const len = polygon.length
 
@@ -125,29 +136,25 @@ export function getDynamicTolerance(polygon) {
   return len > 20 ? 2 : 0.001;
 }
 
+/**
+ * renvoie le sous tableau le plus grand d'un tableau
+ * @param {*} arr 
+ * @returns 
+ */
 export function getLongestSubArray(arr) {
   return arr.reduce((longest, current) =>
     current.length > longest.length ? current : longest
     , []);
 }
 
-export function roundCoordinates(multiPolygon, precision = 6) {
-  return multiPolygon.getCoordinates().map(polygon =>
-    polygon.map(ring =>
-      ring.map(coord => {
-        const longitude = parseFloat(coord[0]);
-        const latitude = parseFloat(coord[1]);
-
-        return [
-          longitude.toFixed(precision),
-          latitude.toFixed(precision)
-        ];
-      })
-    )
-  );
-}
 
 
+
+/**
+ * crée un wkt à partir d'un contour
+ * @param {*} contour 
+ * @returns 
+ */
 export function createRealContour(contour) {
 
   let newcontour = contour.map(polygon => polygon.map(([x, y]) => [y, x]))
@@ -166,6 +173,12 @@ export function createRealContour(contour) {
   return wkt
 }
 
+
+/**
+ * Transforme un tableau de polygones en un tableau de contours [[[[x,y]]]] en [[[x,y]]]
+ * @param {*} contour_country 
+ * @returns 
+ */
 export function transformMultiPolygon(contour_country) {
   let allContours = []
   for (const polygon of contour_country) {
