@@ -13,6 +13,7 @@
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
     <DrawControl 
+      v-if="activeTab === 'phototheque'"
       :map="olMap"
       :isDrawModeActive="drawModeActive"
       @draw-complete="handleDrawComplete"
