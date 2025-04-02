@@ -66,21 +66,22 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { create_multibbox, convertBbox, createRealContour, getLongestSubArray, transformMultiPolygon } from '../composable/convertCoordinates'
+import {
+  create_multibbox,
+  convertBbox,
+  createRealContour,
+  getLongestSubArray,
+  transformMultiPolygon,
+} from '../composable/convertCoordinates'
 import config from '@/config'
 import { useScanStore } from '@/components/store/scan'
 import * as olProj from 'ol/proj'
-
-
-
-
 
 const emit = defineEmits(['close', 'select-country'])
 const searchCountry = ref('')
 const countryResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-
 
 const scanStore = useScanStore()
 
@@ -130,33 +131,38 @@ function searchCountries() {
   }, 500)
 }
 
-
-
-
-
 function selectCountry(country) {
   getCountryBbox(country)
     .then((contour) => {
-      console.log('contour', contour)
-      
+      searchCountry.value = country.nom
+
       const bbox3857 = create_multibbox(contour)
       const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
-      
+
       scanStore.updateBbox(bbox4326)
       scanStore.updateSelectedGeom(contour)
 
       // Cas spécial des pays avec trop de petites îles
       if (contour.length > 10) {
         const longestSubArray = getLongestSubArray(contour)
-        contour =[longestSubArray]
+        contour = [longestSubArray]
       }
 
-      
       // Cas spéciale des USA
-      if (country.code === "US"){
-        contour = [[["-13912762.1682", "2915614.0653"], ["-13912762.1682", "6261721.3124"], ["-7396658.4088", "6261721.3124"], ["-7396658.4088", "2915614.0653"], ["-13912762.1682", "2915614.0653"]]]
+      if (country.code === 'US') {
+        contour = [
+          [
+            ['-13912762.1682', '2915614.0653'],
+            ['-13912762.1682', '6261721.3124'],
+            ['-7396658.4088', '6261721.3124'],
+            ['-7396658.4088', '2915614.0653'],
+            ['-13912762.1682', '2915614.0653'],
+          ],
+        ]
       }
-      let newcontour = contour.map(polygon => polygon.map(([x, y]) => olProj.transform([x, y], 'EPSG:3857', 'EPSG:4326')))
+      let newcontour = contour.map((polygon) =>
+        polygon.map(([x, y]) => olProj.transform([x, y], 'EPSG:3857', 'EPSG:4326')),
+      )
 
       scanStore.updateWKT(createRealContour(newcontour))
     })
@@ -174,12 +180,10 @@ async function getCountryBbox(country) {
     .replace(/[\u0300-\u036f]/g, '')
     .toUpperCase()
 
-
   const urlCountryBbox =
     `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
     `&request=GetFeature&typeNames=pays&outputFormat=application/json` +
     `&CQL_FILTER=CODE_PAYS='${countryCode}'&srsName=EPSG:3857`
-  
 
   try {
     const response = await fetch(urlCountryBbox)
@@ -187,7 +191,7 @@ async function getCountryBbox(country) {
       throw new Error(`Erreur réseau : ${response.status}`)
     }
     const data = await response.json()
-    
+
     const contour_country = data.features[0]?.geometry?.coordinates
 
     if (!contour_country) {

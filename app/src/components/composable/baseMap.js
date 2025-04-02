@@ -164,5 +164,4 @@ export const otherLayersPhotoFrance = [
     thumbnail: ortho1950,
     visible: false,
   },
-
 ]

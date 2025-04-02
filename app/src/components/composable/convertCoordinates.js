@@ -3,8 +3,6 @@ import WKT from 'ol/format/WKT'
 import MultiPolygon from 'ol/geom/MultiPolygon'
 import Polygon from 'ol/geom/Polygon'
 
-
-
 // définit les systèmes de projection
 proj4.defs([
   [
@@ -61,11 +59,10 @@ export function create_bbox(contour) {
   return { minX, minY, maxX, maxY }
 }
 
-
 /**
  * retourne la bbox d'un multi polygon
- * @param {*} contours 
- * @returns 
+ * @param {*} contours
+ * @returns
  */
 export function create_multibbox(contours) {
   if (!contours || contours.length === 0) {
@@ -111,8 +108,8 @@ export function create_multibbox(contours) {
 
 /**
  * retourne la bonne tolérance pour chaque longueur de tableau
- * @param {*} polygon 
- * @returns 
+ * @param {*} polygon
+ * @returns
  */
 export function getDynamicTolerance(polygon) {
   const len = polygon.length
@@ -133,34 +130,27 @@ export function getDynamicTolerance(polygon) {
     return 20
   }
 
-  return len > 20 ? 2 : 0.001;
+  return len > 20 ? 2 : 0.001
 }
 
 /**
  * renvoie le sous tableau le plus grand d'un tableau
- * @param {*} arr 
- * @returns 
+ * @param {*} arr
+ * @returns
  */
 export function getLongestSubArray(arr) {
-  return arr.reduce((longest, current) =>
-    current.length > longest.length ? current : longest
-    , []);
+  return arr.reduce((longest, current) => (current.length > longest.length ? current : longest), [])
 }
-
-
-
 
 /**
  * crée un wkt à partir d'un contour
- * @param {*} contour 
- * @returns 
+ * @param {*} contour
+ * @returns
  */
 export function createRealContour(contour) {
+  let newcontour = contour.map((polygon) => polygon.map(([x, y]) => [y, x]))
 
-  let newcontour = contour.map(polygon => polygon.map(([x, y]) => [y, x]))
-
-
-  const simplePolygon = newcontour.map(polygonCoords => {
+  const simplePolygon = newcontour.map((polygonCoords) => {
     const polygon = new Polygon([polygonCoords])
     return polygon.simplify(getDynamicTolerance(polygonCoords))
   })
@@ -173,11 +163,10 @@ export function createRealContour(contour) {
   return wkt
 }
 
-
 /**
  * Transforme un tableau de polygones en un tableau de contours [[[[x,y]]]] en [[[x,y]]]
- * @param {*} contour_country 
- * @returns 
+ * @param {*} contour_country
+ * @returns
  */
 export function transformMultiPolygon(contour_country) {
   let allContours = []

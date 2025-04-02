@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import config from '@/config'
-import { mdiConsoleNetworkOutline } from '@mdi/js'
 
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
@@ -22,15 +21,14 @@ export const useScanStore = defineStore('scan', () => {
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
-      let empriseURL = 'emprisesscans';
-      let [minX, minY, maxX, maxY] = storeBbox.value;
+      let empriseURL = 'emprisesscans'
+      let [minX, minY, maxX, maxY] = storeBbox.value
 
       if (activeTab.value === 'cartotheque_etranger') {
-        empriseURL = 'emprisesscansmonde';
+        empriseURL = 'emprisesscansmonde'
         // inverse les coordonnées : lon/lat to lat/lon
-        [minX, minY] = [minY, minX];;
-        [maxX, maxY] = [maxY, maxX];
-
+        ;[minX, minY] = [minY, minX]
+        ;[maxX, maxY] = [maxY, maxX]
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
@@ -39,7 +37,7 @@ export const useScanStore = defineStore('scan', () => {
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
 
       if (activeTab.value === 'cartotheque_etranger') {
-        if (activeSubCategory.value === "pays" || activeSubCategory.value === "point") {
+        if (activeSubCategory.value === 'pays' || activeSubCategory.value === 'point') {
           cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
         }
       }
@@ -51,9 +49,8 @@ export const useScanStore = defineStore('scan', () => {
 
       if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
 
-
       if (activeTab.value === 'phototheque') {
-        empriseURL = 'PVALambert93';
+        empriseURL = 'PVALambert93'
         cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
       }
 
@@ -69,21 +66,20 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateScaleRange() {
     if (activeTab.value === 'cartotheque') {
-      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
-      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
-    } else if (activeTab.value === "cartotheque_etranger") {
-      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
-      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 200000;
-    }
-    else if (activeTab.value === 'phototheque') {
-      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
-      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000
     } else if (activeTab.value === 'cartotheque_etranger') {
-      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 2000;
-      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 10000000;
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 200000
+    } else if (activeTab.value === 'phototheque') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000
+    } else if (activeTab.value === 'cartotheque_etranger') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 2000
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 10000000
     } else {
-      storeCritereSelection.value.scaleMin = null;
-      storeCritereSelection.value.scaleMax = null;
+      storeCritereSelection.value.scaleMin = null
+      storeCritereSelection.value.scaleMax = null
     }
   }
 
@@ -100,7 +96,7 @@ export const useScanStore = defineStore('scan', () => {
   function updateActiveSubCategory(subCategory) {
     activeSubCategory.value = subCategory
     console.log('Sous-catégorie active:', activeSubCategory.value)
-    updateScaleRange();
+    updateScaleRange()
   }
 
   function resetCriteria() {
@@ -116,7 +112,6 @@ export const useScanStore = defineStore('scan', () => {
     storeBbox.value = []
     storeScansData.value = []
     storeSelectedScan.value = null
-
   }
 
   function updateSelectedGeom(newVal) {
@@ -126,7 +121,6 @@ export const useScanStore = defineStore('scan', () => {
   function updateSelectedScan(newVal) {
     storeSelectedScan.value = newVal
   }
-
 
   function updateActiveTab(newVal) {
     activeTab.value = newVal
