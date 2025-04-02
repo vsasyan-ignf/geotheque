@@ -110,8 +110,9 @@ const { storeCritereSelection } = storeToRefs(scanStore)
 
 const yearMin = ref(storeCritereSelection.value.yearMin || '')
 const yearMax = ref(storeCritereSelection.value.yearMax || '')
-const scaleMin = ref(storeCritereSelection.value.scaleMin || '500')
-const scaleMax = ref(storeCritereSelection.value.scaleMax || '100000')
+const scaleMin = ref(storeCritereSelection.value.scaleMin ?? '500')
+const scaleMax = ref(storeCritereSelection.value.scaleMax ?? '100000')
+
 const selectedCollection = ref({ id: '', name: '' })
 
 const scaleOptions = [
@@ -249,10 +250,10 @@ const resetForm = () => {
   yearMax.value = initialValues.yearMax
   scaleMin.value = initialValues.scaleMin
   scaleMax.value = initialValues.scaleMax
-  selectedCollection.value = { id: '', name: '' }
+  selectedCollection.value = { id: '0', name: 'Toutes les collections' }
   scanStore.resetCriteria()
 
-  eventBus.emit('criteria-reset', { resetDropdown: true })
+  eventBus.emit('criteria-reset')
 }
 
 const updateSelectedCollection = (selected) => {

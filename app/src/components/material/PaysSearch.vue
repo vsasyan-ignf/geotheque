@@ -1,28 +1,28 @@
+<!-- recherche par pays -->
 <template>
   <div class="sub-category-content">
-    <SubCategoryHeader title="Recherche par feuilles" @close="$emit('close')" />
+    <SubCategoryHeader title="Recherche par pays" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="feuille-search">Numero</label>
+        <label for="country-search">Nom du pays</label>
         <div class="input-group">
           <input
-            id="feuille-search"
-            autocomplete="off"
-            v-model="feuilleSelected"
+            id="country-search"
+            v-model="searchCountry"
             type="text"
-            placeholder="Ex: NE 28 XVIII ou NB 29 VI"
-            @input="searchFeuille"
+            placeholder="Ex: France, Allemagne..."
+            @input="searchCountries"
             @focus="showResults = true"
           />
-          <button @click="validateFeuille">
+          <button @click="searchCountries">
             <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="feuilleResults.length > 0">Résultats ({{ feuilleResults.length }})</h5>
-            <h5 v-else-if="feuilleSelected">Aucun résultat</h5>
+            <h5 v-if="countryResults.length > 0">Résultats ({{ countryResults.length }})</h5>
+            <h5 v-else-if="searchCountry">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
               <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
@@ -30,65 +30,62 @@
           </div>
 
           <div class="results-content">
-            <div class="results-list" v-if="feuilleResults.length > 0">
+            <div class="results-list" v-if="countryResults.length > 0">
               <div
-                v-for="(feuille, index) in feuilleResults"
-                :key="feuille.nom + '-' + index"
+                v-for="country in countryResults"
+                :key="country.code"
                 class="result-item"
-                @click="selectFeuille(feuille)"
+                @click="selectCountry(country)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ feuille.numero }}</div>
-                  <div class="result-secondary">Nom de la feuille : {{ feuille.nom }}</div>
+                  <div class="result-main">{{ country.nom }}</div>
+                  <div class="result-secondary">{{ country.code }}</div>
                 </div>
               </div>
             </div>
 
-            <div class="no-results" v-else-if="feuilleSelected">
+            <div class="no-results" v-else-if="searchCountry">
               <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
-              <span>Aucune feuilles trouvées</span>
+              <span>Aucun pays trouvé</span>
             </div>
 
             <div class="empty-search" v-else>
               <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
-              <span>Saisissez le numéro d'une feuille</span>
+              <span>Saisissez le nom d'un pays</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <CartothequeSubMenu v-if="activeTab === 'cartotheque_etranger'" />
-    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
+    <CartothequeSubMenu />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import PhotothequeSubMenu from '../phototheque/PhotothequeSubMenu.vue'
-import { useScanStore } from '@/components/store/scan'
-import { storeToRefs } from 'pinia'
+import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { create_bbox, useConvertCoordinates } from '@/components/composable/convertCoordinates'
+import { create_multibbox, convertBbox, getDynamicTolerance, roundCoordinates, createRealContour } from '../composable/convertCoordinates'
 import config from '@/config'
+import { useScanStore } from '@/components/store/scan'
 
-const scanStore = useScanStore()
-const { activeTab } = storeToRefs(scanStore)
 
-const emit = defineEmits(['close', 'select-commune'])
 
-const feuilleSelected = ref('')
-const feuilleResults = ref([])
+
+
+const emit = defineEmits(['close', 'select-country'])
+const searchCountry = ref('')
+const countryResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-let repFeuille = ref(null)
+
+
+const scanStore = useScanStore()
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
-  const searchInput = document.getElementById('feuille-search')
-
+  const searchInput = document.getElementById('country-search')
   if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
   }
@@ -103,58 +100,111 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
-function searchFeuille() {
+function searchCountries() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
 
-  const query = feuilleSelected.value
+  const query = searchCountry.value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
 
-  if (!query) {
-    feuilleResults.value = []
-    return
-  }
+  const url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=pays&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
 
-  showResults.value = true
-
-  // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
-  let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
-    fetch(search_url)
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.features.map((feuille) => ({
-          nom: feuille.properties.NOM,
-          numero: feuille.properties.NUMERO,
-          geometry: feuille.geometry.coordinates[0][0],
+        const newResults = data.features.map((pays) => ({
+          nom: pays.properties.NOM,
+          code: pays.properties.CODE_PAYS,
         }))
-        feuilleResults.value = newResults
+        countryResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des feuilles:', error)
-        feuilleResults.value = []
+        console.error('Erreur lors de la récupération des pays:', error)
+        countryResults.value = []
       })
-  }, 300)
+  }, 500)
 }
 
-function selectFeuille(feuille) {
-  feuilleSelected.value = feuille.numero
-  repFeuille.value = feuille
-  validateFeuille()
+function getLongestSubArray(arr) {
+    return arr.reduce((longest, current) => 
+        current.length > longest.length ? current : longest
+    , []);
+}
+
+
+
+function selectCountry(country) {
+  getCountryBbox(country)
+    .then((contour) => {
+      
+      const bbox3857 = create_multibbox(contour)
+      const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
+      
+      scanStore.updateBbox(bbox4326)
+      scanStore.updateSelectedGeom(contour)
+
+      if (contour.length > 10) {
+        const longestSubArray = getLongestSubArray(contour)
+        contour =[longestSubArray]
+      }
+
+      
+
+      if (country.code === "US"){
+        contour = [[["-13912762.1682", "2915614.0653"], ["-13912762.1682", "6261721.3124"], ["-7396658.4088", "6261721.3124"], ["-7396658.4088", "2915614.0653"], ["-13912762.1682", "2915614.0653"]]]
+      }
+
+      scanStore.updateWKT(createRealContour(contour))
+    })
+    .catch((error) => {
+      console.error('Erreur lors de la récupération des contours du pays:', error)
+    })
+
   showResults.value = false
 }
 
-function validateFeuille() {
-  if (repFeuille) {
-    const bbox4326 = create_bbox([repFeuille.value.geometry])
-    const bboxLonLat = [bbox4326.minX, bbox4326.minY, bbox4326.maxX, bbox4326.maxY]
-    scanStore.updateBbox(bboxLonLat)
+async function getCountryBbox(country) {
+  const countryCode = country.code
+    .split(',')[0]
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
 
-    const contourMercator = repFeuille.value.geometry.map((coord) =>
-      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
-    )
-    scanStore.updateSelectedGeom(contourMercator)
+
+  const urlCountryBbox =
+    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
+    `&request=GetFeature&typeNames=pays&outputFormat=application/json` +
+    `&CQL_FILTER=CODE_PAYS='${countryCode}'&srsName=EPSG:3857`
+  
+
+  try {
+    const response = await fetch(urlCountryBbox)
+    if (!response.ok) {
+      throw new Error(`Erreur réseau : ${response.status}`)
+    }
+    const data = await response.json()
+
+    const contour_country = data.features[0]?.geometry?.coordinates
+
+    if (!contour_country) {
+      throw new Error('Coordonnées non trouvées dans la réponse')
+    }
+    const allContours = []
+
+    for (const polygon of contour_country) {
+      const exteriorRing = polygon[0]
+
+      allContours.push(exteriorRing)
+    }
+
+    return allContours
+  } catch (error) {
+    console.error('Erreur:', error)
+    throw error
   }
 }
 </script>
@@ -164,7 +214,6 @@ function validateFeuille() {
   animation: fadeIn 0.3s ease;
   position: relative;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -361,5 +410,9 @@ function validateFeuille() {
 .empty-search i {
   font-size: 24px;
   color: #ddd;
+}
+
+.mdi {
+  margin-top: 5px;
 }
 </style>

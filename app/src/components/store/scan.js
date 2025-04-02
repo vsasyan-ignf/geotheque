@@ -9,6 +9,7 @@ export const useScanStore = defineStore('scan', () => {
   let storeSelectedScan = ref(null)
   let activeSubCategory = ref(null)
   let activeTab = ref('cartotheque')
+  let wkt = ref(null)
 
   let storeCritereSelection = ref({
     yearMin: null,
@@ -20,20 +21,26 @@ export const useScanStore = defineStore('scan', () => {
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
-      let empriseURL = 'emprisesscans'
-      let [minX, minY, maxX, maxY] = storeBbox.value
+      let empriseURL = 'emprisesscans';
+      let [minX, minY, maxX, maxY] = storeBbox.value;
 
       if (activeTab.value === 'cartotheque_etranger') {
-        empriseURL = 'emprisesscansmonde'
+        empriseURL = 'emprisesscansmonde';
         // inverse les coordonnées : lon/lat to lat/lon
-        [minX, minY] = [minY, minX]
-        [maxX, maxY] = [maxY, maxX]
+        [minX, minY] = [minY, minX];;
+        [maxX, maxY] = [maxY, maxX];
+
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
         storeCritereSelection.value
-
+                
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
+      
+      if (activeSubCategory.value === "pays") {
+        cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
+      }
+      
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
       if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`
       if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`
@@ -41,29 +48,56 @@ export const useScanStore = defineStore('scan', () => {
 
       if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
 
+
+      if (activeTab.value === 'phototheque') {
+        empriseURL = 'PVALambert93';
+        cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
+      }
+      
       return (
         `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
         `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
         `&cql_filter=${cqlFilter}` +
         `&srsName=EPSG:3857`
-      )
+        )
+      }
+      return ''
+    })
+    
+  function updateScaleRange() {
+    if (activeTab.value === 'cartotheque') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
+    } else if (activeTab.value === "cartotheque_etranger") {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 200000;
+    } 
+    else if (activeTab.value === 'phototheque') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
+    } else if (activeTab.value === 'cartotheque_etranger') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 2000;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 10000000;
+    } else {
+      storeCritereSelection.value.scaleMin = null;
+      storeCritereSelection.value.scaleMax = null;
     }
-    return ''
-  })
+  }
 
   function updateBbox(newBbox) {
-    console.log(newBbox)
-    storeBbox.value = newBbox
+      console.log(newBbox)
+      storeBbox.value = newBbox
   }
 
   function updateCriteria(newCriteria) {
     storeCritereSelection.value = { ...newCriteria }
     console.log('Updated criteria:', storeCritereSelection.value)
   }
-
+  
   function updateActiveSubCategory(subCategory) {
     activeSubCategory.value = subCategory
     console.log('Sous-catégorie active:', activeSubCategory.value)
+    updateScaleRange();
   }
 
   function resetCriteria() {
@@ -77,8 +111,9 @@ export const useScanStore = defineStore('scan', () => {
 
     storeSelectedGeom.value = []
     storeBbox.value = []
-    storeScansData.value = null
+    storeScansData.value = []
     storeSelectedScan.value = null
+
   }
 
   function updateSelectedGeom(newVal) {
@@ -89,9 +124,14 @@ export const useScanStore = defineStore('scan', () => {
     storeSelectedScan.value = newVal
   }
 
+
   function updateActiveTab(newVal) {
     activeTab.value = newVal
     console.log('tab selected : ', activeTab.value)
+  }
+
+  function updateWKT(newVal) {
+    wkt.value = newVal
   }
 
   async function storeGet(url) {
@@ -106,9 +146,10 @@ export const useScanStore = defineStore('scan', () => {
         storeScansData.value = data.features.map((feature, index) => ({
           id: index,
           geom: feature.geometry.coordinates[0],
-          name: feature.properties.ID_CARTE,
+          name: feature.properties.ID_CARTE ?? feature.properties.NOM, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
           properties: feature.properties,
         }))
+        storeSelectedScan.value = null
       } else {
         throw new Error('Failed to fetch data')
       }
@@ -134,5 +175,7 @@ export const useScanStore = defineStore('scan', () => {
     resetCriteria,
     activeTab,
     updateActiveTab,
+    wkt,
+    updateWKT,
   }
 })

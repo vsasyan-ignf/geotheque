@@ -1,30 +1,28 @@
-<!-- recherche par departement -->
 <template>
   <div class="sub-category-content">
-    <SubCategoryHeader title="Recherche par département" @close="$emit('close')" />
+    <SubCategoryHeader title="Recherche par commune" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="departement-search">Nom ou numéro</label>
+        <label for="commune-search">Nom ou code postal</label>
         <div class="input-group">
           <input
-            id="departement-search"
-            v-model="searchDepartement"
+            id="commune-search"
+            autocomplete="off"
+            v-model="searchCommune"
             type="text"
-            placeholder="Ex: Rhône ou 69"
-            @input="searchDepartements"
+            placeholder="Ex: Paris ou 75000"
+            @input="searchCommunes"
             @focus="showResults = true"
           />
-          <button @click="searchDepartements">
+          <button @click="validateCommune">
             <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="departementResults.length > 0">
-              Résultats ({{ departementResults.length }})
-            </h5>
-            <h5 v-else-if="searchDepartement">Aucun résultat</h5>
+            <h5 v-if="communeResults.length > 0">Résultats ({{ communeResults.length }})</h5>
+            <h5 v-else-if="searchCommune">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
               <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
@@ -32,28 +30,28 @@
           </div>
 
           <div class="results-content">
-            <div class="results-list" v-if="departementResults.length > 0">
+            <div class="results-list" v-if="communeResults.length > 0">
               <div
-                v-for="dept in departementResults"
-                :key="dept.code"
+                v-for="(commune, index) in communeResults"
+                :key="commune.code + '-' + commune.nom"
                 class="result-item"
-                @click="selectDepartement(dept)"
+                @click="selectCommune(commune)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ dept.nom }}</div>
-                  <div class="result-secondary">{{ dept.code }} - {{ dept.region }}</div>
+                  <div class="result-main">{{ commune.nom }}</div>
+                  <div class="result-secondary">{{ commune.code }} - {{ commune.departement }}</div>
                 </div>
               </div>
             </div>
 
-            <div class="no-results" v-else-if="searchDepartement">
+            <div class="no-results" v-else-if="searchCommune">
               <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
-              <span>Aucun Département trouvée</span>
+              <span>Aucune commune trouvée</span>
             </div>
 
             <div class="empty-search" v-else>
               <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
-              <span>Saisissez le nom ou code d'un Département</span>
+              <span>Saisissez le nom ou code postal d'une commune</span>
             </div>
           </div>
         </div>
@@ -67,30 +65,31 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import SubCategoryHeader from './SubCategoryHeader.vue'
-import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import PhotothequeSubMenu from '../phototheque/PhotothequeSubMenu.vue'
-import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-
+import SubCategoryHeader from '@/components/material/SubCategoryHeader.vue'
+import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
+import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
+import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import { useScanStore } from '@/components/store/scan'
-import { convertBbox, create_bbox } from '../composable/convertCoordinates'
-import config from '@/config'
+import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 import { storeToRefs } from 'pinia'
 
-const emit = defineEmits(['close', 'select-departement'])
-const searchDepartement = ref('')
-const departementResults = ref([])
-const showResults = ref(false)
-let searchTimeout = null
-const proj3857 = 'EPSG:3857' // Web Mercator
-const proj2154 = 'EPSG:2154' // Lambert-93
+import config from '@/config'
 
 const scanStore = useScanStore()
 const { activeTab } = storeToRefs(scanStore)
 
+const emit = defineEmits(['close', 'select-commune'])
+
+let searchCommune = ref('')
+const communeResults = ref([])
+const showResults = ref(false)
+let searchTimeout = null
+let repCommune = ref(null)
+
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
-  const searchInput = document.getElementById('departement-search')
+  const searchInput = document.getElementById('commune-search')
+
   if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
   }
@@ -105,84 +104,75 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
-function searchDepartements() {
+function searchCommunes() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-  let url_dep
-  const query = searchDepartement.value.toLowerCase().trim()
-  const numbner_dep = parseInt(query)
-  if (!isNaN(numbner_dep)) {
-    url_dep = `${config.DEPARTEMENT_URL}?code=${query}&fields=nom,code,region`
-  } else {
-    url_dep = `${config.DEPARTEMENT_URL}?nom=${query}&fields=nom,code,region`
+
+  const query = searchCommune.value.toLowerCase().trim()
+
+  if (!query) {
+    communeResults.value = []
+    return
   }
 
+  showResults.value = true
+
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
+  let search_url = ''
   searchTimeout = setTimeout(() => {
-    fetch(url_dep)
+    if (parseInt(query)) {
+      search_url = `${config.COMMUNE_URL}?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+    } else {
+      search_url = `${config.COMMUNE_URL}?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+    }
+
+    fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.map((departement) => ({
-          nom: departement.nom,
-          code: departement.code,
-          region: departement.region.nom,
+        const newResults = data.map((commune) => ({
+          nom: commune.nom,
+          code: commune.codesPostaux[0],
+          departement: commune.departement.nom,
+          bbox: commune.bbox,
+          contour: commune.contour,
         }))
-        departementResults.value = newResults
+
+        communeResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des departements:', error)
-        departementResults.value = []
+        console.error('Erreur lors de la récupération des communes:', error)
+        communeResults.value = []
       })
   }, 300)
 }
 
-function selectDepartement(departement) {
-  getDepartementBbox(departement)
-    .then((contour) => {
-      let bbox3857 = create_bbox(contour)
-      const bbox2154 = convertBbox(bbox3857, proj3857, proj2154)
-      const point = {
-        x: 0,
-        y: 0,
-        bboxLambert93: bbox2154,
-      }
-
-      const coordinates = contour[0].map((point) => [point[0], point[1]])
-
-      scanStore.updateSelectedGeom(coordinates)
-
-      emit('select-departement', point)
-    })
-    .catch((error) => {
-      console.error('Erreur lors de la récupération des controus du departements:', error)
-    })
-  searchDepartement.value = departement.nom
+function selectCommune(commune) {
+  searchCommune.value = commune.nom
+  repCommune = commune
+  validateCommune()
   showResults.value = false
 }
 
-async function getDepartementBbox(departement) {
-  const depCode = departement.code.toString()
-  const urlDepBbox =
-    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0
-  ` +
-    `&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=CODE_DEPT='${depCode}'&srsName=EPSG:3857`
+function validateCommune() {
+  if (repCommune) {
+    const bbox = repCommune.bbox.coordinates[0]
+    const bboxWGS84 = [bbox[0], bbox[2]]
+    const bboxLambert93 = bboxWGS84.map((point) =>
+      useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154'),
+    )
 
-  try {
-    const response = await fetch(urlDepBbox)
-    if (!response.ok) {
-      throw new Error(`rrreur réseau : ${response.status}`)
+    const point = {
+      bboxLambert93: bboxLambert93.flat(),
     }
-    const data = await response.json()
-    const contour_dep = data.features[0]?.geometry?.coordinates[0]
-    if (!contour_dep) {
-      throw new Error('coordonées non trouvée dans la réponse')
-    }
-    console.log('Contour du departement:', contour_dep)
-    return contour_dep
-  } catch (error) {
-    console.error('e:', error)
-    throw error
+
+    const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
+      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
+    )
+
+    scanStore.updateSelectedGeom(contourMercator)
+
+    emit('select-commune', point)
   }
 }
 </script>
@@ -192,6 +182,7 @@ async function getDepartementBbox(departement) {
   animation: fadeIn 0.3s ease;
   position: relative;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;

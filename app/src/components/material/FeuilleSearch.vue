@@ -1,28 +1,28 @@
 <template>
   <div class="sub-category-content">
-    <SubCategoryHeader title="Recherche par commune" @close="$emit('close')" />
+    <SubCategoryHeader title="Recherche par feuilles" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="commune-search">Nom ou code postal</label>
+        <label for="feuille-search">Numero</label>
         <div class="input-group">
           <input
-            id="commune-search"
+            id="feuille-search"
             autocomplete="off"
-            v-model="searchCommune"
+            v-model="feuilleSelected"
             type="text"
-            placeholder="Ex: Paris ou 75000"
-            @input="searchCommunes"
+            placeholder="Ex: NE 28 XVIII ou NB 29 VI"
+            @input="searchFeuille"
             @focus="showResults = true"
           />
-          <button @click="validateCommune">
+          <button @click="validateFeuille">
             <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="communeResults.length > 0">Résultats ({{ communeResults.length }})</h5>
-            <h5 v-else-if="searchCommune">Aucun résultat</h5>
+            <h5 v-if="feuilleResults.length > 0">Résultats ({{ feuilleResults.length }})</h5>
+            <h5 v-else-if="feuilleSelected">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
               <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
@@ -30,35 +30,35 @@
           </div>
 
           <div class="results-content">
-            <div class="results-list" v-if="communeResults.length > 0">
+            <div class="results-list" v-if="feuilleResults.length > 0">
               <div
-                v-for="(commune, index) in communeResults"
-                :key="commune.code + '-' + commune.nom"
+                v-for="(feuille, index) in feuilleResults"
+                :key="feuille.nom + '-' + index"
                 class="result-item"
-                @click="selectCommune(commune)"
+                @click="selectFeuille(feuille)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ commune.nom }}</div>
-                  <div class="result-secondary">{{ commune.code }} - {{ commune.departement }}</div>
+                  <div class="result-main">{{ feuille.numero }}</div>
+                  <div class="result-secondary">Nom de la feuille : {{ feuille.nom }}</div>
                 </div>
               </div>
             </div>
 
-            <div class="no-results" v-else-if="searchCommune">
+            <div class="no-results" v-else-if="feuilleSelected">
               <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
-              <span>Aucune commune trouvée</span>
+              <span>Aucune feuilles trouvées</span>
             </div>
 
             <div class="empty-search" v-else>
               <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
-              <span>Saisissez le nom ou code postal d'une commune</span>
+              <span>Saisissez le numéro d'une feuille</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <CartothequeSubMenu v-if="activeTab === 'cartotheque'" />
+    <CartothequeSubMenu v-if="activeTab === 'cartotheque_etranger'" />
     <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
   </div>
 </template>
@@ -66,13 +66,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import PhotothequeSubMenu from '../phototheque/PhotothequeSubMenu.vue'
-import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
+import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
+import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
 import { useScanStore } from '@/components/store/scan'
-import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 import { storeToRefs } from 'pinia'
-
+import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
+import { create_bbox, useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -80,15 +79,15 @@ const { activeTab } = storeToRefs(scanStore)
 
 const emit = defineEmits(['close', 'select-commune'])
 
-let searchCommune = ref('')
-const communeResults = ref([])
+const feuilleSelected = ref('')
+const feuilleResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-let repCommune = ref(null)
+let repFeuille = ref(null)
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
-  const searchInput = document.getElementById('commune-search')
+  const searchInput = document.getElementById('feuille-search')
 
   if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
@@ -104,15 +103,15 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
-function searchCommunes() {
+function searchFeuille() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
 
-  const query = searchCommune.value.toLowerCase().trim()
+  const query = feuilleSelected.value
 
   if (!query) {
-    communeResults.value = []
+    feuilleResults.value = []
     return
   }
 
@@ -121,60 +120,41 @@ function searchCommunes() {
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    if (parseInt(query)) {
-      search_url = `${config.COMMUNE_URL}?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
-    } else {
-      search_url = `${config.COMMUNE_URL}?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
-    }
-
+    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.map((commune) => ({
-          nom: commune.nom,
-          code: commune.codesPostaux[0],
-          departement: commune.departement.nom,
-          bbox: commune.bbox,
-          contour: commune.contour,
+        const newResults = data.features.map((feuille) => ({
+          nom: feuille.properties.NOM,
+          numero: feuille.properties.NUMERO,
+          geometry: feuille.geometry.coordinates[0][0],
         }))
-
-        communeResults.value = newResults
+        feuilleResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des communes:', error)
-        communeResults.value = []
+        console.error('Erreur lors de la récupération des feuilles:', error)
+        feuilleResults.value = []
       })
   }, 300)
 }
 
-function selectCommune(commune) {
-  searchCommune.value = commune.nom
-  repCommune = commune
-  validateCommune()
+function selectFeuille(feuille) {
+  feuilleSelected.value = feuille.numero
+  repFeuille.value = feuille
+  validateFeuille()
   showResults.value = false
 }
 
-function validateCommune() {
-  if (repCommune) {
-    const bbox = repCommune.bbox.coordinates[0]
-    const bboxWGS84 = [bbox[0], bbox[2]]
-    const bboxLambert93 = bboxWGS84.map((point) =>
-      useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154'),
-    )
+function validateFeuille() {
+  if (repFeuille) {
+    const bbox4326 = create_bbox([repFeuille.value.geometry])
+    const bboxLonLat = [bbox4326.minX, bbox4326.minY, bbox4326.maxX, bbox4326.maxY]
+    scanStore.updateBbox(bboxLonLat)
 
-    const point = {
-      x: 0,
-      y: 0,
-      bboxLambert93: bboxLambert93.flat(),
-    }
-
-    const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
+    const contourMercator = repFeuille.value.geometry.map((coord) =>
       useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
     )
-
     scanStore.updateSelectedGeom(contourMercator)
-
-    emit('select-commune', point)
   }
 }
 </script>
@@ -381,9 +361,5 @@ function validateCommune() {
 .empty-search i {
   font-size: 24px;
   color: #ddd;
-}
-
-.mdi {
-  margin-top: 5px;
 }
 </style>

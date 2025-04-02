@@ -75,21 +75,21 @@ function generateImageUrl(info) {
   const lieu = 'METROPOLE'
   let name = ''
   let url = ''
-
-  if (info.SOUS_COLL !== '') {
-    url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
-    name = info.ID_CARTE
-  } else {
-    url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
-    name = info.SOUS_COLL
+  if (info) {
+    if (info.SOUS_COLL !== '') {
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      name = info.ID_CARTE
+    } else {
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      name = info.SOUS_COLL
+    }
   }
-
   return { url, name }
 }
 
 watch(storeSelectedScan, (newVal) => {
   if (newVal) {
-    const info = storeSelectedScan.value.properties
+    const info = storeSelectedScan.value?.properties
     const { url, name } = generateImageUrl(info)
     imageUrl.value = url
   }
@@ -100,8 +100,10 @@ function openIipmooviewer() {
     console.log(imageUrl.value)
     const urlParams = new URLSearchParams(new URL(imageUrl.value).search)
     const imageUrlServ = urlParams.get('FIF')
-    sessionStorage.setItem('imageUrl', imageUrlServ)
-    window.open('/geotheque/iipmooviewer/index.html', '_blank')
+    const imageName = imageUrlServ.split('/').pop();
+
+    localStorage.setItem('imageUrl', imageUrlServ)    
+    window.open(`/geotheque/iipmooviewer/index.html?image=${encodeURIComponent(imageName)}`, '_blank')
   } else {
     console.error("L'URL de l'image est indéfinie.")
   }
@@ -109,7 +111,7 @@ function openIipmooviewer() {
 
 function downloadScans() {
   if (storeSelectedScan.value) {
-    const info = storeSelectedScan.value.properties
+    const info = storeSelectedScan.value?.properties
     const { url, name } = generateImageUrl(info)
 
     fetch(url)
@@ -132,7 +134,7 @@ let url_xml = ref(``)
 
 function downloadxml() {
   if (storeSelectedScan.value) {
-    const info = storeSelectedScan.value.properties
+    const info = storeSelectedScan.value?.properties
     const lieu = 'METROPOLE'
     if (info.SOUS_COLL !== '') {
       url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/Fiches/${info.ID_CARTE}.xml`
@@ -149,8 +151,9 @@ function downloadCSV() {
 
   if (data) {
     const newData = data.map((scan) => scan.properties)
+    console.log(newData)
     const csvContent = dicoToFormatCSV(newData)
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8,' })
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
     const objUrl = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.setAttribute('href', objUrl)
