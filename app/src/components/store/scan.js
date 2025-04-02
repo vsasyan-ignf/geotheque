@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import config from '@/config'
+import { mdiConsoleNetworkOutline } from '@mdi/js'
 
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
@@ -32,16 +33,15 @@ export const useScanStore = defineStore('scan', () => {
 
       }
 
-      const { yearMin, yearMax, selectedCollection } =
+      const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
         storeCritereSelection.value
-
-      const scaleMin = storeCritereSelection.value.scaleMin ?? 500;
-      const scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
 
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
 
-      if (activeSubCategory.value === "pays") {
-        cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
+      if (activeTab.value === 'cartotheque_etranger') {
+        if (activeSubCategory.value === "pays" || activeSubCategory.value === "point") {
+          cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
+        }
       }
 
       if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
@@ -67,6 +67,26 @@ export const useScanStore = defineStore('scan', () => {
     return ''
   })
 
+  function updateScaleRange() {
+    if (activeTab.value === 'cartotheque') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
+    } else if (activeTab.value === "cartotheque_etranger") {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 200000;
+    }
+    else if (activeTab.value === 'phototheque') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000;
+    } else if (activeTab.value === 'cartotheque_etranger') {
+      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 2000;
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 10000000;
+    } else {
+      storeCritereSelection.value.scaleMin = null;
+      storeCritereSelection.value.scaleMax = null;
+    }
+  }
+
   function updateBbox(newBbox) {
     console.log(newBbox)
     storeBbox.value = newBbox
@@ -80,6 +100,7 @@ export const useScanStore = defineStore('scan', () => {
   function updateActiveSubCategory(subCategory) {
     activeSubCategory.value = subCategory
     console.log('Sous-catégorie active:', activeSubCategory.value)
+    updateScaleRange();
   }
 
   function resetCriteria() {
@@ -93,8 +114,9 @@ export const useScanStore = defineStore('scan', () => {
 
     storeSelectedGeom.value = []
     storeBbox.value = []
-    storeScansData.value = null
+    storeScansData.value = []
     storeSelectedScan.value = null
+
   }
 
   function updateSelectedGeom(newVal) {
@@ -104,6 +126,7 @@ export const useScanStore = defineStore('scan', () => {
   function updateSelectedScan(newVal) {
     storeSelectedScan.value = newVal
   }
+
 
   function updateActiveTab(newVal) {
     activeTab.value = newVal
