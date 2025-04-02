@@ -26,7 +26,9 @@
       @select-departement="goToPoint"
     />
 
-    <PointSearch v-if="activeSubCategory === 'point'" @close="$emit('close-sub-category')" />
+    <PointSearch v-if="activeSubCategory === 'point'" 
+    @go-to-point="goToPoint"
+    @close="$emit('close-sub-category')" />
   </div>
 </template>
 
@@ -61,6 +63,7 @@ const props = defineProps({
 defineEmits(['select-sub-category', 'close-sub-category'])
 
 function goToPoint(point) {
+  console.log(point)
   if (point.bboxLambert93) {
     scanStore.updateBbox(point.bboxLambert93)
   }
