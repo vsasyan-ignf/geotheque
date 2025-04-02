@@ -227,14 +227,15 @@ function Add_new_polygone_to_map(tab) {
           //"Cliche Actif"
           elem = tab_test[i];
           tab_points_3857 = [];
-          for (i2 = 3; i2 < elem.length; i2 = i2 + 2) {
-            //Commence a 3 car en 0 il y a le type d'image et en 1 et 2 il y a le point d'origine
+          for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
+            //Commence a 1 car en 0 il y a le type d'image 
             x = elem[i2];
             y = elem[i2 + 1];
             [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
             //addPointToMap(x_3857, y3857);
             tab_points_3857.push([x_3857, y3857])
           }
+
           Add_new_polygone_to_map(tab_points_3857)
         }
       }
