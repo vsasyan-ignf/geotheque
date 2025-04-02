@@ -44,7 +44,7 @@ const emit = defineEmits()
 
 function updatestoreScansData() {
   emit('update:selected', selected.value) // pour choisir la collection
-  if (props.nameDropdown !== "Collections")
+  if (props.nameDropdown === "Nom du Scan")
   scanStore.updateSelectedScan(selected.value)
 }
 
