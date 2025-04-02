@@ -38,15 +38,17 @@ import View from 'ol/View'
 import Polygon from 'ol/geom/Polygon.js'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
+import { Style, Icon, Stroke, Fill, Text } from 'ol/style'
 import { getMaxZoom, createInitialWMTSLayers, updateWMTSLayers, changeActiveWMTSLayer } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
 import { layers_carto, otherLayersCartoFrance } from './composable/baseMap'
-import { createPinLayer, createGeomLayer, createScanLayer, createWFSLayer, initOtherVectorLayers } from './composable/getVectorLayer'
+import { createPinLayer, createGeomLayer, createScanLayer, createWFSLayer, initOtherVectorLayers, layersConfig } from './composable/getVectorLayer'
 import { parcour_txt_to_tab } from './composable/parseTXT'
 import { useConvertCoordinates } from './composable/convertCoordinates'
 import MultiPolygon from 'ol/geom/MultiPolygon'
 import { initializeIntersectionLayer, findIntersections, clearIntersection } from './composable/intersectionDraw'
+
 
 const scanStore = useScanStore()
 const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
@@ -419,12 +421,12 @@ eventBus.on('countryName', ({ type, visibility }) => {
   }
 })
 
+
 eventBus.on('sheetNumber', ({ type, visibility }) => {
   if(vectorOtherLayers.value[type]){
     vectorOtherLayers.value?.[type].setVisible(visibility)
   }
 })
-
 provide('eventBus', eventBus)
 </script>
 

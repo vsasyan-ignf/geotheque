@@ -90,7 +90,7 @@ function createVectorLayer(source, style, visible = false) {
   })
 }
 
-const layersConfig = [
+export const layersConfig = [
   {
     name: 'communes',
     url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox={bbox},EPSG:3857`,
