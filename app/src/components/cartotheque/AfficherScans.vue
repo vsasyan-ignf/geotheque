@@ -75,15 +75,15 @@ function generateImageUrl(info) {
   const lieu = 'METROPOLE'
   let name = ''
   let url = ''
-
-  if (info.SOUS_COLL !== '') {
-    url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
-    name = info.ID_CARTE
-  } else {
-    url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
-    name = info.SOUS_COLL
+  if (info) {
+    if (info.SOUS_COLL !== '') {
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      name = info.ID_CARTE
+    } else {
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      name = info.SOUS_COLL
+    }
   }
-
   return { url, name }
 }
 
