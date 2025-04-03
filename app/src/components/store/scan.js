@@ -26,9 +26,9 @@ export const useScanStore = defineStore('scan', () => {
 
       if (activeTab.value === 'cartotheque_etranger') {
         empriseURL = 'emprisesscansmonde'
-        // inverse les coordonnées : lon/lat to lat/lon
-        ;[minX, minY] = [minY, minX]
-        ;[maxX, maxY] = [maxY, maxX]
+          // inverse les coordonnées : lon/lat to lat/lon
+          ;[minX, minY] = [minY, minX]
+          ;[maxX, maxY] = [maxY, maxX]
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
@@ -135,17 +135,62 @@ export const useScanStore = defineStore('scan', () => {
     if (!url) {
       return
     }
+    if (activeTab.value === 'phototheque') {
+      await storeGetPhoto(url);
+    }
+    else {
+      try {
+        const response = await fetch(url)
+        console.log()
+        if (response.ok) {
+          const data = await response.json()
+          storeScansData.value = data.features.map((feature, index) => ({
+            id: index,
+            geom: feature.geometry.coordinates[0],
+            name: feature.properties.ID_CARTE ?? feature.properties.NOM, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
+            properties: feature.properties,
+          }))
+          storeSelectedScan.value = null
+        } else {
+          throw new Error('Failed to fetch data')
+        }
+      } catch (error) {
+        console.error('Error:', error)
+      }
+    }
+  }
 
+  async function storeGetPhoto(url) {
     try {
-      const response = await fetch(url)
+      const response = await fetch(url);
+      console.log();
       if (response.ok) {
         const data = await response.json()
-        storeScansData.value = data.features.map((feature, index) => ({
-          id: index,
-          geom: feature.geometry.coordinates[0],
-          name: feature.properties.ID_CARTE ?? feature.properties.NOM, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
-          properties: feature.properties,
-        }))
+        storeScansData.value = data.features.map((feature, index) => {
+          let suffix = '';
+          if (feature.properties.RÉSOLUTIO == 'undifined' || (feature.RÉSOLUTIO === "0.1" && feature.STYLE == "Argentique")) {
+            suffix += 'O';
+          }
+          if (feature.properties.DISPO_INTE === "1") {
+            suffix += 'T';
+          }
+          if (feature.properties.DISPO_INTE === "2") {
+            suffix += 'S';
+          }
+          if (feature.properties.ENVELOPPE_ === "1") {
+            suffix += '*';
+          }
+          if (feature.properties.IDENTIFIAN === 0) {
+            suffix += 'ap';
+          }
+          const name = feature.properties.CHANTIER + ' ' + suffix ?? "problème";
+          return {
+            id: index,
+            geom: feature.geometry.coordinates[0],
+            name: name,
+            properties: feature.properties,
+          };
+        })
         storeSelectedScan.value = null
       } else {
         throw new Error('Failed to fetch data')
