@@ -240,12 +240,6 @@ onMounted(() => {
   nextTick(() => {
     const wmtsLayers = createInitialWMTSLayers(layers.value, activeLayerIndex.value)
 
-    fetch(
-      'http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt',
-    )
-      .then((x) => x.text())
-      .then(console.log)
-
     vectorLayers.value = {
       pin: createPinLayer(markerIcon),
       geom: createGeomLayer(),
