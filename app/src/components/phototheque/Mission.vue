@@ -54,6 +54,14 @@
         @download="downloadDetails"
       />
     </div>
+    <div>
+      <ShakingButton
+          nameButton="Visualiser"
+          @click="print"
+        >
+          <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
+        </ShakingButton>
+    </div>
   </div>
 </template>
 
@@ -64,9 +72,11 @@ import MissionDetailsModal from './MissionDetailsModal.vue'
 import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
+import ShakingButton from '@/components/material/ShakingButton.vue'
+import { mdiPlus } from '@mdi/js'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan, activeTab } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan, activeTab, urlPhoto } = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
@@ -134,6 +144,10 @@ const closeModal = () => {
 
 const downloadDetails = () => {
   console.log('fonction dl')
+}
+
+function print(){
+  console.log(storeSelectedScan.value)
 }
 
 /********************** CHECKBOX ************************* */

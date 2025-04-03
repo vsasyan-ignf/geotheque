@@ -10,6 +10,7 @@ export const useScanStore = defineStore('scan', () => {
   let activeSubCategory = ref(null)
   let activeTab = ref('cartotheque')
   let wkt = ref(null)
+  let urlPhoto = ref(null)
 
   let storeCritereSelection = ref({
     yearMin: null,
@@ -26,9 +27,9 @@ export const useScanStore = defineStore('scan', () => {
 
       if (activeTab.value === 'cartotheque_etranger') {
         empriseURL = 'emprisesscansmonde'
-        // inverse les coordonnées : lon/lat to lat/lon
-        ;[minX, minY] = [minY, minX]
-        ;[maxX, maxY] = [maxY, maxX]
+          // inverse les coordonnées : lon/lat to lat/lon
+          ;[minX, minY] = [minY, minX]
+          ;[maxX, maxY] = [maxY, maxX]
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
@@ -131,6 +132,10 @@ export const useScanStore = defineStore('scan', () => {
     wkt.value = newVal
   }
 
+  function updateUrlPhoto(newVal) {
+    urlPhoto.value = newVal
+  }
+
   async function storeGet(url) {
     if (!url) {
       return
@@ -174,5 +179,7 @@ export const useScanStore = defineStore('scan', () => {
     updateActiveTab,
     wkt,
     updateWKT,
+    urlPhoto,
+    updateUrlPhoto,
   }
 })
