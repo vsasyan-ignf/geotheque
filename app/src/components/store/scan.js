@@ -163,11 +163,11 @@ export const useScanStore = defineStore('scan', () => {
   async function storeGetPhoto(url) {
     try {
       const response = await fetch(url);
-      console.log();
       if (response.ok) {
         const data = await response.json()
         storeScansData.value = data.features.map((feature, index) => {
           let suffix = '';
+          let resolution = '';
           if (feature.properties.RÉSOLUTIO == 'undifined' || (feature.RÉSOLUTIO === "0.1" && feature.STYLE == "Argentique")) {
             suffix += 'O';
           }
@@ -183,6 +183,23 @@ export const useScanStore = defineStore('scan', () => {
           if (feature.properties.IDENTIFIAN === 0) {
             suffix += 'ap';
           }
+
+          if (feature.properties.STYLE[0] === 'A') {
+            if (feature.properties.RÉSOLUTIO === 0.1) {
+              resolution = "Échelle : Oblique";
+            }
+            else {
+              resolution = feature.properties.RÉSOLUTIO * 1000;
+            }
+          }
+          else if (feature.properties.STYLE[0] === 'N') {
+            resolution = feature.properties.RÉSOLUTIO + " m";
+          }
+          else {
+            console.log("non");
+          }
+          const echelle = resolution;
+          feature.properties['ECHELLE'] = echelle;
           const name = feature.properties.CHANTIER + ' ' + suffix ?? "problème";
           return {
             id: index,
@@ -192,6 +209,7 @@ export const useScanStore = defineStore('scan', () => {
           };
         })
         storeSelectedScan.value = null
+        console.table(storeScansData.value);
       } else {
         throw new Error('Failed to fetch data')
       }
