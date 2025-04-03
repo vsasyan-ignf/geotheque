@@ -350,7 +350,6 @@ onMounted(() => {
         vectorLayers.value.geom.getSource().clear()
         vectorLayers.value.scan.getSource().clear()
         scanStore.resetCriteria()
-        scanStore.updateSelectedGeom([])
       }
     })
 
@@ -380,12 +379,15 @@ onMounted(() => {
           minResolution: 200,
           duration: 2000,
         })
+
+        scanStore.updateSelectedGeom([])
       }
 
       vectorLayers.value.emprises.getSource().setUrl(newValue)
       vectorLayers.value.emprises.getSource().refresh()
 
       await scanStore.storeGet(newValue)
+
     })
 
     watch(storeSelectedScan, (newValue) => {

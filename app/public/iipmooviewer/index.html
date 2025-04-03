@@ -63,7 +63,10 @@
             if (image) {
                 new IIPMooViewer("viewer", {
                     server: server,
-                    image: image
+                    image: image,
+                    navigation: {
+                      buttons: ['zoomIn','zoomOut','reset','rotateLeft','rotateRight']
+                    }
                 });
             } else {
                 document.getElementById('viewer').innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial;color:#333">Aucune image spécifiée</div>';
