@@ -149,12 +149,12 @@ const downloadDetails = () => {
 }
 
 function setUrl(){
+  console.log('----------- MISSION ---------------')
   console.log(storeSelectedScan.value)
-  console.log("aaaaaaaaaaaaaaa", activeTab.value)
   const annee = storeSelectedScan.value.properties["ANNÉE"]
   const nom = storeSelectedScan.value.properties["CHANTIER"]
-  const url = `${config.MTD_FRANCE_URL}` + `Lambert93/` +  `${annee}/${nom}/${nom}.txt`
-  console.log("uuuuuuuuuu", url)
+  const url = `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
+  console.log("URL MISSION : ", url)
   scanStore.updateUrlPhoto(url)
 }
 

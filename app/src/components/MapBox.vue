@@ -454,8 +454,7 @@ onMounted(() => {
     })
 
     watch(urlPhoto, () => {
-      console.log("GET TEXT")
-      parcour_tab_and_map(urlPhoto)
+      parcour_tab_and_map(urlPhoto.value)
     })
 
     eventBus.on('criteria-reset', () => {
