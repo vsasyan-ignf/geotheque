@@ -1,28 +1,28 @@
-<!-- recherche par pays -->
 <template>
   <div class="sub-category-content">
-    <SubCategoryHeader title="Recherche par pays" @close="$emit('close')" />
+    <SubCategoryHeader title="Recherche par commune" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="country-search">Nom du pays</label>
+        <label for="commune-search">Nom ou code postal</label>
         <div class="input-group">
           <input
-            id="country-search"
-            v-model="searchCountry"
+            id="commune-search"
+            autocomplete="off"
+            v-model="searchCommune"
             type="text"
-            placeholder="Ex: France, Allemagne..."
-            @input="searchCountries"
+            placeholder="Ex: Paris ou 75000"
+            @input="searchCommunes"
             @focus="showResults = true"
           />
-          <button @click="searchCountries">
+          <button @click="validateCommune">
             <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="countryResults.length > 0">Résultats ({{ countryResults.length }})</h5>
-            <h5 v-else-if="searchCountry">Aucun résultat</h5>
+            <h5 v-if="communeResults.length > 0">Résultats ({{ communeResults.length }})</h5>
+            <h5 v-else-if="searchCommune">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
               <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
@@ -30,62 +30,66 @@
           </div>
 
           <div class="results-content">
-            <div class="results-list" v-if="countryResults.length > 0">
+            <div class="results-list" v-if="communeResults.length > 0">
               <div
-                v-for="country in countryResults"
-                :key="country.code"
+                v-for="(commune, index) in communeResults"
+                :key="commune.code + '-' + commune.nom"
                 class="result-item"
-                @click="selectCountry(country)"
+                @click="selectCommune(commune)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ country.nom }}</div>
-                  <div class="result-secondary">{{ country.code }}</div>
+                  <div class="result-main">{{ commune.nom }}</div>
+                  <div class="result-secondary">{{ commune.code }} - {{ commune.departement }}</div>
                 </div>
               </div>
             </div>
 
-            <div class="no-results" v-else-if="searchCountry">
+            <div class="no-results" v-else-if="searchCommune">
               <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
-              <span>Aucun pays trouvé</span>
+              <span>Aucune commune trouvée</span>
             </div>
 
             <div class="empty-search" v-else>
               <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
-              <span>Saisissez le nom d'un pays</span>
+              <span>Saisissez le nom ou code postal d'une commune</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <CartothequeSubMenu />
+
+    <CartothequeSubMenu v-if="activeTab === 'cartotheque'" />
+    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import SubCategoryHeader from './SubCategoryHeader.vue'
-import CartothequeSubMenu from './CartothequeSubMenu.vue'
-import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { create_multibbox, convertBbox, getDynamicTolerance, roundCoordinates, createRealContour } from '../composable/convertCoordinates'
-import config from '@/config'
+import SubCategoryHeader from '@/components/material/SubCategoryHeader.vue'
+import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
+import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
+import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import { useScanStore } from '@/components/store/scan'
+import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
+import { storeToRefs } from 'pinia'
 
-
-
-
-
-const emit = defineEmits(['close', 'select-country'])
-const searchCountry = ref('')
-const countryResults = ref([])
-const showResults = ref(false)
-let searchTimeout = null
-
+import config from '@/config'
 
 const scanStore = useScanStore()
+const { activeTab } = storeToRefs(scanStore)
+
+const emit = defineEmits(['close', 'select-commune'])
+
+let searchCommune = ref('')
+const communeResults = ref([])
+const showResults = ref(false)
+let searchTimeout = null
+let repCommune = ref(null)
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
-  const searchInput = document.getElementById('country-search')
+  const searchInput = document.getElementById('commune-search')
+
   if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
   }
@@ -100,111 +104,75 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
-function searchCountries() {
+function searchCommunes() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
 
-  const query = searchCountry.value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toUpperCase()
+  const query = searchCommune.value.toLowerCase().trim()
 
-  const url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=pays&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
+  if (!query) {
+    communeResults.value = []
+    return
+  }
 
+  showResults.value = true
+
+  // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
+  let search_url = ''
   searchTimeout = setTimeout(() => {
-    fetch(url)
+    if (parseInt(query)) {
+      search_url = `${config.COMMUNE_URL}?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+    } else {
+      search_url = `${config.COMMUNE_URL}?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+    }
+
+    fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.features.map((pays) => ({
-          nom: pays.properties.NOM,
-          code: pays.properties.CODE_PAYS,
+        const newResults = data.map((commune) => ({
+          nom: commune.nom,
+          code: commune.codesPostaux[0],
+          departement: commune.departement.nom,
+          bbox: commune.bbox,
+          contour: commune.contour,
         }))
-        countryResults.value = newResults
+
+        communeResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des pays:', error)
-        countryResults.value = []
+        console.error('Erreur lors de la récupération des communes:', error)
+        communeResults.value = []
       })
-  }, 500)
+  }, 300)
 }
 
-function getLongestSubArray(arr) {
-    return arr.reduce((longest, current) => 
-        current.length > longest.length ? current : longest
-    , []);
-}
-
-
-
-function selectCountry(country) {
-  getCountryBbox(country)
-    .then((contour) => {
-      
-      const bbox3857 = create_multibbox(contour)
-      const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
-      
-      scanStore.updateBbox(bbox4326)
-      scanStore.updateSelectedGeom(contour)
-
-      if (contour.length > 10) {
-        const longestSubArray = getLongestSubArray(contour)
-        contour =[longestSubArray]
-      }
-
-      
-
-      if (country.code === "US"){
-        contour = [[["-13912762.1682", "2915614.0653"], ["-13912762.1682", "6261721.3124"], ["-7396658.4088", "6261721.3124"], ["-7396658.4088", "2915614.0653"], ["-13912762.1682", "2915614.0653"]]]
-      }
-
-      scanStore.updateWKT(createRealContour(contour))
-    })
-    .catch((error) => {
-      console.error('Erreur lors de la récupération des contours du pays:', error)
-    })
-
+function selectCommune(commune) {
+  searchCommune.value = commune.nom
+  repCommune = commune
+  validateCommune()
   showResults.value = false
 }
 
-async function getCountryBbox(country) {
-  const countryCode = country.code
-    .split(',')[0]
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toUpperCase()
+function validateCommune() {
+  if (repCommune) {
+    const bbox = repCommune.bbox.coordinates[0]
+    const bboxWGS84 = [bbox[0], bbox[2]]
+    const bboxLambert93 = bboxWGS84.map((point) =>
+      useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154'),
+    )
 
-
-  const urlCountryBbox =
-    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
-    `&request=GetFeature&typeNames=pays&outputFormat=application/json` +
-    `&CQL_FILTER=CODE_PAYS='${countryCode}'&srsName=EPSG:3857`
-  
-
-  try {
-    const response = await fetch(urlCountryBbox)
-    if (!response.ok) {
-      throw new Error(`Erreur réseau : ${response.status}`)
-    }
-    const data = await response.json()
-
-    const contour_country = data.features[0]?.geometry?.coordinates
-
-    if (!contour_country) {
-      throw new Error('Coordonnées non trouvées dans la réponse')
-    }
-    const allContours = []
-
-    for (const polygon of contour_country) {
-      const exteriorRing = polygon[0]
-
-      allContours.push(exteriorRing)
+    const point = {
+      bboxLambert93: bboxLambert93.flat(),
     }
 
-    return allContours
-  } catch (error) {
-    console.error('Erreur:', error)
-    throw error
+    const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
+      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
+    )
+
+    scanStore.updateSelectedGeom(contourMercator)
+
+    emit('select-commune', point)
   }
 }
 </script>
@@ -214,6 +182,7 @@ async function getCountryBbox(country) {
   animation: fadeIn 0.3s ease;
   position: relative;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;

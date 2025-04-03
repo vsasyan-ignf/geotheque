@@ -90,18 +90,18 @@ function createVectorLayer(source, style, visible = false) {
   })
 }
 
-const layersConfig = [
+export const layersConfig = [
   {
     name: 'communes',
     url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox={bbox},EPSG:3857`,
     style: function (feature) {
       return new Style({
         stroke: new Stroke({
-          color: 'rgba(0, 0, 0, 0.2)',
-          width: 2,
+          color: 'rgba( 255, 251, 16  , 0.6)',
+          width: 4,
         }),
         fill: new Fill({
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: 'rgba(  255, 251, 16  , 0.2)',
         }),
         text: new Text({
           text: feature.get('NOM_COM'),
@@ -118,11 +118,11 @@ const layersConfig = [
     style: function (feature) {
       return new Style({
         stroke: new Stroke({
-          color: 'rgba(0, 0, 0, 0.2)',
-          width: 2,
+          color: 'rgba(   228, 22, 169 , 0.5)',
+          width: 3,
         }),
         fill: new Fill({
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: 'rgba(  228, 22, 169 , 0.2)',
         }),
         text: new Text({
           text: feature.get('CODE_DEPT'),
@@ -134,25 +134,72 @@ const layersConfig = [
     },
   },
   {
-    name: 'feuilles',
+    name: 'departements_with_no_name',
+    url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox={bbox},EPSG:3857`,
+    style: new Style({
+      stroke: new Stroke({
+        color: 'rgba(   228, 22, 169 , 0.5)',
+        width: 3,
+      }),
+      fill: new Fill({
+        color: 'rgba(  228, 22, 169 , 0.2)',
+      }),
+    }),
+  },
+  {
+    name: 'feuilles_monde',
     url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`,
     style: function (feature) {
       return new Style({
         stroke: new Stroke({
-          color: 'rgba(0, 0, 0, 0.5)',
-          width: 2,
+          color: 'rgba(  17, 209, 197  , 0.5)',
+          width: 3,
         }),
         fill: new Fill({
-          color: 'rgba(0, 255, 0, 0.2)',
+          color: 'rgba(  17, 209, 197  , 0.2)',
         }),
         text: new Text({
           text: feature.get('NUMERO'),
-          font: '12px Calibri,sans-serif',
+          font: '16px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
         }),
       })
     },
+  },
+  {
+    name: 'feuilles_france',
+    url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuilles50000&outputFormat=application/json&srsName=EPSG:3857`,
+    style: function (feature) {
+      return new Style({
+        stroke: new Stroke({
+          color: 'rgba(  17, 209, 197  , 0.5)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(  17, 209, 197  , 0.2)',
+        }),
+        text: new Text({
+          text: feature.get('NUMERO'),
+          font: '16px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+        }),
+      })
+    },
+  },
+  {
+    name: 'feuilles_france_with_no_name',
+    url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuilles50000&outputFormat=application/json&srsName=EPSG:3857`,
+    style: new Style({
+      stroke: new Stroke({
+        color: 'rgba(  17, 209, 197  , 0.5)',
+        width: 2,
+      }),
+      fill: new Fill({
+        color: 'rgba(  17, 209, 197  , 0.2)',
+      }),
+    }),
   },
   {
     name: 'pays',
@@ -160,40 +207,12 @@ const layersConfig = [
     style: new Style({
       stroke: new Stroke({
         color: 'rgba(0, 0, 0, 0.5)',
-        width: 2,
+        width: 3,
       }),
       fill: new Fill({
         color: 'rgba(0, 255, 0, 0.1)',
       }),
     }),
-  },
-  {
-    name: 'paysNameOnly',
-    url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox={bbox},EPSG:3857`,
-    style: function (feature) {
-      return new Style({
-        text: new Text({
-          text: feature.get('NOM').split(',')[0],
-          font: '12px Calibri,sans-serif',
-          fill: new Fill({ color: '#000' }),
-          stroke: new Stroke({ color: '#fff', width: 2 }),
-        }),
-      })
-    },
-  },
-  {
-    name: 'sheetNumber',
-    url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`,
-    style: function (feature) {
-      return new Style({
-        text: new Text({
-          text: feature.get('NUMERO').split(',')[0],
-          font: '12px Calibri,sans-serif',
-          fill: new Fill({ color: '#000' }),
-          stroke: new Stroke({ color: '#fff', width: 2 }),
-        }),
-      })
-    },
   },
 ]
 

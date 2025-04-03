@@ -26,9 +26,9 @@
 
 <script setup>
 import { watch } from 'vue'
-import PointSearch from './PointSearch.vue'
-import FeuilleSearch from './FeuilleSearch.vue'
-import PaysSearch from './PaysSearch.vue'
+import PointSearch from '@/components/material/PointSearch.vue'
+import FeuilleSearch from '@/components/material/FeuilleSearch.vue'
+import PaysSearch from '@/components/material/PaysSearch.vue'
 import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 

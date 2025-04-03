@@ -44,18 +44,21 @@ const emit = defineEmits()
 
 function updatestoreScansData() {
   emit('update:selected', selected.value) // pour choisir la collection
-  scanStore.updateSelectedScan(selected.value)
+  if (props.nameDropdown !== 'Collections') scanStore.updateSelectedScan(selected.value)
 }
 
 watchEffect(() => {
   if (props.defaultValue) {
     selected.value = props.defaultValue
   }
-  eventBus.on('criteria-reset', (payload) => {
-    if (payload?.resetDropdown) {
-      selected.value = ''
-    }
-  })
+})
+
+eventBus.on('criteria-reset', () => {
+  if (props.defaultValue) {
+    selected.value = props.defaultValue
+  } else {
+    selected.value = ''
+  }
 })
 </script>
 

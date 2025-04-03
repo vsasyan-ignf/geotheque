@@ -13,6 +13,7 @@
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
     <DrawControl
+      v-if="activeTab === 'phototheque'"
       :map="olMap"
       :isDrawModeActive="drawModeActive"
       @draw-complete="handleDrawComplete"
@@ -95,14 +96,6 @@ const vectorLayers = ref({
 
 const vectorOtherLayers = ref(null)
 
-function getLayersActiveTab() {
-  return getLayersForActiveTab(activeTab.value)
-}
-
-function getOtherLayers() {
-  return getOtherLayersForActiveTab(activeTab.value)
-}
-
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
     layer.setVisible(false)
@@ -111,9 +104,9 @@ function hideOtherLayers() {
 }
 
 watch(activeTab, (newValue) => {
-  const newLayers = getLayersActiveTab()
+  const newLayers = getLayersForActiveTab(activeTab.value)
   layers.value = newLayers
-  otherLayers.value = getOtherLayers()
+  otherLayers.value = getOtherLayersForActiveTab(activeTab.value)
   hideOtherLayers()
 
   updateWMTSLayers(olMap.value, newLayers)
@@ -156,24 +149,37 @@ function Add_new_polygone_to_map(tab) {
 }
 
 async function parcour_tab_and_map(url) {
+  //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
+    console.log('url : ' + url)
     const tab_test = await parcour_txt_to_tab(url)
+
+    if (!tab_test || tab_test.length === 0) {
+      throw new Error('Le tableau récupéré est vide ou invalide.')
+    }
+
+    console.log('Tab test récupéré :', tab_test)
     let elem, i, i2, x, y, x_3857, y3857, tab_points_3857
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
+        //"Centre Actif"
         x = tab_test[i][1]
         y = tab_test[i][2]
         ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
         addPointToMap(x_3857, y3857)
       } else {
+        //"Cliche Actif"
         elem = tab_test[i]
         tab_points_3857 = []
-        for (i2 = 3; i2 < elem.length; i2 = i2 + 2) {
+        for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
+          //Commence a 1 car en 0 il y a le type d'image
           x = elem[i2]
           y = elem[i2 + 1]
           ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          //addPointToMap(x_3857, y3857);
           tab_points_3857.push([x_3857, y3857])
         }
+
         Add_new_polygone_to_map(tab_points_3857)
       }
     }
@@ -344,12 +350,12 @@ onMounted(() => {
 
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
-        scanStore.resetCriteria()
         vectorLayers.value.pin.getSource().clear()
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
         vectorLayers.value.geom.getSource().clear()
         vectorLayers.value.scan.getSource().clear()
+        scanStore.resetCriteria()
         scanStore.updateSelectedGeom([])
       }
     })
@@ -419,7 +425,7 @@ onMounted(() => {
       if (vectorLayers.value.emprises.getSource()) {
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
-        olMap.value.removeLayer(vectorLayers.value.emprises)
+        // olMap.value.removeLayer(vectorLayers.value.emprises)
       }
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()
@@ -433,18 +439,40 @@ onMounted(() => {
   })
 })
 
-eventBus.on('countryName', ({ type, visibility }) => {
-  if (vectorOtherLayers.value[type]) {
-    vectorOtherLayers.value?.[type].setVisible(visibility)
+eventBus.on('departements', (isChecked) => {
+  const currentLayer = isChecked ? 'departements' : 'departements_with_no_name'
+  const previousLayer = isChecked ? 'departements_with_no_name' : 'departements'
+
+  if (vectorOtherLayers.value?.[previousLayer]) {
+    const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
+    if (isVisible) {
+      vectorOtherLayers.value[previousLayer].setVisible(false)
+      vectorOtherLayers.value[currentLayer].setVisible(true)
+    }
+    // changer la layer dans le BaseCardSwitcher
+    if (otherLayers.value) {
+      otherLayers.value.at(1).id = currentLayer // j'ai mis 1 car je connais l'index mais à change avec un map
+    }
   }
 })
 
-eventBus.on('sheetNumber', ({ type, visibility }) => {
-  if (vectorOtherLayers.value[type]) {
-    vectorOtherLayers.value?.[type].setVisible(visibility)
+eventBus.on('feuilles', (isChecked) => {
+  const currentLayer = isChecked ? 'feuilles_france' : 'feuilles_france_with_no_name'
+  const previousLayer = isChecked ? 'feuilles_france_with_no_name' : 'feuilles_france'
+
+  if (vectorOtherLayers.value?.[previousLayer]) {
+    const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
+
+    if (isVisible) {
+      vectorOtherLayers.value[previousLayer].setVisible(false)
+      vectorOtherLayers.value[currentLayer].setVisible(true)
+    }
+    // changer la layer dans le BaseCardSwitcher
+    if (otherLayers.value?.length >= 2) {
+      otherLayers.value.at(2).id = currentLayer
+    }
   }
 })
-
 provide('eventBus', eventBus)
 </script>
 
