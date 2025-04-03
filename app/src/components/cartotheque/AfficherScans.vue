@@ -77,10 +77,10 @@ function generateImageUrl(info) {
   let url = ''
   if (info) {
     if (info.SOUS_COLL !== '') {
-      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
       name = info.ID_CARTE
     } else {
-      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=Cartes/${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
       name = info.SOUS_COLL
     }
   }
@@ -140,9 +140,10 @@ function downloadxml() {
     const info = storeSelectedScan.value?.properties
     const lieu = 'METROPOLE'
     if (info.SOUS_COLL !== '') {
-      url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/Fiches/${info.ID_CARTE}.xml`
+      url_xml = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/Fiches/${info.ID_CARTE}.xml`
+      console.log(url_xml)
     } else {
-      url_xml = `${config.APACHE_IMG_URL}/Cartes/${lieu}/${info.COLLECTION}/Fiches/${info.ID_CARTE}.xml`
+      url_xml = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/Fiches/${info.ID_CARTE}.xml`
     }
     console.log('URL_XML : ', url_xml)
     window.open(url_xml, 'xml')
