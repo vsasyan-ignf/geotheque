@@ -70,7 +70,7 @@ import Icon from 'ol/style/Icon'
 
 
 const scanStore = useScanStore()
-const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
+const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab, urlPhoto } =
   storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -153,7 +153,7 @@ function addPointToMap(x, y, nom) {
       offsetY: -20, // Décale le texte au-dessus de l'icône
       font: '14px Arial, sans-serif',
       fill: new Fill({
-        color: '#00f', // Couleur du texte
+        color: '#000', // Couleur du texte
       }),
       stroke: new Stroke({
         color: '#fff', // Contour blanc pour améliorer la lisibilité
@@ -325,7 +325,6 @@ onMounted(() => {
     initializeIntersectionLayer(olMap)
 
     olMap.value.on('click', (event) => {
-      parcour_tab_and_map('./1000_AERODROME CREIL_C_100.txt')
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
       if (showPin.value) {
         vectorLayers.value.pin.getSource().clear()
@@ -452,6 +451,11 @@ onMounted(() => {
           duration: 1000,
         })
       }
+    })
+
+    watch(urlPhoto, () => {
+      console.log("GET TEXT")
+      parcour_tab_and_map(urlPhoto)
     })
 
     eventBus.on('criteria-reset', () => {

@@ -57,7 +57,8 @@
     <div>
       <ShakingButton
           nameButton="Visualiser"
-          @click="print"
+          @click="setUrl"
+          :disabled="!storeSelectedScan"
         >
           <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
         </ShakingButton>
@@ -74,6 +75,7 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import ShakingButton from '@/components/material/ShakingButton.vue'
 import { mdiPlus } from '@mdi/js'
+import config from '@/config'
 
 const scanStore = useScanStore()
 const { storeScansData, storeSelectedScan, activeTab, urlPhoto } = storeToRefs(scanStore)
@@ -146,8 +148,14 @@ const downloadDetails = () => {
   console.log('fonction dl')
 }
 
-function print(){
+function setUrl(){
   console.log(storeSelectedScan.value)
+  console.log("aaaaaaaaaaaaaaa", activeTab.value)
+  const annee = storeSelectedScan.value.properties["ANNÉE"]
+  const nom = storeSelectedScan.value.properties["CHANTIER"]
+  const url = `${config.MTD_FRANCE_URL}` + `Lambert93/` +  `${annee}/${nom}/${nom}.txt`
+  console.log("uuuuuuuuuu", url)
+  scanStore.updateUrlPhoto(url)
 }
 
 /********************** CHECKBOX ************************* */
