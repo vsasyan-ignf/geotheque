@@ -350,7 +350,6 @@ onMounted(() => {
         vectorLayers.value.geom.getSource().clear()
         vectorLayers.value.scan.getSource().clear()
         scanStore.resetCriteria()
-        scanStore.updateSelectedGeom([])
       }
     })
 
@@ -358,6 +357,9 @@ onMounted(() => {
       console.log('--------- REQUETE GEOSERVER --------')
       console.log('NEW URL:', newValue)
       vectorLayers.value.geom.getSource().clear()
+
+
+      console.log("value : ",storeSelectedGeom.value)
 
       if (storeSelectedGeom.value.length !== 0) {
         let polygon = null
@@ -380,6 +382,9 @@ onMounted(() => {
           minResolution: 200,
           duration: 2000,
         })
+
+        scanStore.updateSelectedGeom([])
+
       }
 
       vectorLayers.value.emprises.getSource().setUrl(newValue)
