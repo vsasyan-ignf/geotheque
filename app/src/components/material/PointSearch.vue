@@ -118,14 +118,8 @@ async function fetchAndConvertBbox(longitude, latitude) {
   try {
     let url
 
-    if (activeTab.value === 'cartotheque' || activeTab.value === 'phototheque') {
+    if (activeTab.value === 'cartotheque' || activeTab.value === 'phototheque' || activeTab.value === 'cartotheque_etranger') {
       url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
-    } else {
-      // url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&zoom=3&limit=1`
-      url =
-        `${config.GEOSERVER_URL}` +
-        `/wfs?service=wfs&version=2.0.0&request=GetFeature` +
-        `&typeNames=pays&outputFormat=application/json&cql_filter=INTERSECTS(the_geom,POINT(${latitude} ${longitude}))`
     }
 
     const response = await fetch(url)
@@ -136,7 +130,7 @@ async function fetchAndConvertBbox(longitude, latitude) {
 
     const data = await response.json()
 
-    if (activeTab.value === 'cartotheque' || activeTab.value === 'phototheque') {
+    if (activeTab.value === 'cartotheque' || activeTab.value === 'phototheque' || activeTab.value === 'cartotheque_etranger') {
       const bbox = data.boundingbox
 
       const bboxWGS84 = [
@@ -151,60 +145,6 @@ async function fetchAndConvertBbox(longitude, latitude) {
 
       const bboxLambert93 = [southWest[0], southWest[1], northEast[0], northEast[1]]
 
-      return {
-        data,
-        bboxWGS84,
-        bboxLambert93,
-      }
-    } else {
-      let contour_country = data.features[0]?.geometry?.coordinates
-
-      let bboxWGS84 = create_multibbox(contour_country)
-
-      const bboxLambert93 = convertBbox(bboxWGS84, 'EPSG:4326', 'EPSG:3857')
-
-      // on transforme le tableau pour un tableau plus simple
-      contour_country = transformMultiPolygon(contour_country)
-
-      // Cas spécial pour un pays qui a trop de petites îles
-      if (contour_country.length > 10) {
-        const longestSubArray = getLongestSubArray(contour_country)
-        contour_country = [longestSubArray]
-      }
-
-      // cas spécial des USA et du Canada
-      if (data.features[0].properties['CODE_PAYS'] === 'US') {
-        contour_country = [
-          [
-            ['-124.980469', '25.324167'],
-            ['-124.980469', '48.922499'],
-            ['-66.445313', '48.922499'],
-            ['-66.445313', '25.324167'],
-            ['-124.980469', '25.324167'],
-          ],
-        ]
-      }
-
-      if (data.features[0].properties['CODE_PAYS'] === 'CA') {
-        contour_country = [
-          [
-            ['-141.679688', '43.707594'],
-            ['-141.679688', '83.339153'],
-            ['-52.207031', '83.339153'],
-            ['-52.207031', '43.707594'],
-            ['-141.679688', '43.707594'],
-          ],
-        ]
-      }
-
-      scanStore.updateWKT(createRealContour(contour_country))
-
-      bboxWGS84 = [
-        parseFloat(bboxWGS84['minX']),
-        parseFloat(bboxWGS84['minY']),
-        parseFloat(bboxWGS84['maxX']),
-        parseFloat(bboxWGS84['maxY']),
-      ]
       return {
         data,
         bboxWGS84,
