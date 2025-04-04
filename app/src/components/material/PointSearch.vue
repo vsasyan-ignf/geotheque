@@ -100,14 +100,12 @@ const searchMode = ref('map')
 
 const pointX = ref('')
 const pointY = ref('')
-// const selectedProjection = ref('EPSG:3857')
-const selectedProjection = computed(() => {
-  if (activeTab?.value === 'cartotheque_etranger' || activeTab?.value === 'phototheque_etranger') {
-    return 'EPSG:4326'
-  } else {
-    return 'EPSG:2154'
-  }
+
+const init = computed(() => {
+  return activeTab?.value.includes('etranger') ? 'EPSG:4326' : 'EPSG:2154'
 })
+
+const selectedProjection = ref(init.value)
 
 const projections = [
   { id: 'EPSG:3857', name: 'Web Mercator' },
@@ -119,9 +117,7 @@ async function fetchAndConvertBbox(longitude, latitude) {
   try {
     let url
 
-    if (activeTab.value === 'cartotheque' || activeTab.value === 'phototheque' || activeTab.value === 'cartotheque_etranger') {
-      url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
-    }
+    url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
 
     const response = await fetch(url)
 
@@ -131,27 +127,27 @@ async function fetchAndConvertBbox(longitude, latitude) {
 
     const data = await response.json()
 
-    if (activeTab.value === 'cartotheque' || activeTab.value === 'phototheque' || activeTab.value === 'cartotheque_etranger') {
-      const bbox = data.boundingbox
+ 
+    const bbox = data.boundingbox
 
-      const bboxWGS84 = [
-        parseFloat(bbox[2]),
-        parseFloat(bbox[0]),
-        parseFloat(bbox[3]),
-        parseFloat(bbox[1]),
-      ]
+    const bboxWGS84 = [
+      parseFloat(bbox[2]),
+      parseFloat(bbox[0]),
+      parseFloat(bbox[3]),
+      parseFloat(bbox[1]),
+    ]
 
-      const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:2154')
-      const northEast = useConvertCoordinates(bboxWGS84[2], bboxWGS84[3], 'EPSG:4326', 'EPSG:2154')
+    const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:2154')
+    const northEast = useConvertCoordinates(bboxWGS84[2], bboxWGS84[3], 'EPSG:4326', 'EPSG:2154')
 
-      const bboxLambert93 = [southWest[0], southWest[1], northEast[0], northEast[1]]
+    const bboxLambert93 = [southWest[0], southWest[1], northEast[0], northEast[1]]
 
-      return {
-        data,
-        bboxWGS84,
-        bboxLambert93,
-      }
+    return {
+      data,
+      bboxWGS84,
+      bboxLambert93,
     }
+    
   } catch (error) {
     console.error('Erreur lors du géocodage inversé:', error)
     return null
@@ -241,6 +237,7 @@ async function handleMapClick(coords) {
 
 // mise à jour des x et y lorsque le système de proj change
 watch(selectedProjection, (newProjection, oldProjection) => {
+  console.log(newProjection, oldProjection)
   if (pointX.value && pointY.value && newProjection !== oldProjection) {
     const convertedCoords = useConvertCoordinates(
       pointX.value,
