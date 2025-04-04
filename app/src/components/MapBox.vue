@@ -240,6 +240,7 @@ onMounted(() => {
   nextTick(() => {
     const wmtsLayers = createInitialWMTSLayers(layers.value, activeLayerIndex.value)
 
+
     vectorLayers.value = {
       pin: createPinLayer(markerIcon),
       geom: createGeomLayer(),
