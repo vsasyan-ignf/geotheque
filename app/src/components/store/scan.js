@@ -156,7 +156,6 @@ export const useScanStore = defineStore('scan', () => {
       else if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
         typeNames = 'fondcarte:PVALambert93'
       }
-      console.log(typeNames)
 
       const wfsUrl = `${config.GEOSERVER_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json`
   

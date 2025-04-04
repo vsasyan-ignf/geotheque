@@ -48,19 +48,20 @@
           label="Commanditaire"
           id="commanditaire"
           v-model="formData.commanditaire"
-          :options="commanditaireOptions"
+          :options="filteredCommanditaireOptions"
           :showOptions="showCommanditaireOptions"
           @toggle="showCommanditaireOptions = !showCommanditaireOptions"
           @select="selectCommanditaire"
           @hide="showCommanditaireOptions = false"
         />
 
+
         <ComboInput
           class="half"
           label="Producteur"
           id="producteur"
           v-model="formData.producteur"
-          :options="producteurOptions"
+          :options="filteredProducteurOptions"
           :showOptions="showProducteurOptions"
           @toggle="showProducteurOptions = !showProducteurOptions"
           @select="selectProducteur"
@@ -114,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 
 import FormInput from '@/components/material/FormInput.vue'
@@ -163,14 +164,53 @@ const scaleOptions = [
   '10000000',
 ]
 
-const commanditaireOptions = ref(['IGN', 'Autres'])
-const producteurOptions = ref(['IGN', 'Autres'])
-const collectionOptions = ref([defaultCollection])
+const commanditaireOptions = ref([])
+const producteurOptions = ref([])
 
 const showScaleMinOptions = ref(false)
 const showScaleMaxOptions = ref(false)
 const showCommanditaireOptions = ref(false)
 const showProducteurOptions = ref(false)
+
+
+const fetchCommanditaireOptions = async () => {
+  const response = await fetch('http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=COMMANDITA&outputFormat=application/json');
+  const data = await response.json();
+  
+  const uniqueCommanditaires = new Set(data.features.map(feature => feature.properties.COMMANDITA));
+  
+  commanditaireOptions.value = Array.from(uniqueCommanditaires);
+}
+
+const fetchProducteurOptions = async () => {
+  const response = await fetch('http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=PRODUCTEUR&outputFormat=application/json');
+  const data = await response.json();
+  
+  const uniqueProducteur = new Set(data.features.map(feature => feature.properties.PRODUCTEUR));
+  
+  producteurOptions.value = Array.from(uniqueProducteur);
+}
+
+onMounted(() => {
+  fetchCommanditaireOptions()
+  fetchProducteurOptions()
+})
+
+const filteredCommanditaireOptions = computed(() => {
+  if (!formData.value.commanditaire) return commanditaireOptions.value;
+  return producteurOptions.value.filter(option => 
+    option.toLowerCase().includes(formData.value.commanditaire.toLowerCase())
+  );
+});
+
+const filteredProducteurOptions = computed(() => {
+  if (!formData.value.producteur) return producteurOptions.value;
+  return producteurOptions.value.filter(option => 
+    option.toLowerCase().includes(formData.value.producteur.toLowerCase())
+  );
+});
+
+
 
 const selectScaleMin = (scale) => {
   formData.value.scaleMin = scale
