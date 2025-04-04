@@ -12,7 +12,9 @@
     "lint:eslint": "eslint . --fix",
     "lint": "run-s lint:*",
     "format": "prettier --write src/",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist",
+    "config:dev": "cross-env NODE_ENV=development node ./scripts/sync-config-for-browser.js",
+    "config:prod": "cross-env NODE_ENV=production node ./scripts/sync-config-for-browser.js"
   },
   "dependencies": {
     "@jamescoyle/vue-icon": "^0.1.2",
