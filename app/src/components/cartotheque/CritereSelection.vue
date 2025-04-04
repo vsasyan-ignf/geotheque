@@ -198,7 +198,7 @@ onMounted(() => {
 
 const filteredCommanditaireOptions = computed(() => {
   if (!formData.value.commanditaire) return commanditaireOptions.value;
-  return producteurOptions.value.filter(option => 
+  return commanditaireOptions.value.filter(option => 
     option.toLowerCase().includes(formData.value.commanditaire.toLowerCase())
   );
 });
