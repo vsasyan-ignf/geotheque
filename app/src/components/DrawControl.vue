@@ -275,7 +275,7 @@ function circleToPolygon(circle) {
   position: absolute;
   top: 170px;
   right: 20px;
-  z-index: 1000;
+  z-index: 10;
 }
 
 .draw-button {

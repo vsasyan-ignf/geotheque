@@ -392,6 +392,7 @@ onMounted(() => {
       vectorLayers.value.emprises.getSource().refresh()
 
       await scanStore.storeGet(newValue)
+
     })
 
     watch(storeSelectedScan, (newValue) => {
