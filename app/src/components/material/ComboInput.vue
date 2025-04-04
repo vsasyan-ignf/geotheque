@@ -3,18 +3,18 @@
       <label :for="id">{{ label }}</label>
       <div class="combo-input-container">
         <input
-          :id="id"
-          type="text"
-          :value="modelValue"
-          autocomplete="off"
-          @input="$emit('update:modelValue', $event.target.value)"
-          @focus="$emit('toggle', true)"
-          @blur="$emit('hide')"
-        />
+        :id="id"
+        type="text"
+        :value="modelValue"
+        autocomplete="off"
+        @input="$emit('update:modelValue', $event.target.value)"
+        @focus="$emit('toggle', true)"
+        @blur="handleBlur"
+      />
         <button
           type="button"
           class="dropdown-toggle"
-          @click="$emit('toggle', !showOptions)"
+          @click="$emit('toggle', true)"
         >
           <SvgIcon :path="mdiMenuDown" type="mdi" />
         </button>
@@ -33,6 +33,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { mdiMenuDown } from '@mdi/js'
 
 defineProps({
@@ -43,8 +44,16 @@ defineProps({
   showOptions: Boolean,
   class: String
 })
+const emit = defineEmits(['update:modelValue', 'toggle', 'hide', 'select'])
 
-defineEmits(['update:modelValue', 'toggle', 'hide', 'select'])
+const inputFocused = ref(false)
+
+const handleBlur = () => {
+    if (!inputFocused.value) {
+      emit('hide')
+    }
+}
+
 </script>
 
 <style scoped>

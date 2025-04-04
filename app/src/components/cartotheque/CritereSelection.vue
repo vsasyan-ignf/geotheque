@@ -48,40 +48,55 @@
           label="Commanditaire"
           id="commanditaire"
           v-model="formData.commanditaire"
-          :options="commanditaireOptions"
+          :options="filteredCommanditaireOptions"
           :showOptions="showCommanditaireOptions"
           @toggle="showCommanditaireOptions = !showCommanditaireOptions"
           @select="selectCommanditaire"
           @hide="showCommanditaireOptions = false"
         />
+
+
         <ComboInput
           class="half"
           label="Producteur"
           id="producteur"
           v-model="formData.producteur"
-          :options="producteurOptions"
+          :options="filteredProducteurOptions"
           :showOptions="showProducteurOptions"
           @toggle="showProducteurOptions = !showProducteurOptions"
           @select="selectProducteur"
           @hide="showProducteurOptions = false"
         />
       </div>
-      
+
       <Dropdown
         v-if="isCartotheque"
         nameDropdown="Collections"
-        :options="collectionOptions"
+        :options="collectionsOptions"
         @update:selected="updateSelectedCollection"
-        :defaultValue="defaultCollection"
+        :defaultValue="collectionsOptions[0]"
+      />
+
+
+      <div class="form-row" v-if="isPhototheque">
+      <Dropdown
+        v-if="isPhototheque"
+        class="half"
+        nameDropdown="Support"
+        :options="supportOptions"
+        @update:selected="updateSelectedCollection"
+        :defaultValue="supportOptions[0]"
       />
 
       <Dropdown
         v-if="isPhototheque"
-        nameDropdown="Support"
-        :options="collectionOptions"
+        class="half"
+        nameDropdown="Emulsion"
+        :options="emulsionOptions"
         @update:selected="updateSelectedCollection"
-        :defaultValue="defaultCollection"
+        :defaultValue="emulsionOptions[0]"
       />
+      </div>
 
       <div class="button-group">
        
@@ -100,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 
 import FormInput from '@/components/material/FormInput.vue'
@@ -112,7 +127,7 @@ import { storeToRefs } from 'pinia'
 import { mdiRefresh, mdiMagnify } from '@mdi/js'
 
 const scanStore = useScanStore()
-const { storeCritereSelection, activeTab } = storeToRefs(scanStore)
+const { storeCritereSelection, activeTab, collectionsOptions, supportOptions, emulsionOptions } = storeToRefs(scanStore)
 
 const isCartotheque = computed(() => ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value))
 const isPhototheque = computed(() => ['phototheque', 'phototheque_etranger'].includes(activeTab.value))
@@ -126,7 +141,9 @@ const formData = ref({
   scaleMax: String(storeCritereSelection.value.scaleMax || '100000'),
   commanditaire: storeCritereSelection.value.commanditaire || '',
   producteur: storeCritereSelection.value.producteur || '',
-  selectedCollection: { id: '0', name: 'Toutes les collections' }
+  selectedCollection: { id: '0', name: 'Tous les collections' },
+  selectedSupport: { id: '0', name: 'Tous les collections' },
+  selectedEmulsion: { id: '0', name: 'Tous les collections' },
 })
 
 const scaleOptions = [
@@ -147,31 +164,53 @@ const scaleOptions = [
   '10000000',
 ]
 
-const commanditaireOptions = ref(['IGN', 'Autres'])
-const producteurOptions = ref(['IGN', 'Autres'])
-
-const collectionOptions = ref([
-  defaultCollection,
-  { id: '1', name: 'CADASTRE' },
-  { id: '2', name: 'CASSINI' },
-  { id: '3', name: 'DEPARTEMENTS' },
-  { id: '4', name: 'EM_CARTES' },
-  { id: '5', name: 'EM_MINUTES' },
-  { id: '6', name: 'FR_100K_A_200K' },
-  { id: '7', name: 'FR_10K_A_50K' },
-  { id: '8', name: 'FR_2K_A_5K' },
-  { id: '9', name: 'FR_THEMATIQUE_GEN' },
-  { id: '10', name: 'FR_THEMATIQUE_LOC' },
-  { id: '11', name: 'PLANS_DE_VILLE' },
-  { id: '12', name: 'REGION_PARISIENNE' },
-  { id: '13', name: 'TOPO_DIVERS' },
-  { id: '14', name: 'URBANISME' }
-])
+const commanditaireOptions = ref([])
+const producteurOptions = ref([])
 
 const showScaleMinOptions = ref(false)
 const showScaleMaxOptions = ref(false)
 const showCommanditaireOptions = ref(false)
 const showProducteurOptions = ref(false)
+
+
+const fetchCommanditaireOptions = async () => {
+  const response = await fetch('http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=COMMANDITA&outputFormat=application/json');
+  const data = await response.json();
+  
+  const uniqueCommanditaires = new Set(data.features.map(feature => feature.properties.COMMANDITA));
+  
+  commanditaireOptions.value = Array.from(uniqueCommanditaires);
+}
+
+const fetchProducteurOptions = async () => {
+  const response = await fetch('http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=PRODUCTEUR&outputFormat=application/json');
+  const data = await response.json();
+  
+  const uniqueProducteur = new Set(data.features.map(feature => feature.properties.PRODUCTEUR));
+  
+  producteurOptions.value = Array.from(uniqueProducteur);
+}
+
+onMounted(() => {
+  fetchCommanditaireOptions()
+  fetchProducteurOptions()
+})
+
+const filteredCommanditaireOptions = computed(() => {
+  if (!formData.value.commanditaire) return commanditaireOptions.value;
+  return commanditaireOptions.value.filter(option => 
+    option.toLowerCase().includes(formData.value.commanditaire.toLowerCase())
+  );
+});
+
+const filteredProducteurOptions = computed(() => {
+  if (!formData.value.producteur) return producteurOptions.value;
+  return producteurOptions.value.filter(option => 
+    option.toLowerCase().includes(formData.value.producteur.toLowerCase())
+  );
+});
+
+
 
 const selectScaleMin = (scale) => {
   formData.value.scaleMin = scale
