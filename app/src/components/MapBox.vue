@@ -419,8 +419,10 @@ onMounted(() => {
 
         scanStore.updateSelectedGeom([])
       }
-
-      vectorLayers.value.emprises.getSource().setUrl(newValue)
+      if (activeTab.value != 'phototheque'){
+        vectorLayers.value.emprises.getSource().setUrl(newValue)
+      }
+      
       vectorLayers.value.emprises.getSource().refresh()
 
       await scanStore.storeGet(newValue)
@@ -443,10 +445,10 @@ onMounted(() => {
 
         const extent = polygon.getGeometry().getExtent()
 
-        olMap.value.getView().fit(extent, {
-          padding: [50, 50, 50, 50 + 400],
-          duration: 1000,
-        })
+        // olMap.value.getView().fit(extent, {
+        //   padding: [50, 50, 50, 50 + 400],
+        //   duration: 1000,
+        // })
       }
     })
 

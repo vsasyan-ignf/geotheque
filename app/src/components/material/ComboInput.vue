@@ -1,34 +1,39 @@
 <template>
-  <div class="form-group combo-input-wrapper" :class="class">
-    <label :for="id">{{ label }}</label>
-    <div class="combo-input-container">
-      <input
+    <div class="form-group combo-input-wrapper" :class="class">
+      <label :for="id">{{ label }}</label>
+      <div class="combo-input-container">
+        <input
         :id="id"
         type="text"
         :value="modelValue"
         autocomplete="off"
         @input="$emit('update:modelValue', $event.target.value)"
         @focus="$emit('toggle', true)"
-        @blur="$emit('hide')"
+        @blur="handleBlur"
       />
-      <button type="button" class="dropdown-toggle" @click="$emit('toggle', !showOptions)">
-        <SvgIcon :path="mdiMenuDown" type="mdi" />
-      </button>
-      <div class="dropdown-options" v-if="showOptions">
-        <div
-          v-for="option in options"
-          :key="option"
-          class="dropdown-item"
-          @mousedown.prevent="$emit('select', option)"
+        <button
+          type="button"
+          class="dropdown-toggle"
+          @click="$emit('toggle', true)"
         >
-          {{ option }}
+          <SvgIcon :path="mdiMenuDown" type="mdi" />
+        </button>
+        <div class="dropdown-options" v-if="showOptions">
+          <div
+            v-for="option in options"
+            :key="option"
+            class="dropdown-item"
+            @mousedown.prevent="$emit('select', option)"
+          >
+            {{ option }}
+          </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { mdiMenuDown } from '@mdi/js'
 
 defineProps({
@@ -39,8 +44,16 @@ defineProps({
   showOptions: Boolean,
   class: String,
 })
+const emit = defineEmits(['update:modelValue', 'toggle', 'hide', 'select'])
 
-defineEmits(['update:modelValue', 'toggle', 'hide', 'select'])
+const inputFocused = ref(false)
+
+const handleBlur = () => {
+    if (!inputFocused.value) {
+      emit('hide')
+    }
+}
+
 </script>
 
 <style scoped>
