@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import { bboxState, eventBus } from '@/components/composable/eventBus'
 import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
@@ -89,13 +89,6 @@ import { mdiInformationOutline, mdiCrosshairsGps, mdiMapMarker } from '@mdi/js'
 import config from '@/config'
 
 import { storeToRefs } from 'pinia'
-import {
-  createRealContour,
-  create_multibbox,
-  getLongestSubArray,
-  convertBbox,
-  transformMultiPolygon,
-} from '../composable/convertCoordinates'
 
 const scanStore = useScanStore()
 
@@ -107,7 +100,15 @@ const searchMode = ref('map')
 
 const pointX = ref('')
 const pointY = ref('')
-const selectedProjection = ref('EPSG:3857')
+// const selectedProjection = ref('EPSG:3857')
+const selectedProjection = computed(() => {
+  if (activeTab?.value === 'cartotheque_etranger' || activeTab?.value === 'phototheque_etranger') {
+    return 'EPSG:4326'
+  } else {
+    return 'EPSG:2154'
+  }
+})
+
 const projections = [
   { id: 'EPSG:3857', name: 'Web Mercator' },
   { id: 'EPSG:4326', name: 'WGS 84' },
