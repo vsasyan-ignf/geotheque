@@ -29,21 +29,24 @@
       </div>
     </div>
 
-    <div class="mission-options">
-      <div class="options-label">Options de sélection</div>
-      <div class="checkbox-group">
-        <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
-          <input
-            type="checkbox"
-            v-model="selectedOptions[option.key]"
-            class="checkbox-input"
-            @change="handleCheckboxChange(option.key)"
-          />
-          <span class="custom-checkbox"></span>
-          {{ option.label }}
-        </label>
+    <Accordion title="Critère de mission" defaultOpen>
+      <CritereSelection />
+      <div class="mission-options">
+        <div class="options-label">Options de sélection</div>
+        <div class="checkbox-group">
+          <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
+            <input
+              type="checkbox"
+              v-model="selectedOptions[option.key]"
+              class="checkbox-input"
+              @change="handleCheckboxChange(option.key)"
+            />
+            <span class="custom-checkbox"></span>
+            {{ option.label }}
+          </label>
+        </div>
       </div>
-    </div>
+    </Accordion>
 
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
       <MissionDetailsModal
@@ -73,9 +76,13 @@ import MissionDetailsModal from './MissionDetailsModal.vue'
 import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
+
 import ShakingButton from '@/components/material/ShakingButton.vue'
 import { mdiPlus } from '@mdi/js'
 import config from '@/config'
+
+import Accordion from '../material/Accordeon.vue'
+import CritereSelection from '../cartotheque/CritereSelection.vue'
 
 const scanStore = useScanStore()
 const { storeScansData, storeSelectedScan, activeTab, urlPhoto } = storeToRefs(scanStore)

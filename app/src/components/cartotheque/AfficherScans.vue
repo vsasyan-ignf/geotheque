@@ -100,11 +100,10 @@ function openIipmooviewer() {
     console.log(imageUrl.value)
     const urlParams = new URLSearchParams(new URL(imageUrl.value).search)
     const imageUrlServ = urlParams.get('FIF')
-    const imageName = imageUrlServ.split('/').pop()
 
     localStorage.setItem('imageUrl', imageUrlServ)
     window.open(
-      `/geotheque/iipmooviewer/index.html?image=${encodeURIComponent(imageName)}`,
+      `/geotheque/iipmooviewer/index.html?server=${config.IIPSRV_URL}&image=${encodeURIComponent(imageUrlServ)}`,
       '_blank',
     )
   } else {

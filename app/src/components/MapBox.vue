@@ -274,6 +274,7 @@ onMounted(() => {
   nextTick(() => {
     const wmtsLayers = createInitialWMTSLayers(layers.value, activeLayerIndex.value)
 
+
     vectorLayers.value = {
       pin: createPinLayer(markerIcon),
       geom: createGeomLayer(),
@@ -432,6 +433,7 @@ onMounted(() => {
       vectorLayers.value.emprises.getSource().refresh()
 
       await scanStore.storeGet(newValue)
+
     })
 
     watch(storeSelectedScan, (newValue) => {

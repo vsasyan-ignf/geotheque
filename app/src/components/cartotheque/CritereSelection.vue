@@ -1,95 +1,98 @@
 <template>
-  <div class="critere-selection" @submit.prevent="handleSubmit">
-    <form class="criteria-form" action="">
-      <div class="form-row">
-        <div class="form-group half">
-          <label for="yearMin">Année min.</label>
-          <input id="yearMin" type="text" v-model="yearMin" autocomplete="off" />
-        </div>
-        <div class="form-group half">
-          <label for="yearMax">Année max.</label>
-          <input id="yearMax" type="text" v-model="yearMax" autocomplete="off" />
-        </div>
-      </div>
+  <div class="critere-selection">
+    <form class="criteria-form" @submit.prevent="handleSubmit">
 
       <div class="form-row">
-        <div class="form-group half">
-          <label for="scaleMin">Echelle min.</label>
-          <div class="combo-input-container">
-            <input
-              id="scaleMin"
-              type="text"
-              v-model="scaleMin"
-              autocomplete="off"
-              @focus="showScaleMinOptions = true"
-              @blur="hideScaleMinOptionsDelayed"
-            />
-            <button
-              type="button"
-              class="dropdown-toggle"
-              @click="showScaleMinOptions = !showScaleMinOptions"
-            >
-              <SvgIcon :path="mdiMenuDown" type="mdi" class="i" />
-            </button>
-            <div class="dropdown-options" v-if="showScaleMinOptions">
-              <div
-                v-for="scale in scaleOptions"
-                :key="scale"
-                class="dropdown-item"
-                @mousedown.prevent="selectScaleMin(scale)"
-              >
-                1:{{ scale }}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="form-group half">
-          <label for="scaleMax">Echelle max.</label>
-          <div class="combo-input-container">
-            <input
-              id="scaleMax"
-              type="text"
-              v-model="scaleMax"
-              autocomplete="off"
-              @focus="showScaleMaxOptions = true"
-              @blur="hideScaleMaxOptionsDelayed"
-            />
-            <button
-              type="button"
-              class="dropdown-toggle"
-              @click="showScaleMaxOptions = !showScaleMaxOptions"
-            >
-              <SvgIcon :path="mdiMenuDown" type="mdi" class="i" />
-            </button>
-            <div class="dropdown-options" v-if="showScaleMaxOptions">
-              <div
-                v-for="scale in scaleOptions"
-                :key="scale"
-                class="dropdown-item"
-                @mousedown.prevent="selectScaleMax(scale)"
-              >
-                1:{{ scale }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <FormInput 
+          class="half"
+          label="Année min."
+          id="yearMin"
+          v-model="formData.yearMin"
+        />
+        <FormInput 
+          class="half"
+          label="Année max."
+          id="yearMax"
+          v-model="formData.yearMax"
+        />
       </div>
 
+      <div class="form-row" v-if="isCartotheque">
+        <ComboInput
+          class="half"
+          label="Echelle min."
+          id="scaleMin"
+          v-model="formData.scaleMin"
+          :options="scaleOptions"
+          :showOptions="showScaleMinOptions"
+          @toggle="showScaleMinOptions = !showScaleMinOptions"
+          @select="selectScaleMin"
+          @hide="showScaleMinOptions = false"
+        />
+        <ComboInput
+          class="half"
+          label="Echelle max."
+          id="scaleMax"
+          v-model="formData.scaleMax"
+          :options="scaleOptions"
+          :showOptions="showScaleMaxOptions"
+          @toggle="showScaleMaxOptions = !showScaleMaxOptions"
+          @select="selectScaleMax"
+          @hide="showScaleMaxOptions = false"
+        />
+      </div>
+
+      <div class="form-row" v-if="isPhototheque">
+        <ComboInput
+          class="half"
+          label="Commanditaire"
+          id="commanditaire"
+          v-model="formData.commanditaire"
+          :options="commanditaireOptions"
+          :showOptions="showCommanditaireOptions"
+          @toggle="showCommanditaireOptions = !showCommanditaireOptions"
+          @select="selectCommanditaire"
+          @hide="showCommanditaireOptions = false"
+        />
+        <ComboInput
+          class="half"
+          label="Producteur"
+          id="producteur"
+          v-model="formData.producteur"
+          :options="producteurOptions"
+          :showOptions="showProducteurOptions"
+          @toggle="showProducteurOptions = !showProducteurOptions"
+          @select="selectProducteur"
+          @hide="showProducteurOptions = false"
+        />
+      </div>
+      
       <Dropdown
+        v-if="isCartotheque"
         nameDropdown="Collections"
         :options="collectionOptions"
         @update:selected="updateSelectedCollection"
-        :defaultValue="{ id: '0', name: 'Toutes les collections' }"
+        :defaultValue="defaultCollection"
+      />
+
+      <Dropdown
+        v-if="isPhototheque"
+        nameDropdown="Support"
+        :options="collectionOptions"
+        @update:selected="updateSelectedCollection"
+        :defaultValue="defaultCollection"
       />
 
       <div class="button-group">
-        <button type="submit" class="button search-button">
-          <SvgIcon :path="mdiMagnify" type="mdi" class="i" />
-          <span>Rechercher</span>
-        </button>
+       
         <button type="button" class="button reset-button" @click="resetForm">
-          <SvgIcon :path="mdiRefresh" type="mdi" class="i" />
+          <SvgIcon :path="mdiRefresh" type="mdi" />
           <span>Réinitialiser</span>
+        </button>
+
+        <button type="submit" class="button search-button">
+          <SvgIcon :path="mdiMagnify" type="mdi" />
+          <span>Rechercher</span>
         </button>
       </div>
     </form>
@@ -97,23 +100,34 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Dropdown from '@/components/material/Dropdown.vue'
-import { eventBus } from '@/components/composable/eventBus'
 
+import FormInput from '@/components/material/FormInput.vue'
+import ComboInput from '@/components/material/ComboInput.vue'
+
+import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
-import { mdiRefresh, mdiMagnify, mdiMenuDown } from '@mdi/js'
+import { mdiRefresh, mdiMagnify } from '@mdi/js'
 
 const scanStore = useScanStore()
-const { storeCritereSelection } = storeToRefs(scanStore)
+const { storeCritereSelection, activeTab } = storeToRefs(scanStore)
 
-const yearMin = ref(storeCritereSelection.value.yearMin || '')
-const yearMax = ref(storeCritereSelection.value.yearMax || '')
-const scaleMin = ref(storeCritereSelection.value.scaleMin ?? '500')
-const scaleMax = ref(storeCritereSelection.value.scaleMax ?? '100000')
+const isCartotheque = computed(() => ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value))
+const isPhototheque = computed(() => ['phototheque', 'phototheque_etranger'].includes(activeTab.value))
 
-const selectedCollection = ref({ id: '', name: '' })
+const defaultCollection = { id: '0', name: 'Toutes les collections' }
+
+const formData = ref({
+  yearMin: storeCritereSelection.value.yearMin || '',
+  yearMax: storeCritereSelection.value.yearMax || '',
+  scaleMin: String(storeCritereSelection.value.scaleMin || '500'),
+  scaleMax: String(storeCritereSelection.value.scaleMax || '100000'),
+  commanditaire: storeCritereSelection.value.commanditaire || '',
+  producteur: storeCritereSelection.value.producteur || '',
+  selectedCollection: { id: '0', name: 'Toutes les collections' }
+})
 
 const scaleOptions = [
   '500',
@@ -133,131 +147,86 @@ const scaleOptions = [
   '10000000',
 ]
 
-const showScaleMinOptions = ref(false)
-const showScaleMaxOptions = ref(false)
+const commanditaireOptions = ref(['IGN', 'Autres'])
+const producteurOptions = ref(['IGN', 'Autres'])
 
 const collectionOptions = ref([
-  {
-    id: '0',
-    name: 'Toutes les collections',
-  },
-  {
-    id: '1',
-    name: 'CADASTRE',
-  },
-  {
-    id: '2',
-    name: 'CASSINI',
-  },
-  {
-    id: '3',
-    name: 'DEPARTEMENTS',
-  },
-  {
-    id: '4',
-    name: 'EM_CARTES',
-  },
-  {
-    id: '5',
-    name: 'EM_MINUTES',
-  },
-  {
-    id: '6',
-    name: 'FR_100K_A_200K',
-  },
-  {
-    id: '7',
-    name: 'FR_10K_A_50K',
-  },
-  {
-    id: '8',
-    name: 'FR_2K_A_5K',
-  },
-  {
-    id: '9',
-    name: 'FR_THEMATIQUE_GEN',
-  },
-  {
-    id: '10',
-    name: 'FR_THEMATIQUE_LOC',
-  },
-  {
-    id: '11',
-    name: 'PLANS_DE_VILLE',
-  },
-  {
-    id: '12',
-    name: 'REGION_PARISIENNE',
-  },
-  {
-    id: '13',
-    name: 'TOPO_DIVERS',
-  },
-  {
-    id: '14',
-    name: 'URBANISME',
-  },
+  defaultCollection,
+  { id: '1', name: 'CADASTRE' },
+  { id: '2', name: 'CASSINI' },
+  { id: '3', name: 'DEPARTEMENTS' },
+  { id: '4', name: 'EM_CARTES' },
+  { id: '5', name: 'EM_MINUTES' },
+  { id: '6', name: 'FR_100K_A_200K' },
+  { id: '7', name: 'FR_10K_A_50K' },
+  { id: '8', name: 'FR_2K_A_5K' },
+  { id: '9', name: 'FR_THEMATIQUE_GEN' },
+  { id: '10', name: 'FR_THEMATIQUE_LOC' },
+  { id: '11', name: 'PLANS_DE_VILLE' },
+  { id: '12', name: 'REGION_PARISIENNE' },
+  { id: '13', name: 'TOPO_DIVERS' },
+  { id: '14', name: 'URBANISME' }
 ])
 
+const showScaleMinOptions = ref(false)
+const showScaleMaxOptions = ref(false)
+const showCommanditaireOptions = ref(false)
+const showProducteurOptions = ref(false)
+
 const selectScaleMin = (scale) => {
-  scaleMin.value = scale
+  formData.value.scaleMin = scale
   showScaleMinOptions.value = false
 }
 
 const selectScaleMax = (scale) => {
-  scaleMax.value = scale
+  formData.value.scaleMax = scale
   showScaleMaxOptions.value = false
 }
 
-const hideScaleMinOptionsDelayed = () => {
-  setTimeout(() => {
-    showScaleMinOptions.value = false
-  }, 200)
+const selectCommanditaire = (option) => {
+  formData.value.commanditaire = option
+  showCommanditaireOptions.value = false
 }
 
-const hideScaleMaxOptionsDelayed = () => {
-  setTimeout(() => {
-    showScaleMaxOptions.value = false
-  }, 200)
+const selectProducteur = (option) => {
+  formData.value.producteur = option
+  showProducteurOptions.value = false
 }
 
-const initialValues = {
-  yearMin: '',
-  yearMax: '',
-  scaleMin: '',
-  scaleMax: '',
-  selectedCollection: null,
+const updateSelectedCollection = (selected) => {
+  formData.value.selectedCollection = selected
 }
 
 const handleSubmit = () => {
   eventBus.emit('reset')
 
   const criteria = {
-    yearMin: yearMin.value,
-    yearMax: yearMax.value,
-    scaleMin: scaleMin.value,
-    scaleMax: scaleMax.value,
-    selectedCollection:
-      selectedCollection.value.name === 'Toutes les collections'
-        ? null
-        : selectedCollection.value.name,
+    yearMin: formData.value.yearMin,
+    yearMax: formData.value.yearMax,
+    scaleMin: formData.value.scaleMin,
+    scaleMax: formData.value.scaleMax,
+    commanditaire: formData.value.commanditaire,
+    producteur: formData.value.producteur,
+    selectedCollection: formData.value.selectedCollection.name === defaultCollection.name 
+      ? null 
+      : formData.value.selectedCollection.name
   }
+  
   scanStore.updateCriteria(criteria)
 }
 
 const resetForm = () => {
-  yearMin.value = initialValues.yearMin
-  yearMax.value = initialValues.yearMax
-  scaleMin.value = initialValues.scaleMin
-  scaleMax.value = initialValues.scaleMax
-  selectedCollection.value = { id: '0', name: 'Toutes les collections' }
+  formData.value = {
+    yearMin: '',
+    yearMax: '',
+    scaleMin: '500',
+    scaleMax: '100000',
+    commanditaire: '',
+    producteur: '',
+  }
+  
   scanStore.resetCriteria()
-
   eventBus.emit('criteria-reset')
-}
-
-const updateSelectedCollection = (selected) => {
-  selectedCollection.value = selected
 }
 </script>
 
@@ -282,100 +251,10 @@ const updateSelectedCollection = (selected) => {
   flex-wrap: wrap;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.form-group.half {
+.half {
   flex: 1;
   min-width: calc(50% - 6px);
   max-width: calc(50% - 6px);
-}
-
-.form-group label {
-  font-size: 14px;
-  color: #555;
-  font-weight: 500;
-}
-
-.form-group input {
-  padding: 10px 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 14px;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
-  width: 100%;
-  box-sizing: border-box;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.form-group input:focus {
-  border-color: #739614;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(115, 150, 20, 0.15);
-}
-
-.combo-input-container {
-  position: relative;
-  width: 100%;
-}
-
-.combo-input-container input {
-  padding-right: 35px;
-}
-
-.dropdown-toggle {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: 35px;
-  background: transparent;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #666;
-  font-size: 20px;
-  z-index: 1;
-}
-
-.dropdown-toggle:hover {
-  color: #739614;
-}
-
-.dropdown-options {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  color: black;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 0 0 6px 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 10;
-}
-
-.dropdown-item {
-  padding: 10px 12px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  font-size: 14px;
-}
-
-.dropdown-item:hover {
-  background-color: #f5f5f5;
-  color: #739614;
 }
 
 .button-group {
@@ -437,19 +316,13 @@ const updateSelectedCollection = (selected) => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.i {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-}
-
 @media (max-width: 500px) {
   .form-row {
     flex-direction: column;
     gap: 15px;
   }
 
-  .form-group.half {
+  .half {
     min-width: 100%;
     max-width: 100%;
   }
