@@ -54,6 +54,7 @@
           @select="selectCommanditaire"
           @hide="showCommanditaireOptions = false"
         />
+
         <ComboInput
           class="half"
           label="Producteur"
@@ -66,22 +67,35 @@
           @hide="showProducteurOptions = false"
         />
       </div>
-      
+
       <Dropdown
         v-if="isCartotheque"
         nameDropdown="Collections"
-        :options="collectionOptions"
+        :options="collectionsOptions"
         @update:selected="updateSelectedCollection"
-        :defaultValue="defaultCollection"
+        :defaultValue="collectionsOptions[0]"
+      />
+
+
+      <div class="form-row" v-if="isPhototheque">
+      <Dropdown
+        v-if="isPhototheque"
+        class="half"
+        nameDropdown="Support"
+        :options="supportOptions"
+        @update:selected="updateSelectedCollection"
+        :defaultValue="supportOptions[0]"
       />
 
       <Dropdown
         v-if="isPhototheque"
-        nameDropdown="Support"
-        :options="collectionOptions"
+        class="half"
+        nameDropdown="Emulsion"
+        :options="emulsionOptions"
         @update:selected="updateSelectedCollection"
-        :defaultValue="defaultCollection"
+        :defaultValue="emulsionOptions[0]"
       />
+      </div>
 
       <div class="button-group">
        
@@ -112,7 +126,7 @@ import { storeToRefs } from 'pinia'
 import { mdiRefresh, mdiMagnify } from '@mdi/js'
 
 const scanStore = useScanStore()
-const { storeCritereSelection, activeTab } = storeToRefs(scanStore)
+const { storeCritereSelection, activeTab, collectionsOptions, supportOptions, emulsionOptions } = storeToRefs(scanStore)
 
 const isCartotheque = computed(() => ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value))
 const isPhototheque = computed(() => ['phototheque', 'phototheque_etranger'].includes(activeTab.value))
@@ -126,7 +140,9 @@ const formData = ref({
   scaleMax: String(storeCritereSelection.value.scaleMax || '100000'),
   commanditaire: storeCritereSelection.value.commanditaire || '',
   producteur: storeCritereSelection.value.producteur || '',
-  selectedCollection: { id: '0', name: 'Toutes les collections' }
+  selectedCollection: { id: '0', name: 'Tous les collections' },
+  selectedSupport: { id: '0', name: 'Tous les collections' },
+  selectedEmulsion: { id: '0', name: 'Tous les collections' },
 })
 
 const scaleOptions = [
@@ -149,24 +165,7 @@ const scaleOptions = [
 
 const commanditaireOptions = ref(['IGN', 'Autres'])
 const producteurOptions = ref(['IGN', 'Autres'])
-
-const collectionOptions = ref([
-  defaultCollection,
-  { id: '1', name: 'CADASTRE' },
-  { id: '2', name: 'CASSINI' },
-  { id: '3', name: 'DEPARTEMENTS' },
-  { id: '4', name: 'EM_CARTES' },
-  { id: '5', name: 'EM_MINUTES' },
-  { id: '6', name: 'FR_100K_A_200K' },
-  { id: '7', name: 'FR_10K_A_50K' },
-  { id: '8', name: 'FR_2K_A_5K' },
-  { id: '9', name: 'FR_THEMATIQUE_GEN' },
-  { id: '10', name: 'FR_THEMATIQUE_LOC' },
-  { id: '11', name: 'PLANS_DE_VILLE' },
-  { id: '12', name: 'REGION_PARISIENNE' },
-  { id: '13', name: 'TOPO_DIVERS' },
-  { id: '14', name: 'URBANISME' }
-])
+const collectionOptions = ref([defaultCollection])
 
 const showScaleMinOptions = ref(false)
 const showScaleMaxOptions = ref(false)
