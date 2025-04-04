@@ -428,8 +428,10 @@ onMounted(() => {
         scanStore.updateSelectedGeom([])
 
       }
-
-      vectorLayers.value.emprises.getSource().setUrl(newValue)
+      if (activeTab.value != 'phototheque'){
+        vectorLayers.value.emprises.getSource().setUrl(newValue)
+      }
+      
       vectorLayers.value.emprises.getSource().refresh()
 
       await scanStore.storeGet(newValue)
