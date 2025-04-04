@@ -164,20 +164,20 @@ export const useScanStore = defineStore('scan', () => {
   function get_suffixPhoto(feature) {
     //Sert a retoruner le,les suffixes corespondant a la photo
     let suffix = ' ';
-    if (feature.properties.RÉSOLUTIO == 'undifined' || (feature.RÉSOLUTIO === "0.1" && feature.STYLE == "Argentique")) {
-      suffix += 'O';
+    if (feature.properties.RÉSOLUTIO == 'undifined' || (feature.RÉSOLUTIO === 0.1 && feature.STYLE == "Argentique")) {
+      suffix += '[O]';
     }
     if (feature.properties.DISPO_INTE === "1") {
-      suffix += 'T';
+      suffix += '[T]';
     }
     if (feature.properties.DISPO_INTE === "2") {
-      suffix += 'S';
+      suffix += '[S]';
     }
     if (feature.properties.ENVELOPPE_ === 1) {
-      suffix += '*';
+      suffix += '[*]';
     }
     if (feature.properties.IDENTIFIAN === 0) {
-      suffix += 'ap';
+      suffix += '[ap]';
     }
     return suffix;
   }
