@@ -455,10 +455,10 @@ onMounted(() => {
 
         const extent = polygon.getGeometry().getExtent()
 
-        olMap.value.getView().fit(extent, {
-          padding: [50, 50, 50, 50 + 400],
-          duration: 1000,
-        })
+        // olMap.value.getView().fit(extent, {
+        //   padding: [50, 50, 50, 50 + 400],
+        //   duration: 1000,
+        // })
       }
     })
 

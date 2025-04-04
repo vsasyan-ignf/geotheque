@@ -217,7 +217,7 @@ export const useScanStore = defineStore('scan', () => {
         storeScansData.value = data.features.map((feature, index) => {
           const echelle = get_ResolutionPhoto(feature);
           feature.properties['ECHELLE'] = echelle;
-          console.log(echelle);
+          // console.log(echelle);
           const name = feature.properties.CHANTIER + get_suffixPhoto(feature) ?? " problème";
           return {
             id: index,
