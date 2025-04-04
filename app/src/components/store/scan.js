@@ -38,7 +38,7 @@ export const useScanStore = defineStore('scan', () => {
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
 
       if (activeTab.value === 'cartotheque_etranger') {
-        if (activeSubCategory.value === 'pays' || activeSubCategory.value === 'point') {
+        if (activeSubCategory.value === 'pays') {
           cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
         }
       }
@@ -169,7 +169,7 @@ export const useScanStore = defineStore('scan', () => {
   function get_suffixPhoto(feature) {
     //Sert a retoruner le,les suffixes corespondant a la photo
     let suffix = ' ';
-    if (feature.properties.RÉSOLUTIO == 'undifined' || (feature.RÉSOLUTIO === 0.1 && feature.STYLE == "Argentique")) {
+    if (feature.properties.RÉSOLUTIO == 'undefined' || (feature.RÉSOLUTIO === 0.1 && feature.STYLE == "Argentique")) {
       suffix += '[O]';
     }
     if (feature.properties.DISPO_INTE === "1") {
