@@ -168,7 +168,6 @@ export const useScanStore = defineStore('scan', () => {
   async function storeGetPhoto(url) {
     try {
       const response = await fetch(url);
-      console.log();
       if (response.ok) {
         const data = await response.json()
         storeScansData.value = data.features.map((feature, index) => {
