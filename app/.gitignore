@@ -14,7 +14,7 @@ dist-ssr
 coverage
 *.local
 
-public/iipmooviewer/config.js
+# public/iipmooviewer/config.js
 
 /cypress/videos/
 /cypress/screenshots/

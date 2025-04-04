@@ -48,10 +48,12 @@
   <script src="js/iipmooviewer-2.0-min.js"></script>
 
   <script type="module">
-    import config from './config.js';
     // IIPMooViewer options: See documentation at http://iipimage.sourceforge.net for more details
     // Server path: set if not using default path
-    var server = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi`; // Chemin du serveur iipsrv
+    const params = new URLSearchParams(window.location.search);
+
+    // mettre en param de l'url le serv iipsrv
+    var server = `${params.get('server')}/fcgi-bin/iipsrv.fcgi`; // Chemin du serveur iipsrv
 
     // L'image complète sur le serveur, ici l'URL de votre image JPEG2000
     var image = localStorage.getItem('imageUrl')

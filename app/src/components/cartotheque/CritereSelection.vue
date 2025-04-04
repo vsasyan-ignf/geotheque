@@ -84,13 +84,15 @@
       />
 
       <div class="button-group">
-        <button type="submit" class="button search-button">
-          <SvgIcon :path="mdiMagnify" type="mdi" />
-          <span>Rechercher</span>
-        </button>
+       
         <button type="button" class="button reset-button" @click="resetForm">
           <SvgIcon :path="mdiRefresh" type="mdi" />
           <span>Réinitialiser</span>
+        </button>
+
+        <button type="submit" class="button search-button">
+          <SvgIcon :path="mdiMagnify" type="mdi" />
+          <span>Rechercher</span>
         </button>
       </div>
     </form>
