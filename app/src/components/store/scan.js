@@ -10,6 +10,7 @@ export const useScanStore = defineStore('scan', () => {
   let activeSubCategory = ref(null)
   let activeTab = ref('cartotheque')
   let wkt = ref(null)
+  let urlPhoto = ref(null)
 
   let storeCritereSelection = ref({
     yearMin: null,
@@ -131,6 +132,10 @@ export const useScanStore = defineStore('scan', () => {
     wkt.value = newVal
   }
 
+  function updateUrlPhoto(newVal) {
+    urlPhoto.value = newVal
+  }
+
   async function storeGet(url) {
     if (!url) {
       return
@@ -249,5 +254,7 @@ export const useScanStore = defineStore('scan', () => {
     updateActiveTab,
     wkt,
     updateWKT,
+    urlPhoto,
+    updateUrlPhoto,
   }
 })

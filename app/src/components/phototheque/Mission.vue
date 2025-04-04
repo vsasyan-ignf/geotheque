@@ -57,6 +57,15 @@
         @download="downloadDetails"
       />
     </div>
+    <div>
+      <ShakingButton
+          nameButton="Visualiser"
+          @click="setUrl"
+          :disabled="!storeSelectedScan"
+        >
+          <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
+        </ShakingButton>
+    </div>
   </div>
 </template>
 
@@ -67,11 +76,16 @@ import MissionDetailsModal from './MissionDetailsModal.vue'
 import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
+
+import ShakingButton from '@/components/material/ShakingButton.vue'
+import { mdiPlus } from '@mdi/js'
+import config from '@/config'
+
 import Accordion from '../material/Accordeon.vue'
 import CritereSelection from '../cartotheque/CritereSelection.vue'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan, activeTab } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan, activeTab, urlPhoto } = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
@@ -139,6 +153,16 @@ const closeModal = () => {
 
 const downloadDetails = () => {
   console.log('fonction dl')
+}
+
+function setUrl(){
+  console.log('----------- MISSION ---------------')
+  console.log(storeSelectedScan.value)
+  const annee = storeSelectedScan.value.properties["ANNÉE"]
+  const nom = storeSelectedScan.value.properties["CHANTIER"]
+  const url = `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
+  console.log("URL MISSION : ", url)
+  scanStore.updateUrlPhoto(url)
 }
 
 /********************** CHECKBOX ************************* */

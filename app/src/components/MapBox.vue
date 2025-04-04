@@ -31,6 +31,7 @@ import VisibilitySwitch from './VisibilitySwitch.vue'
 import ZoomControl from './ZoomControl.vue'
 import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
+import crossIcon from '@/assets/red-cross.svg'
 import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 import DrawControl from './DrawControl.vue'
@@ -63,9 +64,13 @@ import {
   findIntersections,
   clearIntersection,
 } from './composable/intersectionDraw'
+import {Style, Text, Stroke, Fill} from 'ol/style'
+import Icon from 'ol/style/Icon'
+
+
 
 const scanStore = useScanStore()
-const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
+const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab, urlPhoto } =
   storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -92,6 +97,8 @@ const vectorLayers = ref({
   geom: null,
   scan: null,
   emprises: null,
+  cross: null,
+  geomPhoto: null,
 })
 
 const vectorOtherLayers = ref(null)
@@ -132,20 +139,46 @@ function toggleLayerVisibility(isVisible) {
   }
 }
 
-function addPointToMap(x, y) {
-  const coord = [x, y]
+function addPointToMap(x, y, nom) {
+  const coord = [x, y];
+  
+  // Créer un style avec une icône et un texte
+  const style = new Style({
+    image: new Icon({
+      src: crossIcon,
+      scale: 0.03, // Ajustez la taille de l'icône si nécessaire
+    }),
+    text: new Text({
+      text: nom,
+      offsetY: -20, // Décale le texte au-dessus de l'icône
+      font: '14px Arial, sans-serif',
+      fill: new Fill({
+        color: '#000', // Couleur du texte
+      }),
+      stroke: new Stroke({
+        color: '#fff', // Contour blanc pour améliorer la lisibilité
+        width: 3,
+      }),
+    }),
+  });
+
+  // Créer une entité Feature avec le style
   const feature = new Feature({
     geometry: new Point(coord),
-  })
-  vectorLayers.value.pin.getSource().addFeature(feature)
+  });
+  feature.setStyle(style);
+
+  // Ajouter la Feature à la couche
+  vectorLayers.value.cross.getSource().addFeature(feature);
 }
+
 
 function Add_new_polygone_to_map(tab) {
   const polygon = new Feature({
     geometry: new Polygon([tab]),
   })
 
-  vectorLayers.value.geom.getSource().addFeature(polygon)
+  vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
 }
 
 async function parcour_tab_and_map(url) {
@@ -159,28 +192,29 @@ async function parcour_tab_and_map(url) {
     }
 
     console.log('Tab test récupéré :', tab_test)
-    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857
+    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857, name
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
         //"Centre Actif"
-        x = tab_test[i][1]
-        y = tab_test[i][2]
-        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-        addPointToMap(x_3857, y3857)
+        x = tab_test[i][1];
+        y = tab_test[i][2];
+        name = tab_test[i][3] ;
+        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
+        addPointToMap(x_3857, y3857, name);
       } else {
         //"Cliche Actif"
-        elem = tab_test[i]
-        tab_points_3857 = []
+        elem = tab_test[i];
+        tab_points_3857 = [];
         for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
           //Commence a 1 car en 0 il y a le type d'image
-          x = elem[i2]
-          y = elem[i2 + 1]
-          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          x = elem[i2];
+          y = elem[i2 + 1];
+          [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
           //addPointToMap(x_3857, y3857);
-          tab_points_3857.push([x_3857, y3857])
+          tab_points_3857.push([x_3857, y3857]);
         }
 
-        Add_new_polygone_to_map(tab_points_3857)
+        Add_new_polygone_to_map(tab_points_3857);
       }
     }
   } catch (error) {
@@ -246,6 +280,8 @@ onMounted(() => {
       geom: createGeomLayer(),
       scan: createScanLayer(),
       emprises: createWFSLayer(),
+      cross: createPinLayer(crossIcon),
+      geomPhoto: createGeomLayer(),
     }
 
     vectorOtherLayers.value = initOtherVectorLayers()
@@ -279,6 +315,8 @@ onMounted(() => {
         vectorLayers.value.pin,
         vectorLayers.value.geom,
         vectorLayers.value.scan,
+        vectorLayers.value.cross,
+        vectorLayers.value.geomPhoto,
         ...Object.values(vectorOtherLayers.value),
       ],
       view: view,
@@ -350,6 +388,8 @@ onMounted(() => {
         vectorLayers.value.emprises.getSource().setUrl('')
         vectorLayers.value.geom.getSource().clear()
         vectorLayers.value.scan.getSource().clear()
+        vectorLayers.value.cross.getSource().clear()
+        vectorLayers.value.geomPhoto.getSource().clear()
         scanStore.resetCriteria()
       }
     })
@@ -358,6 +398,7 @@ onMounted(() => {
       console.log('--------- REQUETE GEOSERVER --------')
       console.log('NEW URL:', newValue)
       vectorLayers.value.geom.getSource().clear()
+      vectorLayers.value.geomPhoto.getSource().clear()
 
 
       console.log("value : ",storeSelectedGeom.value)
@@ -419,6 +460,10 @@ onMounted(() => {
       }
     })
 
+    watch(urlPhoto, () => {
+      parcour_tab_and_map(urlPhoto.value)
+    })
+
     eventBus.on('criteria-reset', () => {
       if (vectorLayers.value.pin) {
         vectorLayers.value.pin.getSource().clear()
@@ -430,6 +475,13 @@ onMounted(() => {
       }
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()
+        olMap.value.removeLayer(geomLayer)
+      }
+      if (vectorLayers.value.cross){
+        vectorLayers.value.cross.getSource().clear()
+      }
+      if (vectorLayers.value.geomPhoto) {
+        vectorLayers.value.geomPhoto.getSource().clear()
         olMap.value.removeLayer(geomLayer)
       }
 
