@@ -27,9 +27,9 @@ export const useScanStore = defineStore('scan', () => {
 
       if (activeTab.value === 'cartotheque_etranger') {
         empriseURL = 'emprisesscansmonde'
-          // inverse les coordonnées : lon/lat to lat/lon
-          ;[minX, minY] = [minY, minX]
-          ;[maxX, maxY] = [maxY, maxX]
+        // inverse les coordonnées : lon/lat to lat/lon
+        ;[minX, minY] = [minY, minX]
+        ;[maxX, maxY] = [maxY, maxX]
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
@@ -141,9 +141,8 @@ export const useScanStore = defineStore('scan', () => {
       return
     }
     if (activeTab.value === 'phototheque') {
-      await storeGetPhoto(url);
-    }
-    else {
+      await storeGetPhoto(url)
+    } else {
       try {
         const response = await fetch(url)
         console.log()
@@ -165,67 +164,66 @@ export const useScanStore = defineStore('scan', () => {
     }
   }
 
-
   function get_suffixPhoto(feature) {
     //Sert a retoruner le,les suffixes corespondant a la photo
-    let suffix = ' ';
-    if (feature.properties.RÉSOLUTIO == 'undefined' || (feature.RÉSOLUTIO === 0.1 && feature.STYLE == "Argentique")) {
-      suffix += '[O]';
+    let suffix = ' '
+    if (
+      feature.properties.RÉSOLUTIO == 'undefined' ||
+      (feature.RÉSOLUTIO === 0.1 && feature.STYLE == 'Argentique')
+    ) {
+      suffix += '[O]'
     }
-    if (feature.properties.DISPO_INTE === "1") {
-      suffix += '[T]';
+    if (feature.properties.DISPO_INTE === '1') {
+      suffix += '[T]'
     }
-    if (feature.properties.DISPO_INTE === "2") {
-      suffix += '[S]';
+    if (feature.properties.DISPO_INTE === '2') {
+      suffix += '[S]'
     }
     if (feature.properties.ENVELOPPE_ === 1) {
-      suffix += '[*]';
+      suffix += '[*]'
     }
     if (feature.properties.IDENTIFIAN === 0) {
-      suffix += '[ap]';
+      suffix += '[ap]'
     }
-    return suffix;
+    return suffix
   }
 
   function get_ResolutionPhoto(feature) {
     //Sert a retourner la résolution de la photo
-    let resolution = '';
+    let resolution = ''
 
     if (feature.properties.STYLE[0] === 'A') {
       if (feature.properties.RÉSOLUTIO === 0.1) {
-        resolution = "Échelle : Oblique";
+        resolution = 'Échelle : Oblique'
+      } else {
+        resolution = feature.properties.RÉSOLUTIO * 1000
       }
-      else {
-        resolution = feature.properties.RÉSOLUTIO * 1000;
-      }
+    } else if (feature.properties.STYLE[0] === 'N') {
+      resolution = feature.properties.RÉSOLUTIO + ' m'
+    } else {
+      console.log('probleme get_ResolutionPhoto')
     }
-    else if (feature.properties.STYLE[0] === 'N') {
-      resolution = feature.properties.RÉSOLUTIO + " m";
-    }
-    else {
-      console.log("probleme get_ResolutionPhoto");
-    }
-    return resolution;
+    return resolution
   }
 
   async function storeGetPhoto(url) {
     //Sert a récupérer les infos et ajouter une echelle dans les propriétés ainsi que le nom complet à la place du nom classique
     try {
-      const response = await fetch(url);
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
         storeScansData.value = data.features.map((feature, index) => {
-          const echelle = get_ResolutionPhoto(feature);
-          feature.properties['ECHELLE'] = echelle;
-          console.log(echelle);
-          const name = feature.properties.CHANTIER + get_suffixPhoto(feature) ?? " problème";
+          const echelle = get_ResolutionPhoto(feature)
+          feature.properties['ECHELLE'] = echelle
+          const name = feature.properties.CHANTIER + get_suffixPhoto(feature) ?? ' problème'
           return {
             id: index,
             geom: feature.geometry.coordinates[0],
             name: name,
             properties: feature.properties,
-          };
+          }
         })
+        console.log(storeScansData.value)
         storeSelectedScan.value = null
       } else {
         throw new Error('Failed to fetch data')
@@ -248,6 +246,7 @@ export const useScanStore = defineStore('scan', () => {
     updateActiveSubCategory,
     activeSubCategory,
     storeSelectedGeom,
+    storeGetPhoto,
     updateSelectedGeom,
     resetCriteria,
     activeTab,

@@ -58,13 +58,9 @@
       />
     </div>
     <div>
-      <ShakingButton
-          nameButton="Visualiser"
-          @click="setUrl"
-          :disabled="!storeSelectedScan"
-        >
-          <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
-        </ShakingButton>
+      <ShakingButton nameButton="Visualiser" @click="setUrl" :disabled="!storeSelectedScan">
+        <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
+      </ShakingButton>
     </div>
   </div>
 </template>
@@ -85,7 +81,7 @@ import Accordion from '../material/Accordeon.vue'
 import CritereSelection from '../cartotheque/CritereSelection.vue'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan, activeTab, urlPhoto } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
@@ -155,13 +151,11 @@ const downloadDetails = () => {
   console.log('fonction dl')
 }
 
-function setUrl(){
-  console.log('----------- MISSION ---------------')
-  console.log(storeSelectedScan.value)
-  const annee = storeSelectedScan.value.properties["ANNÉE"]
-  const nom = storeSelectedScan.value.properties["CHANTIER"]
+function setUrl() {
+  const annee = storeSelectedScan.value.properties['ANNÉE']
+  const nom = storeSelectedScan.value.properties['CHANTIER']
   const url = `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
-  console.log("URL MISSION : ", url)
+  console.log('URL MISSION : ', url)
   scanStore.updateUrlPhoto(url)
 }
 
@@ -186,8 +180,6 @@ const checkboxOptions = [
 // Fonction qui gère l'activation/désactivation des cases
 const handleCheckboxChange = (optionKey) => {
   const isChecked = selectedOptions[optionKey]
-  console.log('-----------in mission--------------')
-  console.log(optionKey, isChecked)
 
   if (optionKey === 'couplesStereo') {
     console.log('click couplesStereo')

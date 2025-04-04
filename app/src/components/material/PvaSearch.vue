@@ -1,17 +1,17 @@
 <template>
   <div class="sub-category-content">
-    <SubCategoryHeader title="Recherche par feuilles" @close="$emit('close')" />
+    <SubCategoryHeader title="Recherche Autres" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="feuille-search">Numero</label>
+        <label for="pva-search">Nom de la mission</label>
         <div class="input-group">
           <input
-            id="feuille-search"
+            id="pva-search"
             autocomplete="off"
-            v-model="feuilleSelected"
+            v-model="pvaSelected"
             type="text"
-            placeholder="Ex: NE 28 XVIII ou 1911"
-            @input="searchFeuille"
+            placeholder="Ex: AERODROME CREIL"
+            @input="searchPVA"
             @focus="showResults = true"
           />
           <button @click="validateFeuille">
@@ -21,8 +21,8 @@
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="feuilleResults.length > 0">Résultats ({{ feuilleResults.length }})</h5>
-            <h5 v-else-if="feuilleSelected">Aucun résultat</h5>
+            <h5 v-if="pvaResults.length > 0">Résultats ({{ pvaResults.length }})</h5>
+            <h5 v-else-if="pvaSelected">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
               <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
@@ -30,28 +30,28 @@
           </div>
 
           <div class="results-content">
-            <div class="results-list" v-if="feuilleResults.length > 0">
+            <div class="results-list" v-if="pvaResults.length > 0">
               <div
-                v-for="(feuille, index) in feuilleResults"
-                :key="feuille.nom + '-' + index"
+                v-for="(pva, index) in pvaResults"
+                :key="pva.nom + '-' + index"
                 class="result-item"
-                @click="selectFeuille(feuille)"
+                @click="selectPVA(pva)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ feuille.numero }}</div>
-                  <div class="result-secondary">Nom de la feuille : {{ feuille.nom }}</div>
+                  <div class="result-main">{{ pva.nom }}</div>
+                  <div class="result-secondary">Chantier : {{ pva.chantier }}</div>
                 </div>
               </div>
             </div>
 
-            <div class="no-results" v-else-if="feuilleSelected">
+            <div class="no-results" v-else-if="pvaSelected">
               <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
-              <span>Aucune feuilles trouvées</span>
+              <span>Aucune missions trouvées</span>
             </div>
 
             <div class="empty-search" v-else>
               <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
-              <span>Saisissez le numéro d'une feuille</span>
+              <span>Saisissez le nom d'une mission</span>
             </div>
           </div>
         </div>
@@ -71,7 +71,7 @@ import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { create_bbox, useConvertCoordinates } from '@/components/composable/convertCoordinates'
+import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -79,13 +79,15 @@ const { activeTab } = storeToRefs(scanStore)
 
 const emit = defineEmits(['close', 'select-commune'])
 
-const feuilleSelected = ref('')
-const feuilleResults = ref([])
+const pvaSelected = ref('')
+const pvaResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-let repFeuille = ref(null)
+const repPVA = ref(null)
 
-const feuilleWFS = computed(() => {
+const url = ref('')
+
+const coucheGeoserverName = computed(() => {
   if (activeTab.value === 'phototheque') {
     return 'PVALambert93'
   } else {
@@ -93,13 +95,9 @@ const feuilleWFS = computed(() => {
   }
 })
 
-const proj = computed(() => {
-  return feuilleWFS.value === 'feuillesmonde' ? 'EPSG:4326' : 'EPSG:2154'
-})
-
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
-  const searchInput = document.getElementById('feuille-search')
+  const searchInput = document.getElementById('pva-search')
 
   if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
@@ -115,56 +113,54 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
-function searchFeuille() {
+function searchPVA() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
 
-  const query = feuilleSelected.value
+  const query = pvaSelected.value
 
   if (!query) {
-    feuilleResults.value = []
+    pvaResults.value = []
     return
   }
 
   showResults.value = true
 
-  // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
+  // requete pour l'autocomplétion du nom de la mission
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${feuilleWFS.value}&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
+    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.features.map((feuille) => ({
-          nom: feuille.properties.NOM,
-          numero: feuille.properties.NUMERO,
-          geometry: feuille.geometry.coordinates[0][0],
+        const newResults = data.features.map((pva) => ({
+          nom: pva.properties.NOM,
+          chantier: pva.properties.CHANTIER,
+          geometry: pva.geometry.coordinates[0][0],
         }))
-        feuilleResults.value = newResults
+        pvaResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des feuilles:', error)
-        feuilleResults.value = []
+        console.error('Erreur lors de la récupération des mission:', error)
+        pvaResults.value = []
       })
   }, 300)
 }
 
-function selectFeuille(feuille) {
-  feuilleSelected.value = feuille.numero
-  repFeuille.value = feuille
-  validateFeuille()
+function selectPVA(pva) {
+  pvaSelected.value = pva.nom
+  url.value = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${pva.nom}%27&srsName=EPSG:3857`
+  repPVA.value = pva
+  validatePVA()
   showResults.value = false
 }
 
-function validateFeuille() {
-  if (repFeuille) {
-    const bbox4326 = create_bbox([repFeuille.value.geometry])
-    const bboxLonLat = [bbox4326.minX, bbox4326.minY, bbox4326.maxX, bbox4326.maxY]
-    scanStore.updateBbox(bboxLonLat)
-
-    const contourMercator = repFeuille.value.geometry.map((coord) =>
-      useConvertCoordinates(coord[0], coord[1], proj.value, 'EPSG:3857'),
+function validatePVA() {
+  if (repPVA) {
+    scanStore.storeGetPhoto(url.value)
+    const contourMercator = repPVA.value.geometry.map((coord) =>
+      useConvertCoordinates(coord[0], coord[1], 'EPSG:2154', 'EPSG:3857'),
     )
     scanStore.updateSelectedGeom(contourMercator)
   }

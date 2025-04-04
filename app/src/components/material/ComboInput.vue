@@ -1,35 +1,31 @@
 <template>
-    <div class="form-group combo-input-wrapper" :class="class">
-      <label :for="id">{{ label }}</label>
-      <div class="combo-input-container">
-        <input
-          :id="id"
-          type="text"
-          :value="modelValue"
-          autocomplete="off"
-          @input="$emit('update:modelValue', $event.target.value)"
-          @focus="$emit('toggle', true)"
-          @blur="$emit('hide')"
-        />
-        <button
-          type="button"
-          class="dropdown-toggle"
-          @click="$emit('toggle', !showOptions)"
+  <div class="form-group combo-input-wrapper" :class="class">
+    <label :for="id">{{ label }}</label>
+    <div class="combo-input-container">
+      <input
+        :id="id"
+        type="text"
+        :value="modelValue"
+        autocomplete="off"
+        @input="$emit('update:modelValue', $event.target.value)"
+        @focus="$emit('toggle', true)"
+        @blur="$emit('hide')"
+      />
+      <button type="button" class="dropdown-toggle" @click="$emit('toggle', !showOptions)">
+        <SvgIcon :path="mdiMenuDown" type="mdi" />
+      </button>
+      <div class="dropdown-options" v-if="showOptions">
+        <div
+          v-for="option in options"
+          :key="option"
+          class="dropdown-item"
+          @mousedown.prevent="$emit('select', option)"
         >
-          <SvgIcon :path="mdiMenuDown" type="mdi" />
-        </button>
-        <div class="dropdown-options" v-if="showOptions">
-          <div
-            v-for="option in options"
-            :key="option"
-            class="dropdown-item"
-            @mousedown.prevent="$emit('select', option)"
-          >
-            {{ option }}
-          </div>
+          {{ option }}
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -41,7 +37,7 @@ defineProps({
   modelValue: [String, Number],
   options: Array,
   showOptions: Boolean,
-  class: String
+  class: String,
 })
 
 defineEmits(['update:modelValue', 'toggle', 'hide', 'select'])

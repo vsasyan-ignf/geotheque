@@ -1,20 +1,9 @@
 <template>
   <div class="critere-selection">
     <form class="criteria-form" @submit.prevent="handleSubmit">
-
       <div class="form-row">
-        <FormInput 
-          class="half"
-          label="Année min."
-          id="yearMin"
-          v-model="formData.yearMin"
-        />
-        <FormInput 
-          class="half"
-          label="Année max."
-          id="yearMax"
-          v-model="formData.yearMax"
-        />
+        <FormInput class="half" label="Année min." id="yearMin" v-model="formData.yearMin" />
+        <FormInput class="half" label="Année max." id="yearMax" v-model="formData.yearMax" />
       </div>
 
       <div class="form-row" v-if="isCartotheque">
@@ -66,7 +55,7 @@
           @hide="showProducteurOptions = false"
         />
       </div>
-      
+
       <Dropdown
         v-if="isCartotheque"
         nameDropdown="Collections"
@@ -84,7 +73,6 @@
       />
 
       <div class="button-group">
-       
         <button type="button" class="button reset-button" @click="resetForm">
           <SvgIcon :path="mdiRefresh" type="mdi" />
           <span>Réinitialiser</span>
@@ -114,8 +102,12 @@ import { mdiRefresh, mdiMagnify } from '@mdi/js'
 const scanStore = useScanStore()
 const { storeCritereSelection, activeTab } = storeToRefs(scanStore)
 
-const isCartotheque = computed(() => ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value))
-const isPhototheque = computed(() => ['phototheque', 'phototheque_etranger'].includes(activeTab.value))
+const isCartotheque = computed(() =>
+  ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value),
+)
+const isPhototheque = computed(() =>
+  ['phototheque', 'phototheque_etranger'].includes(activeTab.value),
+)
 
 const defaultCollection = { id: '0', name: 'Toutes les collections' }
 
@@ -126,7 +118,7 @@ const formData = ref({
   scaleMax: String(storeCritereSelection.value.scaleMax || '100000'),
   commanditaire: storeCritereSelection.value.commanditaire || '',
   producteur: storeCritereSelection.value.producteur || '',
-  selectedCollection: { id: '0', name: 'Toutes les collections' }
+  selectedCollection: { id: '0', name: 'Toutes les collections' },
 })
 
 const scaleOptions = [
@@ -165,7 +157,7 @@ const collectionOptions = ref([
   { id: '11', name: 'PLANS_DE_VILLE' },
   { id: '12', name: 'REGION_PARISIENNE' },
   { id: '13', name: 'TOPO_DIVERS' },
-  { id: '14', name: 'URBANISME' }
+  { id: '14', name: 'URBANISME' },
 ])
 
 const showScaleMinOptions = ref(false)
@@ -207,11 +199,12 @@ const handleSubmit = () => {
     scaleMax: formData.value.scaleMax,
     commanditaire: formData.value.commanditaire,
     producteur: formData.value.producteur,
-    selectedCollection: formData.value.selectedCollection.name === defaultCollection.name 
-      ? null 
-      : formData.value.selectedCollection.name
+    selectedCollection:
+      formData.value.selectedCollection.name === defaultCollection.name
+        ? null
+        : formData.value.selectedCollection.name,
   }
-  
+
   scanStore.updateCriteria(criteria)
 }
 
@@ -224,7 +217,7 @@ const resetForm = () => {
     commanditaire: '',
     producteur: '',
   }
-  
+
   scanStore.resetCriteria()
   eventBus.emit('criteria-reset')
 }
