@@ -441,18 +441,13 @@ onMounted(() => {
         })
 
         vectorLayers.value.scan.getSource().addFeature(polygon)
-
-        const extent = polygon.getGeometry().getExtent()
-
-        // olMap.value.getView().fit(extent, {
-        //   padding: [50, 50, 50, 50 + 400],
-        //   duration: 1000,
-        // })
       }
     })
 
     watch(urlPhoto, () => {
-      parcour_tab_and_map(urlPhoto.value)
+      if (urlPhoto.value) {
+        parcour_tab_and_map(urlPhoto.value)
+      }
     })
 
     eventBus.on('criteria-reset', () => {
@@ -462,7 +457,6 @@ onMounted(() => {
       if (vectorLayers.value.emprises.getSource()) {
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
-        // olMap.value.removeLayer(vectorLayers.value.emprises)
       }
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()
