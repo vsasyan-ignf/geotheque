@@ -81,8 +81,6 @@ const olMap = ref(null)
 const pins = ref([])
 const showPin = ref(false)
 
-const geomLayer = ref(null)
-
 const drawModeActive = ref(false)
 const lastDrawFeature = ref(null)
 
@@ -113,11 +111,8 @@ watch(activeTab, (newValue) => {
   layers.value = newLayers
   otherLayers.value = getOtherLayersForActiveTab(activeTab.value)
   hideOtherLayers()
-
   updateWMTSLayers(olMap.value, newLayers)
-
   scanStore.resetCriteria()
-
   activeLayerIndex.value = 0
 })
 
@@ -377,12 +372,6 @@ onMounted(() => {
 
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
-        // vectorLayers.value.pin.getSource().clear()
-        // vectorLayers.value.emprises.getSource().clear()
-        // vectorLayers.value.geom.getSource().clear()
-        // vectorLayers.value.scan.getSource().clear()
-        // vectorLayers.value.cross.getSource().clear()
-        // vectorLayers.value.geomPhoto.getSource().clear()
         Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
         vectorLayers.value.emprises.getSource().setUrl('')
         scanStore.resetCriteria()
@@ -416,15 +405,14 @@ onMounted(() => {
           minResolution: 200,
           duration: 2000,
         })
-
         scanStore.updateSelectedGeom([])
       }
+      // Pour ne pas afficher toutes les emprises
       if (activeTab.value != 'phototheque') {
         vectorLayers.value.emprises.getSource().setUrl(newValue)
       }
 
       vectorLayers.value.emprises.getSource().refresh()
-
       await scanStore.storeGet(newValue)
     })
 

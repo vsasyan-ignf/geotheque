@@ -85,7 +85,7 @@ const showResults = ref(false)
 let searchTimeout = null
 let repFeuille = ref(null)
 
-const feuilleWFS = computed(() => {
+const coucheGeoserverName = computed(() => {
   if (activeTab.value === 'phototheque') {
     return 'feuilles50000'
   } else {
@@ -94,7 +94,7 @@ const feuilleWFS = computed(() => {
 })
 
 const proj = computed(() => {
-  return feuilleWFS.value === 'feuillesmonde' ? 'EPSG:4326' : 'EPSG:2154'
+  return coucheGeoserverName.value === 'feuillesmonde' ? 'EPSG:4326' : 'EPSG:2154'
 })
 
 const handleClickOutside = (event) => {
@@ -132,7 +132,7 @@ function searchFeuille() {
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${feuilleWFS.value}&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
+    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
@@ -159,8 +159,8 @@ function selectFeuille(feuille) {
 
 function validateFeuille() {
   if (repFeuille) {
-    const bbox4326 = create_bbox([repFeuille.value.geometry])
-    const bboxLonLat = [bbox4326.minX, bbox4326.minY, bbox4326.maxX, bbox4326.maxY]
+    const bbox = create_bbox([repFeuille.value.geometry])
+    const bboxLonLat = [bbox.minX, bbox.minY, bbox.maxX, bbox.maxY]
     scanStore.updateBbox(bboxLonLat)
 
     const contourMercator = repFeuille.value.geometry.map((coord) =>

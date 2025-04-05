@@ -16,7 +16,6 @@ export const useScanStore = defineStore('scan', () => {
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
   let emulsionOptions = ref([{ id: '0', name: 'Toutes les émulsions' }])
 
-
   let storeCritereSelection = ref({
     yearMin: null,
     yearMax: null,
@@ -146,27 +145,25 @@ export const useScanStore = defineStore('scan', () => {
     urlPhoto.value = newVal
   }
 
-
   async function fetchOptions(propertyName) {
     try {
       let typeNames = 'fondcarte:emprisesscans'
-      
+
       if (activeTab.value === 'cartotheque_etranger') {
         typeNames = 'fondcarte:emprisesscansmonde'
-      }
-      else if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
+      } else if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
         typeNames = 'fondcarte:PVALambert93'
       }
 
       const wfsUrl = `${config.GEOSERVER_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json`
-  
+
       const response = await fetch(wfsUrl)
       if (!response.ok) throw new Error(response.status)
-  
+
       const data = await response.json()
-      const values = data.features.map(f => f.properties[propertyName]).filter(Boolean)
+      const values = data.features.map((f) => f.properties[propertyName]).filter(Boolean)
       const unique = [...new Set(values)].sort()
-  
+
       const defaultOption = { id: '0', name: `Tous les ${propertyName.toLowerCase()}s` }
 
       return [defaultOption, ...unique.map((val, i) => ({ id: String(i + 1), name: val }))]
@@ -175,19 +172,18 @@ export const useScanStore = defineStore('scan', () => {
       return []
     }
   }
-  
+
   async function fetchAllOptions() {
     if (activeTab.value === 'cartotheque' || activeTab.value === 'cartotheque_etranger') {
       collectionsOptions.value = await fetchOptions('COLLECTION')
     }
-  
+
     if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
       supportOptions.value = await fetchOptions('SUPPORT')
       emulsionOptions.value = await fetchOptions('EMULSION')
     }
   }
-  
-  
+
   async function storeGet(url) {
     if (!url) {
       return
@@ -313,6 +309,6 @@ export const useScanStore = defineStore('scan', () => {
     fetchOptions,
     supportOptions,
     emulsionOptions,
-    fetchAllOptions
+    fetchAllOptions,
   }
 })

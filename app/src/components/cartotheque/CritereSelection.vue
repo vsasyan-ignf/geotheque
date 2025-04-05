@@ -44,7 +44,6 @@
           @hide="showCommanditaireOptions = false"
         />
 
-
         <ComboInput
           class="half"
           label="Producteur"
@@ -66,25 +65,24 @@
         :defaultValue="collectionsOptions[0]"
       />
 
-
       <div class="form-row" v-if="isPhototheque">
-      <Dropdown
-        v-if="isPhototheque"
-        class="half"
-        nameDropdown="Support"
-        :options="supportOptions"
-        @update:selected="updateSelectedCollection"
-        :defaultValue="supportOptions[0]"
-      />
+        <Dropdown
+          v-if="isPhototheque"
+          class="half"
+          nameDropdown="Support"
+          :options="supportOptions"
+          @update:selected="updateSelectedCollection"
+          :defaultValue="supportOptions[0]"
+        />
 
-      <Dropdown
-        v-if="isPhototheque"
-        class="half"
-        nameDropdown="Emulsion"
-        :options="emulsionOptions"
-        @update:selected="updateSelectedCollection"
-        :defaultValue="emulsionOptions[0]"
-      />
+        <Dropdown
+          v-if="isPhototheque"
+          class="half"
+          nameDropdown="Emulsion"
+          :options="emulsionOptions"
+          @update:selected="updateSelectedCollection"
+          :defaultValue="emulsionOptions[0]"
+        />
       </div>
 
       <div class="button-group">
@@ -115,7 +113,8 @@ import { storeToRefs } from 'pinia'
 import { mdiRefresh, mdiMagnify } from '@mdi/js'
 
 const scanStore = useScanStore()
-const { storeCritereSelection, activeTab, collectionsOptions, supportOptions, emulsionOptions } = storeToRefs(scanStore)
+const { storeCritereSelection, activeTab, collectionsOptions, supportOptions, emulsionOptions } =
+  storeToRefs(scanStore)
 
 const isCartotheque = computed(() =>
   ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value),
@@ -164,23 +163,28 @@ const showScaleMaxOptions = ref(false)
 const showCommanditaireOptions = ref(false)
 const showProducteurOptions = ref(false)
 
-
 const fetchCommanditaireOptions = async () => {
-  const response = await fetch('http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=COMMANDITA&outputFormat=application/json');
-  const data = await response.json();
-  
-  const uniqueCommanditaires = new Set(data.features.map(feature => feature.properties.COMMANDITA));
-  
-  commanditaireOptions.value = Array.from(uniqueCommanditaires);
+  const response = await fetch(
+    'http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=COMMANDITA&outputFormat=application/json',
+  )
+  const data = await response.json()
+
+  const uniqueCommanditaires = new Set(
+    data.features.map((feature) => feature.properties.COMMANDITA),
+  )
+
+  commanditaireOptions.value = Array.from(uniqueCommanditaires)
 }
 
 const fetchProducteurOptions = async () => {
-  const response = await fetch('http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=PRODUCTEUR&outputFormat=application/json');
-  const data = await response.json();
-  
-  const uniqueProducteur = new Set(data.features.map(feature => feature.properties.PRODUCTEUR));
-  
-  producteurOptions.value = Array.from(uniqueProducteur);
+  const response = await fetch(
+    'http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=PRODUCTEUR&outputFormat=application/json',
+  )
+  const data = await response.json()
+
+  const uniqueProducteur = new Set(data.features.map((feature) => feature.properties.PRODUCTEUR))
+
+  producteurOptions.value = Array.from(uniqueProducteur)
 }
 
 onMounted(() => {
@@ -189,20 +193,18 @@ onMounted(() => {
 })
 
 const filteredCommanditaireOptions = computed(() => {
-  if (!formData.value.commanditaire) return commanditaireOptions.value;
-  return commanditaireOptions.value.filter(option => 
-    option.toLowerCase().includes(formData.value.commanditaire.toLowerCase())
-  );
-});
+  if (!formData.value.commanditaire) return commanditaireOptions.value
+  return commanditaireOptions.value.filter((option) =>
+    option.toLowerCase().includes(formData.value.commanditaire.toLowerCase()),
+  )
+})
 
 const filteredProducteurOptions = computed(() => {
-  if (!formData.value.producteur) return producteurOptions.value;
-  return producteurOptions.value.filter(option => 
-    option.toLowerCase().includes(formData.value.producteur.toLowerCase())
-  );
-});
-
-
+  if (!formData.value.producteur) return producteurOptions.value
+  return producteurOptions.value.filter((option) =>
+    option.toLowerCase().includes(formData.value.producteur.toLowerCase()),
+  )
+})
 
 const selectScaleMin = (scale) => {
   formData.value.scaleMin = scale
