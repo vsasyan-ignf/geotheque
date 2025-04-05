@@ -29,7 +29,7 @@
     </div>
 
     <div class="group-button">
-      <ShakingButton nameButton="" @click="setUrl">
+      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan">
         <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
       </ShakingButton>
 
