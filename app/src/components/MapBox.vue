@@ -176,7 +176,7 @@ function Add_new_polygone_to_map(tab) {
 async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
-    console.log('url : ' + url)
+    console.log('url TA : ', url)
     const tab_test = await parcour_txt_to_tab(url)
 
     if (!tab_test || tab_test.length === 0) {

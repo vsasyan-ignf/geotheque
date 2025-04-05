@@ -140,7 +140,6 @@ function downloadxml() {
     const lieu = 'METROPOLE'
     if (info.SOUS_COLL !== '') {
       url_xml = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/Fiches/${info.ID_CARTE}.xml`
-      console.log(url_xml)
     } else {
       url_xml = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/Fiches/${info.ID_CARTE}.xml`
     }
