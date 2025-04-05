@@ -1,20 +1,9 @@
 <template>
   <div class="critere-selection">
     <form class="criteria-form" @submit.prevent="handleSubmit">
-
       <div class="form-row">
-        <FormInput 
-          class="half"
-          label="Année min."
-          id="yearMin"
-          v-model="formData.yearMin"
-        />
-        <FormInput 
-          class="half"
-          label="Année max."
-          id="yearMax"
-          v-model="formData.yearMax"
-        />
+        <FormInput class="half" label="Année min." id="yearMin" v-model="formData.yearMin" />
+        <FormInput class="half" label="Année max." id="yearMax" v-model="formData.yearMax" />
       </div>
 
       <div class="form-row" v-if="isCartotheque">
@@ -55,7 +44,6 @@
           @hide="showCommanditaireOptions = false"
         />
 
-
         <ComboInput
           class="half"
           label="Producteur"
@@ -77,29 +65,27 @@
         :defaultValue="collectionsOptions[0]"
       />
 
-
       <div class="form-row" v-if="isPhototheque">
-      <Dropdown
-        v-if="isPhototheque"
-        class="half"
-        nameDropdown="Support"
-        :options="supportOptions"
-        @update:selected="updateSelectedCollection"
-        :defaultValue="supportOptions[0]"
-      />
+        <Dropdown
+          v-if="isPhototheque"
+          class="half"
+          nameDropdown="Support"
+          :options="supportOptions"
+          @update:selected="updateSelectedCollection"
+          :defaultValue="supportOptions[0]"
+        />
 
-      <Dropdown
-        v-if="isPhototheque"
-        class="half"
-        nameDropdown="Emulsion"
-        :options="emulsionOptions"
-        @update:selected="updateSelectedCollection"
-        :defaultValue="emulsionOptions[0]"
-      />
+        <Dropdown
+          v-if="isPhototheque"
+          class="half"
+          nameDropdown="Emulsion"
+          :options="emulsionOptions"
+          @update:selected="updateSelectedCollection"
+          :defaultValue="emulsionOptions[0]"
+        />
       </div>
 
       <div class="button-group">
-       
         <button type="button" class="button reset-button" @click="resetForm">
           <SvgIcon :path="mdiRefresh" type="mdi" />
           <span>Réinitialiser</span>
@@ -127,10 +113,15 @@ import { storeToRefs } from 'pinia'
 import { mdiRefresh, mdiMagnify } from '@mdi/js'
 
 const scanStore = useScanStore()
-const { storeCritereSelection, activeTab, collectionsOptions, supportOptions, emulsionOptions } = storeToRefs(scanStore)
+const { storeCritereSelection, activeTab, collectionsOptions, supportOptions, emulsionOptions } =
+  storeToRefs(scanStore)
 
-const isCartotheque = computed(() => ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value))
-const isPhototheque = computed(() => ['phototheque', 'phototheque_etranger'].includes(activeTab.value))
+const isCartotheque = computed(() =>
+  ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value),
+)
+const isPhototheque = computed(() =>
+  ['phototheque', 'phototheque_etranger'].includes(activeTab.value),
+)
 
 const defaultCollection = { id: '0', name: 'Toutes les collections' }
 
@@ -172,23 +163,28 @@ const showScaleMaxOptions = ref(false)
 const showCommanditaireOptions = ref(false)
 const showProducteurOptions = ref(false)
 
-
 const fetchCommanditaireOptions = async () => {
-  const response = await fetch('http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=COMMANDITA&outputFormat=application/json');
-  const data = await response.json();
-  
-  const uniqueCommanditaires = new Set(data.features.map(feature => feature.properties.COMMANDITA));
-  
-  commanditaireOptions.value = Array.from(uniqueCommanditaires);
+  const response = await fetch(
+    'http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=COMMANDITA&outputFormat=application/json',
+  )
+  const data = await response.json()
+
+  const uniqueCommanditaires = new Set(
+    data.features.map((feature) => feature.properties.COMMANDITA),
+  )
+
+  commanditaireOptions.value = Array.from(uniqueCommanditaires)
 }
 
 const fetchProducteurOptions = async () => {
-  const response = await fetch('http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=PRODUCTEUR&outputFormat=application/json');
-  const data = await response.json();
-  
-  const uniqueProducteur = new Set(data.features.map(feature => feature.properties.PRODUCTEUR));
-  
-  producteurOptions.value = Array.from(uniqueProducteur);
+  const response = await fetch(
+    'http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=PRODUCTEUR&outputFormat=application/json',
+  )
+  const data = await response.json()
+
+  const uniqueProducteur = new Set(data.features.map((feature) => feature.properties.PRODUCTEUR))
+
+  producteurOptions.value = Array.from(uniqueProducteur)
 }
 
 onMounted(() => {
@@ -197,20 +193,18 @@ onMounted(() => {
 })
 
 const filteredCommanditaireOptions = computed(() => {
-  if (!formData.value.commanditaire) return commanditaireOptions.value;
-  return commanditaireOptions.value.filter(option => 
-    option.toLowerCase().includes(formData.value.commanditaire.toLowerCase())
-  );
-});
+  if (!formData.value.commanditaire) return commanditaireOptions.value
+  return commanditaireOptions.value.filter((option) =>
+    option.toLowerCase().includes(formData.value.commanditaire.toLowerCase()),
+  )
+})
 
 const filteredProducteurOptions = computed(() => {
-  if (!formData.value.producteur) return producteurOptions.value;
-  return producteurOptions.value.filter(option => 
-    option.toLowerCase().includes(formData.value.producteur.toLowerCase())
-  );
-});
-
-
+  if (!formData.value.producteur) return producteurOptions.value
+  return producteurOptions.value.filter((option) =>
+    option.toLowerCase().includes(formData.value.producteur.toLowerCase()),
+  )
+})
 
 const selectScaleMin = (scale) => {
   formData.value.scaleMin = scale
@@ -246,11 +240,12 @@ const handleSubmit = () => {
     scaleMax: formData.value.scaleMax,
     commanditaire: formData.value.commanditaire,
     producteur: formData.value.producteur,
-    selectedCollection: formData.value.selectedCollection.name === defaultCollection.name 
-      ? null 
-      : formData.value.selectedCollection.name
+    selectedCollection:
+      formData.value.selectedCollection.name === defaultCollection.name
+        ? null
+        : formData.value.selectedCollection.name,
   }
-  
+
   scanStore.updateCriteria(criteria)
 }
 
@@ -263,7 +258,7 @@ const resetForm = () => {
     commanditaire: '',
     producteur: '',
   }
-  
+
   scanStore.resetCriteria()
   eventBus.emit('criteria-reset')
 }

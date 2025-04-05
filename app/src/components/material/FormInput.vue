@@ -1,14 +1,14 @@
 <template>
-    <div class="form-group" :class="class">
-      <label :for="id">{{ label }}</label>
-      <input 
-        :id="id" 
-        type="text" 
-        :value="modelValue" 
-        autocomplete="off"
-        @input="$emit('update:modelValue', $event.target.value)"
-      />
-    </div>
+  <div class="form-group" :class="class">
+    <label :for="id">{{ label }}</label>
+    <input
+      :id="id"
+      type="text"
+      :value="modelValue"
+      autocomplete="off"
+      @input="$emit('update:modelValue', $event.target.value)"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -16,7 +16,7 @@ defineProps({
   id: String,
   label: String,
   modelValue: String,
-  class: String
+  class: String,
 })
 
 defineEmits(['update:modelValue'])

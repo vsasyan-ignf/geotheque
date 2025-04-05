@@ -1,8 +1,7 @@
 // config.js
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV || 'development'
 
 const config = {
-
   // environnement de dev
   development: {
     COMMUNE_URL: 'https://geo.api.gouv.fr/communes',
@@ -35,7 +34,7 @@ const config = {
     IIPSRV_PREFIX_CARTE: '/Carto/Patrimoine/Cartes/',
     IIPSRV_PREFIX_FRANCE: '/Misphot_Image/',
     IIPSRV_PREFIX_MONDE: '/Misphot_Image_Etranger/',
-  }
-};
+  },
+}
 
-export default config[env];
+export default config[env]

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import config from '@/config'
+import { getEchellePhoto, getSuffixPhoto } from '../composable/paramPhoto'
 
 export const useScanStore = defineStore('scan', () => {
   let storeBbox = ref([])
@@ -15,7 +16,6 @@ export const useScanStore = defineStore('scan', () => {
   let collectionsOptions = ref([{ id: '0', name: 'Tous les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
   let emulsionOptions = ref([{ id: '0', name: 'Toutes les émulsions' }])
-
 
   let storeCritereSelection = ref({
     yearMin: null,
@@ -32,9 +32,9 @@ export const useScanStore = defineStore('scan', () => {
 
       if (activeTab.value === 'cartotheque_etranger') {
         empriseURL = 'emprisesscansmonde'
-          // inverse les coordonnées : lon/lat to lat/lon
-          ;[minX, minY] = [minY, minX]
-          ;[maxX, maxY] = [maxY, maxX]
+        // inverse les coordonnées : lon/lat to lat/lon
+        ;[minX, minY] = [minY, minX]
+        ;[maxX, maxY] = [maxY, maxX]
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
@@ -93,7 +93,6 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateBbox(newBbox) {
-    console.log(newBbox)
     storeBbox.value = newBbox
   }
 
@@ -104,7 +103,6 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateActiveSubCategory(subCategory) {
     activeSubCategory.value = subCategory
-    console.log('Sous-catégorie active:', activeSubCategory.value)
     updateScaleRange()
   }
 
@@ -121,6 +119,7 @@ export const useScanStore = defineStore('scan', () => {
     storeBbox.value = []
     storeScansData.value = []
     storeSelectedScan.value = null
+    urlPhoto.value = null
   }
 
   function updateSelectedGeom(newVal) {
@@ -145,27 +144,25 @@ export const useScanStore = defineStore('scan', () => {
     urlPhoto.value = newVal
   }
 
-
   async function fetchOptions(propertyName) {
     try {
       let typeNames = 'fondcarte:emprisesscans'
-      
+
       if (activeTab.value === 'cartotheque_etranger') {
         typeNames = 'fondcarte:emprisesscansmonde'
-      }
-      else if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
+      } else if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
         typeNames = 'fondcarte:PVALambert93'
       }
 
       const wfsUrl = `${config.GEOSERVER_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json`
-  
+
       const response = await fetch(wfsUrl)
       if (!response.ok) throw new Error(response.status)
-  
+
       const data = await response.json()
-      const values = data.features.map(f => f.properties[propertyName]).filter(Boolean)
+      const values = data.features.map((f) => f.properties[propertyName]).filter(Boolean)
       const unique = [...new Set(values)].sort()
-  
+
       const defaultOption = { id: '0', name: `Tous les ${propertyName.toLowerCase()}s` }
 
       return [defaultOption, ...unique.map((val, i) => ({ id: String(i + 1), name: val }))]
@@ -174,30 +171,27 @@ export const useScanStore = defineStore('scan', () => {
       return []
     }
   }
-  
+
   async function fetchAllOptions() {
     if (activeTab.value === 'cartotheque' || activeTab.value === 'cartotheque_etranger') {
       collectionsOptions.value = await fetchOptions('COLLECTION')
     }
-  
+
     if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
       supportOptions.value = await fetchOptions('SUPPORT')
       emulsionOptions.value = await fetchOptions('EMULSION')
     }
   }
-  
-  
+
   async function storeGet(url) {
     if (!url) {
       return
     }
     if (activeTab.value === 'phototheque') {
-      await storeGetPhoto(url);
-    }
-    else {
+      await storeGetPhoto(url)
+    } else {
       try {
         const response = await fetch(url)
-        console.log()
         if (response.ok) {
           const data = await response.json()
           storeScansData.value = data.features.map((feature, index) => ({
@@ -217,66 +211,24 @@ export const useScanStore = defineStore('scan', () => {
   }
 
 
-  function get_suffixPhoto(feature) {
-    //Sert a retoruner le,les suffixes corespondant a la photo
-    let suffix = ' ';
-    if (feature.properties.RÉSOLUTIO == 'undefined' || (feature.RÉSOLUTIO === 0.1 && feature.STYLE == "Argentique")) {
-      suffix += '[O]';
-    }
-    if (feature.properties.DISPO_INTE === "1") {
-      suffix += '[T]';
-    }
-    if (feature.properties.DISPO_INTE === "2") {
-      suffix += '[S]';
-    }
-    if (feature.properties.ENVELOPPE_ === 1) {
-      suffix += '[*]';
-    }
-    if (feature.properties.IDENTIFIAN === 0) {
-      suffix += '[ap]';
-    }
-    return suffix;
-  }
-
-  function get_ResolutionPhoto(feature) {
-    //Sert a retourner la résolution de la photo
-    let resolution = '';
-
-    if (feature.properties.STYLE[0] === 'A') {
-      if (feature.properties.RÉSOLUTIO === 0.1) {
-        resolution = "Échelle : Oblique";
-      }
-      else {
-        resolution = feature.properties.RÉSOLUTIO * 1000;
-      }
-    }
-    else if (feature.properties.STYLE[0] === 'N') {
-      resolution = feature.properties.RÉSOLUTIO + " m";
-    }
-    else {
-      console.log("probleme get_ResolutionPhoto");
-    }
-    return resolution;
-  }
 
   async function storeGetPhoto(url) {
     //Sert a récupérer les infos et ajouter une echelle dans les propriétés ainsi que le nom complet à la place du nom classique
     try {
-      const response = await fetch(url);
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
         storeScansData.value = data.features.map((feature, index) => {
-          const echelle = get_ResolutionPhoto(feature);
-          feature.properties['ECHELLE'] = echelle;
-          // console.log(echelle);
-          const name = feature.properties.CHANTIER + get_suffixPhoto(feature) ?? " problème";
+          feature.properties['ECHELLE'] = getEchellePhoto(feature)
+          const name = feature.properties.CHANTIER + getSuffixPhoto(feature)
           return {
             id: index,
             geom: feature.geometry.coordinates[0],
             name: name,
             properties: feature.properties,
-          };
+          }
         })
+        console.log(storeScansData.value)
         storeSelectedScan.value = null
       } else {
         throw new Error('Failed to fetch data')
@@ -301,6 +253,7 @@ export const useScanStore = defineStore('scan', () => {
     updateActiveSubCategory,
     activeSubCategory,
     storeSelectedGeom,
+    storeGetPhoto,
     updateSelectedGeom,
     resetCriteria,
     activeTab,
@@ -313,6 +266,6 @@ export const useScanStore = defineStore('scan', () => {
     fetchOptions,
     supportOptions,
     emulsionOptions,
-    fetchAllOptions
+    fetchAllOptions,
   }
 })

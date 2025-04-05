@@ -69,8 +69,6 @@ export async function parcour_txt_to_tab(url) {
         tab_fin.push(tab2)
       }
     }
-    console.log(' tab fin:')
-    console.log(tab_fin)
     return tab_fin
   } catch (error) {
     console.error('Erreur lors de la lecture du fichier :', error)

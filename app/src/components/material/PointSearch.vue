@@ -127,7 +127,6 @@ async function fetchAndConvertBbox(longitude, latitude) {
 
     const data = await response.json()
 
- 
     const bbox = data.boundingbox
 
     const bboxWGS84 = [
@@ -147,7 +146,6 @@ async function fetchAndConvertBbox(longitude, latitude) {
       bboxWGS84,
       bboxLambert93,
     }
-    
   } catch (error) {
     console.error('Erreur lors du géocodage inversé:', error)
     return null

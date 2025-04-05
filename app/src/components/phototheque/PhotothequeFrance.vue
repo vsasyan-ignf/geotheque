@@ -32,6 +32,8 @@
       @go-to-point="goToPoint"
       @close="$emit('close-sub-category')"
     />
+
+    <PvaSearch v-if="activeSubCategory === 'autre'" @close="$emit('close-sub-category')" />
   </div>
 </template>
 
@@ -45,6 +47,7 @@ import CommuneSearch from '@/components/material/CommuneSearch.vue'
 import DepartementSearch from '@/components/material/DepartementSearch.vue'
 import FeuilleSearch from '@/components/material/FeuilleSearch.vue'
 import PointSearch from '@/components/material/PointSearch.vue'
+import PvaSearch from '../material/PvaSearch.vue'
 
 const scanStore = useScanStore()
 

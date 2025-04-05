@@ -24,9 +24,26 @@
 
         <div class="action-buttons">
           <button class="view-details-button" @click="openModal">Voir tous les détails</button>
-          <button class="download-button" @click="downloadDetails">Télécharger</button>
         </div>
       </div>
+    </div>
+
+    <div class="group-button">
+      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan">
+        <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
+      </ShakingButton>
+
+      <ShakingButton nameButton="" @click="" :disabled="!storeSelectedScan">
+        <template #icon><SvgIcon type="mdi" :path="mdiMinus" class="mdicon" /></template>
+      </ShakingButton>
+
+      <ShakingButton nameButton="" @click="" :disabled="!storeSelectedScan">
+        <template #icon><SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" /></template>
+      </ShakingButton>
+
+      <ShakingButton nameButton="HTML" @click="" :disabled="!storeSelectedScan">
+        <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
+      </ShakingButton>
     </div>
 
     <Accordion title="Critère de mission" defaultOpen>
@@ -57,15 +74,6 @@
         @download="downloadDetails"
       />
     </div>
-    <div>
-      <ShakingButton
-          nameButton="Visualiser"
-          @click="setUrl"
-          :disabled="!storeSelectedScan"
-        >
-          <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
-        </ShakingButton>
-    </div>
   </div>
 </template>
 
@@ -78,14 +86,14 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 
 import ShakingButton from '@/components/material/ShakingButton.vue'
-import { mdiPlus } from '@mdi/js'
+import { mdiPlus, mdiMinus, mdiTrashCan, mdiXml } from '@mdi/js'
 import config from '@/config'
 
 import Accordion from '../material/Accordeon.vue'
 import CritereSelection from '../cartotheque/CritereSelection.vue'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan, activeTab, urlPhoto } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
@@ -118,6 +126,7 @@ const all_keys = {
   IDENTIFIAN: 'IDENTIFIANT',
   FORMAT: 'FORMAT',
   FOCALE: 'FOCALE',
+  ECHELLE: 'ECHELLE',
 }
 
 const allDetails = computed(() => {
@@ -151,17 +160,11 @@ const closeModal = () => {
   document.body.style.overflow = ''
 }
 
-const downloadDetails = () => {
-  console.log('fonction dl')
-}
-
-function setUrl(){
-  console.log('----------- MISSION ---------------')
-  console.log(storeSelectedScan.value)
-  const annee = storeSelectedScan.value.properties["ANNÉE"]
-  const nom = storeSelectedScan.value.properties["CHANTIER"]
+function setUrl() {
+  const annee = storeSelectedScan.value.properties['ANNÉE']
+  const nom = storeSelectedScan.value.properties['CHANTIER']
   const url = `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
-  console.log("URL MISSION : ", url)
+  console.log('URL MISSION : ', url)
   scanStore.updateUrlPhoto(url)
 }
 
@@ -186,8 +189,6 @@ const checkboxOptions = [
 // Fonction qui gère l'activation/désactivation des cases
 const handleCheckboxChange = (optionKey) => {
   const isChecked = selectedOptions[optionKey]
-  console.log('-----------in mission--------------')
-  console.log(optionKey, isChecked)
 
   if (optionKey === 'couplesStereo') {
     console.log('click couplesStereo')
@@ -233,6 +234,13 @@ const handleCheckboxChange = (optionKey) => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.group-button {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-left: 10px;
 }
 
 .slide-in {
