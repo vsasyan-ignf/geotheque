@@ -28,6 +28,9 @@
         </div>
       </div>
     </div>
+    <ShakingButton nameButton="Visualiser" @click="setUrl" :disabled="!storeSelectedScan">
+      <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
+    </ShakingButton>
 
     <Accordion title="Critère de mission" defaultOpen>
       <CritereSelection />
@@ -56,11 +59,6 @@
         @close="closeModal"
         @download="downloadDetails"
       />
-    </div>
-    <div>
-      <ShakingButton nameButton="Visualiser" @click="setUrl" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
-      </ShakingButton>
     </div>
   </div>
 </template>

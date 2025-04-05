@@ -87,9 +87,9 @@ let repFeuille = ref(null)
 
 const feuilleWFS = computed(() => {
   if (activeTab.value === 'phototheque') {
-    return 'PVALambert93'
+    return 'feuilles50000'
   } else {
-    return 'PVALambert93'
+    return 'feuillesmonde'
   }
 })
 

@@ -240,7 +240,6 @@ function handleDrawComplete(drawData) {
   let drawGeometry
   if (drawData.type === 'Rectangle' || drawData.type === 'Polygon') {
     drawGeometry = new Polygon(drawData.coordinates)
-    console.log(drawGeometry)
   } else if (drawData.type === 'Circle') {
     drawGeometry = new Polygon(drawData.coordinates)
   }
@@ -419,10 +418,10 @@ onMounted(() => {
 
         scanStore.updateSelectedGeom([])
       }
-      if (activeTab.value != 'phototheque'){
+      if (activeTab.value != 'phototheque') {
         vectorLayers.value.emprises.getSource().setUrl(newValue)
       }
-      
+
       vectorLayers.value.emprises.getSource().refresh()
 
       await scanStore.storeGet(newValue)
@@ -467,14 +466,12 @@ onMounted(() => {
       }
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()
-        olMap.value.removeLayer(geomLayer)
       }
       if (vectorLayers.value.cross) {
         vectorLayers.value.cross.getSource().clear()
       }
       if (vectorLayers.value.geomPhoto) {
         vectorLayers.value.geomPhoto.getSource().clear()
-        olMap.value.removeLayer(geomLayer)
       }
 
       clearIntersection()
