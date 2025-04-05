@@ -377,13 +377,14 @@ onMounted(() => {
 
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
-        vectorLayers.value.pin.getSource().clear()
-        vectorLayers.value.emprises.getSource().clear()
+        // vectorLayers.value.pin.getSource().clear()
+        // vectorLayers.value.emprises.getSource().clear()
+        // vectorLayers.value.geom.getSource().clear()
+        // vectorLayers.value.scan.getSource().clear()
+        // vectorLayers.value.cross.getSource().clear()
+        // vectorLayers.value.geomPhoto.getSource().clear()
+        Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
         vectorLayers.value.emprises.getSource().setUrl('')
-        vectorLayers.value.geom.getSource().clear()
-        vectorLayers.value.scan.getSource().clear()
-        vectorLayers.value.cross.getSource().clear()
-        vectorLayers.value.geomPhoto.getSource().clear()
         scanStore.resetCriteria()
       }
     })
