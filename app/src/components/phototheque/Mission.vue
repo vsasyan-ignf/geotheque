@@ -14,7 +14,7 @@
         <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
       </ShakingButton>
 
-      <ShakingButton nameButton="" @click="" :disabled="!storeSelectedScan">
+      <ShakingButton nameButton="" @click="DeletePhotoAll" :disabled="!storeSelectedScan">
         <template #icon><SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" /></template>
       </ShakingButton>
 
@@ -84,7 +84,7 @@ import { mdiPlus, mdiMinus, mdiTrashCan, mdiXml } from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan, deletePhotoAllBool } = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
@@ -157,6 +157,10 @@ function setUrl() {
   const url = `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
   console.log('URL MISSION : ', url)
   scanStore.updateUrlPhoto(url)
+}
+
+function DeletePhotoAll(){
+  scanStore.updateDeletePhotoAllBool(!deletePhotoAllBool.value)
 }
 
 /********************** CHECKBOX ************************* */

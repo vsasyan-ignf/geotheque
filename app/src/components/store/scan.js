@@ -12,6 +12,7 @@ export const useScanStore = defineStore('scan', () => {
   let activeTab = ref('cartotheque')
   let wkt = ref(null)
   let urlPhoto = ref(null)
+  let deletePhotoAllBool = ref(false)
 
   let collectionsOptions = ref([{ id: '0', name: 'Tous les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
@@ -32,9 +33,9 @@ export const useScanStore = defineStore('scan', () => {
 
       if (activeTab.value === 'cartotheque_etranger') {
         empriseURL = 'emprisesscansmonde'
-        // inverse les coordonnées : lon/lat to lat/lon
-        ;[minX, minY] = [minY, minX]
-        ;[maxX, maxY] = [maxY, maxX]
+          // inverse les coordonnées : lon/lat to lat/lon
+          ;[minX, minY] = [minY, minX]
+          ;[maxX, maxY] = [maxY, maxX]
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
@@ -142,6 +143,10 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateUrlPhoto(newVal) {
     urlPhoto.value = newVal
+  }
+
+  function updateDeletePhotoAllBool(newVal) {
+    deletePhotoAllBool.value = newVal
   }
 
   async function fetchOptions(propertyName) {
@@ -267,5 +272,7 @@ export const useScanStore = defineStore('scan', () => {
     supportOptions,
     emulsionOptions,
     fetchAllOptions,
+    deletePhotoAllBool,
+    updateDeletePhotoAllBool,
   }
 })
