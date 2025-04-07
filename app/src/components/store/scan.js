@@ -60,7 +60,7 @@ export const useScanStore = defineStore('scan', () => {
 
         // inverse les coordonnées : lon/lat to lat/lon
         ;[minX, minY] = [minY, minX]
-        ;[maxX, maxY] = [maxY, maxX]
+          ;[maxX, maxY] = [maxY, maxX]
       }
 
       const { yearMin, yearMax, scaleMin, scaleMax, collection, commanditaire, producteur, support, emulsion } =
@@ -91,12 +91,6 @@ export const useScanStore = defineStore('scan', () => {
         if (emulsion) cqlFilter += `%20AND%20EMULSION%3D'${emulsion}'`
       }
 
-      console.log( `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
-        `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
-        `&cql_filter=${cqlFilter}` +
-        `&srsName=EPSG:3857`)
-
-
       return (
         `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
         `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
@@ -114,12 +108,6 @@ export const useScanStore = defineStore('scan', () => {
     } else if (activeTab.value === 'cartotheque_etranger') {
       storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500
       storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 200000
-    } else if (activeTab.value === 'phototheque') {
-      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500
-      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000
-    } else if (activeTab.value === 'cartotheque_etranger') {
-      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 2000
-      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 10000000
     } else {
       storeCritereSelection.value.scaleMin = null
       storeCritereSelection.value.scaleMax = null
@@ -223,37 +211,37 @@ export const useScanStore = defineStore('scan', () => {
 
   async function fetchOptionsComboBox(propertyName) {
     if (optionsCache.value[propertyName]) {
-        return optionsCache.value[propertyName];
+      return optionsCache.value[propertyName];
     }
 
     try {
-        const typeNames = getCurrentTypeNames();
-        const wfsUrl = `${config.GEOSERVER_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json`;
+      const typeNames = getCurrentTypeNames();
+      const wfsUrl = `${config.GEOSERVER_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json`;
 
-        const response = await fetch(wfsUrl);
+      const response = await fetch(wfsUrl);
 
-        const data = await response.json();
+      const data = await response.json();
 
-        const values = data.features
-            .map((feature) => feature.properties[propertyName])
-            .filter((value) => value);
+      const values = data.features
+        .map((feature) => feature.properties[propertyName])
+        .filter((value) => value);
 
-        const uniqueValues = [...new Set(values)].sort();
+      const uniqueValues = [...new Set(values)].sort();
 
-        const options = [...uniqueValues.map((value, index) => ({ id: String(index + 1), name: value }))];
-        optionsCache.value[propertyName] = options;
+      const options = [...uniqueValues.map((value, index) => ({ id: String(index + 1), name: value }))];
+      optionsCache.value[propertyName] = options;
 
-        return options;
+      return options;
     } catch (error) {
-        console.error(`${propertyName}:`, error);
+      console.error(`${propertyName}:`, error);
     }
   }
 
   function getFilteredOptions(options, searchTerm) {
     if (!searchTerm) return options
-    
-    return options.filter(option => 
-      typeof option === 'string' 
+
+    return options.filter(option =>
+      typeof option === 'string'
         ? option.toLowerCase().includes(searchTerm.toLowerCase())
         : option.name.toLowerCase().includes(searchTerm.toLowerCase())
     )

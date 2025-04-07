@@ -2,7 +2,7 @@
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
       <div class="scan-export-container">
-        <button class="export-scan-button" @click="downloadCSV" :disabled="!isDataAvailable > 0">
+        <button class="export-scan-button" @click="downloadCSV(storeScansData)" :disabled="!isDataAvailable > 0">
           <div class="button-content">
             <div class="icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="export-icon">
@@ -58,6 +58,7 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiMonitorEye, mdiBriefcaseDownload, mdiXml } from '@mdi/js'
 import {findSectionScan} from '@/components/composable/getSectionScans'
+import { downloadCSV } from '../composable/download'
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -161,46 +162,6 @@ function downloadxml() {
   }
 }
 
-function downloadCSV() {
-  const data = storeScansData.value
-
-  if (data) {
-    const newData = data.map((scan) => scan.properties)
-    const csvContent = dicoToFormatCSV(newData)
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
-    const objUrl = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.setAttribute('href', objUrl)
-    link.setAttribute('download', 'scans.csv')
-    link.click()
-  }
-}
-
-function dicoToFormatCSV(arrObj) {
-  const titleKeys = Object.keys(arrObj[0])
-
-  const refinedData = []
-  refinedData.push(titleKeys)
-
-  arrObj.forEach((item) => {
-    refinedData.push(Object.values(item))
-  })
-
-  let csvContent = ''
-
-  refinedData.forEach((row) => {
-    const formattedRow = row.map((field) => {
-      if (field.includes(',')) {
-        return `"${field.replace(/"/g, '""')}"`
-      }
-      return field
-    })
-
-    csvContent += formattedRow.join(';') + '\n'
-  })
-
-  return csvContent.trim()
-}
 </script>
 <style scoped>
 .scan-box {
