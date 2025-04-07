@@ -392,6 +392,7 @@ const handleCheckboxChange = (optionKey) => {
 
 .mission-options {
   margin-top: 20px;
+  margin-bottom: 40px;
 }
 
 .options-label {

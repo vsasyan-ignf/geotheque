@@ -122,6 +122,8 @@ const handleBlur = () => {
   overflow-y: auto;
   z-index: 100;
   margin-top: 2px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
 }
 
 .dropdown-item {
