@@ -8,6 +8,7 @@ export const useScanStore = defineStore('scan', () => {
   let storeScansData = ref(null)
   let storeSelectedGeom = ref([])
   let storeSelectedScan = ref(null)
+  let storeHoveredScan = ref(null)
   let activeSubCategory = ref(null)
   let activeTab = ref('cartotheque')
   let wkt = ref(null)
@@ -161,6 +162,10 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateSelectedScan(newVal) {
     storeSelectedScan.value = newVal
+  }
+
+  function updateHoverScan(newVal) {
+    storeHoveredScan.value = newVal
   }
 
   function updateActiveTab(newVal) {
@@ -350,6 +355,8 @@ export const useScanStore = defineStore('scan', () => {
     fetchAllOptions,
     getCommanditaireOptions,
     getProducteurOptions,
-    getFilteredOptions
+    getFilteredOptions,
+    storeHoveredScan,
+    updateHoverScan
   }
 })

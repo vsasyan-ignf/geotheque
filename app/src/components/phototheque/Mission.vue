@@ -90,7 +90,6 @@ const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
 
 // real key : key bien écrit pour afficher dans modal
-
 const all_keys = {
   NOM: 'NOM',
   CHANTIER: 'CHANTIER',
