@@ -83,9 +83,6 @@ import ShakingButton from '@/components/material/ShakingButton.vue'
 import { mdiPlus, mdiMinus, mdiTrashCan, mdiXml } from '@mdi/js'
 import config from '@/config'
 
-import Accordion from '../material/Accordeon.vue'
-import CritereSelection from '../cartotheque/CritereSelection.vue'
-
 const scanStore = useScanStore()
 const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
 
@@ -175,7 +172,6 @@ const selectedOptions = reactive({
 const checkboxOptions = [
   { key: 'couplesStereo', label: 'Couples Stéréo' },
   { key: 'alphanumeric', label: 'Alphanumérique' },
-  { key: 'popup', label: 'Popup' },
   { key: 'feuilles', label: 'N° Feuille' },
   { key: 'departements', label: 'N° Département' },
 ]
@@ -235,6 +231,7 @@ const handleCheckboxChange = (optionKey) => {
   flex-direction: row;
   gap: 10px;
   margin-left: 10px;
+  margin-bottom: 20px;
 }
 
 .slide-in {
