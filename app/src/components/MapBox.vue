@@ -339,8 +339,6 @@ onMounted(() => {
       target: document.getElementById('mouse-position'),
     });
 
-    console.log(mousePositionControl)
-
 
         olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent);

@@ -175,12 +175,6 @@ export const useScanStore = defineStore('scan', () => {
   async function fetchAllOptions() {
     if (activeTab.value === 'cartotheque' || activeTab.value === 'cartotheque_etranger') {
       collectionsOptions.value = await fetchOptions('COLLECTION')
-
-      const map = Object.values(collectionsOptions.value).map(elem => elem.name)
-
-      console.log(map)
-
-
     }
 
     if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
