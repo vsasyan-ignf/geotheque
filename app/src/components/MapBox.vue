@@ -20,7 +20,9 @@
       @draw-mode-activated="handleDrawModeActivated"
       @deactivate-draw-mode="handleDeactivateDrawMode"
     />
-  </div>
+  </div>    
+  <div style="z-index: 99999999;" id="mouse-position"></div>
+  <div style="z-index: 99999999;" id="form-proj"></div>
 </template>
 
 <script setup>
@@ -66,6 +68,11 @@ import {
 } from './composable/intersectionDraw'
 import { Style, Text, Stroke, Fill } from 'ol/style'
 import Icon from 'ol/style/Icon'
+
+
+import MousePosition from 'ol/control/MousePosition.js';
+import {createStringXY} from 'ol/coordinate.js';
+
 
 const scanStore = useScanStore()
 const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab, urlPhoto } =
@@ -262,6 +269,9 @@ function handleDeactivateDrawMode() {
 
 onMounted(() => {
   nextTick(() => {
+
+   
+
     const wmtsLayers = createInitialWMTSLayers(layers.value, activeLayerIndex.value)
 
     vectorLayers.value = {
@@ -311,6 +321,38 @@ onMounted(() => {
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
+
+    function updateProjectionDisplay() {
+      const projectionCode = olMap.value.getView().getProjection().getCode(); 
+      const formProjElement = document.getElementById('form-proj');
+      if (formProjElement) {
+        formProjElement.innerHTML = `Projection: ${projectionCode}`;
+      }
+    }
+
+    updateProjectionDisplay();
+    olMap.value.getView().on('change:projection', updateProjectionDisplay);
+
+    const mousePositionControl = new MousePosition({
+      coordinateFormat: createStringXY(2),
+      projection: olMap.value.getView().getProjection().getCode(),
+      target: document.getElementById('mouse-position'),
+    });
+
+    console.log(mousePositionControl)
+
+
+        olMap.value.on('pointermove', (event) => {
+      const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
+      const formattedCoordinate = createStringXY(2)(coordinate); // Formatage des coordonnées
+
+      // Mettre à jour l'élément HTML avec la position de la souris
+      const mousePositionElement = document.getElementById('mouse-position');
+      if (mousePositionElement) {
+        mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`;
+      }
+      
+    });
 
     initializeIntersectionLayer(olMap)
 
@@ -518,4 +560,28 @@ provide('eventBus', eventBus)
   height: 100%;
   flex: 1;
 }
+
+
+#mouse-position {
+  position: absolute;
+  bottom: 10px;   
+  right: 40%;     /* À 10px du côté gauche */
+  background-color: rgba(255, 255, 255, 0.8);  /* Fond semi-transparent pour améliorer la lisibilité */
+  padding: 5px;   /* Un peu de padding */
+  font-size: 14px; /* Taille du texte */
+  border-radius: 5px; /* Coins arrondis pour une meilleure esthétique */
+}
+
+#form-proj  {
+  position: absolute;      /* Positionner de manière absolue par rapport au conteneur parent */
+  bottom: 10px;               
+  right: 24%;             
+  z-index: 99999999;       /* Priorité sur les autres éléments */
+  background-color: rgba(255, 255, 255, 0.8); /* Fond légèrement transparent pour le formulaire */
+  padding: 5px;           /* Un peu de padding autour du formulaire */
+  font-size: 14px;
+  border-radius: 5px;      /* Coins arrondis pour le formulaire */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre douce pour faire ressortir le formulaire */
+}
+
 </style>
