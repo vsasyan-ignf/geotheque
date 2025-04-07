@@ -2,7 +2,11 @@
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
       <div class="scan-export-container">
-        <button class="export-scan-button" @click="downloadCSV(storeScansData)" :disabled="!isDataAvailable > 0">
+        <button
+          class="export-scan-button"
+          @click="downloadCSV(storeScansData)"
+          :disabled="!isDataAvailable > 0"
+        >
           <div class="button-content">
             <div class="icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="export-icon">
@@ -57,7 +61,7 @@ import Dropdown from '@/components/material/Dropdown.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiMonitorEye, mdiBriefcaseDownload, mdiXml } from '@mdi/js'
-import {findSectionScan} from '@/components/composable/getSectionScans'
+import { findSectionScan } from '@/components/composable/getSectionScans'
 import { downloadCSV } from '../composable/download'
 import config from '@/config'
 
@@ -161,7 +165,6 @@ function downloadxml() {
     window.open(url_xml, 'xml')
   }
 }
-
 </script>
 <style scoped>
 .scan-box {

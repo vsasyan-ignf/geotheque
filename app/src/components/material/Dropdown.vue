@@ -2,13 +2,15 @@
   <div class="custom-dropdown" v-click-outside="closeDropdown">
     <label v-if="nameDropdown">{{ nameDropdown }}</label>
     <div class="dropdown-selected" @click="toggleDropdown">
-      <span class="selected-text">{{ selected ? selected.name : disableOption || 'Sélectionner' }}</span>
-      <span class="dropdown-arrow" :class="{ 'open': isOpen }">▼</span>
+      <span class="selected-text">{{
+        selected ? selected.name : disableOption || 'Sélectionner'
+      }}</span>
+      <span class="dropdown-arrow" :class="{ open: isOpen }">▼</span>
     </div>
-    
-    <div class="dropdown-options" :class="{ 'show': isOpen }">
-      <div 
-        v-for="option in options" 
+
+    <div class="dropdown-options" :class="{ show: isOpen }">
+      <div
+        v-for="option in options"
         :key="option.id"
         class="dropdown-option"
         @click="selectOption(option)"
@@ -24,7 +26,7 @@
 import { ref, watchEffect } from 'vue'
 import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '../store/scan'
-import { debounce } from 'lodash';
+import { debounce } from 'lodash'
 
 const scanStore = useScanStore()
 const props = defineProps({
@@ -108,7 +110,7 @@ const vClickOutside = {
   },
   unmounted(el) {
     document.removeEventListener('click', el._clickOutside)
-  }
+  },
 }
 </script>
 

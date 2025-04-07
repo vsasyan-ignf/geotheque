@@ -23,7 +23,7 @@ export const useScanStore = defineStore('scan', () => {
     SUPPORT: null,
     EMULSION: null,
     COMMANDITA: null,
-    PRODUCTEUR: null
+    PRODUCTEUR: null,
   })
 
   const getCurrentTypeNames = () => {
@@ -33,7 +33,7 @@ export const useScanStore = defineStore('scan', () => {
       case 'phototheque':
         return 'fondcarte:PVALambert93'
       case 'phototheque_etranger':
-        return ''; // à modif pour prendre en compte le bon wfs
+        return '' // à modif pour prendre en compte le bon wfs
       default:
         return 'fondcarte:emprisesscans'
     }
@@ -48,23 +48,31 @@ export const useScanStore = defineStore('scan', () => {
     commanditaire: null,
     producteur: null,
     support: null,
-    emulsion: null
+    emulsion: null,
   })
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
-      let empriseURL = getCurrentTypeNames();
+      let empriseURL = getCurrentTypeNames()
       let [minX, minY, maxX, maxY] = storeBbox.value
 
       if (activeTab.value === 'cartotheque_etranger') {
-
         // inverse les coordonnées : lon/lat to lat/lon
         ;[minX, minY] = [minY, minX]
-          ;[maxX, maxY] = [maxY, maxX]
+        ;[maxX, maxY] = [maxY, maxX]
       }
 
-      const { yearMin, yearMax, scaleMin, scaleMax, collection, commanditaire, producteur, support, emulsion } =
-        storeCritereSelection.value
+      const {
+        yearMin,
+        yearMax,
+        scaleMin,
+        scaleMax,
+        collection,
+        commanditaire,
+        producteur,
+        support,
+        emulsion,
+      } = storeCritereSelection.value
 
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
 
@@ -211,52 +219,54 @@ export const useScanStore = defineStore('scan', () => {
 
   async function fetchOptionsComboBox(propertyName) {
     if (optionsCache.value[propertyName]) {
-      return optionsCache.value[propertyName];
+      return optionsCache.value[propertyName]
     }
 
     try {
-      const typeNames = getCurrentTypeNames();
-      const wfsUrl = `${config.GEOSERVER_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json`;
+      const typeNames = getCurrentTypeNames()
+      const wfsUrl = `${config.GEOSERVER_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json`
 
-      const response = await fetch(wfsUrl);
+      const response = await fetch(wfsUrl)
 
-      const data = await response.json();
+      const data = await response.json()
 
       const values = data.features
         .map((feature) => feature.properties[propertyName])
-        .filter((value) => value);
+        .filter((value) => value)
 
-      const uniqueValues = [...new Set(values)].sort();
+      const uniqueValues = [...new Set(values)].sort()
 
-      const options = [...uniqueValues.map((value, index) => ({ id: String(index + 1), name: value }))];
-      optionsCache.value[propertyName] = options;
+      const options = [
+        ...uniqueValues.map((value, index) => ({ id: String(index + 1), name: value })),
+      ]
+      optionsCache.value[propertyName] = options
 
-      return options;
+      return options
     } catch (error) {
-      console.error(`${propertyName}:`, error);
+      console.error(`${propertyName}:`, error)
     }
   }
 
   function getFilteredOptions(options, searchTerm) {
     if (!searchTerm) return options
 
-    return options.filter(option =>
+    return options.filter((option) =>
       typeof option === 'string'
         ? option.toLowerCase().includes(searchTerm.toLowerCase())
-        : option.name.toLowerCase().includes(searchTerm.toLowerCase())
+        : option.name.toLowerCase().includes(searchTerm.toLowerCase()),
     )
   }
 
   async function getCommanditaireOptions(searchTerm = '') {
     const options = await fetchOptionsComboBox('COMMANDITA')
     const filteredOptions = getFilteredOptions(options, searchTerm)
-    return filteredOptions.map(option => option.name)
+    return filteredOptions.map((option) => option.name)
   }
 
   async function getProducteurOptions(searchTerm = '') {
     const options = await fetchOptionsComboBox('PRODUCTEUR')
     const filteredOptions = getFilteredOptions(options, searchTerm)
-    return filteredOptions.map(option => option.name)
+    return filteredOptions.map((option) => option.name)
   }
 
   async function storeGet(url) {
@@ -345,6 +355,6 @@ export const useScanStore = defineStore('scan', () => {
     getProducteurOptions,
     getFilteredOptions,
     storeHoveredScan,
-    updateHoverScan
+    updateHoverScan,
   }
 })
