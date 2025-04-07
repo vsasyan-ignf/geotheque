@@ -34,10 +34,6 @@
       </ShakingButton>
 
       <ShakingButton nameButton="" @click="" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiMinus" class="mdicon" /></template>
-      </ShakingButton>
-
-      <ShakingButton nameButton="" @click="" :disabled="!storeSelectedScan">
         <template #icon><SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" /></template>
       </ShakingButton>
 
