@@ -5,7 +5,22 @@
         <label for="mission-select">Sélectionner une mission</label>
         <span class="mission-count">{{ storeScansData?.length }} missions trouvées</span>
       </div>
+
       <Dropdown :options="storeScansData" disableOption="Choisissez une mission" />
+    </div>
+
+    <div class="group-button">
+      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan">
+        <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
+      </ShakingButton>
+
+      <ShakingButton nameButton="" @click="" :disabled="!storeSelectedScan">
+        <template #icon><SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" /></template>
+      </ShakingButton>
+
+      <ShakingButton nameButton="HTML" @click="" :disabled="!storeSelectedScan">
+        <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
+      </ShakingButton>
     </div>
 
     <div v-if="selectedMission" class="mission-preview slide-in">
@@ -27,24 +42,6 @@
         </div>
       </div>
     </div>
-
-    <div class="group-button">
-      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
-      </ShakingButton>
-
-      <ShakingButton nameButton="" @click="" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" /></template>
-      </ShakingButton>
-
-      <ShakingButton nameButton="HTML" @click="" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
-      </ShakingButton>
-    </div>
-
-    <Accordion title="Critère de mission" defaultOpen>
-      <CritereSelection />
-    </Accordion>
 
     <div class="mission-options">
         <div class="options-label">Options de sélection</div>
