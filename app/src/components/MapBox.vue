@@ -278,13 +278,7 @@ function handleDeactivateDrawMode() {
 onMounted(() => {
   nextTick(() => {
 
-    const mousePositionControl = new MousePosition({
-      coordinateFormat: createStringXY(2),
-      projection: 'EPSG:3854',
-      target: document.getElementById('mouse-position'),
-    });
-
-    console.log(mousePositionControl)
+   
 
     const wmtsLayers = createInitialWMTSLayers(layers.value, activeLayerIndex.value)
 
@@ -337,7 +331,25 @@ onMounted(() => {
       controls: defaultControls({ zoom: false, rotate: false }),
     })
 
-        // olMap.value.addControl(mousePositionControl);
+    function updateProjectionDisplay() {
+      const projectionCode = olMap.value.getView().getProjection().getCode(); 
+      const formProjElement = document.getElementById('form-proj');
+      if (formProjElement) {
+        formProjElement.innerHTML = `Projection: ${projectionCode}`;
+      }
+    }
+
+    updateProjectionDisplay();
+    olMap.value.getView().on('change:projection', updateProjectionDisplay);
+
+    const mousePositionControl = new MousePosition({
+      coordinateFormat: createStringXY(2),
+      projection: olMap.value.getView().getProjection().getCode(),
+      target: document.getElementById('mouse-position'),
+    });
+
+    console.log(mousePositionControl)
+
 
         olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
@@ -348,6 +360,7 @@ onMounted(() => {
       if (mousePositionElement) {
         mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`;
       }
+      
     });
 
     initializeIntersectionLayer(olMap)
