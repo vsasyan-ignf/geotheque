@@ -75,7 +75,7 @@ import {createStringXY} from 'ol/coordinate.js';
 
 
 const scanStore = useScanStore()
-const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab, urlPhoto } =
+const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab, urlPhoto, storeHoveredScan } =
   storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -102,6 +102,7 @@ const vectorLayers = ref({
   emprises: null,
   cross: null,
   geomPhoto: null,
+  hover: null
 })
 
 const vectorOtherLayers = ref(null)
@@ -270,8 +271,6 @@ function handleDeactivateDrawMode() {
 onMounted(() => {
   nextTick(() => {
 
-   
-
     const wmtsLayers = createInitialWMTSLayers(layers.value, activeLayerIndex.value)
 
     vectorLayers.value = {
@@ -281,6 +280,7 @@ onMounted(() => {
       emprises: createWFSLayer(),
       cross: createPinLayer(crossIcon),
       geomPhoto: createGeomLayer(),
+      hover: createScanLayer()
     }
 
     vectorOtherLayers.value = initOtherVectorLayers()
@@ -314,6 +314,7 @@ onMounted(() => {
         vectorLayers.value.pin,
         vectorLayers.value.geom,
         vectorLayers.value.scan,
+        vectorLayers.value.hover,
         vectorLayers.value.cross,
         vectorLayers.value.geomPhoto,
         ...Object.values(vectorOtherLayers.value),
@@ -458,6 +459,22 @@ onMounted(() => {
       await scanStore.storeGet(newValue)
     })
 
+    watch(storeHoveredScan, (newVal) => {
+      vectorLayers.value.hover.getSource().clear()
+
+      if (
+        storeHoveredScan.value &&
+        storeHoveredScan.value.geom &&
+        storeHoveredScan.value.geom.length > 0
+      ) {
+        const polygon = new Feature({
+          geometry: new Polygon([storeHoveredScan.value.geom[0]]),
+        })
+
+        vectorLayers.value.hover.getSource().addFeature(polygon)
+      }
+    })
+
     watch(storeSelectedScan, (newValue) => {
       console.log('----------- NEW SCAN SELECTED -------------')
 
@@ -570,6 +587,7 @@ provide('eventBus', eventBus)
   padding: 5px;   /* Un peu de padding */
   font-size: 14px; /* Taille du texte */
   border-radius: 5px; /* Coins arrondis pour une meilleure esthétique */
+  color:black
 }
 
 #form-proj  {
@@ -582,6 +600,7 @@ provide('eventBus', eventBus)
   font-size: 14px;
   border-radius: 5px;      /* Coins arrondis pour le formulaire */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre douce pour faire ressortir le formulaire */
+  color: black;
 }
 
 </style>
