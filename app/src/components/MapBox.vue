@@ -435,6 +435,8 @@ onMounted(() => {
 
     watch(urlPhoto, () => {
       if (urlPhoto.value) {
+        vectorLayers.value.geomPhoto.getSource().clear()
+        vectorLayers.value.cross.getSource().clear()
         parcour_tab_and_map(urlPhoto.value)
       }
     })
