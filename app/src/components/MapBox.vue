@@ -106,6 +106,8 @@ const vectorLayers = ref({
 
 const vectorOtherLayers = ref(null)
 
+let tab_emprise_photo = [];
+
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
     layer.setVisible(false)
@@ -138,6 +140,22 @@ function toggleLayerVisibility(isVisible) {
     }
   }
 }
+
+function isPointOnEmprise(point, emprises) {
+  let i;
+  for (i = 0; i < emprises.length; i++) {
+    const polygon = new Feature({
+      geometry: new Polygon([emprises[i]]),
+    });
+    const geometry = polygon.getGeometry();
+    
+    if (geometry.intersectsCoordinate(point)) {
+      console.log("oui");
+    }
+  }
+}
+
+
 
 function addPointToMap(x, y, nom) {
   const coord = [x, y]
@@ -212,7 +230,9 @@ async function parcour_tab_and_map(url) {
           tab_points_3857.push([x_3857, y3857])
         }
 
-        Add_new_polygone_to_map(tab_points_3857)
+        tab_emprise_photo.push(tab_points_3857);
+        Add_new_polygone_to_map(tab_points_3857);
+        
       }
     }
   } catch (error) {
@@ -338,15 +358,14 @@ onMounted(() => {
       projection: olMap.value.getView().getProjection().getCode(),
       target: document.getElementById('mouse-position'),
     });
-
-    console.log(mousePositionControl)
-
+    console.log(mousePositionControl);
 
         olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
-      const formattedCoordinate = createStringXY(2)(coordinate); // Formatage des coordonnées
+      const formattedCoordinate = createStringXY(2)(coordinate); 
 
-      // Mettre à jour l'élément HTML avec la position de la souris
+      isPointOnEmprise(coordinate,tab_emprise_photo)
+
       const mousePositionElement = document.getElementById('mouse-position');
       if (mousePositionElement) {
         mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`;
