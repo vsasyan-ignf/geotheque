@@ -56,7 +56,7 @@ export const useScanStore = defineStore('scan', () => {
       let [minX, minY, maxX, maxY] = storeBbox.value
 
       if (activeTab.value === 'cartotheque_etranger') {
-        // empriseURL = 'emprisesscansmonde'
+
         // inverse les coordonnées : lon/lat to lat/lon
         ;[minX, minY] = [minY, minX]
         ;[maxX, maxY] = [maxY, maxX]

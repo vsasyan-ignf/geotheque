@@ -57,6 +57,7 @@ import Dropdown from '@/components/material/Dropdown.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiMonitorEye, mdiBriefcaseDownload, mdiXml } from '@mdi/js'
+import {findSectionScan} from '@/components/composable/getSectionScans'
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -72,26 +73,38 @@ const textDisableOption = computed(() => {
 })
 
 function generateImageUrl(info) {
-  const lieu = 'METROPOLE'
+  const lieu = findSectionScan(info.COLLECTION)
   let name = ''
   let url = ''
   if (info) {
     if (info.SOUS_COLL !== '') {
-      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      url = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2`
       name = info.ID_CARTE
     } else {
-      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      url = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2`
       name = info.SOUS_COLL
     }
   }
   return { url, name }
 }
 
+function getImageIppsrv(info) {
+  const lieu = findSectionScan(info.COLLECTION)
+  let url = ''
+  if (info) {
+    if (info.SOUS_COLL !== '') {
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
+    } else {
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
+    }
+  }
+  return url
+}
+
 watch(storeSelectedScan, (newVal) => {
   if (newVal) {
     const info = storeSelectedScan.value?.properties
-    const { url, name } = generateImageUrl(info)
-    imageUrl.value = url
+    imageUrl.value = getImageIppsrv(info)
   }
 })
 
