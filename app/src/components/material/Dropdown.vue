@@ -8,7 +8,10 @@
       <span class="dropdown-arrow" :class="{ open: isOpen }">▼</span>
     </div>
 
-    <div class="dropdown-options" :class="{ show: isOpen }">
+    <div class="dropdown-options" 
+      :class="{ show: isOpen }"
+      @mouseleave="resetHover"
+    >
       <div
         v-for="option in options"
         :key="option.id"
@@ -79,10 +82,16 @@ const debouncedHoverUpdate = debounce((option) => {
 }, 200)
 
 function handleOptionHover(option) {
-  scanStore.updateSelectedScan(null)
-
   debouncedHoverUpdate(option)
-  emit('option-hover', option)
+  // scanStore.updateSelectedScan(null)
+}
+
+function resetHover() {
+  scanStore.updateHoverScan(null)
+  
+  if (selected.value) {
+    scanStore.updateSelectedScan(selected.value)
+  }
 }
 
 watchEffect(() => {
