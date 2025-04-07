@@ -46,8 +46,8 @@
       </ShakingButton>
     </div>
 
-    <Accordion title="Critère de mission" defaultOpen>
-      <CritereSelection />
+    <!-- <Accordion title="Critère de mission" defaultOpen>
+      <CritereSelection /> -->
       <div class="mission-options">
         <div class="options-label">Options de sélection</div>
         <div class="checkbox-group">
@@ -63,7 +63,7 @@
           </label>
         </div>
       </div>
-    </Accordion>
+    <!-- </Accordion> -->
 
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
       <MissionDetailsModal

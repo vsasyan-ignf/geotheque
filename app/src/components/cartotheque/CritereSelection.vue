@@ -1,7 +1,7 @@
 <template>
   <div class="critere-selection">
     <form class="criteria-form" @submit.prevent="handleSubmit">
-      <div class="form-row">
+      <div class="form-row" v-if="isCartotheque">
         <FormInput class="half" label="Année min." id="yearMin" v-model="formData.yearMin" />
         <FormInput class="half" label="Année max." id="yearMax" v-model="formData.yearMax" />
       </div>
