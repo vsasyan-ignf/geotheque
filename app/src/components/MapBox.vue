@@ -66,7 +66,7 @@ import {
   findIntersections,
   clearIntersection,
 } from './composable/intersectionDraw'
-import {Style, Text, Stroke, Fill} from 'ol/style'
+import { Style, Text, Stroke, Fill } from 'ol/style'
 import Icon from 'ol/style/Icon'
 
 
@@ -87,8 +87,6 @@ const mapElement = ref(null)
 const olMap = ref(null)
 const pins = ref([])
 const showPin = ref(false)
-
-const geomLayer = ref(null)
 
 const drawModeActive = ref(false)
 const lastDrawFeature = ref(null)
@@ -120,11 +118,8 @@ watch(activeTab, (newValue) => {
   layers.value = newLayers
   otherLayers.value = getOtherLayersForActiveTab(activeTab.value)
   hideOtherLayers()
-
   updateWMTSLayers(olMap.value, newLayers)
-
   scanStore.resetCriteria()
-
   activeLayerIndex.value = 0
 })
 
@@ -145,8 +140,8 @@ function toggleLayerVisibility(isVisible) {
 }
 
 function addPointToMap(x, y, nom) {
-  const coord = [x, y];
-  
+  const coord = [x, y]
+
   // Créer un style avec une icône et un texte
   const style = new Style({
     image: new Icon({
@@ -165,18 +160,17 @@ function addPointToMap(x, y, nom) {
         width: 3,
       }),
     }),
-  });
+  })
 
   // Créer une entité Feature avec le style
   const feature = new Feature({
     geometry: new Point(coord),
-  });
-  feature.setStyle(style);
+  })
+  feature.setStyle(style)
 
   // Ajouter la Feature à la couche
-  vectorLayers.value.cross.getSource().addFeature(feature);
+  vectorLayers.value.cross.getSource().addFeature(feature)
 }
-
 
 function Add_new_polygone_to_map(tab) {
   const polygon = new Feature({
@@ -189,37 +183,36 @@ function Add_new_polygone_to_map(tab) {
 async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
-    console.log('url : ' + url)
+    console.log('url TA : ', url)
     const tab_test = await parcour_txt_to_tab(url)
 
     if (!tab_test || tab_test.length === 0) {
       throw new Error('Le tableau récupéré est vide ou invalide.')
     }
 
-    console.log('Tab test récupéré :', tab_test)
     let elem, i, i2, x, y, x_3857, y3857, tab_points_3857, name
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
         //"Centre Actif"
-        x = tab_test[i][1];
-        y = tab_test[i][2];
-        name = tab_test[i][3] ;
-        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
-        addPointToMap(x_3857, y3857, name);
+        x = tab_test[i][1]
+        y = tab_test[i][2]
+        name = tab_test[i][3]
+        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+        addPointToMap(x_3857, y3857, name)
       } else {
         //"Cliche Actif"
-        elem = tab_test[i];
-        tab_points_3857 = [];
+        elem = tab_test[i]
+        tab_points_3857 = []
         for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
           //Commence a 1 car en 0 il y a le type d'image
-          x = elem[i2];
-          y = elem[i2 + 1];
-          [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
+          x = elem[i2]
+          y = elem[i2 + 1]
+          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
           //addPointToMap(x_3857, y3857);
-          tab_points_3857.push([x_3857, y3857]);
+          tab_points_3857.push([x_3857, y3857])
         }
 
-        Add_new_polygone_to_map(tab_points_3857);
+        Add_new_polygone_to_map(tab_points_3857)
       }
     }
   } catch (error) {
@@ -249,7 +242,6 @@ function handleDrawComplete(drawData) {
   let drawGeometry
   if (drawData.type === 'Rectangle' || drawData.type === 'Polygon') {
     drawGeometry = new Polygon(drawData.coordinates)
-    console.log(drawGeometry)
   } else if (drawData.type === 'Circle') {
     drawGeometry = new Polygon(drawData.coordinates)
   }
@@ -281,7 +273,6 @@ onMounted(() => {
    
 
     const wmtsLayers = createInitialWMTSLayers(layers.value, activeLayerIndex.value)
-
 
     vectorLayers.value = {
       pin: createPinLayer(markerIcon),
@@ -423,13 +414,8 @@ onMounted(() => {
 
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
-        vectorLayers.value.pin.getSource().clear()
-        vectorLayers.value.emprises.getSource().clear()
+        Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
         vectorLayers.value.emprises.getSource().setUrl('')
-        vectorLayers.value.geom.getSource().clear()
-        vectorLayers.value.scan.getSource().clear()
-        vectorLayers.value.cross.getSource().clear()
-        vectorLayers.value.geomPhoto.getSource().clear()
         scanStore.resetCriteria()
       }
     })
@@ -439,9 +425,6 @@ onMounted(() => {
       console.log('NEW URL:', newValue)
       vectorLayers.value.geom.getSource().clear()
       vectorLayers.value.geomPhoto.getSource().clear()
-
-
-      console.log("value : ",storeSelectedGeom.value)
 
       if (storeSelectedGeom.value.length !== 0) {
         let polygon = null
@@ -464,16 +447,15 @@ onMounted(() => {
           minResolution: 200,
           duration: 2000,
         })
-
         scanStore.updateSelectedGeom([])
-
+      }
+      // Pour ne pas afficher toutes les emprises
+      if (activeTab.value != 'phototheque') {
+        vectorLayers.value.emprises.getSource().setUrl(newValue)
       }
 
-      vectorLayers.value.emprises.getSource().setUrl(newValue)
       vectorLayers.value.emprises.getSource().refresh()
-
       await scanStore.storeGet(newValue)
-
     })
 
     watch(storeSelectedScan, (newValue) => {
@@ -490,18 +472,15 @@ onMounted(() => {
         })
 
         vectorLayers.value.scan.getSource().addFeature(polygon)
-
-        const extent = polygon.getGeometry().getExtent()
-
-        olMap.value.getView().fit(extent, {
-          padding: [50, 50, 50, 50 + 400],
-          duration: 1000,
-        })
       }
     })
 
     watch(urlPhoto, () => {
-      parcour_tab_and_map(urlPhoto.value)
+      if (urlPhoto.value) {
+        vectorLayers.value.geomPhoto.getSource().clear()
+        vectorLayers.value.cross.getSource().clear()
+        parcour_tab_and_map(urlPhoto.value)
+      }
     })
 
     eventBus.on('criteria-reset', () => {
@@ -511,18 +490,15 @@ onMounted(() => {
       if (vectorLayers.value.emprises.getSource()) {
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
-        // olMap.value.removeLayer(vectorLayers.value.emprises)
       }
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()
-        olMap.value.removeLayer(geomLayer)
       }
-      if (vectorLayers.value.cross){
+      if (vectorLayers.value.cross) {
         vectorLayers.value.cross.getSource().clear()
       }
       if (vectorLayers.value.geomPhoto) {
         vectorLayers.value.geomPhoto.getSource().clear()
-        olMap.value.removeLayer(geomLayer)
       }
 
       clearIntersection()
