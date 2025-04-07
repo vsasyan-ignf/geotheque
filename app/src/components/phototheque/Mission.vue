@@ -48,7 +48,9 @@
 
     <Accordion title="Critère de mission" defaultOpen>
       <CritereSelection />
-      <div class="mission-options">
+    </Accordion>
+
+    <div class="mission-options">
         <div class="options-label">Options de sélection</div>
         <div class="checkbox-group">
           <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
@@ -63,7 +65,6 @@
           </label>
         </div>
       </div>
-    </Accordion>
 
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
       <MissionDetailsModal
