@@ -1,7 +1,7 @@
 <template>
   <div class="critere-selection">
     <form class="criteria-form" @submit.prevent="handleSubmit">
-      <div class="form-row">
+      <div class="form-row" v-if="isCartotheque">
         <FormInput class="half" label="Année min." id="yearMin" v-model="formData.yearMin" />
         <FormInput class="half" label="Année max." id="yearMax" v-model="formData.yearMax" />
       </div>
@@ -37,11 +37,12 @@
           label="Commanditaire"
           id="commanditaire"
           v-model="formData.commanditaire"
-          :options="filteredCommanditaireOptions"
+          :options="commanditaireOptions"
           :showOptions="showCommanditaireOptions"
           @toggle="showCommanditaireOptions = !showCommanditaireOptions"
           @select="selectCommanditaire"
           @hide="showCommanditaireOptions = false"
+          @input="updateCommanditaireOptions"
         />
 
         <ComboInput
@@ -49,11 +50,12 @@
           label="Producteur"
           id="producteur"
           v-model="formData.producteur"
-          :options="filteredProducteurOptions"
+          :options="producteurOptions"
           :showOptions="showProducteurOptions"
           @toggle="showProducteurOptions = !showProducteurOptions"
           @select="selectProducteur"
           @hide="showProducteurOptions = false"
+          @input="updateProducteurOptions"
         />
       </div>
 
@@ -71,7 +73,7 @@
           class="half"
           nameDropdown="Support"
           :options="supportOptions"
-          @update:selected="updateSelectedCollection"
+          @update:selected="updateSelectedSupport"
           :defaultValue="supportOptions[0]"
         />
 
@@ -80,7 +82,7 @@
           class="half"
           nameDropdown="Emulsion"
           :options="emulsionOptions"
-          @update:selected="updateSelectedCollection"
+          @update:selected="updateSelectedEmulsion"
           :defaultValue="emulsionOptions[0]"
         />
       </div>
@@ -101,12 +103,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import Dropdown from '@/components/material/Dropdown.vue'
-
 import FormInput from '@/components/material/FormInput.vue'
 import ComboInput from '@/components/material/ComboInput.vue'
-
 import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
@@ -117,13 +117,11 @@ const { storeCritereSelection, activeTab, collectionsOptions, supportOptions, em
   storeToRefs(scanStore)
 
 const isCartotheque = computed(() =>
-  ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value),
+  ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value)
 )
 const isPhototheque = computed(() =>
-  ['phototheque', 'phototheque_etranger'].includes(activeTab.value),
+  ['phototheque', 'phototheque_etranger'].includes(activeTab.value)
 )
-
-const defaultCollection = { id: '0', name: 'Toutes les collections' }
 
 const formData = ref({
   yearMin: storeCritereSelection.value.yearMin || '',
@@ -132,9 +130,9 @@ const formData = ref({
   scaleMax: String(storeCritereSelection.value.scaleMax || '100000'),
   commanditaire: storeCritereSelection.value.commanditaire || '',
   producteur: storeCritereSelection.value.producteur || '',
-  selectedCollection: { id: '0', name: 'Tous les collections' },
-  selectedSupport: { id: '0', name: 'Tous les collections' },
-  selectedEmulsion: { id: '0', name: 'Tous les collections' },
+  collection: { id: '0', name: 'Tous les collections' },
+  support: { id: '0', name: 'Tous les supports' },
+  emulsion: { id: '0', name: 'Tous les emulsions' },
 })
 
 const scaleOptions = [
@@ -163,48 +161,39 @@ const showScaleMaxOptions = ref(false)
 const showCommanditaireOptions = ref(false)
 const showProducteurOptions = ref(false)
 
-const fetchCommanditaireOptions = async () => {
-  const response = await fetch(
-    'http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=COMMANDITA&outputFormat=application/json',
-  )
-  const data = await response.json()
+onMounted(async () => {
+  await loadInitialOptions()
+})
 
-  const uniqueCommanditaires = new Set(
-    data.features.map((feature) => feature.properties.COMMANDITA),
-  )
+watch(activeTab, async () => {
+  await loadInitialOptions()
+})
 
-  commanditaireOptions.value = Array.from(uniqueCommanditaires)
+async function loadInitialOptions() {
+  if (isPhototheque.value) {
+    const [commanditaireOpts, producteurOpts] = await Promise.all([
+      scanStore.getCommanditaireOptions(),
+      scanStore.getProducteurOptions()
+    ])
+    
+    commanditaireOptions.value = commanditaireOpts
+    producteurOptions.value = producteurOpts
+  }
 }
 
-const fetchProducteurOptions = async () => {
-  const response = await fetch(
-    'http://localhost:8088/geoserver/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=fondcarte:PVALambert93&propertyName=PRODUCTEUR&outputFormat=application/json',
-  )
-  const data = await response.json()
-
-  const uniqueProducteur = new Set(data.features.map((feature) => feature.properties.PRODUCTEUR))
-
-  producteurOptions.value = Array.from(uniqueProducteur)
+async function updateCommanditaireOptions() {
+  if (isPhototheque.value) {
+    const options = await scanStore.getCommanditaireOptions(formData.value.commanditaire)
+    commanditaireOptions.value = options
+  }
 }
 
-onMounted(() => {
-  fetchCommanditaireOptions()
-  fetchProducteurOptions()
-})
-
-const filteredCommanditaireOptions = computed(() => {
-  if (!formData.value.commanditaire) return commanditaireOptions.value
-  return commanditaireOptions.value.filter((option) =>
-    option.toLowerCase().includes(formData.value.commanditaire.toLowerCase()),
-  )
-})
-
-const filteredProducteurOptions = computed(() => {
-  if (!formData.value.producteur) return producteurOptions.value
-  return producteurOptions.value.filter((option) =>
-    option.toLowerCase().includes(formData.value.producteur.toLowerCase()),
-  )
-})
+async function updateProducteurOptions() {
+  if (isPhototheque.value) {
+    const options = await scanStore.getProducteurOptions(formData.value.producteur)
+    producteurOptions.value = options
+  }
+}
 
 const selectScaleMin = (scale) => {
   formData.value.scaleMin = scale
@@ -227,7 +216,15 @@ const selectProducteur = (option) => {
 }
 
 const updateSelectedCollection = (selected) => {
-  formData.value.selectedCollection = selected
+  formData.value.collection = selected
+}
+
+const updateSelectedSupport = (selected) => {
+  formData.value.support = selected
+}
+
+const updateSelectedEmulsion = (selected) => {
+  formData.value.emulsion = selected
 }
 
 const handleSubmit = () => {
@@ -240,12 +237,12 @@ const handleSubmit = () => {
     scaleMax: formData.value.scaleMax,
     commanditaire: formData.value.commanditaire,
     producteur: formData.value.producteur,
-    selectedCollection:
-      formData.value.selectedCollection.name === defaultCollection.name
-        ? null
-        : formData.value.selectedCollection.name,
+    collection: formData.value.collection.name === collectionsOptions.value[0].name ? null : formData.value.collection.name,
+    support: formData.value.support.name === supportOptions.value[0].name ? null : formData.value.support.name,
+    emulsion: formData.value.emulsion.name === emulsionOptions.value[0].name ? null : formData.value.emulsion.name
   }
-
+  
+  console.log(criteria)
   scanStore.updateCriteria(criteria)
 }
 
@@ -257,6 +254,9 @@ const resetForm = () => {
     scaleMax: '100000',
     commanditaire: '',
     producteur: '',
+    collection: { id: '0', name: 'Tous les collections' },
+    support: { id: '0', name: 'Tous les supports' },
+    emulsion: { id: '0', name: 'Tous les emulsions' }
   }
 
   scanStore.resetCriteria()

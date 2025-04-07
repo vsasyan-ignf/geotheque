@@ -7,6 +7,7 @@
     <Accordion title="Mission" defaultOpen>
       <Mission />
     </Accordion>
+    
   </div>
 </template>
 
