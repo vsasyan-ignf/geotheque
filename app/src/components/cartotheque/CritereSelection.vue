@@ -117,10 +117,10 @@ const { storeCritereSelection, activeTab, collectionsOptions, supportOptions, em
   storeToRefs(scanStore)
 
 const isCartotheque = computed(() =>
-  ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value)
+  ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value),
 )
 const isPhototheque = computed(() =>
-  ['phototheque', 'phototheque_etranger'].includes(activeTab.value)
+  ['phototheque', 'phototheque_etranger'].includes(activeTab.value),
 )
 
 const formData = ref({
@@ -173,9 +173,9 @@ async function loadInitialOptions() {
   if (isPhototheque.value) {
     const [commanditaireOpts, producteurOpts] = await Promise.all([
       scanStore.getCommanditaireOptions(),
-      scanStore.getProducteurOptions()
+      scanStore.getProducteurOptions(),
     ])
-    
+
     commanditaireOptions.value = commanditaireOpts
     producteurOptions.value = producteurOpts
   }
@@ -237,11 +237,20 @@ const handleSubmit = () => {
     scaleMax: formData.value.scaleMax,
     commanditaire: formData.value.commanditaire,
     producteur: formData.value.producteur,
-    collection: formData.value.collection.name === collectionsOptions.value[0].name ? null : formData.value.collection.name,
-    support: formData.value.support.name === supportOptions.value[0].name ? null : formData.value.support.name,
-    emulsion: formData.value.emulsion.name === emulsionOptions.value[0].name ? null : formData.value.emulsion.name
+    collection:
+      formData.value.collection.name === collectionsOptions.value[0].name
+        ? null
+        : formData.value.collection.name,
+    support:
+      formData.value.support.name === supportOptions.value[0].name
+        ? null
+        : formData.value.support.name,
+    emulsion:
+      formData.value.emulsion.name === emulsionOptions.value[0].name
+        ? null
+        : formData.value.emulsion.name,
   }
-  
+
   console.log(criteria)
   scanStore.updateCriteria(criteria)
 }
@@ -256,7 +265,7 @@ const resetForm = () => {
     producteur: '',
     collection: { id: '0', name: 'Tous les collections' },
     support: { id: '0', name: 'Tous les supports' },
-    emulsion: { id: '0', name: 'Tous les emulsions' }
+    emulsion: { id: '0', name: 'Tous les emulsions' },
   }
 
   scanStore.resetCriteria()
