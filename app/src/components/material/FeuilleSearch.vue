@@ -10,7 +10,7 @@
             autocomplete="off"
             v-model="feuilleSelected"
             type="text"
-            placeholder="Ex: NE 28 XVIII ou NB 29 VI"
+            placeholder="Ex: NE 28 XVIII ou 1911"
             @input="searchFeuille"
             @focus="showResults = true"
           />
@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
 import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
@@ -84,6 +84,18 @@ const feuilleResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
 let repFeuille = ref(null)
+
+const coucheGeoserverName = computed(() => {
+  if (activeTab.value === 'phototheque') {
+    return 'feuilles50000'
+  } else {
+    return 'feuillesmonde'
+  }
+})
+
+const proj = computed(() => {
+  return coucheGeoserverName.value === 'feuillesmonde' ? 'EPSG:4326' : 'EPSG:2154'
+})
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
@@ -120,7 +132,7 @@ function searchFeuille() {
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
+    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
@@ -147,12 +159,12 @@ function selectFeuille(feuille) {
 
 function validateFeuille() {
   if (repFeuille) {
-    const bbox4326 = create_bbox([repFeuille.value.geometry])
-    const bboxLonLat = [bbox4326.minX, bbox4326.minY, bbox4326.maxX, bbox4326.maxY]
+    const bbox = create_bbox([repFeuille.value.geometry])
+    const bboxLonLat = [bbox.minX, bbox.minY, bbox.maxX, bbox.maxY]
     scanStore.updateBbox(bboxLonLat)
 
     const contourMercator = repFeuille.value.geometry.map((coord) =>
-      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
+      useConvertCoordinates(coord[0], coord[1], proj.value, 'EPSG:3857'),
     )
     scanStore.updateSelectedGeom(contourMercator)
   }

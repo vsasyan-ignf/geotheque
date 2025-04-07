@@ -76,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import { bboxState, eventBus } from '@/components/composable/eventBus'
 import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
@@ -100,7 +100,13 @@ const searchMode = ref('map')
 
 const pointX = ref('')
 const pointY = ref('')
-const selectedProjection = ref('EPSG:3857')
+
+const init = computed(() => {
+  return activeTab?.value.includes('etranger') ? 'EPSG:4326' : 'EPSG:2154'
+})
+
+const selectedProjection = ref(init.value)
+
 const projections = [
   { id: 'EPSG:3857', name: 'Web Mercator' },
   { id: 'EPSG:4326', name: 'WGS 84' },
@@ -111,12 +117,7 @@ async function fetchAndConvertBbox(longitude, latitude) {
   try {
     let url
 
-    if (activeTab.value === 'cartotheque') {
-      url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
-    } else {
-      url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&zoom=3&limit=1`
-      console.log(url)
-    }
+    url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
 
     const response = await fetch(url)
 
@@ -219,7 +220,6 @@ async function handleMapClick(coords) {
   }
 
   const bboxResult = await fetchAndConvertBbox(point.x, point.y)
-
   if (bboxResult) {
     point.locationData = bboxResult.data
     point.bboxWGS84 = bboxResult.bboxWGS84
@@ -228,17 +228,14 @@ async function handleMapClick(coords) {
 
   bboxState.value = point.bboxLambert93
 
-  if (activeTab.value === 'cartotheque') {
-    scanStore.updateBbox(point.bboxLambert93)
-  } else {
-    scanStore.updateBbox(point.bboxWGS84)
-  }
+  emit('go-to-point', point)
 
   searchMode.value = 'map'
 }
 
 // mise à jour des x et y lorsque le système de proj change
 watch(selectedProjection, (newProjection, oldProjection) => {
+  console.log(newProjection, oldProjection)
   if (pointX.value && pointY.value && newProjection !== oldProjection) {
     const convertedCoords = useConvertCoordinates(
       pointX.value,

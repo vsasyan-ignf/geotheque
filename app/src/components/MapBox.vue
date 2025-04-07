@@ -12,13 +12,17 @@
     />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
-    <DrawControl 
+    <DrawControl
+      v-if="activeTab === 'phototheque'"
       :map="olMap"
       :isDrawModeActive="drawModeActive"
       @draw-complete="handleDrawComplete"
       @draw-mode-activated="handleDrawModeActivated"
-      @deactivate-draw-mode="handleDeactivateDrawMode" />
+      @deactivate-draw-mode="handleDeactivateDrawMode"
+    />
   </div>
+  <div style="z-index: 99999999" id="mouse-position"></div>
+  <div style="z-index: 99999999" id="form-proj"></div>
 </template>
 
 <script setup>
@@ -29,6 +33,7 @@ import VisibilitySwitch from './VisibilitySwitch.vue'
 import ZoomControl from './ZoomControl.vue'
 import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
+import crossIcon from '@/assets/red-cross.svg'
 import { useScanStore } from './store/scan'
 import { storeToRefs } from 'pinia'
 import DrawControl from './DrawControl.vue'
@@ -37,19 +42,46 @@ import View from 'ol/View'
 import Polygon from 'ol/geom/Polygon.js'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
-import { getMaxZoom, createInitialWMTSLayers, updateWMTSLayers, changeActiveWMTSLayer } from './composable/getWMTS'
+import {
+  getMaxZoom,
+  createInitialWMTSLayers,
+  updateWMTSLayers,
+  changeActiveWMTSLayer,
+} from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
 import { layers_carto, otherLayersCartoFrance } from './composable/baseMap'
-import { createPinLayer, createGeomLayer, createScanLayer, createWFSLayer, initOtherVectorLayers } from './composable/getVectorLayer'
+import {
+  createPinLayer,
+  createGeomLayer,
+  createScanLayer,
+  createWFSLayer,
+  initOtherVectorLayers,
+} from './composable/getVectorLayer'
 import { parcour_txt_to_tab } from './composable/parseTXT'
 import { useConvertCoordinates } from './composable/convertCoordinates'
 import MultiPolygon from 'ol/geom/MultiPolygon'
-import { initializeIntersectionLayer, findIntersections, clearIntersection } from './composable/intersectionDraw'
+import {
+  initializeIntersectionLayer,
+  findIntersections,
+  clearIntersection,
+} from './composable/intersectionDraw'
+import { Style, Text, Stroke, Fill } from 'ol/style'
+import Icon from 'ol/style/Icon'
+
+import MousePosition from 'ol/control/MousePosition.js'
+import { createStringXY } from 'ol/coordinate.js'
 
 const scanStore = useScanStore()
-const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab } =
-  storeToRefs(scanStore)
+const {
+  storeURL,
+  activeSubCategory,
+  storeSelectedScan,
+  storeSelectedGeom,
+  activeTab,
+  urlPhoto,
+  storeHoveredScan,
+} = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -61,10 +93,8 @@ const olMap = ref(null)
 const pins = ref([])
 const showPin = ref(false)
 
-const geomLayer = ref(null)
-
-const drawModeActive = ref(false);
-const lastDrawFeature = ref(null);
+const drawModeActive = ref(false)
+const lastDrawFeature = ref(null)
 
 let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
@@ -75,17 +105,12 @@ const vectorLayers = ref({
   geom: null,
   scan: null,
   emprises: null,
+  cross: null,
+  geomPhoto: null,
+  hover: null,
 })
 
 const vectorOtherLayers = ref(null)
-
-function getLayersActiveTab() {
-  return getLayersForActiveTab(activeTab.value)
-}
-
-function getOtherLayers() {
-  return getOtherLayersForActiveTab(activeTab.value)
-}
 
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
@@ -95,15 +120,12 @@ function hideOtherLayers() {
 }
 
 watch(activeTab, (newValue) => {
-  const newLayers = getLayersActiveTab()
+  const newLayers = getLayersForActiveTab(activeTab.value)
   layers.value = newLayers
-  otherLayers.value = getOtherLayers()
+  otherLayers.value = getOtherLayersForActiveTab(activeTab.value)
   hideOtherLayers()
-
   updateWMTSLayers(olMap.value, newLayers)
-
   scanStore.resetCriteria()
-
   activeLayerIndex.value = 0
 })
 
@@ -123,12 +145,37 @@ function toggleLayerVisibility(isVisible) {
   }
 }
 
-function addPointToMap(x, y) {
+function addPointToMap(x, y, nom) {
   const coord = [x, y]
+
+  // Créer un style avec une icône et un texte
+  const style = new Style({
+    image: new Icon({
+      src: crossIcon,
+      scale: 0.03, // Ajustez la taille de l'icône si nécessaire
+    }),
+    text: new Text({
+      text: nom,
+      offsetY: -20, // Décale le texte au-dessus de l'icône
+      font: '14px Arial, sans-serif',
+      fill: new Fill({
+        color: '#000', // Couleur du texte
+      }),
+      stroke: new Stroke({
+        color: '#fff', // Contour blanc pour améliorer la lisibilité
+        width: 3,
+      }),
+    }),
+  })
+
+  // Créer une entité Feature avec le style
   const feature = new Feature({
     geometry: new Point(coord),
   })
-  vectorLayers.value.pin.getSource().addFeature(feature)
+  feature.setStyle(style)
+
+  // Ajouter la Feature à la couche
+  vectorLayers.value.cross.getSource().addFeature(feature)
 }
 
 function Add_new_polygone_to_map(tab) {
@@ -136,28 +183,41 @@ function Add_new_polygone_to_map(tab) {
     geometry: new Polygon([tab]),
   })
 
-  vectorLayers.value.geom.getSource().addFeature(polygon)
+  vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
 }
 
 async function parcour_tab_and_map(url) {
+  //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
+    console.log('url TA : ', url)
     const tab_test = await parcour_txt_to_tab(url)
-    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857
+
+    if (!tab_test || tab_test.length === 0) {
+      throw new Error('Le tableau récupéré est vide ou invalide.')
+    }
+
+    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857, name
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
+        //"Centre Actif"
         x = tab_test[i][1]
         y = tab_test[i][2]
+        name = tab_test[i][3]
         ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-        addPointToMap(x_3857, y3857)
+        addPointToMap(x_3857, y3857, name)
       } else {
+        //"Cliche Actif"
         elem = tab_test[i]
         tab_points_3857 = []
-        for (i2 = 3; i2 < elem.length; i2 = i2 + 2) {
+        for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
+          //Commence a 1 car en 0 il y a le type d'image
           x = elem[i2]
           y = elem[i2 + 1]
           ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          //addPointToMap(x_3857, y3857);
           tab_points_3857.push([x_3857, y3857])
         }
+
         Add_new_polygone_to_map(tab_points_3857)
       }
     }
@@ -183,35 +243,34 @@ function changeActiveLayer(index) {
 }
 
 function handleDrawComplete(drawData) {
-  console.log('Dessin terminé:', drawData);
-  
-  let drawGeometry;
+  console.log('Dessin terminé:', drawData)
+
+  let drawGeometry
   if (drawData.type === 'Rectangle' || drawData.type === 'Polygon') {
-    drawGeometry = new Polygon(drawData.coordinates);
-    console.log(drawGeometry)
+    drawGeometry = new Polygon(drawData.coordinates)
   } else if (drawData.type === 'Circle') {
-    drawGeometry = new Polygon(drawData.coordinates);
+    drawGeometry = new Polygon(drawData.coordinates)
   }
-  
+
   lastDrawFeature.value = new Feature({
-    geometry: drawGeometry
-  });
-  
-  const extent = findIntersections(drawGeometry, vectorOtherLayers.value);
+    geometry: drawGeometry,
+  })
+
+  const extent = findIntersections(drawGeometry, vectorOtherLayers.value)
   console.log(extent)
 }
 
 function handleDrawModeActivated(mode) {
-  console.log('Mode de dessin activé:', mode);
-  drawModeActive.value = true;
-  
-  clearIntersection();
+  console.log('Mode de dessin activé:', mode)
+  drawModeActive.value = true
+
+  clearIntersection()
 }
 
 function handleDeactivateDrawMode() {
-  console.log('Mode de dessin désactivé');
-  drawModeActive.value = false;
-  clearIntersection();
+  console.log('Mode de dessin désactivé')
+  drawModeActive.value = false
+  clearIntersection()
 }
 
 onMounted(() => {
@@ -223,6 +282,9 @@ onMounted(() => {
       geom: createGeomLayer(),
       scan: createScanLayer(),
       emprises: createWFSLayer(),
+      cross: createPinLayer(crossIcon),
+      geomPhoto: createGeomLayer(),
+      hover: createScanLayer(),
     }
 
     vectorOtherLayers.value = initOtherVectorLayers()
@@ -256,13 +318,44 @@ onMounted(() => {
         vectorLayers.value.pin,
         vectorLayers.value.geom,
         vectorLayers.value.scan,
+        vectorLayers.value.hover,
+        vectorLayers.value.cross,
+        vectorLayers.value.geomPhoto,
         ...Object.values(vectorOtherLayers.value),
       ],
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
-    
-    initializeIntersectionLayer(olMap);
+
+    function updateProjectionDisplay() {
+      const projectionCode = olMap.value.getView().getProjection().getCode()
+      const formProjElement = document.getElementById('form-proj')
+      if (formProjElement) {
+        formProjElement.innerHTML = `Projection: ${projectionCode}`
+      }
+    }
+
+    updateProjectionDisplay()
+    olMap.value.getView().on('change:projection', updateProjectionDisplay)
+
+    const mousePositionControl = new MousePosition({
+      coordinateFormat: createStringXY(2),
+      projection: olMap.value.getView().getProjection().getCode(),
+      target: document.getElementById('mouse-position'),
+    })
+
+    olMap.value.on('pointermove', (event) => {
+      const coordinate = olMap.value.getEventCoordinate(event.originalEvent)
+      const formattedCoordinate = createStringXY(2)(coordinate) // Formatage des coordonnées
+
+      // Mettre à jour l'élément HTML avec la position de la souris
+      const mousePositionElement = document.getElementById('mouse-position')
+      if (mousePositionElement) {
+        mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`
+      }
+    })
+
+    initializeIntersectionLayer(olMap)
 
     olMap.value.on('click', (event) => {
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
@@ -322,14 +415,9 @@ onMounted(() => {
 
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
-        scanStore.resetCriteria()
-        vectorLayers.value.pin.getSource().clear()
-        vectorLayers.value.emprises.getSource().clear()
+        Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
         vectorLayers.value.emprises.getSource().setUrl('')
-        vectorLayers.value.geom.getSource().clear()
-        vectorLayers.value.scan.getSource().clear()
-        scanStore.updateSelectedGeom([])
-        
+        scanStore.resetCriteria()
       }
     })
 
@@ -337,6 +425,7 @@ onMounted(() => {
       console.log('--------- REQUETE GEOSERVER --------')
       console.log('NEW URL:', newValue)
       vectorLayers.value.geom.getSource().clear()
+      vectorLayers.value.geomPhoto.getSource().clear()
 
       if (storeSelectedGeom.value.length !== 0) {
         let polygon = null
@@ -359,12 +448,31 @@ onMounted(() => {
           minResolution: 200,
           duration: 2000,
         })
+        scanStore.updateSelectedGeom([])
+      }
+      // Pour ne pas afficher toutes les emprises
+      if (activeTab.value != 'phototheque') {
+        vectorLayers.value.emprises.getSource().setUrl(newValue)
       }
 
-      vectorLayers.value.emprises.getSource().setUrl(newValue)
       vectorLayers.value.emprises.getSource().refresh()
-
       await scanStore.storeGet(newValue)
+    })
+
+    watch(storeHoveredScan, (newVal) => {
+      vectorLayers.value.hover.getSource().clear()
+
+      if (
+        storeHoveredScan.value &&
+        storeHoveredScan.value.geom &&
+        storeHoveredScan.value.geom.length > 0
+      ) {
+        const polygon = new Feature({
+          geometry: new Polygon([storeHoveredScan.value.geom[0]]),
+        })
+
+        vectorLayers.value.hover.getSource().addFeature(polygon)
+      }
     })
 
     watch(storeSelectedScan, (newValue) => {
@@ -381,13 +489,14 @@ onMounted(() => {
         })
 
         vectorLayers.value.scan.getSource().addFeature(polygon)
+      }
+    })
 
-        const extent = polygon.getGeometry().getExtent()
-
-        olMap.value.getView().fit(extent, {
-          padding: [50, 50, 50, 50 + 400],
-          duration: 1000,
-        })
+    watch(urlPhoto, () => {
+      if (urlPhoto.value) {
+        vectorLayers.value.geomPhoto.getSource().clear()
+        vectorLayers.value.cross.getSource().clear()
+        parcour_tab_and_map(urlPhoto.value)
       }
     })
 
@@ -398,32 +507,58 @@ onMounted(() => {
       if (vectorLayers.value.emprises.getSource()) {
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
-        olMap.value.removeLayer(vectorLayers.value.emprises)
       }
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()
-        olMap.value.removeLayer(geomLayer)
       }
-      
-      clearIntersection();
+      if (vectorLayers.value.cross) {
+        vectorLayers.value.cross.getSource().clear()
+      }
+      if (vectorLayers.value.geomPhoto) {
+        vectorLayers.value.geomPhoto.getSource().clear()
+      }
+
+      clearIntersection()
     })
 
     window.dispatchEvent(new Event('resize'))
   })
 })
 
-eventBus.on('countryName', ({ type, visibility }) => {
-  if(vectorOtherLayers.value[type]){
-    vectorOtherLayers.value?.[type].setVisible(visibility)
+eventBus.on('departements', (isChecked) => {
+  const currentLayer = isChecked ? 'departements' : 'departements_with_no_name'
+  const previousLayer = isChecked ? 'departements_with_no_name' : 'departements'
+
+  if (vectorOtherLayers.value?.[previousLayer]) {
+    const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
+    if (isVisible) {
+      vectorOtherLayers.value[previousLayer].setVisible(false)
+      vectorOtherLayers.value[currentLayer].setVisible(true)
+    }
+    // changer la layer dans le BaseCardSwitcher
+    if (otherLayers.value) {
+      otherLayers.value.at(1).id = currentLayer // j'ai mis 1 car je connais l'index mais à change avec un map
+    }
   }
 })
 
-eventBus.on('sheetNumber', ({ type, visibility }) => {
-  if(vectorOtherLayers.value[type]){
-    vectorOtherLayers.value?.[type].setVisible(visibility)
+eventBus.on('feuilles', (isChecked) => {
+  const currentLayer = isChecked ? 'feuilles_france' : 'feuilles_france_with_no_name'
+  const previousLayer = isChecked ? 'feuilles_france_with_no_name' : 'feuilles_france'
+
+  if (vectorOtherLayers.value?.[previousLayer]) {
+    const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
+
+    if (isVisible) {
+      vectorOtherLayers.value[previousLayer].setVisible(false)
+      vectorOtherLayers.value[currentLayer].setVisible(true)
+    }
+    // changer la layer dans le BaseCardSwitcher
+    if (otherLayers.value?.length >= 2) {
+      otherLayers.value.at(2).id = currentLayer
+    }
   }
 })
-
 provide('eventBus', eventBus)
 </script>
 
@@ -441,5 +576,34 @@ provide('eventBus', eventBus)
   width: 100%;
   height: 100%;
   flex: 1;
+}
+
+#mouse-position {
+  position: absolute;
+  bottom: 10px;
+  right: 40%; /* À 10px du côté gauche */
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.8
+  ); /* Fond semi-transparent pour améliorer la lisibilité */
+  padding: 5px; /* Un peu de padding */
+  font-size: 14px; /* Taille du texte */
+  border-radius: 5px; /* Coins arrondis pour une meilleure esthétique */
+  color: black;
+}
+
+#form-proj {
+  position: absolute; /* Positionner de manière absolue par rapport au conteneur parent */
+  bottom: 10px;
+  right: 24%;
+  z-index: 99999999; /* Priorité sur les autres éléments */
+  background-color: rgba(255, 255, 255, 0.8); /* Fond légèrement transparent pour le formulaire */
+  padding: 5px; /* Un peu de padding autour du formulaire */
+  font-size: 14px;
+  border-radius: 5px; /* Coins arrondis pour le formulaire */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre douce pour faire ressortir le formulaire */
+  color: black;
 }
 </style>

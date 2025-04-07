@@ -1,28 +1,28 @@
-<!-- recherche par pays -->
 <template>
   <div class="sub-category-content">
-    <SubCategoryHeader title="Recherche par pays" @close="$emit('close')" />
+    <SubCategoryHeader title="Recherche Autres" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
-        <label for="country-search">Nom du pays</label>
+        <label for="pva-search">Nom de la mission</label>
         <div class="input-group">
           <input
-            id="country-search"
-            v-model="searchCountry"
+            id="pva-search"
+            autocomplete="off"
+            v-model="pvaSelected"
             type="text"
-            placeholder="Ex: France, Allemagne..."
-            @input="searchCountries"
+            placeholder="Ex: AERODROME CREIL"
+            @input="searchPVA"
             @focus="showResults = true"
           />
-          <button @click="searchCountries">
+          <button @click="validateFeuille">
             <SvgIcon :path="mdiMagnify" type="mdi" class="mdi" />
           </button>
         </div>
 
         <div class="results-wrapper" v-if="showResults">
           <div class="results-header">
-            <h5 v-if="countryResults.length > 0">Résultats ({{ countryResults.length }})</h5>
-            <h5 v-else-if="searchCountry">Aucun résultat</h5>
+            <h5 v-if="pvaResults.length > 0">Résultats ({{ pvaResults.length }})</h5>
+            <h5 v-else-if="pvaSelected">Aucun résultat</h5>
             <h5 v-else>Commencez à taper pour rechercher</h5>
             <button class="close-results" @click="showResults = false">
               <SvgIcon :path="mdiClose" type="mdi" class="mdi" />
@@ -30,64 +30,75 @@
           </div>
 
           <div class="results-content">
-            <div class="results-list" v-if="countryResults.length > 0">
+            <div class="results-list" v-if="pvaResults.length > 0">
               <div
-                v-for="country in countryResults"
-                :key="country.code"
+                v-for="(pva, index) in pvaResults"
+                :key="pva.nom + '-' + index"
                 class="result-item"
-                @click="selectCountry(country)"
+                @click="selectPVA(pva)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ country.nom }}</div>
-                  <div class="result-secondary">{{ country.code }}</div>
+                  <div class="result-main">{{ pva.nom }}</div>
+                  <div class="result-secondary">Chantier : {{ pva.chantier }}</div>
                 </div>
               </div>
             </div>
 
-            <div class="no-results" v-else-if="searchCountry">
+            <div class="no-results" v-else-if="pvaSelected">
               <SvgIcon :path="mdiAlertCircleOutline" type="mdi" class="mdi" />
-              <span>Aucun pays trouvé</span>
+              <span>Aucune missions trouvées</span>
             </div>
 
             <div class="empty-search" v-else>
               <SvgIcon :path="mdiMapSearchOutline" type="mdi" class="mdi" />
-              <span>Saisissez le nom d'un pays</span>
+              <span>Saisissez le nom d'une mission</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <CartothequeSubMenu />
+
+    <CartothequeSubMenu v-if="activeTab === 'cartotheque_etranger'" />
+    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
 import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
-import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import {
-  create_multibbox,
-  convertBbox,
-  createRealContour,
-  getLongestSubArray,
-  transformMultiPolygon,
-} from '../composable/convertCoordinates'
-import config from '@/config'
+import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
 import { useScanStore } from '@/components/store/scan'
-import * as olProj from 'ol/proj'
-
-const emit = defineEmits(['close', 'select-country'])
-const searchCountry = ref('')
-const countryResults = ref([])
-const showResults = ref(false)
-let searchTimeout = null
+import { storeToRefs } from 'pinia'
+import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
+import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
+import config from '@/config'
 
 const scanStore = useScanStore()
+const { activeTab } = storeToRefs(scanStore)
+
+const emit = defineEmits(['close', 'select-commune'])
+
+const pvaSelected = ref('')
+const pvaResults = ref([])
+const showResults = ref(false)
+let searchTimeout = null
+const repPVA = ref(null)
+
+const url = ref('')
+
+const coucheGeoserverName = computed(() => {
+  if (activeTab.value === 'phototheque') {
+    return 'PVALambert93'
+  } else {
+    return 'PVALambert93'
+  }
+})
 
 const handleClickOutside = (event) => {
   const resultsWrapper = document.querySelector('.results-wrapper')
-  const searchInput = document.getElementById('country-search')
+  const searchInput = document.getElementById('pva-search')
+
   if (resultsWrapper && !resultsWrapper.contains(event.target) && event.target !== searchInput) {
     showResults.value = false
   }
@@ -102,107 +113,56 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
-function searchCountries() {
+function searchPVA() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
 
-  const query = searchCountry.value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toUpperCase()
+  const query = pvaSelected.value
 
-  const url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=pays&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
+  if (!query) {
+    pvaResults.value = []
+    return
+  }
 
+  showResults.value = true
+
+  // requete pour l'autocomplétion du nom de la mission
+  let search_url = ''
   searchTimeout = setTimeout(() => {
-    fetch(url)
+    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
+    fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.features.map((pays) => ({
-          nom: pays.properties.NOM,
-          code: pays.properties.CODE_PAYS,
+        const newResults = data.features.map((pva) => ({
+          nom: pva.properties.NOM,
+          chantier: pva.properties.CHANTIER,
+          geometry: pva.geometry.coordinates[0][0],
         }))
-        countryResults.value = newResults
+        pvaResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des pays:', error)
-        countryResults.value = []
+        console.error('Erreur lors de la récupération des mission:', error)
+        pvaResults.value = []
       })
-  }, 500)
+  }, 300)
 }
 
-function selectCountry(country) {
-  getCountryBbox(country)
-    .then((contour) => {
-      searchCountry.value = country.nom
-
-      const bbox3857 = create_multibbox(contour)
-      const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
-
-      scanStore.updateBbox(bbox4326)
-      scanStore.updateSelectedGeom(contour)
-
-      // Cas spécial des pays avec trop de petites îles
-      if (contour.length > 10) {
-        const longestSubArray = getLongestSubArray(contour)
-        contour = [longestSubArray]
-      }
-
-      // Cas spéciale des USA
-      if (country.code === 'US') {
-        contour = [
-          [
-            ['-13912762.1682', '2915614.0653'],
-            ['-13912762.1682', '6261721.3124'],
-            ['-7396658.4088', '6261721.3124'],
-            ['-7396658.4088', '2915614.0653'],
-            ['-13912762.1682', '2915614.0653'],
-          ],
-        ]
-      }
-      let newcontour = contour.map((polygon) =>
-        polygon.map(([x, y]) => olProj.transform([x, y], 'EPSG:3857', 'EPSG:4326')),
-      )
-
-      scanStore.updateWKT(createRealContour(newcontour))
-    })
-    .catch((error) => {
-      console.error('Erreur lors de la récupération des contours du pays:', error)
-    })
-
+function selectPVA(pva) {
+  pvaSelected.value = pva.nom
+  url.value = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${pva.nom}%27&srsName=EPSG:3857`
+  repPVA.value = pva
+  validatePVA()
   showResults.value = false
 }
 
-async function getCountryBbox(country) {
-  const countryCode = country.code
-    .split(',')[0]
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toUpperCase()
-
-  const urlCountryBbox =
-    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
-    `&request=GetFeature&typeNames=pays&outputFormat=application/json` +
-    `&CQL_FILTER=CODE_PAYS='${countryCode}'&srsName=EPSG:3857`
-
-  try {
-    const response = await fetch(urlCountryBbox)
-    if (!response.ok) {
-      throw new Error(`Erreur réseau : ${response.status}`)
-    }
-    const data = await response.json()
-
-    const contour_country = data.features[0]?.geometry?.coordinates
-
-    if (!contour_country) {
-      throw new Error('Coordonnées non trouvées dans la réponse')
-    }
-
-    // transformation de l'array en array plus simple
-    return transformMultiPolygon(contour_country)
-  } catch (error) {
-    console.error('Erreur:', error)
-    throw error
+function validatePVA() {
+  if (repPVA) {
+    scanStore.storeGetPhoto(url.value)
+    const contourMercator = repPVA.value.geometry.map((coord) =>
+      useConvertCoordinates(coord[0], coord[1], 'EPSG:2154', 'EPSG:3857'),
+    )
+    scanStore.updateSelectedGeom(contourMercator)
   }
 }
 </script>
@@ -212,6 +172,7 @@ async function getCountryBbox(country) {
   animation: fadeIn 0.3s ease;
   position: relative;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -408,9 +369,5 @@ async function getCountryBbox(country) {
 .empty-search i {
   font-size: 24px;
   color: #ddd;
-}
-
-.mdi {
-  margin-top: 5px;
 }
 </style>
