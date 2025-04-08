@@ -87,7 +87,7 @@ const subCategoriesPhototheque = [
   { id: 'departement', icon: 'departement', title: 'Département' },
   { id: 'feuilles', icon: 'feuille', title: 'Feuilles' },
   { id: 'point', icon: 'point', title: 'Point XY' },
-  { id: 'autre', icon: 'autre', title: 'Autre' },
+  { id: 'autre', icon: 'autre', title: 'PVA' },
 ]
 
 const activeTabTitle = computed(() => {

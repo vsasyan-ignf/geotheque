@@ -293,7 +293,7 @@ export const useScanStore = defineStore('scan', () => {
           const data = await response.json()
           storeScansData.value = data.features.map((feature, index) => ({
             id: index,
-            geom: feature.geometry.coordinates[0],
+            geom: feature.geometry.coordinates,
             name: feature.properties.ID_CARTE ?? feature.properties.NOM, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
             properties: feature.properties,
           }))
@@ -318,12 +318,11 @@ export const useScanStore = defineStore('scan', () => {
           const name = feature.properties.CHANTIER + getSuffixPhoto(feature)
           return {
             id: index,
-            geom: feature.geometry.coordinates[0],
+            geom: feature.geometry.coordinates,
             name: name,
             properties: feature.properties,
           }
         })
-        console.log(storeScansData.value)
         storeSelectedScan.value = null
       } else {
         throw new Error('Failed to fetch data')

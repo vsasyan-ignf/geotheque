@@ -139,9 +139,10 @@ function searchFeuille() {
         const newResults = data.features.map((feuille) => ({
           nom: feuille.properties.NOM,
           numero: feuille.properties.NUMERO,
-          geometry: feuille.geometry.coordinates[0][0],
+          geometry: feuille.geometry.coordinates[0][0], 
         }))
         feuilleResults.value = newResults
+
       })
       .catch((error) => {
         console.error('Erreur lors de la récupération des feuilles:', error)
@@ -166,7 +167,8 @@ function validateFeuille() {
     const contourMercator = repFeuille.value.geometry.map((coord) =>
       useConvertCoordinates(coord[0], coord[1], proj.value, 'EPSG:3857'),
     )
-    scanStore.updateSelectedGeom(contourMercator)
+
+    scanStore.updateSelectedGeom([contourMercator])
   }
 }
 </script>

@@ -460,6 +460,9 @@ onMounted(() => {
         Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
         vectorLayers.value.emprises.getSource().setUrl('')
         scanStore.resetCriteria()
+        vectorLayers.value.geomMouseOver.getSource().clear()
+        tab_emprise_photo = [];
+        last_geom = null;
       }
     })
 
@@ -471,16 +474,10 @@ onMounted(() => {
       vectorLayers.value.geomPhoto.getSource().clear()
 
       if (storeSelectedGeom.value.length !== 0) {
-        let polygon = null
-        if (storeSelectedGeom.value[0].length === 2) {
-          polygon = new Feature({
-            geometry: new Polygon([storeSelectedGeom.value]),
-          })
-        } else {
-          polygon = new Feature({
+
+        const polygon = new Feature({
             geometry: new MultiPolygon([storeSelectedGeom.value]),
           })
-        }
 
         vectorLayers.value.geom.getSource().addFeature(polygon)
 
@@ -511,7 +508,7 @@ onMounted(() => {
         storeHoveredScan.value.geom.length > 0
       ) {
         const polygon = new Feature({
-          geometry: new Polygon([storeHoveredScan.value.geom[0]]),
+          geometry: new MultiPolygon(storeHoveredScan.value.geom),
         })
 
         vectorLayers.value.hover.getSource().addFeature(polygon)
@@ -528,7 +525,7 @@ onMounted(() => {
         storeSelectedScan.value.geom.length > 0
       ) {
         const polygon = new Feature({
-          geometry: new Polygon([storeSelectedScan.value.geom[0]]),
+          geometry: new MultiPolygon(storeSelectedScan.value.geom),
         })
 
         vectorLayers.value.scan.getSource().addFeature(polygon)
@@ -539,6 +536,9 @@ onMounted(() => {
       if (dicoUrlPhoto.value.length > 0) {
         vectorLayers.value.geomPhoto.getSource().clear()
         vectorLayers.value.cross.getSource().clear()
+        vectorLayers.value.geomMouseOver.getSource().clear()
+        tab_emprise_photo = [];
+        last_geom = null;
         dicoUrlPhoto.value.forEach((url) => {
           parcour_tab_and_map(url)
         })
@@ -546,6 +546,9 @@ onMounted(() => {
       else {
         vectorLayers.value.geomPhoto.getSource().clear()
         vectorLayers.value.cross.getSource().clear()
+        vectorLayers.value.geomMouseOver.getSource().clear()
+        tab_emprise_photo = [];
+        last_geom = null;
       }
     },
       { deep: true }
@@ -560,6 +563,11 @@ onMounted(() => {
       }
       if (vectorLayers.value.scan) {
         vectorLayers.value.scan.getSource().clear()
+      }
+      if (vectorLayers.value.geomMouseOver) {
+        vectorLayers.value.geomMouseOver.getSource().clear()
+        tab_emprise_photo = [];
+        last_geom = null;
       }
     })
 
