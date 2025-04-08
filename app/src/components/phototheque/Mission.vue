@@ -11,31 +11,35 @@
 
     <div class="group-button">
       <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan" v-if="!urlInDico">
-        <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiPlus" class="mdicon" />
+        </template>
       </ShakingButton>
 
       <ShakingButton nameButton="" @click="DeleteSelectedPhoto" :disabled="!storeSelectedScan" v-if="urlInDico">
-        <template #icon><SvgIcon type="mdi" :path="mdiMinus" class="mdicon" /></template>
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiMinus" class="mdicon" />
+        </template>
       </ShakingButton>
 
       <ShakingButton nameButton="" @click="DeletePhotoAll" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" /></template>
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" />
+        </template>
       </ShakingButton>
 
       <ShakingButton nameButton="csv" @click="" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiXml" class="mdicon" />
+        </template>
       </ShakingButton>
     </div>
 
     <div v-if="selectedMission" class="mission-preview slide-in">
       <div class="mission-card">
         <div class="preview-details">
-          <div
-            v-for="(val, key, index) in essentialDetails"
-            :key="key"
-            class="detail-item"
-            :style="{ 'animation-delay': `${index * 0.05}s` }"
-          >
+          <div v-for="(val, key, index) in essentialDetails" :key="key" class="detail-item"
+            :style="{ 'animation-delay': `${index * 0.05}s` }">
             <div class="detail-label">{{ key }}</div>
             <div class="detail-value">{{ val }}</div>
           </div>
@@ -48,29 +52,20 @@
     </div>
 
     <div class="mission-options">
-        <div class="options-label">Options de sélection</div>
-        <div class="checkbox-group">
-          <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
-            <input
-              type="checkbox"
-              v-model="selectedOptions[option.key]"
-              class="checkbox-input"
-              @change="handleCheckboxChange(option.key)"
-            />
-            <span class="custom-checkbox"></span>
-            {{ option.label }}
-          </label>
-        </div>
+      <div class="options-label">Options de sélection</div>
+      <div class="checkbox-group">
+        <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
+          <input type="checkbox" v-model="selectedOptions[option.key]" class="checkbox-input"
+            @change="handleCheckboxChange(option.key)" />
+          <span class="custom-checkbox"></span>
+          {{ option.label }}
+        </label>
       </div>
+    </div>
 
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-      <MissionDetailsModal
-        :isOpen="isModalOpen"
-        :title="`${missionName} - Détails complets`"
-        :details="allDetails"
-        @close="closeModal"
-        @download="downloadDetails"
-      />
+      <MissionDetailsModal :isOpen="isModalOpen" :title="`${missionName} - Détails complets`" :details="allDetails"
+        @close="closeModal" @download="downloadDetails" />
     </div>
   </div>
 </template>
@@ -156,13 +151,15 @@ const closeModal = () => {
 }
 
 function setUrl() {
-  const url = createUrlPhoto()
-  console.log('URL MISSION : ', url)
-  scanStore.updateUrlPhoto(url)
-  scanStore.updateDicoUrlPhoto(url)
+  if (storeSelectedScan.value) {
+    const url = createUrlPhoto()
+    scanStore.updateUrlPhoto(url)
+    scanStore.updateDicoUrlPhoto(url)
+  }
 }
 
-function DeletePhotoAll(){
+
+function DeletePhotoAll() {
   scanStore.updateDeletePhotoAllBool(!deletePhotoAllBool.value)
   dicoUrlPhoto.value = []
 }
@@ -179,11 +176,12 @@ function createUrlPhoto() {
   return `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
 }
 
-function DeleteSelectedPhoto(){
-  const url = createUrlPhoto();
-  const index = dicoUrlPhoto.value.indexOf(url);
-  dicoUrlPhoto.value.pop(index);
-  console.log('url in dico : ', dicoUrlPhoto.value)
+function DeleteSelectedPhoto() {
+  const deleteUrl = createUrlPhoto()
+  const index = dicoUrlPhoto.value.indexOf(deleteUrl);
+  if (index > -1) {
+    dicoUrlPhoto.value.splice(index, 1);
+  }
 }
 
 /********************** CHECKBOX ************************* */
@@ -227,6 +225,7 @@ const handleCheckboxChange = (optionKey) => {
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -237,6 +236,7 @@ const handleCheckboxChange = (optionKey) => {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -247,6 +247,7 @@ const handleCheckboxChange = (optionKey) => {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -458,12 +459,12 @@ const handleCheckboxChange = (optionKey) => {
   transition: all 0.2s;
 }
 
-.checkbox-input:checked + .custom-checkbox {
+.checkbox-input:checked+.custom-checkbox {
   background-color: #739614;
   border-color: #739614;
 }
 
-.checkbox-input:checked + .custom-checkbox::after {
+.checkbox-input:checked+.custom-checkbox::after {
   content: '';
   position: absolute;
   left: 5px;

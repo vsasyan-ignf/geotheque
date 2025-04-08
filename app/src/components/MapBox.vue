@@ -2,25 +2,14 @@
   <div class="map-container">
     <SideMenu @toggle-visibility="toggleLayerVisibility" />
     <div ref="mapElement" class="ol-map"></div>
-    <BasecardSwitcher
-      :layers="layers"
-      :otherLayers="otherLayers"
-      :activeLayerIndex="activeLayerIndex"
-      :currentZoom="currentZoom"
-      @layer-change="changeActiveLayer"
-      @other-layer-toggle="handleOtherLayerToggle"
-    />
+    <BasecardSwitcher :layers="layers" :otherLayers="otherLayers" :activeLayerIndex="activeLayerIndex"
+      :currentZoom="currentZoom" @layer-change="changeActiveLayer" @other-layer-toggle="handleOtherLayerToggle" />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
-    <DrawControl
-      v-if="activeTab === 'phototheque'"
-      :map="olMap"
-      :isDrawModeActive="drawModeActive"
-      @draw-complete="handleDrawComplete"
-      @draw-mode-activated="handleDrawModeActivated"
-      @deactivate-draw-mode="handleDeactivateDrawMode"
-    />
-  </div>    
+    <DrawControl v-if="activeTab === 'phototheque'" :map="olMap" :isDrawModeActive="drawModeActive"
+      @draw-complete="handleDrawComplete" @draw-mode-activated="handleDrawModeActivated"
+      @deactivate-draw-mode="handleDeactivateDrawMode" />
+  </div>
   <div style="z-index: 99999999;" id="mouse-position"></div>
   <div style="z-index: 99999999;" id="form-proj"></div>
 </template>
@@ -71,7 +60,7 @@ import Icon from 'ol/style/Icon'
 
 
 import MousePosition from 'ol/control/MousePosition.js';
-import {createStringXY} from 'ol/coordinate.js';
+import { createStringXY } from 'ol/coordinate.js';
 
 
 const scanStore = useScanStore()
@@ -197,7 +186,7 @@ async function parcour_tab_and_map(url) {
         x = tab_test[i][1]
         y = tab_test[i][2]
         name = tab_test[i][3]
-        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
         addPointToMap(x_3857, y3857, name)
       } else {
         //"Cliche Actif"
@@ -207,7 +196,7 @@ async function parcour_tab_and_map(url) {
           //Commence a 1 car en 0 il y a le type d'image
           x = elem[i2]
           y = elem[i2 + 1]
-          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+            ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
           //addPointToMap(x_3857, y3857);
           tab_points_3857.push([x_3857, y3857])
         }
@@ -270,7 +259,7 @@ function handleDeactivateDrawMode() {
 onMounted(() => {
   nextTick(() => {
 
-   
+
 
     const wmtsLayers = createInitialWMTSLayers(layers.value, activeLayerIndex.value)
 
@@ -323,7 +312,7 @@ onMounted(() => {
     })
 
     function updateProjectionDisplay() {
-      const projectionCode = olMap.value.getView().getProjection().getCode(); 
+      const projectionCode = olMap.value.getView().getProjection().getCode();
       const formProjElement = document.getElementById('form-proj');
       if (formProjElement) {
         formProjElement.innerHTML = `Projection: ${projectionCode}`;
@@ -342,7 +331,7 @@ onMounted(() => {
     console.log(mousePositionControl)
 
 
-        olMap.value.on('pointermove', (event) => {
+    olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
       const formattedCoordinate = createStringXY(2)(coordinate); // Formatage des coordonnées
 
@@ -351,7 +340,7 @@ onMounted(() => {
       if (mousePositionElement) {
         mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`;
       }
-      
+
     });
 
     initializeIntersectionLayer(olMap)
@@ -475,23 +464,21 @@ onMounted(() => {
       }
     })
 
-    watch(urlPhoto, () => {
-      console.log("zzzzzzzzzzzzzzzz")
+    watch(dicoUrlPhoto, () => {
       if (dicoUrlPhoto.value.length > 0) {
         vectorLayers.value.geomPhoto.getSource().clear()
         vectorLayers.value.cross.getSource().clear()
         dicoUrlPhoto.value.forEach((url) => {
-
           parcour_tab_and_map(url)
-          
         })
-        // parcour_tab_and_map(urlPhoto.value)
       }
-      else{
+      else {
         vectorLayers.value.geomPhoto.getSource().clear()
         vectorLayers.value.cross.getSource().clear()
       }
-    })
+    },
+      { deep: true }
+    )
 
     watch(deletePhotoAllBool, () => {
       if (vectorLayers.value.geomPhoto) {
@@ -500,7 +487,7 @@ onMounted(() => {
       if (vectorLayers.value.cross) {
         vectorLayers.value.cross.getSource().clear()
       }
-      if (vectorLayers.value.scan){
+      if (vectorLayers.value.scan) {
         vectorLayers.value.scan.getSource().clear()
       }
     })
@@ -586,24 +573,34 @@ provide('eventBus', eventBus)
 
 #mouse-position {
   position: absolute;
-  bottom: 10px;   
-  right: 40%;     /* À 10px du côté gauche */
-  background-color: rgba(255, 255, 255, 0.8);  /* Fond semi-transparent pour améliorer la lisibilité */
-  padding: 5px;   /* Un peu de padding */
-  font-size: 14px; /* Taille du texte */
-  border-radius: 5px; /* Coins arrondis pour une meilleure esthétique */
-}
-
-#form-proj  {
-  position: absolute;      /* Positionner de manière absolue par rapport au conteneur parent */
-  bottom: 10px;               
-  right: 24%;             
-  z-index: 99999999;       /* Priorité sur les autres éléments */
-  background-color: rgba(255, 255, 255, 0.8); /* Fond légèrement transparent pour le formulaire */
-  padding: 5px;           /* Un peu de padding autour du formulaire */
+  bottom: 10px;
+  right: 40%;
+  /* À 10px du côté gauche */
+  background-color: rgba(255, 255, 255, 0.8);
+  /* Fond semi-transparent pour améliorer la lisibilité */
+  padding: 5px;
+  /* Un peu de padding */
   font-size: 14px;
-  border-radius: 5px;      /* Coins arrondis pour le formulaire */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre douce pour faire ressortir le formulaire */
+  /* Taille du texte */
+  border-radius: 5px;
+  /* Coins arrondis pour une meilleure esthétique */
 }
 
+#form-proj {
+  position: absolute;
+  /* Positionner de manière absolue par rapport au conteneur parent */
+  bottom: 10px;
+  right: 24%;
+  z-index: 99999999;
+  /* Priorité sur les autres éléments */
+  background-color: rgba(255, 255, 255, 0.8);
+  /* Fond légèrement transparent pour le formulaire */
+  padding: 5px;
+  /* Un peu de padding autour du formulaire */
+  font-size: 14px;
+  border-radius: 5px;
+  /* Coins arrondis pour le formulaire */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* Ombre douce pour faire ressortir le formulaire */
+}
 </style>

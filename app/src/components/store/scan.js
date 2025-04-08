@@ -129,6 +129,7 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateSelectedScan(newVal) {
+    console.log('updateSelectedScan', newVal)
     storeSelectedScan.value = newVal
   }
 
@@ -144,7 +145,6 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateUrlPhoto(newVal) {
     urlPhoto.value = newVal
-    console.log('urlPhoto : ', urlPhoto.value)
   }
 
   function updateDeletePhotoAllBool(newVal) {
@@ -153,7 +153,6 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateDicoUrlPhoto(newVal) {
     dicoUrlPhoto.value.push(newVal)
-    console.log('dicoUrlPhoto : ', dicoUrlPhoto.value)
   }
 
   async function fetchOptions(propertyName) {
