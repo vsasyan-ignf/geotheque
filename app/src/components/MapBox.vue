@@ -75,7 +75,7 @@ import {createStringXY} from 'ol/coordinate.js';
 
 
 const scanStore = useScanStore()
-const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab, urlPhoto, deletePhotoAllBool } =
+const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab, urlPhoto, deletePhotoAllBool, dicoUrlPhoto } =
   storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -476,8 +476,20 @@ onMounted(() => {
     })
 
     watch(urlPhoto, () => {
-      if (urlPhoto.value) {
-        parcour_tab_and_map(urlPhoto.value)
+      console.log("zzzzzzzzzzzzzzzz")
+      if (dicoUrlPhoto.value.length > 0) {
+        vectorLayers.value.geomPhoto.getSource().clear()
+        vectorLayers.value.cross.getSource().clear()
+        dicoUrlPhoto.value.forEach((url) => {
+
+          parcour_tab_and_map(url)
+          
+        })
+        // parcour_tab_and_map(urlPhoto.value)
+      }
+      else{
+        vectorLayers.value.geomPhoto.getSource().clear()
+        vectorLayers.value.cross.getSource().clear()
       }
     })
 

@@ -10,15 +10,19 @@
     </div>
 
     <div class="group-button">
-      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan">
+      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan" v-if="!urlInDico">
         <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
+      </ShakingButton>
+
+      <ShakingButton nameButton="" @click="DeleteSelectedPhoto" :disabled="!storeSelectedScan" v-if="urlInDico">
+        <template #icon><SvgIcon type="mdi" :path="mdiMinus" class="mdicon" /></template>
       </ShakingButton>
 
       <ShakingButton nameButton="" @click="DeletePhotoAll" :disabled="!storeSelectedScan">
         <template #icon><SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" /></template>
       </ShakingButton>
 
-      <ShakingButton nameButton="HTML" @click="" :disabled="!storeSelectedScan">
+      <ShakingButton nameButton="csv" @click="" :disabled="!storeSelectedScan">
         <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
       </ShakingButton>
     </div>
@@ -84,7 +88,7 @@ import { mdiPlus, mdiMinus, mdiTrashCan, mdiXml } from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan, deletePhotoAllBool } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto } = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
@@ -152,15 +156,34 @@ const closeModal = () => {
 }
 
 function setUrl() {
-  const annee = storeSelectedScan.value.properties['ANNÉE']
-  const nom = storeSelectedScan.value.properties['CHANTIER']
-  const url = `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
+  const url = createUrlPhoto()
   console.log('URL MISSION : ', url)
   scanStore.updateUrlPhoto(url)
+  scanStore.updateDicoUrlPhoto(url)
 }
 
 function DeletePhotoAll(){
   scanStore.updateDeletePhotoAllBool(!deletePhotoAllBool.value)
+  dicoUrlPhoto.value = []
+}
+
+const urlInDico = computed(() => {
+  if (!storeSelectedScan.value) return false;
+  const url = createUrlPhoto();
+  return dicoUrlPhoto.value.includes(url);
+});
+
+function createUrlPhoto() {
+  const annee = storeSelectedScan.value.properties['ANNÉE']
+  const nom = storeSelectedScan.value.properties['CHANTIER']
+  return `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
+}
+
+function DeleteSelectedPhoto(){
+  const url = createUrlPhoto();
+  const index = dicoUrlPhoto.value.indexOf(url);
+  dicoUrlPhoto.value.pop(index);
+  console.log('url in dico : ', dicoUrlPhoto.value)
 }
 
 /********************** CHECKBOX ************************* */

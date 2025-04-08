@@ -13,6 +13,7 @@ export const useScanStore = defineStore('scan', () => {
   let wkt = ref(null)
   let urlPhoto = ref(null)
   let deletePhotoAllBool = ref(false)
+  let dicoUrlPhoto = ref([])
 
   let collectionsOptions = ref([{ id: '0', name: 'Tous les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
@@ -143,10 +144,16 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateUrlPhoto(newVal) {
     urlPhoto.value = newVal
+    console.log('urlPhoto : ', urlPhoto.value)
   }
 
   function updateDeletePhotoAllBool(newVal) {
     deletePhotoAllBool.value = newVal
+  }
+
+  function updateDicoUrlPhoto(newVal) {
+    dicoUrlPhoto.value.push(newVal)
+    console.log('dicoUrlPhoto : ', dicoUrlPhoto.value)
   }
 
   async function fetchOptions(propertyName) {
@@ -274,5 +281,7 @@ export const useScanStore = defineStore('scan', () => {
     fetchAllOptions,
     deletePhotoAllBool,
     updateDeletePhotoAllBool,
+    dicoUrlPhoto,
+    updateDicoUrlPhoto,
   }
 })
