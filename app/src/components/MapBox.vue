@@ -469,6 +469,8 @@ onMounted(() => {
         Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
         vectorLayers.value.emprises.getSource().setUrl('')
         scanStore.resetCriteria()
+        vectorLayers.value.geomMouseOver.getSource().clear()
+  
       }
     })
 
