@@ -45,7 +45,7 @@ export function createGeomMouseOverLayer() {
         width: 2,
       }),
       fill: new Fill({
-        color: 'rgba(255, 0, 234, 0.81)',
+        color: 'rgba(255, 145, 0, 0.5)',
       }),
     }),
   })
