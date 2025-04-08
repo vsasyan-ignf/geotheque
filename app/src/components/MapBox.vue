@@ -92,6 +92,8 @@ let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
 
+const checkboxAlphanum = ref(false)
+
 const vectorLayers = ref({
   pin: null,
   geom: null,
@@ -220,7 +222,11 @@ function addPointToMap(x, y, nom, crossAlpha=false) {
     vectorLayers.value.cross.getSource().addFeature(feature)
   }
 
-
+  if (checkboxAlphanum.value) {
+    vectorLayers.value.cross.setVisible(false)
+  } else {
+    vectorLayers.value.cross_alphanum.setVisible(false)
+  }
 }
 
 function Add_new_polygone_to_map(tab) {
@@ -251,7 +257,7 @@ async function parcour_tab_and_map(url) {
         numero = tab_test[i][4];
 
         [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-        // addPointToMap(x_3857, y3857, numero)
+        addPointToMap(x_3857, y3857, numero)
         addPointToMap(x_3857, y3857, alphanum, true)
       } else {
         //"Cliche Actif"
@@ -570,6 +576,23 @@ onMounted(() => {
 })
 
 function handleDisplayOptionChange({ option, value }) {
+
+  if (option === 'alphanumerique') {
+
+    const currentLayer = value ? vectorLayers.value.cross_alphanum : vectorLayers.value.cross;
+    const previousLayer = value ? vectorLayers.value.cross : vectorLayers.value.cross_alphanum;
+
+    const isVisible = previousLayer.getVisible();
+
+    if (isVisible) {
+      previousLayer.setVisible(false)
+      currentLayer.setVisible(true)
+    }
+
+    checkboxAlphanum.value = value
+
+  }
+
   if (option === 'numDepartement') {
     const currentLayerId = value ? 'departements' : 'departements_with_no_name';
     const previousLayerId = value ? 'departements_with_no_name' : 'departements';
@@ -581,10 +604,7 @@ function handleDisplayOptionChange({ option, value }) {
         vectorOtherLayers.value[currentLayerId].setVisible(true);
       }
 
-      const departmentLayer = otherLayers.value.find(layer =>
-        layer.id === previousLayerId ||
-        layer.id === 'departements' ||
-        layer.id === 'departements_with_no_name');
+      const departmentLayer = otherLayers.value.find(layer => layer.id === previousLayerId);
 
       if (departmentLayer) {
         departmentLayer.id = currentLayerId;
@@ -609,10 +629,7 @@ function handleDisplayOptionChange({ option, value }) {
           vectorOtherLayers.value[currentLayerId].setVisible(true);
         }
 
-        const feuilleLayer = otherLayers.value.find(layer =>
-          layer.id === previousLayerId ||
-          layer.id === type.base ||
-          layer.id === type.withoutName);
+        const feuilleLayer = otherLayers.value.find(layer => layer.id === previousLayerId);
 
         if (feuilleLayer) {
           feuilleLayer.id = currentLayerId;
