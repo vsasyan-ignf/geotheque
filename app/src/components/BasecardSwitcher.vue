@@ -107,8 +107,8 @@ const props = defineProps({
     default: () => ({
       couplesStero: false,
       alphanumerique: false,
-      numFeuille: false,
-      numDepartement: false
+      numFeuille: true,
+      numDepartement: true
     })
   }
 })
@@ -144,7 +144,6 @@ function handleOptionChange(option) {
     option,
     value: displayOptions.value[option]
   })
-  console.log(option)
 }
 
 function toggleExpand() {
@@ -226,7 +225,7 @@ onUnmounted(() => {
 }
 
 .layer-switcher__options {
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
   border-top: 1px solid #eee;
 }

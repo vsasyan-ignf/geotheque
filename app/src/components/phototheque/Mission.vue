@@ -46,23 +46,7 @@
         </div>
       </div>
     </div>
-
-    <!-- <div class="mission-options">
-      <div class="options-label">Options de sélection</div>
-      <div class="checkbox-group">
-        <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
-          <input
-            type="checkbox"
-            v-model="selectedOptions[option.key]"
-            class="checkbox-input"
-            @change="handleCheckboxChange(option.key)"
-          />
-          <span class="custom-checkbox"></span>
-          {{ option.label }}
-        </label>
-      </div>
-    </div> -->
-
+    
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
       <MissionDetailsModal
         :isOpen="isModalOpen"
@@ -164,39 +148,6 @@ function setUrl() {
   scanStore.updateUrlPhoto(url)
 }
 
-/********************** CHECKBOX ************************* */
-
-const selectedOptions = reactive({
-  couplesStereo: false,
-  alphanumeric: false,
-  popup: false,
-  feuilles: true,
-  departements: true,
-})
-
-const checkboxOptions = [
-  { key: 'couplesStereo', label: 'Couples Stéréo' },
-  { key: 'alphanumeric', label: 'Alphanumérique' },
-  { key: 'feuilles', label: 'N° Feuille' },
-  { key: 'departements', label: 'N° Département' },
-]
-
-// Fonction qui gère l'activation/désactivation des cases
-const handleCheckboxChange = (optionKey) => {
-  const isChecked = selectedOptions[optionKey]
-
-  if (optionKey === 'couplesStereo') {
-    console.log('click couplesStereo')
-  } else if (optionKey === 'alphanumeric') {
-    console.log('click alpha')
-  } else if (optionKey === 'popup') {
-    console.log('click popup')
-  } else if (optionKey === 'feuilles') {
-    eventBus.emit('feuilles', isChecked)
-  } else if (optionKey === 'departements') {
-    eventBus.emit('departements', isChecked)
-  }
-}
 </script>
 
 <style scoped>

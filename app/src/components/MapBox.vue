@@ -9,6 +9,7 @@
       :currentZoom="currentZoom"
       @layer-change="changeActiveLayer"
       @other-layer-toggle="handleOtherLayerToggle"
+      @display-option-change="handleDisplayOptionChange"
     />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
@@ -111,6 +112,7 @@ const vectorLayers = ref({
   geomPhoto: null,
   hover: null,
 })
+
 
 const vectorOtherLayers = ref(null)
 
@@ -592,41 +594,60 @@ onMounted(() => {
   })
 })
 
-eventBus.on('departements', (isChecked) => {
-  const currentLayer = isChecked ? 'departements' : 'departements_with_no_name'
-  const previousLayer = isChecked ? 'departements_with_no_name' : 'departements'
-
-  if (vectorOtherLayers.value?.[previousLayer]) {
-    const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
-    if (isVisible) {
-      vectorOtherLayers.value[previousLayer].setVisible(false)
-      vectorOtherLayers.value[currentLayer].setVisible(true)
-    }
-    // changer la layer dans le BaseCardSwitcher
-    if (otherLayers.value) {
-      otherLayers.value.at(1).id = currentLayer // j'ai mis 1 car je connais l'index mais à change avec un map
-    }
-  }
-})
-
-eventBus.on('feuilles', (isChecked) => {
-  const currentLayer = isChecked ? 'feuilles_france' : 'feuilles_france_with_no_name'
-  const previousLayer = isChecked ? 'feuilles_france_with_no_name' : 'feuilles_france'
-
-  if (vectorOtherLayers.value?.[previousLayer]) {
-    const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
-
-    if (isVisible) {
-      vectorOtherLayers.value[previousLayer].setVisible(false)
-      vectorOtherLayers.value[currentLayer].setVisible(true)
-    }
-    // changer la layer dans le BaseCardSwitcher
-    if (otherLayers.value?.length >= 2) {
-      otherLayers.value.at(2).id = currentLayer
+function handleDisplayOptionChange({ option, value }) {
+  if (option === 'numDepartement') {
+    const currentLayerId = value ? 'departements' : 'departements_with_no_name';
+    const previousLayerId = value ? 'departements_with_no_name' : 'departements';
+    
+    if (vectorOtherLayers.value) {
+      const isVisible = vectorOtherLayers.value[previousLayerId]?.getVisible();
+      if (isVisible) {
+        vectorOtherLayers.value[previousLayerId].setVisible(false);
+        vectorOtherLayers.value[currentLayerId].setVisible(true);
+      }
+      
+      const departmentLayer = otherLayers.value.find(layer =>
+        layer.id === previousLayerId ||
+        layer.id === 'departements' ||
+        layer.id === 'departements_with_no_name');
+      
+      if (departmentLayer) {
+        departmentLayer.id = currentLayerId;
+      }
     }
   }
-})
+  
+  if (option === 'numFeuille') {
+    const layerTypes = [
+      { base: 'feuilles_france', withoutName: 'feuilles_france_with_no_name' },
+      { base: 'feuilles_monde', withoutName: 'feuilles_monde_with_no_name' }
+    ];
+    
+    layerTypes.forEach(type => {
+      const currentLayerId = value ? type.base : type.withoutName;
+      const previousLayerId = value ? type.withoutName : type.base;
+      
+      if (vectorOtherLayers.value && vectorOtherLayers.value[previousLayerId]) {
+        const isVisible = vectorOtherLayers.value[previousLayerId].getVisible();
+        if (isVisible) {
+          vectorOtherLayers.value[previousLayerId].setVisible(false);
+          vectorOtherLayers.value[currentLayerId].setVisible(true);
+        }
+        
+        const feuilleLayer = otherLayers.value.find(layer =>
+          layer.id === previousLayerId ||
+          layer.id === type.base ||
+          layer.id === type.withoutName);
+        
+        if (feuilleLayer) {
+          feuilleLayer.id = currentLayerId;
+        }
+      }
+    });
+  }
+}
 provide('eventBus', eventBus)
+
 </script>
 
 <style scoped>
