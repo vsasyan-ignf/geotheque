@@ -429,6 +429,8 @@ onMounted(() => {
 
       if (storeSelectedGeom.value.length !== 0) {
         let polygon = null
+
+        console.log(storeSelectedGeom.value)
         if (storeSelectedGeom.value[0].length === 2) {
           polygon = new Feature({
             geometry: new Polygon([storeSelectedGeom.value]),
@@ -438,6 +440,8 @@ onMounted(() => {
             geometry: new MultiPolygon([storeSelectedGeom.value]),
           })
         }
+
+      
 
         vectorLayers.value.geom.getSource().addFeature(polygon)
 
@@ -468,7 +472,7 @@ onMounted(() => {
         storeHoveredScan.value.geom.length > 0
       ) {
         const polygon = new Feature({
-          geometry: new Polygon([storeHoveredScan.value.geom[0]]),
+          geometry: new MultiPolygon(storeHoveredScan.value.geom),
         })
 
         vectorLayers.value.hover.getSource().addFeature(polygon)
@@ -485,7 +489,7 @@ onMounted(() => {
         storeSelectedScan.value.geom.length > 0
       ) {
         const polygon = new Feature({
-          geometry: new Polygon([storeSelectedScan.value.geom[0]]),
+          geometry: new MultiPolygon(storeSelectedScan.value.geom),
         })
 
         vectorLayers.value.scan.getSource().addFeature(polygon)

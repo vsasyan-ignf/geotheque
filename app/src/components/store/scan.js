@@ -59,7 +59,7 @@ export const useScanStore = defineStore('scan', () => {
       if (activeTab.value === 'cartotheque_etranger') {
         // inverse les coordonnées : lon/lat to lat/lon
         ;[minX, minY] = [minY, minX]
-        ;[maxX, maxY] = [maxY, maxX]
+          ;[maxX, maxY] = [maxY, maxX]
       }
 
       const {
@@ -282,7 +282,7 @@ export const useScanStore = defineStore('scan', () => {
           const data = await response.json()
           storeScansData.value = data.features.map((feature, index) => ({
             id: index,
-            geom: feature.geometry.coordinates[0],
+            geom: feature.geometry.coordinates,
             name: feature.properties.ID_CARTE ?? feature.properties.NOM, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
             properties: feature.properties,
           }))
@@ -307,7 +307,7 @@ export const useScanStore = defineStore('scan', () => {
           const name = feature.properties.CHANTIER + getSuffixPhoto(feature)
           return {
             id: index,
-            geom: feature.geometry.coordinates[0],
+            geom: feature.geometry.coordinates,
             name: name,
             properties: feature.properties,
           }
