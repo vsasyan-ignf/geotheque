@@ -51,17 +51,6 @@
       </div>
     </div>
 
-    <div class="mission-options">
-      <div class="options-label">Options de sélection</div>
-      <div class="checkbox-group">
-        <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
-          <input type="checkbox" v-model="selectedOptions[option.key]" class="checkbox-input"
-            @change="handleCheckboxChange(option.key)" />
-          <span class="custom-checkbox"></span>
-          {{ option.label }}
-        </label>
-      </div>
-    </div>
 
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
       <MissionDetailsModal :isOpen="isModalOpen" :title="`${missionName} - Détails complets`" :details="allDetails"

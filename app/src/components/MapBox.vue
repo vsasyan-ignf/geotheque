@@ -382,14 +382,16 @@ onMounted(() => {
       coordinateFormat: createStringXY(2),
       projection: olMap.value.getView().getProjection().getCode(),
       target: document.getElementById('mouse-position'),
-    })
+    });
+    console.log(mousePositionControl);
 
     olMap.value.on('pointermove', (event) => {
-      const coordinate = olMap.value.getEventCoordinate(event.originalEvent)
-      const formattedCoordinate = createStringXY(2)(coordinate) // Formatage des coordonnées
+      const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
+      const formattedCoordinate = createStringXY(2)(coordinate);
 
-      // Mettre à jour l'élément HTML avec la position de la souris
-      const mousePositionElement = document.getElementById('mouse-position')
+      isPointOnEmprise(coordinate, tab_emprise_photo)
+
+      const mousePositionElement = document.getElementById('mouse-position');
       if (mousePositionElement) {
         mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`
       }
