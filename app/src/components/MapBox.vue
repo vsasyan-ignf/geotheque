@@ -391,7 +391,6 @@ onMounted(() => {
       coordinateFormat: createStringXY(2),
       projection: olMap.value.getView().getProjection().getCode(),
       target: document.getElementById('mouse-position'),
-<<<<<<< HEAD
     });
     console.log(mousePositionControl);
 
@@ -402,16 +401,6 @@ onMounted(() => {
       isPointOnEmprise(coordinate,tab_emprise_photo)
 
       const mousePositionElement = document.getElementById('mouse-position');
-=======
-    })
-
-    olMap.value.on('pointermove', (event) => {
-      const coordinate = olMap.value.getEventCoordinate(event.originalEvent)
-      const formattedCoordinate = createStringXY(2)(coordinate) // Formatage des coordonnées
-
-      // Mettre à jour l'élément HTML avec la position de la souris
-      const mousePositionElement = document.getElementById('mouse-position')
->>>>>>> origin/dev
       if (mousePositionElement) {
         mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`
       }
