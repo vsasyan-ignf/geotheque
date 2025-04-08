@@ -68,6 +68,28 @@ export async function parcour_txt_to_tab(url) {
         tab2.push(roundToTwo(previous_x + coord_x), roundToTwo(previous_y + coord_y))
         tab_fin.push(tab2)
       }
+      else if (mots.length > 3 && mots[2] == 'Couple Actif') {
+        if (mots.length < 18) {
+          console.error('Problème longueur Couple Actif')
+        }
+        tab2.push('Couple Actif')
+        base_x = roundToTwo(parseFloat(mots[11]))
+        base_y = roundToTwo(parseFloat(mots[12]))
+        previous_x = base_x
+        previous_y = base_y
+
+        tab2.push(base_x, base_y)
+
+        for (y = 14; y < mots.length; y = y + 2) {
+          coord_x = roundToTwo(previous_x + parseFloat(mots[y]))
+          coord_y = roundToTwo(previous_y + parseFloat(mots[y + 1]))
+          tab2.push(coord_x, coord_y)
+
+          previous_x = coord_x
+          previous_y = coord_y
+        }
+        tab_fin.push(tab2)
+      }
     }
     return tab_fin
   } catch (error) {

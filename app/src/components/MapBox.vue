@@ -241,7 +241,7 @@ async function parcour_tab_and_map(url) {
       throw new Error('Le tableau récupéré est vide ou invalide.')
     }
 
-    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857, name
+    let elem, i, i2, x, y, x_3857, y3857, tab_points_cliche_3857,tab_points_couple_3857, name
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
         //"Centre Actif"
@@ -250,22 +250,37 @@ async function parcour_tab_and_map(url) {
         name = tab_test[i][3]
         ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
         addPointToMap(x_3857, y3857, name)
-      } else {
-        //"Cliche Actif"
+      } else if (tab_test[i][0] == 'Cliche Actif') {
         elem = tab_test[i]
-        tab_points_3857 = []
+        tab_points_cliche_3857 = []
+        for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
+          //Commence a 1 car en 0 il y a le type d'image
+          x = elem[i2]
+          y = elem[i2 + 1]
+          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          tab_points_cliche_3857.push([x_3857, y3857])
+        }
+
+        tab_emprise_photo.push(tab_points_cliche_3857);
+        Add_new_polygone_to_map(tab_points_cliche_3857);
+        
+      }
+      else if(tab_test[i][0] == 'Couple Actif'){
+        elem = tab_test[i]
+        tab_points_couple_3857 = []
         for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
           //Commence a 1 car en 0 il y a le type d'image
           x = elem[i2]
           y = elem[i2 + 1]
           ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
           //addPointToMap(x_3857, y3857);
-          tab_points_3857.push([x_3857, y3857])
+          tab_points_couple_3857.push([x_3857, y3857])
         }
-
-        tab_emprise_photo.push(tab_points_3857);
-        Add_new_polygone_to_map(tab_points_3857);
-        
+      console.log(tab_points_couple_3857);
+      // a changer soit le sotcker soit directement l'afficher
+      }
+      else{
+        console.error("probleme dans parcour tab")
       }
     }
   } catch (error) {
@@ -409,6 +424,7 @@ onMounted(() => {
     initializeIntersectionLayer(olMap)
 
     olMap.value.on('click', (event) => {
+      parcour_tab_and_map('./2021_FD 01_C_20.txt')
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
       if (showPin.value) {
         vectorLayers.value.pin.getSource().clear()
@@ -605,6 +621,17 @@ function handleDisplayOptionChange({ option, value }) {
       }
     }
   }
+
+  if(option ==='couplesStero' ){
+    if(value){
+      console.log('on')
+      //afficher les emprises de couples
+    }
+    else{
+      console.log('off')
+      //enlever les emprises de couples
+    }
+  } 
   
   if (option === 'numFeuille') {
     const layerTypes = [
