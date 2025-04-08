@@ -58,20 +58,18 @@
       </div>
     </div>
 
-    <CartothequeSubMenu v-if="activeTab === 'cartotheque_etranger'" />
-    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
+    <PhotothequeSubMenu />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import SubCategoryHeader from './SubCategoryHeader.vue'
-import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
 import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
+
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -130,14 +128,14 @@ function searchPVA() {
   // requete pour l'autocomplétion du nom de la mission
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
+    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27&srsName=EPSG:3857`
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
         const newResults = data.features.map((pva) => ({
           nom: pva.properties.NOM,
           chantier: pva.properties.CHANTIER,
-          geometry: pva.geometry.coordinates[0][0],
+          geometry: pva.geometry.coordinates,
         }))
         pvaResults.value = newResults
       })
@@ -156,13 +154,16 @@ function selectPVA(pva) {
   showResults.value = false
 }
 
-function validatePVA() {
+async function validatePVA() {
   if (repPVA) {
-    scanStore.storeGetPhoto(url.value)
-    const contourMercator = repPVA.value.geometry.map((coord) =>
-      useConvertCoordinates(coord[0], coord[1], 'EPSG:2154', 'EPSG:3857'),
-    )
-    scanStore.updateSelectedGeom(contourMercator)
+
+    /** Il faut modifier l'url dans le store mais comme c'est un computed avec une bbox il faut modifier pleins de trucs
+     * Donc on n'affiche pas encore le selectedGeom cad la zone de travail comme dans les autres menu
+     */
+    // const contourMercator = repPVA.value.geometry.flat()
+    // scanStore.updateSelectedGeom(contourMercator)
+
+    await scanStore.storeGetPhoto(url.value)
   }
 }
 </script>
