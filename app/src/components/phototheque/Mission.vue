@@ -18,8 +18,12 @@
         <template #icon><SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" /></template>
       </ShakingButton>
 
-      <ShakingButton nameButton="HTML" @click="" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
+      <ShakingButton
+        nameButton="CSV"
+        @click="downloadCSV(storeScansData)"
+        :disabled="!isDataAvailable > 0"
+      >
+        <template #icon><SvgIcon type="mdi" :path="mdiDownloadCircle" class="mdicon" /></template>
       </ShakingButton>
     </div>
 
@@ -43,21 +47,21 @@
       </div>
     </div>
 
-    <div class="mission-options">
-        <div class="options-label">Options de sélection</div>
-        <div class="checkbox-group">
-          <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
-            <input
-              type="checkbox"
-              v-model="selectedOptions[option.key]"
-              class="checkbox-input"
-              @change="handleCheckboxChange(option.key)"
-            />
-            <span class="custom-checkbox"></span>
-            {{ option.label }}
-          </label>
-        </div>
+    <!-- <div class="mission-options">
+      <div class="options-label">Options de sélection</div>
+      <div class="checkbox-group">
+        <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
+          <input
+            type="checkbox"
+            v-model="selectedOptions[option.key]"
+            class="checkbox-input"
+            @change="handleCheckboxChange(option.key)"
+          />
+          <span class="custom-checkbox"></span>
+          {{ option.label }}
+        </label>
       </div>
+    </div> -->
 
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
       <MissionDetailsModal
@@ -78,9 +82,10 @@ import MissionDetailsModal from './MissionDetailsModal.vue'
 import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
+import { downloadCSV } from '../composable/download'
 
 import ShakingButton from '@/components/material/ShakingButton.vue'
-import { mdiPlus, mdiMinus, mdiTrashCan, mdiXml } from '@mdi/js'
+import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle } from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -88,9 +93,9 @@ const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
+const isDataAvailable = computed(() => storeScansData.value && storeScansData.value.length > 0)
 
 // real key : key bien écrit pour afficher dans modal
-
 const all_keys = {
   NOM: 'NOM',
   CHANTIER: 'CHANTIER',
@@ -392,6 +397,7 @@ const handleCheckboxChange = (optionKey) => {
 
 .mission-options {
   margin-top: 20px;
+  margin-bottom: 40px;
 }
 
 .options-label {

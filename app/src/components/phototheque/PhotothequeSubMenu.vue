@@ -13,5 +13,5 @@
 <script setup>
 import Accordion from '@/components/material/Accordeon.vue'
 import Mission from './Mission.vue'
-import CritereSelection from '../cartotheque/CritereSelection.vue';
+import CritereSelection from '../cartotheque/CritereSelection.vue'
 </script>
