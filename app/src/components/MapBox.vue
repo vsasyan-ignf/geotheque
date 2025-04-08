@@ -2,25 +2,14 @@
   <div class="map-container">
     <SideMenu @toggle-visibility="toggleLayerVisibility" />
     <div ref="mapElement" class="ol-map"></div>
-    <BasecardSwitcher
-      :layers="layers"
-      :otherLayers="otherLayers"
-      :activeLayerIndex="activeLayerIndex"
-      :currentZoom="currentZoom"
-      @layer-change="changeActiveLayer"
-      @other-layer-toggle="handleOtherLayerToggle"
-      @display-option-change="handleDisplayOptionChange"
-    />
+    <BasecardSwitcher :layers="layers" :otherLayers="otherLayers" :activeLayerIndex="activeLayerIndex"
+      :currentZoom="currentZoom" @layer-change="changeActiveLayer" @other-layer-toggle="handleOtherLayerToggle"
+      @display-option-change="handleDisplayOptionChange" />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
-    <DrawControl
-      v-if="activeTab === 'phototheque'"
-      :map="olMap"
-      :isDrawModeActive="drawModeActive"
-      @draw-complete="handleDrawComplete"
-      @draw-mode-activated="handleDrawModeActivated"
-      @deactivate-draw-mode="handleDeactivateDrawMode"
-    />
+    <DrawControl v-if="activeTab === 'phototheque'" :map="olMap" :isDrawModeActive="drawModeActive"
+      @draw-complete="handleDrawComplete" @draw-mode-activated="handleDrawModeActivated"
+      @deactivate-draw-mode="handleDeactivateDrawMode" />
   </div>
   <div style="z-index: 99999999" id="mouse-position"></div>
   <div style="z-index: 99999999" id="form-proj"></div>
@@ -83,6 +72,8 @@ const {
   activeTab,
   urlPhoto,
   storeHoveredScan,
+  deletePhotoAllBool,
+  dicoUrlPhoto,
 } = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -105,7 +96,7 @@ const otherLayers = ref(otherLayersCartoFrance)
 const vectorLayers = ref({
   pin: null,
   geom: null,
-  geomMouseOver : null,
+  geomMouseOver: null,
   scan: null,
   emprises: null,
   cross: null,
@@ -138,7 +129,7 @@ watch(activeTab, (newValue) => {
   tab_emprise_photo = [];
   last_geom = null;
   vectorLayers.value.geomMouseOver.getSource().clear()
-  
+
 })
 
 const activeLayerIndex = ref(0)
@@ -157,9 +148,9 @@ function toggleLayerVisibility(isVisible) {
   }
 }
 
-function DrawEmpriseGeometry(geometry){
+function DrawEmpriseGeometry(geometry) {
   //fonction qui affiche la géometry et efface l'ancienne si il y en a
-  if(last_geom != null){
+  if (last_geom != null) {
     vectorLayers.value.geomMouseOver.getSource().clear()
   }
   last_geom = geometry
@@ -179,10 +170,10 @@ function isPointOnEmprise(point, emprises) {
       geometry: new Polygon([emprises[i]]),
     });
     const geometry = polygon.getGeometry();
-    
+
     if (geometry.intersectsCoordinate(point)) {
       DrawEmpriseGeometry(geometry)
-      return ;
+      return;
     }
   }
   vectorLayers.value.geomMouseOver.getSource().clear()
@@ -248,7 +239,7 @@ async function parcour_tab_and_map(url) {
         x = tab_test[i][1]
         y = tab_test[i][2]
         name = tab_test[i][3]
-        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
         addPointToMap(x_3857, y3857, name)
       } else {
         //"Cliche Actif"
@@ -258,14 +249,14 @@ async function parcour_tab_and_map(url) {
           //Commence a 1 car en 0 il y a le type d'image
           x = elem[i2]
           y = elem[i2 + 1]
-          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+            ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
           //addPointToMap(x_3857, y3857);
           tab_points_3857.push([x_3857, y3857])
         }
 
         tab_emprise_photo.push(tab_points_3857);
         Add_new_polygone_to_map(tab_points_3857);
-        
+
       }
     }
   } catch (error) {
@@ -394,11 +385,11 @@ onMounted(() => {
     });
     console.log(mousePositionControl);
 
-        olMap.value.on('pointermove', (event) => {
+    olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
-      const formattedCoordinate = createStringXY(2)(coordinate); 
+      const formattedCoordinate = createStringXY(2)(coordinate);
 
-      isPointOnEmprise(coordinate,tab_emprise_photo)
+      isPointOnEmprise(coordinate, tab_emprise_photo)
 
       const mousePositionElement = document.getElementById('mouse-position');
       if (mousePositionElement) {
@@ -540,11 +531,31 @@ onMounted(() => {
       }
     })
 
-    watch(urlPhoto, () => {
-      if (urlPhoto.value) {
+    watch(dicoUrlPhoto, () => {
+      if (dicoUrlPhoto.value.length > 0) {
         vectorLayers.value.geomPhoto.getSource().clear()
         vectorLayers.value.cross.getSource().clear()
-        parcour_tab_and_map(urlPhoto.value)
+        dicoUrlPhoto.value.forEach((url) => {
+          parcour_tab_and_map(url)
+        })
+      }
+      else {
+        vectorLayers.value.geomPhoto.getSource().clear()
+        vectorLayers.value.cross.getSource().clear()
+      }
+    },
+      { deep: true }
+    )
+
+    watch(deletePhotoAllBool, () => {
+      if (vectorLayers.value.geomPhoto) {
+        vectorLayers.value.geomPhoto.getSource().clear()
+      }
+      if (vectorLayers.value.cross) {
+        vectorLayers.value.cross.getSource().clear()
+      }
+      if (vectorLayers.value.scan) {
+        vectorLayers.value.scan.getSource().clear()
       }
     })
 
@@ -583,47 +594,47 @@ function handleDisplayOptionChange({ option, value }) {
   if (option === 'numDepartement') {
     const currentLayerId = value ? 'departements' : 'departements_with_no_name';
     const previousLayerId = value ? 'departements_with_no_name' : 'departements';
-    
+
     if (vectorOtherLayers.value) {
       const isVisible = vectorOtherLayers.value[previousLayerId]?.getVisible();
       if (isVisible) {
         vectorOtherLayers.value[previousLayerId].setVisible(false);
         vectorOtherLayers.value[currentLayerId].setVisible(true);
       }
-      
+
       const departmentLayer = otherLayers.value.find(layer =>
         layer.id === previousLayerId ||
         layer.id === 'departements' ||
         layer.id === 'departements_with_no_name');
-      
+
       if (departmentLayer) {
         departmentLayer.id = currentLayerId;
       }
     }
   }
-  
+
   if (option === 'numFeuille') {
     const layerTypes = [
       { base: 'feuilles_france', withoutName: 'feuilles_france_with_no_name' },
       { base: 'feuilles_monde', withoutName: 'feuilles_monde_with_no_name' }
     ];
-    
+
     layerTypes.forEach(type => {
       const currentLayerId = value ? type.base : type.withoutName;
       const previousLayerId = value ? type.withoutName : type.base;
-      
+
       if (vectorOtherLayers.value && vectorOtherLayers.value[previousLayerId]) {
         const isVisible = vectorOtherLayers.value[previousLayerId].getVisible();
         if (isVisible) {
           vectorOtherLayers.value[previousLayerId].setVisible(false);
           vectorOtherLayers.value[currentLayerId].setVisible(true);
         }
-        
+
         const feuilleLayer = otherLayers.value.find(layer =>
           layer.id === previousLayerId ||
           layer.id === type.base ||
           layer.id === type.withoutName);
-        
+
         if (feuilleLayer) {
           feuilleLayer.id = currentLayerId;
         }
@@ -654,29 +665,38 @@ provide('eventBus', eventBus)
 #mouse-position {
   position: absolute;
   bottom: 10px;
-  right: 40%; /* À 10px du côté gauche */
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.8
-  ); /* Fond semi-transparent pour améliorer la lisibilité */
-  padding: 5px; /* Un peu de padding */
-  font-size: 14px; /* Taille du texte */
-  border-radius: 5px; /* Coins arrondis pour une meilleure esthétique */
+  right: 40%;
+  /* À 10px du côté gauche */
+  background-color: rgba(255,
+      255,
+      255,
+      0.8);
+  /* Fond semi-transparent pour améliorer la lisibilité */
+  padding: 5px;
+  /* Un peu de padding */
+  font-size: 14px;
+  /* Taille du texte */
+  border-radius: 5px;
+  /* Coins arrondis pour une meilleure esthétique */
   color: black;
 }
 
 #form-proj {
-  position: absolute; /* Positionner de manière absolue par rapport au conteneur parent */
+  position: absolute;
+  /* Positionner de manière absolue par rapport au conteneur parent */
   bottom: 10px;
   right: 24%;
-  z-index: 99999999; /* Priorité sur les autres éléments */
-  background-color: rgba(255, 255, 255, 0.8); /* Fond légèrement transparent pour le formulaire */
-  padding: 5px; /* Un peu de padding autour du formulaire */
+  z-index: 99999999;
+  /* Priorité sur les autres éléments */
+  background-color: rgba(255, 255, 255, 0.8);
+  /* Fond légèrement transparent pour le formulaire */
+  padding: 5px;
+  /* Un peu de padding autour du formulaire */
   font-size: 14px;
-  border-radius: 5px; /* Coins arrondis pour le formulaire */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre douce pour faire ressortir le formulaire */
+  border-radius: 5px;
+  /* Coins arrondis pour le formulaire */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* Ombre douce pour faire ressortir le formulaire */
   color: black;
 }
 </style>

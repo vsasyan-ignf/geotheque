@@ -10,32 +10,36 @@
     </div>
 
     <div class="group-button">
-      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
+      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan" v-if="!urlInDico">
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiPlus" class="mdicon" />
+        </template>
       </ShakingButton>
 
-      <ShakingButton nameButton="" @click="" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" /></template>
+      <ShakingButton nameButton="" @click="DeleteSelectedPhoto" :disabled="!storeSelectedScan" v-if="urlInDico">
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiMinus" class="mdicon" />
+        </template>
       </ShakingButton>
 
-      <ShakingButton
-        nameButton="CSV"
-        @click="downloadCSV(storeScansData)"
-        :disabled="!isDataAvailable > 0"
-      >
-        <template #icon><SvgIcon type="mdi" :path="mdiDownloadCircle" class="mdicon" /></template>
+      <ShakingButton nameButton="" @click="DeletePhotoAll" :disabled="!storeSelectedScan">
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" />
+        </template>
+      </ShakingButton>
+
+      <ShakingButton nameButton="CSV" @click="downloadCSV(storeScansData)" :disabled="!isDataAvailable > 0">
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiDownloadCircle" class="mdicon" />
+        </template>
       </ShakingButton>
     </div>
 
     <div v-if="selectedMission" class="mission-preview slide-in">
       <div class="mission-card">
         <div class="preview-details">
-          <div
-            v-for="(val, key, index) in essentialDetails"
-            :key="key"
-            class="detail-item"
-            :style="{ 'animation-delay': `${index * 0.05}s` }"
-          >
+          <div v-for="(val, key, index) in essentialDetails" :key="key" class="detail-item"
+            :style="{ 'animation-delay': `${index * 0.05}s` }">
             <div class="detail-label">{{ key }}</div>
             <div class="detail-value">{{ val }}</div>
           </div>
@@ -46,15 +50,11 @@
         </div>
       </div>
     </div>
-    
+
+
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-      <MissionDetailsModal
-        :isOpen="isModalOpen"
-        :title="`${missionName} - Détails complets`"
-        :details="allDetails"
-        @close="closeModal"
-        @download="downloadDetails"
-      />
+      <MissionDetailsModal :isOpen="isModalOpen" :title="`${missionName} - Détails complets`" :details="allDetails"
+        @close="closeModal" @download="downloadDetails" />
     </div>
   </div>
 </template>
@@ -73,7 +73,7 @@ import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle } from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto } = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
@@ -141,11 +141,37 @@ const closeModal = () => {
 }
 
 function setUrl() {
+  if (storeSelectedScan.value) {
+    const url = createUrlPhoto()
+    scanStore.updateUrlPhoto(url)
+    scanStore.updateDicoUrlPhoto(url)
+  }
+}
+
+
+function DeletePhotoAll() {
+  scanStore.updateDeletePhotoAllBool(!deletePhotoAllBool.value)
+  dicoUrlPhoto.value = []
+}
+
+const urlInDico = computed(() => {
+  if (!storeSelectedScan.value) return false;
+  const url = createUrlPhoto();
+  return dicoUrlPhoto.value.includes(url);
+});
+
+function createUrlPhoto() {
   const annee = storeSelectedScan.value.properties['ANNÉE']
   const nom = storeSelectedScan.value.properties['CHANTIER']
-  const url = `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
-  console.log('URL MISSION : ', url)
-  scanStore.updateUrlPhoto(url)
+  return `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
+}
+
+function DeleteSelectedPhoto() {
+  const deleteUrl = createUrlPhoto()
+  const index = dicoUrlPhoto.value.indexOf(deleteUrl);
+  if (index > -1) {
+    dicoUrlPhoto.value.splice(index, 1);
+  }
 }
 
 </script>
@@ -156,6 +182,7 @@ function setUrl() {
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -166,6 +193,7 @@ function setUrl() {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -176,6 +204,7 @@ function setUrl() {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -388,12 +417,12 @@ function setUrl() {
   transition: all 0.2s;
 }
 
-.checkbox-input:checked + .custom-checkbox {
+.checkbox-input:checked+.custom-checkbox {
   background-color: #739614;
   border-color: #739614;
 }
 
-.checkbox-input:checked + .custom-checkbox::after {
+.checkbox-input:checked+.custom-checkbox::after {
   content: '';
   position: absolute;
   left: 5px;

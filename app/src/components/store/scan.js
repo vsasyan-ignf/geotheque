@@ -13,6 +13,8 @@ export const useScanStore = defineStore('scan', () => {
   let activeTab = ref('cartotheque')
   let wkt = ref(null)
   let urlPhoto = ref(null)
+  let deletePhotoAllBool = ref(false)
+  let dicoUrlPhoto = ref([])
 
   let collectionsOptions = ref([{ id: '0', name: 'Tous les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
@@ -157,6 +159,7 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateSelectedScan(newVal) {
+    console.log('updateSelectedScan', newVal)
     storeSelectedScan.value = newVal
   }
 
@@ -176,6 +179,14 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateUrlPhoto(newVal) {
     urlPhoto.value = newVal
+  }
+
+  function updateDeletePhotoAllBool(newVal) {
+    deletePhotoAllBool.value = newVal
+  }
+
+  function updateDicoUrlPhoto(newVal) {
+    dicoUrlPhoto.value.push(newVal)
   }
 
   async function fetchOptionsDropDown(propertyName) {
@@ -350,6 +361,10 @@ export const useScanStore = defineStore('scan', () => {
     supportOptions,
     emulsionOptions,
     fetchAllOptions,
+    deletePhotoAllBool,
+    updateDeletePhotoAllBool,
+    dicoUrlPhoto,
+    updateDicoUrlPhoto,
     getCommanditaireOptions,
     getProducteurOptions,
     getFilteredOptions,
