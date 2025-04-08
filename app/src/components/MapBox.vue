@@ -214,10 +214,19 @@ function addPointToMap(x, y, nom) {
   vectorLayers.value.cross.getSource().addFeature(feature)
 }
 
-function Add_new_polygone_to_map(tab) {
+function Add_new_polygone_to_map(tab, name) {
   const polygon = new Feature({
     geometry: new Polygon([tab]),
+    name: name,
   })
+
+  const style = new Style({
+    fill: new Fill({
+      color: 'rgba(0, 0, 0, 0)',
+    }),
+  });
+
+  polygon.setStyle(style);
 
   vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
 }
@@ -255,7 +264,7 @@ async function parcour_tab_and_map(url) {
         }
 
         tab_emprise_photo.push(tab_points_3857);
-        Add_new_polygone_to_map(tab_points_3857);
+        Add_new_polygone_to_map(tab_points_3857, name);
 
       }
     }
@@ -417,6 +426,16 @@ onMounted(() => {
         y: clickedCoord[1],
         projection: projection.value,
       })
+
+      if (vectorLayers.value.geomPhoto) {
+        olMap.value.forEachFeatureAtPixel(event.pixel, function (feature) {
+          const name = feature.get('name');
+          if (name) {
+            console.log('Nom du polygone :', name);
+            scanStore.updateSelectedPhotos(name)
+          }
+        });
+      }
     })
 
     eventBus.on('toggle-pin', (isVisible) => {
@@ -476,8 +495,8 @@ onMounted(() => {
       if (storeSelectedGeom.value.length !== 0) {
 
         const polygon = new Feature({
-            geometry: new MultiPolygon([storeSelectedGeom.value]),
-          })
+          geometry: new MultiPolygon([storeSelectedGeom.value]),
+        })
 
         vectorLayers.value.geom.getSource().addFeature(polygon)
 
