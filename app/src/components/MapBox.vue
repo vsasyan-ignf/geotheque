@@ -54,6 +54,7 @@ import { layers_carto, otherLayersCartoFrance } from './composable/baseMap'
 import {
   createPinLayer,
   createGeomLayer,
+  createGeomMouseOverLayer,
   createScanLayer,
   createWFSLayer,
   initOtherVectorLayers,
@@ -98,6 +99,7 @@ const otherLayers = ref(otherLayersCartoFrance)
 const vectorLayers = ref({
   pin: null,
   geom: null,
+  geomMouseOver : null,
   scan: null,
   emprises: null,
   cross: null,
@@ -107,6 +109,7 @@ const vectorLayers = ref({
 const vectorOtherLayers = ref(null)
 
 let tab_emprise_photo = [];
+let last_geom = null;
 
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
@@ -123,6 +126,11 @@ watch(activeTab, (newValue) => {
   updateWMTSLayers(olMap.value, newLayers)
   scanStore.resetCriteria()
   activeLayerIndex.value = 0
+  //faire une fonction pour pas dupliquer avec reset
+  tab_emprise_photo = [];
+  last_geom = null;
+  vectorLayers.value.geomMouseOver.getSource().clear()
+  
 })
 
 const activeLayerIndex = ref(0)
@@ -141,7 +149,22 @@ function toggleLayerVisibility(isVisible) {
   }
 }
 
+function DrawEmpriseGeometry(geometry){
+  //fonction qui affiche la géometry et efface l'ancienne si il y en a
+  if(last_geom != null){
+    vectorLayers.value.geomMouseOver.getSource().clear()
+  }
+  last_geom = geometry
+  const feature = new Feature({
+    geometry: last_geom
+  });
+  vectorLayers.value.geomMouseOver.getSource().addFeature(feature);
+}
+
+
 function isPointOnEmprise(point, emprises) {
+  //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
+  // le point de la souris ,sinon on vide la couche des emprises à afficher
   let i;
   for (i = 0; i < emprises.length; i++) {
     const polygon = new Feature({
@@ -150,9 +173,11 @@ function isPointOnEmprise(point, emprises) {
     const geometry = polygon.getGeometry();
     
     if (geometry.intersectsCoordinate(point)) {
-      console.log("oui");
+      DrawEmpriseGeometry(geometry)
+      return ;
     }
   }
+  vectorLayers.value.geomMouseOver.getSource().clear()
 }
 
 
@@ -297,6 +322,7 @@ onMounted(() => {
     vectorLayers.value = {
       pin: createPinLayer(markerIcon),
       geom: createGeomLayer(),
+      geomMouseOver: createGeomMouseOverLayer(),
       scan: createScanLayer(),
       emprises: createWFSLayer(),
       cross: createPinLayer(crossIcon),
@@ -333,6 +359,7 @@ onMounted(() => {
         vectorLayers.value.emprises,
         vectorLayers.value.pin,
         vectorLayers.value.geom,
+        vectorLayers.value.geomMouseOver,
         vectorLayers.value.scan,
         vectorLayers.value.cross,
         vectorLayers.value.geomPhoto,
@@ -443,6 +470,7 @@ onMounted(() => {
       console.log('--------- REQUETE GEOSERVER --------')
       console.log('NEW URL:', newValue)
       vectorLayers.value.geom.getSource().clear()
+      vectorLayers.value.geomMouseOver.getSource().clear()
       vectorLayers.value.geomPhoto.getSource().clear()
 
       if (storeSelectedGeom.value.length !== 0) {
@@ -509,6 +537,12 @@ onMounted(() => {
       if (vectorLayers.value.emprises.getSource()) {
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
+      }
+      if (vectorLayers.value.geomMouseOver) {
+        vectorLayers.value.geomMouseOver.getSource().clear()
+        tab_emprise_photo = [];
+        last_geom = null;
+
       }
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()

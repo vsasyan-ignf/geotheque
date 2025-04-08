@@ -29,13 +29,30 @@ export function createGeomLayer() {
       stroke: new Stroke({
         color: 'blue',
         width: 2,
+      })
+    }),
+  })
+}
+
+export function createGeomMouseOverLayer() {
+  const source = new VectorSource()
+
+  return new VectorLayer({
+    source,
+    style: new Style({
+      stroke: new Stroke({
+        color: 'black',
+        width: 2,
       }),
       fill: new Fill({
-        color: 'rgba(0, 0, 255, 0.1)',
+        color: 'rgba(255, 0, 234, 0.81)',
       }),
     }),
   })
 }
+
+
+
 
 export function createScanLayer() {
   const source = new VectorSource()
