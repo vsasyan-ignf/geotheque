@@ -461,7 +461,8 @@ onMounted(() => {
         vectorLayers.value.emprises.getSource().setUrl('')
         scanStore.resetCriteria()
         vectorLayers.value.geomMouseOver.getSource().clear()
-  
+        tab_emprise_photo = [];
+        last_geom = null;
       }
     })
 
@@ -535,6 +536,9 @@ onMounted(() => {
       if (dicoUrlPhoto.value.length > 0) {
         vectorLayers.value.geomPhoto.getSource().clear()
         vectorLayers.value.cross.getSource().clear()
+        vectorLayers.value.geomMouseOver.getSource().clear()
+        tab_emprise_photo = [];
+        last_geom = null;
         dicoUrlPhoto.value.forEach((url) => {
           parcour_tab_and_map(url)
         })
@@ -542,6 +546,9 @@ onMounted(() => {
       else {
         vectorLayers.value.geomPhoto.getSource().clear()
         vectorLayers.value.cross.getSource().clear()
+        vectorLayers.value.geomMouseOver.getSource().clear()
+        tab_emprise_photo = [];
+        last_geom = null;
       }
     },
       { deep: true }
@@ -556,6 +563,11 @@ onMounted(() => {
       }
       if (vectorLayers.value.scan) {
         vectorLayers.value.scan.getSource().clear()
+      }
+      if (vectorLayers.value.geomMouseOver) {
+        vectorLayers.value.geomMouseOver.getSource().clear()
+        tab_emprise_photo = [];
+        last_geom = null;
       }
     })
 
