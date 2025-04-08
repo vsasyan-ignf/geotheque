@@ -42,6 +42,7 @@
           <Aide />
         </template>
       </component>
+      <Panier v-if="activeTab === 'phototheque'"/>
     </div>
   </div>
 </template>
@@ -55,7 +56,7 @@ import CartothequeEtranger from './cartotheque/CartothequeEtranger.vue'
 import PhotothequeFrance from './phototheque/PhotothequeFrance.vue'
 import Aide from './Aide.vue'
 import { useScanStore } from './store/scan'
-
+import Panier from './phototheque/Panier.vue'
 const scanStore = useScanStore()
 
 const activeTab = ref('cartotheque')
