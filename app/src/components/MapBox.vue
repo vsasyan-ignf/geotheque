@@ -236,6 +236,10 @@ function Add_new_polygone_to_map(tab, name) {
   })
 
   const style = new Style({
+    stroke: new Stroke({
+        color: 'blue',
+        width: 2,
+      }),
     fill: new Fill({
       color: 'rgba(0, 0, 0, 0)',
     }),
@@ -282,7 +286,7 @@ async function parcour_tab_and_map(url) {
         }
 
         tab_emprise_photo.push(tab_points_3857);
-        Add_new_polygone_to_map(tab_points_3857, name);
+        Add_new_polygone_to_map(tab_points_3857, alphanum);
 
       }
     }
