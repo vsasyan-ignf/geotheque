@@ -428,25 +428,10 @@ onMounted(() => {
       vectorLayers.value.geomPhoto.getSource().clear()
 
       if (storeSelectedGeom.value.length !== 0) {
-        // let polygon = null
-
-        // console.log(storeSelectedGeom.value)
-        // if (storeSelectedGeom.value[0].length === 2) {
-        //   polygon = new Feature({
-        //     geometry: new Polygon([storeSelectedGeom.value]),
-        //   })
-        // } else {
-        //   polygon = new Feature({
-        //     geometry: new MultiPolygon([storeSelectedGeom.value]),
-        //   })
-        // }
-
 
         const polygon = new Feature({
             geometry: new MultiPolygon([storeSelectedGeom.value]),
           })
-
-      
 
         vectorLayers.value.geom.getSource().addFeature(polygon)
 
