@@ -47,7 +47,7 @@
       </div>
     </div>
 
-    <div class="mission-options">
+    <!-- <div class="mission-options">
       <div class="options-label">Options de sélection</div>
       <div class="checkbox-group">
         <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
@@ -61,7 +61,7 @@
           {{ option.label }}
         </label>
       </div>
-    </div>
+    </div> -->
 
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
       <MissionDetailsModal
