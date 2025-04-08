@@ -70,7 +70,6 @@ const {
   storeSelectedScan,
   storeSelectedGeom,
   activeTab,
-  urlPhoto,
   storeHoveredScan,
   deletePhotoAllBool,
   dicoUrlPhoto,
@@ -93,6 +92,8 @@ let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
 
+const checkboxAlphanum = ref(false)
+
 const vectorLayers = ref({
   pin: null,
   geom: null,
@@ -100,9 +101,20 @@ const vectorLayers = ref({
   scan: null,
   emprises: null,
   cross: null,
+  cross_alphanum: null,
   geomPhoto: null,
   hover: null,
 })
+
+const clearAllLayersTA = () => { 
+  vectorLayers.value.scan.getSource().clear()
+  vectorLayers.value.geomPhoto.getSource().clear()
+  vectorLayers.value.cross.getSource().clear()
+  vectorLayers.value.cross_alphanum.getSource().clear()
+  vectorLayers.value.geomMouseOver.getSource().clear()
+  tab_emprise_photo = [];
+  last_geom = null;
+}
 
 
 const vectorOtherLayers = ref(null)
@@ -125,11 +137,6 @@ watch(activeTab, (newValue) => {
   updateWMTSLayers(olMap.value, newLayers)
   scanStore.resetCriteria()
   activeLayerIndex.value = 0
-  //faire une fonction pour pas dupliquer avec reset
-  tab_emprise_photo = [];
-  last_geom = null;
-  vectorLayers.value.geomMouseOver.getSource().clear()
-
 })
 
 const activeLayerIndex = ref(0)
@@ -164,8 +171,7 @@ function DrawEmpriseGeometry(geometry) {
 function isPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
-  let i;
-  for (i = 0; i < emprises.length; i++) {
+  for (let i = 0; i < emprises.length; i++) {
     const polygon = new Feature({
       geometry: new Polygon([emprises[i]]),
     });
@@ -181,7 +187,7 @@ function isPointOnEmprise(point, emprises) {
 
 
 
-function addPointToMap(x, y, nom) {
+function addPointToMap(x, y, nom, crossAlpha=false) {
   const coord = [x, y]
 
   // Créer un style avec une icône et un texte
@@ -210,8 +216,17 @@ function addPointToMap(x, y, nom) {
   })
   feature.setStyle(style)
 
-  // Ajouter la Feature à la couche
-  vectorLayers.value.cross.getSource().addFeature(feature)
+  if (crossAlpha) {
+    vectorLayers.value.cross_alphanum.getSource().addFeature(feature)
+  } else {
+    vectorLayers.value.cross.getSource().addFeature(feature)
+  }
+
+  if (checkboxAlphanum.value) {
+    vectorLayers.value.cross.setVisible(false)
+  } else {
+    vectorLayers.value.cross_alphanum.setVisible(false)
+  }
 }
 
 function Add_new_polygone_to_map(tab, name) {
@@ -221,6 +236,10 @@ function Add_new_polygone_to_map(tab, name) {
   })
 
   const style = new Style({
+    stroke: new Stroke({
+        color: 'blue',
+        width: 2,
+      }),
     fill: new Fill({
       color: 'rgba(0, 0, 0, 0)',
     }),
@@ -235,36 +254,39 @@ async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
     console.log('url TA : ', url)
-    const tab_test = await parcour_txt_to_tab(url)
+    const tab_test = await parcour_txt_to_tab(url);
 
     if (!tab_test || tab_test.length === 0) {
       throw new Error('Le tableau récupéré est vide ou invalide.')
     }
 
-    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857, name
+    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857, alphanum, numero;
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
         //"Centre Actif"
-        x = tab_test[i][1]
-        y = tab_test[i][2]
-        name = tab_test[i][3]
-          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-        addPointToMap(x_3857, y3857, name)
+        x = tab_test[i][1];
+        y = tab_test[i][2];
+        alphanum = tab_test[i][3];
+        numero = tab_test[i][4];
+
+        [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+        addPointToMap(x_3857, y3857, numero)
+        addPointToMap(x_3857, y3857, alphanum, true)
       } else {
         //"Cliche Actif"
-        elem = tab_test[i]
-        tab_points_3857 = []
+        elem = tab_test[i];
+        tab_points_3857 = [];
         for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
           //Commence a 1 car en 0 il y a le type d'image
-          x = elem[i2]
-          y = elem[i2 + 1]
-            ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          x = elem[i2];
+          y = elem[i2 + 1];
+          [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
           //addPointToMap(x_3857, y3857);
-          tab_points_3857.push([x_3857, y3857])
+          tab_points_3857.push([x_3857, y3857]);
         }
 
         tab_emprise_photo.push(tab_points_3857);
-        Add_new_polygone_to_map(tab_points_3857, name);
+        Add_new_polygone_to_map(tab_points_3857, alphanum);
 
       }
     }
@@ -331,6 +353,7 @@ onMounted(() => {
       scan: createScanLayer(),
       emprises: createWFSLayer(),
       cross: createPinLayer(crossIcon),
+      cross_alphanum: createPinLayer(crossIcon),
       geomPhoto: createGeomLayer(),
       hover: createScanLayer(),
     }
@@ -369,6 +392,7 @@ onMounted(() => {
         vectorLayers.value.scan,
         vectorLayers.value.hover,
         vectorLayers.value.cross,
+        vectorLayers.value.cross_alphanum,
         vectorLayers.value.geomPhoto,
         ...Object.values(vectorOtherLayers.value),
       ],
@@ -392,7 +416,6 @@ onMounted(() => {
       projection: olMap.value.getView().getProjection().getCode(),
       target: document.getElementById('mouse-position'),
     });
-    console.log(mousePositionControl);
 
     olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
@@ -478,10 +501,8 @@ onMounted(() => {
       if (newValue === null && olMap.value) {
         Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
         vectorLayers.value.emprises.getSource().setUrl('')
-        scanStore.resetCriteria()
-        vectorLayers.value.geomMouseOver.getSource().clear()
-        tab_emprise_photo = [];
-        last_geom = null;
+        scanStore.resetCriteria();
+        clearAllLayersTA();
       }
     })
 
@@ -552,68 +573,24 @@ onMounted(() => {
     })
 
     watch(dicoUrlPhoto, () => {
+      clearAllLayersTA();
       if (dicoUrlPhoto.value.length > 0) {
-        vectorLayers.value.geomPhoto.getSource().clear()
-        vectorLayers.value.cross.getSource().clear()
-        vectorLayers.value.geomMouseOver.getSource().clear()
-        tab_emprise_photo = [];
-        last_geom = null;
         dicoUrlPhoto.value.forEach((url) => {
           parcour_tab_and_map(url)
         })
-      }
-      else {
-        vectorLayers.value.geomPhoto.getSource().clear()
-        vectorLayers.value.cross.getSource().clear()
-        vectorLayers.value.geomMouseOver.getSource().clear()
-        tab_emprise_photo = [];
-        last_geom = null;
       }
     },
       { deep: true }
     )
 
     watch(deletePhotoAllBool, () => {
-      if (vectorLayers.value.geomPhoto) {
-        vectorLayers.value.geomPhoto.getSource().clear()
-      }
-      if (vectorLayers.value.cross) {
-        vectorLayers.value.cross.getSource().clear()
-      }
-      if (vectorLayers.value.scan) {
-        vectorLayers.value.scan.getSource().clear()
-      }
-      if (vectorLayers.value.geomMouseOver) {
-        vectorLayers.value.geomMouseOver.getSource().clear()
-        tab_emprise_photo = [];
-        last_geom = null;
-      }
+        clearAllLayersTA()
     })
 
     eventBus.on('criteria-reset', () => {
-      if (vectorLayers.value.pin) {
-        vectorLayers.value.pin.getSource().clear()
-      }
-      if (vectorLayers.value.emprises.getSource()) {
-        vectorLayers.value.emprises.getSource().clear()
-        vectorLayers.value.emprises.getSource().setUrl('')
-      }
-      if (vectorLayers.value.geomMouseOver) {
-        vectorLayers.value.geomMouseOver.getSource().clear()
-        tab_emprise_photo = [];
-        last_geom = null;
-
-      }
-      if (vectorLayers.value.geom) {
-        vectorLayers.value.geom.getSource().clear()
-      }
-      if (vectorLayers.value.cross) {
-        vectorLayers.value.cross.getSource().clear()
-      }
-      if (vectorLayers.value.geomPhoto) {
-        vectorLayers.value.geomPhoto.getSource().clear()
-      }
-
+      Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
+      vectorLayers.value.emprises.getSource().setUrl('')
+      clearAllLayersTA()
       clearIntersection()
     })
 
@@ -622,6 +599,23 @@ onMounted(() => {
 })
 
 function handleDisplayOptionChange({ option, value }) {
+
+  if (option === 'alphanumerique') {
+
+    const currentLayer = value ? vectorLayers.value.cross_alphanum : vectorLayers.value.cross;
+    const previousLayer = value ? vectorLayers.value.cross : vectorLayers.value.cross_alphanum;
+
+    const isVisible = previousLayer.getVisible();
+
+    if (isVisible) {
+      previousLayer.setVisible(false)
+      currentLayer.setVisible(true)
+    }
+
+    checkboxAlphanum.value = value
+
+  }
+
   if (option === 'numDepartement') {
     const currentLayerId = value ? 'departements' : 'departements_with_no_name';
     const previousLayerId = value ? 'departements_with_no_name' : 'departements';
@@ -633,10 +627,7 @@ function handleDisplayOptionChange({ option, value }) {
         vectorOtherLayers.value[currentLayerId].setVisible(true);
       }
 
-      const departmentLayer = otherLayers.value.find(layer =>
-        layer.id === previousLayerId ||
-        layer.id === 'departements' ||
-        layer.id === 'departements_with_no_name');
+      const departmentLayer = otherLayers.value.find(layer => layer.id === previousLayerId);
 
       if (departmentLayer) {
         departmentLayer.id = currentLayerId;
@@ -661,10 +652,7 @@ function handleDisplayOptionChange({ option, value }) {
           vectorOtherLayers.value[currentLayerId].setVisible(true);
         }
 
-        const feuilleLayer = otherLayers.value.find(layer =>
-          layer.id === previousLayerId ||
-          layer.id === type.base ||
-          layer.id === type.withoutName);
+        const feuilleLayer = otherLayers.value.find(layer => layer.id === previousLayerId);
 
         if (feuilleLayer) {
           feuilleLayer.id = currentLayerId;

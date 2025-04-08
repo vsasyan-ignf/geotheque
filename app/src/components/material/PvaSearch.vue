@@ -1,6 +1,6 @@
 <template>
   <div class="sub-category-content">
-    <SubCategoryHeader title="Recherche Autres" @close="$emit('close')" />
+    <SubCategoryHeader title="Recherche PVA" @close="$emit('close')" />
     <div class="search-form">
       <div class="form-group">
         <label for="pva-search">Nom de la mission</label>
