@@ -312,7 +312,6 @@ export const useScanStore = defineStore('scan', () => {
             properties: feature.properties,
           }
         })
-        console.log(storeScansData.value)
         storeSelectedScan.value = null
       } else {
         throw new Error('Failed to fetch data')

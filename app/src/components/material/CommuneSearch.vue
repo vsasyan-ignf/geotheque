@@ -170,9 +170,7 @@ function validateCommune() {
       useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
     )
 
-
-
-    scanStore.updateSelectedGeom(contourMercator)
+    scanStore.updateSelectedGeom([contourMercator])
 
     emit('select-commune', point)
   }
