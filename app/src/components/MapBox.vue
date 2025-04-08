@@ -222,12 +222,11 @@ function Add_new_polygone_to_map(tab, name) {
 
   const style = new Style({
     fill: new Fill({
-      color: 'rgba(0, 0, 0, 0)', // Remplissage 100% transparent
+      color: 'rgba(0, 0, 0, 0)',
     }),
   });
 
   polygon.setStyle(style);
-  // polygon.set('name', name,)
 
   vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
 }
@@ -432,13 +431,11 @@ onMounted(() => {
       })
 
       if (vectorLayers.value.geomPhoto) {
-        console.log("aaaaaaaa")
         olMap.value.forEachFeatureAtPixel(event.pixel, function (feature) {
           const name = feature.get('name');
-          console.log("bbbbbbbb", feature.getProperties())
-          console.log(name)
           if (name) {
             console.log('Nom du polygone :', name);
+            scanStore.updateSelectedPhotos(name)
           }
         });
       }

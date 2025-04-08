@@ -15,6 +15,7 @@ export const useScanStore = defineStore('scan', () => {
   let urlPhoto = ref(null)
   let deletePhotoAllBool = ref(false)
   let dicoUrlPhoto = ref([])
+  let SelectedPhotos = ref([])
 
   let collectionsOptions = ref([{ id: '0', name: 'Tous les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
@@ -187,6 +188,13 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateDicoUrlPhoto(newVal) {
     dicoUrlPhoto.value.push(newVal)
+  }
+
+  function updateSelectedPhotos(newVal) {
+    if (!SelectedPhotos.value.includes(newVal)) {
+      SelectedPhotos.value.push(newVal)
+    }
+    console.log('SelectedPhotos', SelectedPhotos.value)
   }
 
   async function fetchOptionsDropDown(propertyName) {
@@ -370,5 +378,7 @@ export const useScanStore = defineStore('scan', () => {
     getFilteredOptions,
     storeHoveredScan,
     updateHoverScan,
+    SelectedPhotos,
+    updateSelectedPhotos,
   }
 })
