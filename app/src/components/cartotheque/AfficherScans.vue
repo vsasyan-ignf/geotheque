@@ -2,7 +2,11 @@
   <div class="scan-box">
     <form class="criteria-form" @submit.prevent="">
       <div class="scan-export-container">
-        <button class="export-scan-button" @click="downloadCSV" :disabled="!isDataAvailable > 0">
+        <button
+          class="export-scan-button"
+          @click="downloadCSV(storeScansData)"
+          :disabled="!isDataAvailable > 0"
+        >
           <div class="button-content">
             <div class="icon-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="export-icon">
@@ -57,6 +61,8 @@ import Dropdown from '@/components/material/Dropdown.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiMonitorEye, mdiBriefcaseDownload, mdiXml } from '@mdi/js'
+import { findSectionScan } from '@/components/composable/getSectionScans'
+import { downloadCSV } from '../composable/download'
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -72,26 +78,38 @@ const textDisableOption = computed(() => {
 })
 
 function generateImageUrl(info) {
-  const lieu = 'METROPOLE'
+  const lieu = findSectionScan(info.COLLECTION)
   let name = ''
   let url = ''
   if (info) {
     if (info.SOUS_COLL !== '') {
-      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      url = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2`
       name = info.ID_CARTE
     } else {
-      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      url = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2`
       name = info.SOUS_COLL
     }
   }
   return { url, name }
 }
 
+function getImageIppsrv(info) {
+  const lieu = findSectionScan(info.COLLECTION)
+  let url = ''
+  if (info) {
+    if (info.SOUS_COLL !== '') {
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
+    } else {
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
+    }
+  }
+  return url
+}
+
 watch(storeSelectedScan, (newVal) => {
   if (newVal) {
     const info = storeSelectedScan.value?.properties
-    const { url, name } = generateImageUrl(info)
-    imageUrl.value = url
+    imageUrl.value = getImageIppsrv(info)
   }
 })
 
@@ -146,47 +164,6 @@ function downloadxml() {
     console.log('URL_XML : ', url_xml)
     window.open(url_xml, 'xml')
   }
-}
-
-function downloadCSV() {
-  const data = storeScansData.value
-
-  if (data) {
-    const newData = data.map((scan) => scan.properties)
-    const csvContent = dicoToFormatCSV(newData)
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
-    const objUrl = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.setAttribute('href', objUrl)
-    link.setAttribute('download', 'scans.csv')
-    link.click()
-  }
-}
-
-function dicoToFormatCSV(arrObj) {
-  const titleKeys = Object.keys(arrObj[0])
-
-  const refinedData = []
-  refinedData.push(titleKeys)
-
-  arrObj.forEach((item) => {
-    refinedData.push(Object.values(item))
-  })
-
-  let csvContent = ''
-
-  refinedData.forEach((row) => {
-    const formattedRow = row.map((field) => {
-      if (field.includes(',')) {
-        return `"${field.replace(/"/g, '""')}"`
-      }
-      return field
-    })
-
-    csvContent += formattedRow.join(';') + '\n'
-  })
-
-  return csvContent.trim()
 }
 </script>
 <style scoped>

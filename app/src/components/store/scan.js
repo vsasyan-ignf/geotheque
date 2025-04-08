@@ -8,6 +8,7 @@ export const useScanStore = defineStore('scan', () => {
   let storeScansData = ref(null)
   let storeSelectedGeom = ref([])
   let storeSelectedScan = ref(null)
+  let storeHoveredScan = ref(null)
   let activeSubCategory = ref(null)
   let activeTab = ref('cartotheque')
   let wkt = ref(null)
@@ -17,39 +18,69 @@ export const useScanStore = defineStore('scan', () => {
 
   let collectionsOptions = ref([{ id: '0', name: 'Tous les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
-  let emulsionOptions = ref([{ id: '0', name: 'Toutes les émulsions' }])
+  let emulsionOptions = ref([{ id: '0', name: 'Toutes les emulsions' }])
+
+  let optionsCache = ref({
+    COLLECTION: null,
+    SUPPORT: null,
+    EMULSION: null,
+    COMMANDITA: null,
+    PRODUCTEUR: null,
+  })
+
+  const getCurrentTypeNames = () => {
+    switch (activeTab.value) {
+      case 'cartotheque_etranger':
+        return 'fondcarte:emprisesscansmonde'
+      case 'phototheque':
+        return 'fondcarte:PVALambert93'
+      case 'phototheque_etranger':
+        return '' // à modif pour prendre en compte le bon wfs
+      default:
+        return 'fondcarte:emprisesscans'
+    }
+  }
 
   let storeCritereSelection = ref({
     yearMin: null,
     yearMax: null,
     scaleMin: null,
     scaleMax: null,
-    selectedCollection: null,
+    collection: null,
+    commanditaire: null,
+    producteur: null,
+    support: null,
+    emulsion: null,
   })
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
-      let empriseURL = 'emprisesscans'
+      let empriseURL = getCurrentTypeNames()
       let [minX, minY, maxX, maxY] = storeBbox.value
 
       if (activeTab.value === 'cartotheque_etranger') {
-        empriseURL = 'emprisesscansmonde'
-          // inverse les coordonnées : lon/lat to lat/lon
-          ;[minX, minY] = [minY, minX]
+        // inverse les coordonnées : lon/lat to lat/lon
+        ;[minX, minY] = [minY, minX]
           ;[maxX, maxY] = [maxY, maxX]
       }
 
-      const { yearMin, yearMax, scaleMin, scaleMax, selectedCollection } =
-        storeCritereSelection.value
+      const {
+        yearMin,
+        yearMax,
+        scaleMin,
+        scaleMax,
+        collection,
+        commanditaire,
+        producteur,
+        support,
+        emulsion,
+      } = storeCritereSelection.value
 
       let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
 
       if (activeTab.value === 'cartotheque_etranger') {
         if (activeSubCategory.value === 'pays') {
           cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
-
-          // if (commanditaire) cqlFilter += `%20AND%20COMMANDITA%3D'${commanditaire}'`
-          // if (producteur) cqlFilter += `%20AND%20PRODUCTEUR%3D'${producteur}'`
         }
       }
 
@@ -58,11 +89,16 @@ export const useScanStore = defineStore('scan', () => {
       if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`
       if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`
 
-      if (selectedCollection) cqlFilter += `%20AND%20COLLECTION%3D'${selectedCollection}'`
+      if (collection) cqlFilter += `%20AND%20COLLECTION%3D'${collection}'`
 
       if (activeTab.value === 'phototheque') {
-        empriseURL = 'PVALambert93'
+        // empriseURL = 'PVALambert93'
         cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
+
+        if (commanditaire) cqlFilter += `%20AND%20COMMANDITA%3D'${commanditaire}'`
+        if (producteur) cqlFilter += `%20AND%20PRODUCTEUR%3D'${producteur}'`
+        if (support) cqlFilter += `%20AND%20SUPPORT%3D'${support}'`
+        if (emulsion) cqlFilter += `%20AND%20EMULSION%3D'${emulsion}'`
       }
 
       return (
@@ -82,12 +118,6 @@ export const useScanStore = defineStore('scan', () => {
     } else if (activeTab.value === 'cartotheque_etranger') {
       storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500
       storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 200000
-    } else if (activeTab.value === 'phototheque') {
-      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500
-      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000
-    } else if (activeTab.value === 'cartotheque_etranger') {
-      storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 2000
-      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 10000000
     } else {
       storeCritereSelection.value.scaleMin = null
       storeCritereSelection.value.scaleMax = null
@@ -114,7 +144,7 @@ export const useScanStore = defineStore('scan', () => {
       yearMax: null,
       scaleMin: null,
       scaleMax: null,
-      selectedCollection: null,
+      collection: null,
     }
 
     storeSelectedGeom.value = []
@@ -131,6 +161,10 @@ export const useScanStore = defineStore('scan', () => {
   function updateSelectedScan(newVal) {
     console.log('updateSelectedScan', newVal)
     storeSelectedScan.value = newVal
+  }
+
+  function updateHoverScan(newVal) {
+    storeHoveredScan.value = newVal
   }
 
   function updateActiveTab(newVal) {
@@ -155,7 +189,7 @@ export const useScanStore = defineStore('scan', () => {
     dicoUrlPhoto.value.push(newVal)
   }
 
-  async function fetchOptions(propertyName) {
+  async function fetchOptionsDropDown(propertyName) {
     try {
       let typeNames = 'fondcarte:emprisesscans'
 
@@ -178,20 +212,72 @@ export const useScanStore = defineStore('scan', () => {
 
       return [defaultOption, ...unique.map((val, i) => ({ id: String(i + 1), name: val }))]
     } catch (error) {
-      console.error(`Erreur fetchOptions ${propertyName} :`, error)
+      console.error(`${propertyName} :`, error)
       return []
     }
   }
 
   async function fetchAllOptions() {
     if (activeTab.value === 'cartotheque' || activeTab.value === 'cartotheque_etranger') {
-      collectionsOptions.value = await fetchOptions('COLLECTION')
+      collectionsOptions.value = await fetchOptionsDropDown('COLLECTION')
     }
 
     if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
-      supportOptions.value = await fetchOptions('SUPPORT')
-      emulsionOptions.value = await fetchOptions('EMULSION')
+      supportOptions.value = await fetchOptionsDropDown('SUPPORT')
+      emulsionOptions.value = await fetchOptionsDropDown('EMULSION')
     }
+  }
+
+  async function fetchOptionsComboBox(propertyName) {
+    if (optionsCache.value[propertyName]) {
+      return optionsCache.value[propertyName]
+    }
+
+    try {
+      const typeNames = getCurrentTypeNames()
+      const wfsUrl = `${config.GEOSERVER_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json`
+
+      const response = await fetch(wfsUrl)
+
+      const data = await response.json()
+
+      const values = data.features
+        .map((feature) => feature.properties[propertyName])
+        .filter((value) => value)
+
+      const uniqueValues = [...new Set(values)].sort()
+
+      const options = [
+        ...uniqueValues.map((value, index) => ({ id: String(index + 1), name: value })),
+      ]
+      optionsCache.value[propertyName] = options
+
+      return options
+    } catch (error) {
+      console.error(`${propertyName}:`, error)
+    }
+  }
+
+  function getFilteredOptions(options, searchTerm) {
+    if (!searchTerm) return options
+
+    return options.filter((option) =>
+      typeof option === 'string'
+        ? option.toLowerCase().includes(searchTerm.toLowerCase())
+        : option.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+  }
+
+  async function getCommanditaireOptions(searchTerm = '') {
+    const options = await fetchOptionsComboBox('COMMANDITA')
+    const filteredOptions = getFilteredOptions(options, searchTerm)
+    return filteredOptions.map((option) => option.name)
+  }
+
+  async function getProducteurOptions(searchTerm = '') {
+    const options = await fetchOptionsComboBox('PRODUCTEUR')
+    const filteredOptions = getFilteredOptions(options, searchTerm)
+    return filteredOptions.map((option) => option.name)
   }
 
   async function storeGet(url) {
@@ -220,8 +306,6 @@ export const useScanStore = defineStore('scan', () => {
       }
     }
   }
-
-
 
   async function storeGetPhoto(url) {
     //Sert a récupérer les infos et ajouter une echelle dans les propriétés ainsi que le nom complet à la place du nom classique
@@ -274,7 +358,7 @@ export const useScanStore = defineStore('scan', () => {
     urlPhoto,
     updateUrlPhoto,
     collectionsOptions,
-    fetchOptions,
+    fetchOptionsDropDown,
     supportOptions,
     emulsionOptions,
     fetchAllOptions,
@@ -282,5 +366,10 @@ export const useScanStore = defineStore('scan', () => {
     updateDeletePhotoAllBool,
     dicoUrlPhoto,
     updateDicoUrlPhoto,
+    getCommanditaireOptions,
+    getProducteurOptions,
+    getFilteredOptions,
+    storeHoveredScan,
+    updateHoverScan,
   }
 })

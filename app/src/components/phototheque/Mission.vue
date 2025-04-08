@@ -28,9 +28,9 @@
         </template>
       </ShakingButton>
 
-      <ShakingButton nameButton="csv" @click="" :disabled="!storeSelectedScan">
+      <ShakingButton nameButton="CSV" @click="downloadCSV(storeScansData)" :disabled="!isDataAvailable > 0">
         <template #icon>
-          <SvgIcon type="mdi" :path="mdiXml" class="mdicon" />
+          <SvgIcon type="mdi" :path="mdiDownloadCircle" class="mdicon" />
         </template>
       </ShakingButton>
     </div>
@@ -77,9 +77,10 @@ import MissionDetailsModal from './MissionDetailsModal.vue'
 import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
+import { downloadCSV } from '../composable/download'
 
 import ShakingButton from '@/components/material/ShakingButton.vue'
-import { mdiPlus, mdiMinus, mdiTrashCan, mdiXml } from '@mdi/js'
+import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle } from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -87,9 +88,9 @@ const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto } = 
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
+const isDataAvailable = computed(() => storeScansData.value && storeScansData.value.length > 0)
 
 // real key : key bien écrit pour afficher dans modal
-
 const all_keys = {
   NOM: 'NOM',
   CHANTIER: 'CHANTIER',
@@ -184,39 +185,6 @@ function DeleteSelectedPhoto() {
   }
 }
 
-/********************** CHECKBOX ************************* */
-
-const selectedOptions = reactive({
-  couplesStereo: false,
-  alphanumeric: false,
-  popup: false,
-  feuilles: true,
-  departements: true,
-})
-
-const checkboxOptions = [
-  { key: 'couplesStereo', label: 'Couples Stéréo' },
-  { key: 'alphanumeric', label: 'Alphanumérique' },
-  { key: 'feuilles', label: 'N° Feuille' },
-  { key: 'departements', label: 'N° Département' },
-]
-
-// Fonction qui gère l'activation/désactivation des cases
-const handleCheckboxChange = (optionKey) => {
-  const isChecked = selectedOptions[optionKey]
-
-  if (optionKey === 'couplesStereo') {
-    console.log('click couplesStereo')
-  } else if (optionKey === 'alphanumeric') {
-    console.log('click alpha')
-  } else if (optionKey === 'popup') {
-    console.log('click popup')
-  } else if (optionKey === 'feuilles') {
-    eventBus.emit('feuilles', isChecked)
-  } else if (optionKey === 'departements') {
-    eventBus.emit('departements', isChecked)
-  }
-}
 </script>
 
 <style scoped>
@@ -420,6 +388,7 @@ const handleCheckboxChange = (optionKey) => {
 
 .mission-options {
   margin-top: 20px;
+  margin-bottom: 40px;
 }
 
 .options-label {

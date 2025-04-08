@@ -3,15 +3,16 @@
     <SideMenu @toggle-visibility="toggleLayerVisibility" />
     <div ref="mapElement" class="ol-map"></div>
     <BasecardSwitcher :layers="layers" :otherLayers="otherLayers" :activeLayerIndex="activeLayerIndex"
-      :currentZoom="currentZoom" @layer-change="changeActiveLayer" @other-layer-toggle="handleOtherLayerToggle" />
+      :currentZoom="currentZoom" @layer-change="changeActiveLayer" @other-layer-toggle="handleOtherLayerToggle"
+      @display-option-change="handleDisplayOptionChange" />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
     <DrawControl v-if="activeTab === 'phototheque'" :map="olMap" :isDrawModeActive="drawModeActive"
       @draw-complete="handleDrawComplete" @draw-mode-activated="handleDrawModeActivated"
       @deactivate-draw-mode="handleDeactivateDrawMode" />
   </div>
-  <div style="z-index: 99999999;" id="mouse-position"></div>
-  <div style="z-index: 99999999;" id="form-proj"></div>
+  <div style="z-index: 99999999" id="mouse-position"></div>
+  <div style="z-index: 99999999" id="form-proj"></div>
 </template>
 
 <script setup>
@@ -43,6 +44,7 @@ import { layers_carto, otherLayersCartoFrance } from './composable/baseMap'
 import {
   createPinLayer,
   createGeomLayer,
+  createGeomMouseOverLayer,
   createScanLayer,
   createWFSLayer,
   initOtherVectorLayers,
@@ -58,14 +60,21 @@ import {
 import { Style, Text, Stroke, Fill } from 'ol/style'
 import Icon from 'ol/style/Icon'
 
-
-import MousePosition from 'ol/control/MousePosition.js';
-import { createStringXY } from 'ol/coordinate.js';
-
+import MousePosition from 'ol/control/MousePosition.js'
+import { createStringXY } from 'ol/coordinate.js'
 
 const scanStore = useScanStore()
-const { storeURL, activeSubCategory, storeSelectedScan, storeSelectedGeom, activeTab, urlPhoto, deletePhotoAllBool, dicoUrlPhoto } =
-  storeToRefs(scanStore)
+const {
+  storeURL,
+  activeSubCategory,
+  storeSelectedScan,
+  storeSelectedGeom,
+  activeTab,
+  urlPhoto,
+  storeHoveredScan,
+  deletePhotoAllBool,
+  dicoUrlPhoto,
+} = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
 const projection = ref('EPSG:3857')
@@ -87,13 +96,19 @@ const otherLayers = ref(otherLayersCartoFrance)
 const vectorLayers = ref({
   pin: null,
   geom: null,
+  geomMouseOver: null,
   scan: null,
   emprises: null,
   cross: null,
   geomPhoto: null,
+  hover: null,
 })
 
+
 const vectorOtherLayers = ref(null)
+
+let tab_emprise_photo = [];
+let last_geom = null;
 
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
@@ -110,6 +125,11 @@ watch(activeTab, (newValue) => {
   updateWMTSLayers(olMap.value, newLayers)
   scanStore.resetCriteria()
   activeLayerIndex.value = 0
+  //faire une fonction pour pas dupliquer avec reset
+  tab_emprise_photo = [];
+  last_geom = null;
+  vectorLayers.value.geomMouseOver.getSource().clear()
+
 })
 
 const activeLayerIndex = ref(0)
@@ -127,6 +147,39 @@ function toggleLayerVisibility(isVisible) {
     }
   }
 }
+
+function DrawEmpriseGeometry(geometry) {
+  //fonction qui affiche la géometry et efface l'ancienne si il y en a
+  if (last_geom != null) {
+    vectorLayers.value.geomMouseOver.getSource().clear()
+  }
+  last_geom = geometry
+  const feature = new Feature({
+    geometry: last_geom
+  });
+  vectorLayers.value.geomMouseOver.getSource().addFeature(feature);
+}
+
+
+function isPointOnEmprise(point, emprises) {
+  //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
+  // le point de la souris ,sinon on vide la couche des emprises à afficher
+  let i;
+  for (i = 0; i < emprises.length; i++) {
+    const polygon = new Feature({
+      geometry: new Polygon([emprises[i]]),
+    });
+    const geometry = polygon.getGeometry();
+
+    if (geometry.intersectsCoordinate(point)) {
+      DrawEmpriseGeometry(geometry)
+      return;
+    }
+  }
+  vectorLayers.value.geomMouseOver.getSource().clear()
+}
+
+
 
 function addPointToMap(x, y, nom) {
   const coord = [x, y]
@@ -201,7 +254,9 @@ async function parcour_tab_and_map(url) {
           tab_points_3857.push([x_3857, y3857])
         }
 
-        Add_new_polygone_to_map(tab_points_3857)
+        tab_emprise_photo.push(tab_points_3857);
+        Add_new_polygone_to_map(tab_points_3857);
+
       }
     }
   } catch (error) {
@@ -258,18 +313,17 @@ function handleDeactivateDrawMode() {
 
 onMounted(() => {
   nextTick(() => {
-
-
-
     const wmtsLayers = createInitialWMTSLayers(layers.value, activeLayerIndex.value)
 
     vectorLayers.value = {
       pin: createPinLayer(markerIcon),
       geom: createGeomLayer(),
+      geomMouseOver: createGeomMouseOverLayer(),
       scan: createScanLayer(),
       emprises: createWFSLayer(),
       cross: createPinLayer(crossIcon),
       geomPhoto: createGeomLayer(),
+      hover: createScanLayer(),
     }
 
     vectorOtherLayers.value = initOtherVectorLayers()
@@ -302,7 +356,9 @@ onMounted(() => {
         vectorLayers.value.emprises,
         vectorLayers.value.pin,
         vectorLayers.value.geom,
+        vectorLayers.value.geomMouseOver,
         vectorLayers.value.scan,
+        vectorLayers.value.hover,
         vectorLayers.value.cross,
         vectorLayers.value.geomPhoto,
         ...Object.values(vectorOtherLayers.value),
@@ -312,36 +368,32 @@ onMounted(() => {
     })
 
     function updateProjectionDisplay() {
-      const projectionCode = olMap.value.getView().getProjection().getCode();
-      const formProjElement = document.getElementById('form-proj');
+      const projectionCode = olMap.value.getView().getProjection().getCode()
+      const formProjElement = document.getElementById('form-proj')
       if (formProjElement) {
-        formProjElement.innerHTML = `Projection: ${projectionCode}`;
+        formProjElement.innerHTML = `Projection: ${projectionCode}`
       }
     }
 
-    updateProjectionDisplay();
-    olMap.value.getView().on('change:projection', updateProjectionDisplay);
+    updateProjectionDisplay()
+    olMap.value.getView().on('change:projection', updateProjectionDisplay)
 
     const mousePositionControl = new MousePosition({
       coordinateFormat: createStringXY(2),
       projection: olMap.value.getView().getProjection().getCode(),
       target: document.getElementById('mouse-position'),
-    });
-
-    console.log(mousePositionControl)
-
+    })
 
     olMap.value.on('pointermove', (event) => {
-      const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
-      const formattedCoordinate = createStringXY(2)(coordinate); // Formatage des coordonnées
+      const coordinate = olMap.value.getEventCoordinate(event.originalEvent)
+      const formattedCoordinate = createStringXY(2)(coordinate) // Formatage des coordonnées
 
       // Mettre à jour l'élément HTML avec la position de la souris
-      const mousePositionElement = document.getElementById('mouse-position');
+      const mousePositionElement = document.getElementById('mouse-position')
       if (mousePositionElement) {
-        mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`;
+        mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`
       }
-
-    });
+    })
 
     initializeIntersectionLayer(olMap)
 
@@ -413,6 +465,7 @@ onMounted(() => {
       console.log('--------- REQUETE GEOSERVER --------')
       console.log('NEW URL:', newValue)
       vectorLayers.value.geom.getSource().clear()
+      vectorLayers.value.geomMouseOver.getSource().clear()
       vectorLayers.value.geomPhoto.getSource().clear()
 
       if (storeSelectedGeom.value.length !== 0) {
@@ -445,6 +498,22 @@ onMounted(() => {
 
       vectorLayers.value.emprises.getSource().refresh()
       await scanStore.storeGet(newValue)
+    })
+
+    watch(storeHoveredScan, (newVal) => {
+      vectorLayers.value.hover.getSource().clear()
+
+      if (
+        storeHoveredScan.value &&
+        storeHoveredScan.value.geom &&
+        storeHoveredScan.value.geom.length > 0
+      ) {
+        const polygon = new Feature({
+          geometry: new Polygon([storeHoveredScan.value.geom[0]]),
+        })
+
+        vectorLayers.value.hover.getSource().addFeature(polygon)
+      }
     })
 
     watch(storeSelectedScan, (newValue) => {
@@ -500,6 +569,12 @@ onMounted(() => {
         vectorLayers.value.emprises.getSource().clear()
         vectorLayers.value.emprises.getSource().setUrl('')
       }
+      if (vectorLayers.value.geomMouseOver) {
+        vectorLayers.value.geomMouseOver.getSource().clear()
+        tab_emprise_photo = [];
+        last_geom = null;
+
+      }
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()
       }
@@ -517,41 +592,60 @@ onMounted(() => {
   })
 })
 
-eventBus.on('departements', (isChecked) => {
-  const currentLayer = isChecked ? 'departements' : 'departements_with_no_name'
-  const previousLayer = isChecked ? 'departements_with_no_name' : 'departements'
+function handleDisplayOptionChange({ option, value }) {
+  if (option === 'numDepartement') {
+    const currentLayerId = value ? 'departements' : 'departements_with_no_name';
+    const previousLayerId = value ? 'departements_with_no_name' : 'departements';
 
-  if (vectorOtherLayers.value?.[previousLayer]) {
-    const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
-    if (isVisible) {
-      vectorOtherLayers.value[previousLayer].setVisible(false)
-      vectorOtherLayers.value[currentLayer].setVisible(true)
-    }
-    // changer la layer dans le BaseCardSwitcher
-    if (otherLayers.value) {
-      otherLayers.value.at(1).id = currentLayer // j'ai mis 1 car je connais l'index mais à change avec un map
-    }
-  }
-})
+    if (vectorOtherLayers.value) {
+      const isVisible = vectorOtherLayers.value[previousLayerId]?.getVisible();
+      if (isVisible) {
+        vectorOtherLayers.value[previousLayerId].setVisible(false);
+        vectorOtherLayers.value[currentLayerId].setVisible(true);
+      }
 
-eventBus.on('feuilles', (isChecked) => {
-  const currentLayer = isChecked ? 'feuilles_france' : 'feuilles_france_with_no_name'
-  const previousLayer = isChecked ? 'feuilles_france_with_no_name' : 'feuilles_france'
+      const departmentLayer = otherLayers.value.find(layer =>
+        layer.id === previousLayerId ||
+        layer.id === 'departements' ||
+        layer.id === 'departements_with_no_name');
 
-  if (vectorOtherLayers.value?.[previousLayer]) {
-    const isVisible = vectorOtherLayers.value[previousLayer].getVisible()
-
-    if (isVisible) {
-      vectorOtherLayers.value[previousLayer].setVisible(false)
-      vectorOtherLayers.value[currentLayer].setVisible(true)
-    }
-    // changer la layer dans le BaseCardSwitcher
-    if (otherLayers.value?.length >= 2) {
-      otherLayers.value.at(2).id = currentLayer
+      if (departmentLayer) {
+        departmentLayer.id = currentLayerId;
+      }
     }
   }
-})
+
+  if (option === 'numFeuille') {
+    const layerTypes = [
+      { base: 'feuilles_france', withoutName: 'feuilles_france_with_no_name' },
+      { base: 'feuilles_monde', withoutName: 'feuilles_monde_with_no_name' }
+    ];
+
+    layerTypes.forEach(type => {
+      const currentLayerId = value ? type.base : type.withoutName;
+      const previousLayerId = value ? type.withoutName : type.base;
+
+      if (vectorOtherLayers.value && vectorOtherLayers.value[previousLayerId]) {
+        const isVisible = vectorOtherLayers.value[previousLayerId].getVisible();
+        if (isVisible) {
+          vectorOtherLayers.value[previousLayerId].setVisible(false);
+          vectorOtherLayers.value[currentLayerId].setVisible(true);
+        }
+
+        const feuilleLayer = otherLayers.value.find(layer =>
+          layer.id === previousLayerId ||
+          layer.id === type.base ||
+          layer.id === type.withoutName);
+
+        if (feuilleLayer) {
+          feuilleLayer.id = currentLayerId;
+        }
+      }
+    });
+  }
+}
 provide('eventBus', eventBus)
+
 </script>
 
 <style scoped>
@@ -570,13 +664,15 @@ provide('eventBus', eventBus)
   flex: 1;
 }
 
-
 #mouse-position {
   position: absolute;
   bottom: 10px;
   right: 40%;
   /* À 10px du côté gauche */
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255,
+      255,
+      255,
+      0.8);
   /* Fond semi-transparent pour améliorer la lisibilité */
   padding: 5px;
   /* Un peu de padding */
@@ -584,6 +680,7 @@ provide('eventBus', eventBus)
   /* Taille du texte */
   border-radius: 5px;
   /* Coins arrondis pour une meilleure esthétique */
+  color: black;
 }
 
 #form-proj {
@@ -602,5 +699,6 @@ provide('eventBus', eventBus)
   /* Coins arrondis pour le formulaire */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   /* Ombre douce pour faire ressortir le formulaire */
+  color: black;
 }
 </style>
