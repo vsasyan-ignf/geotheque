@@ -264,9 +264,6 @@ async function parcour_tab_and_map(url) {
         }
 
         tab_emprise_photo.push(tab_points_3857);
-        // console.log('tab_emprise_photo:', tab_emprise_photo)
-        // console.log('tab_points_3857:', tab_points_3857)
-        // console.log('nameeeeeeeeeeeee:', name)
         Add_new_polygone_to_map(tab_points_3857, name);
 
       }
