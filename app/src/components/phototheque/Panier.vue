@@ -31,7 +31,14 @@
               <div v-for="(item, index) in cartItems" :key="index" class="cart-item">
                 <div class="item-content">
                   <div class="item-image">
-                    <img :src="getImageUrl(item)" alt="Aperçu de la mission" class="mission-image" />
+                    <img 
+                      :src="getImageUrl(item)" 
+                      alt="Aperçu de la mission" 
+                      class="mission-image" 
+                      @error="
+                        (e) => 
+                          e.target.src = NoImageAvailable"
+                    />
                   </div>
                   <div class="item-info">
                     <div class="item-header">
@@ -99,8 +106,9 @@
 </template>
   
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import SvgIcon from '@jamescoyle/vue-icon'
+import NoImageAvailable from '@/assets/no-image-available.jpg'
 import { 
   mdiCartOutline, 
   mdiCartOff, 
@@ -125,9 +133,9 @@ const cartItemsCount = computed(() => cartItems.value.length)
 
 const getImageUrl = (item) => {
   if (item) {
-  const year = item.chantier.substring(0, 4)
-  let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2&CVT=jpeg`
-  return imageUrl
+    const year = item.chantier.substring(0, 4)
+    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2&CVT=jpeg`
+    return imageUrl
   }
 }
 
