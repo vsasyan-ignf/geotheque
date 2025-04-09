@@ -13,6 +13,9 @@ export const useScanStore = defineStore('scan', () => {
   let activeTab = ref('cartotheque')
   let wkt = ref(null)
   let urlPhoto = ref(null)
+  let deletePhotoAllBool = ref(false)
+  let dicoUrlPhoto = ref([])
+  let SelectedPhotos = ref([])
 
   let collectionsOptions = ref([{ id: '0', name: 'Tous les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
@@ -59,7 +62,7 @@ export const useScanStore = defineStore('scan', () => {
       if (activeTab.value === 'cartotheque_etranger') {
         // inverse les coordonnées : lon/lat to lat/lon
         ;[minX, minY] = [minY, minX]
-        ;[maxX, maxY] = [maxY, maxX]
+          ;[maxX, maxY] = [maxY, maxX]
       }
 
       const {
@@ -150,6 +153,7 @@ export const useScanStore = defineStore('scan', () => {
     storeScansData.value = []
     storeSelectedScan.value = null
     urlPhoto.value = null
+    dicoUrlPhoto.value = []
   }
 
   function updateSelectedGeom(newVal) {
@@ -157,6 +161,7 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateSelectedScan(newVal) {
+    console.log('updateSelectedScan', newVal)
     storeSelectedScan.value = newVal
   }
 
@@ -176,6 +181,21 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateUrlPhoto(newVal) {
     urlPhoto.value = newVal
+  }
+
+  function updateDeletePhotoAllBool(newVal) {
+    deletePhotoAllBool.value = newVal
+  }
+
+  function updateDicoUrlPhoto(newVal) {
+    dicoUrlPhoto.value.push(newVal)
+  }
+
+  function updateSelectedPhotos(newVal) {
+    if (!SelectedPhotos.value.includes(newVal)) {
+      SelectedPhotos.value.push(newVal)
+    }
+    console.log('SelectedPhotos', SelectedPhotos.value)
   }
 
   async function fetchOptionsDropDown(propertyName) {
@@ -282,7 +302,7 @@ export const useScanStore = defineStore('scan', () => {
           const data = await response.json()
           storeScansData.value = data.features.map((feature, index) => ({
             id: index,
-            geom: feature.geometry.coordinates[0],
+            geom: feature.geometry.coordinates,
             name: feature.properties.ID_CARTE ?? feature.properties.NOM, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
             properties: feature.properties,
           }))
@@ -307,12 +327,11 @@ export const useScanStore = defineStore('scan', () => {
           const name = feature.properties.CHANTIER + getSuffixPhoto(feature)
           return {
             id: index,
-            geom: feature.geometry.coordinates[0],
+            geom: feature.geometry.coordinates,
             name: name,
             properties: feature.properties,
           }
         })
-        console.log(storeScansData.value)
         storeSelectedScan.value = null
       } else {
         throw new Error('Failed to fetch data')
@@ -351,10 +370,16 @@ export const useScanStore = defineStore('scan', () => {
     supportOptions,
     emulsionOptions,
     fetchAllOptions,
+    deletePhotoAllBool,
+    updateDeletePhotoAllBool,
+    dicoUrlPhoto,
+    updateDicoUrlPhoto,
     getCommanditaireOptions,
     getProducteurOptions,
     getFilteredOptions,
     storeHoveredScan,
     updateHoverScan,
+    SelectedPhotos,
+    updateSelectedPhotos,
   }
 })

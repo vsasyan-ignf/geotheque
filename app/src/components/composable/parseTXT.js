@@ -25,7 +25,8 @@ export async function parcour_txt_to_tab(url) {
       centre_y,
       previous_x,
       previous_y,
-      nom_numero_photo
+      nom_numero_photo,
+      numero
     let tab2
     let tab_fin = []
 
@@ -38,8 +39,9 @@ export async function parcour_txt_to_tab(url) {
         centre_x = roundToTwo(parseFloat(mots[taille_ligne - 3]))
         centre_y = roundToTwo(parseFloat(mots[taille_ligne - 2]))
         nom_numero_photo = mots[3]
+        numero = mots[9]
         tab2.push('Centre Actif')
-        tab2.push(centre_x, centre_y, nom_numero_photo)
+        tab2.push(centre_x, centre_y, nom_numero_photo, numero)
 
         tab_fin.push(tab2)
       } else if (mots.length > 3 && mots[2] == 'Cliche Actif') {

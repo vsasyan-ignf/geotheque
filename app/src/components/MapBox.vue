@@ -2,25 +2,14 @@
   <div class="map-container">
     <SideMenu @toggle-visibility="toggleLayerVisibility" />
     <div ref="mapElement" class="ol-map"></div>
-    <BasecardSwitcher
-      :layers="layers"
-      :otherLayers="otherLayers"
-      :activeLayerIndex="activeLayerIndex"
-      :currentZoom="currentZoom"
-      @layer-change="changeActiveLayer"
-      @other-layer-toggle="handleOtherLayerToggle"
-      @display-option-change="handleDisplayOptionChange"
-    />
+    <BasecardSwitcher :layers="layers" :otherLayers="otherLayers" :activeLayerIndex="activeLayerIndex"
+      :currentZoom="currentZoom" @layer-change="changeActiveLayer" @other-layer-toggle="handleOtherLayerToggle"
+      @display-option-change="handleDisplayOptionChange" />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
-    <DrawControl
-      v-if="activeTab === 'phototheque'"
-      :map="olMap"
-      :isDrawModeActive="drawModeActive"
-      @draw-complete="handleDrawComplete"
-      @draw-mode-activated="handleDrawModeActivated"
-      @deactivate-draw-mode="handleDeactivateDrawMode"
-    />
+    <DrawControl v-if="activeTab === 'phototheque'" :map="olMap" :isDrawModeActive="drawModeActive"
+      @draw-complete="handleDrawComplete" @draw-mode-activated="handleDrawModeActivated"
+      @deactivate-draw-mode="handleDeactivateDrawMode" />
   </div>
   <div style="z-index: 99999999" id="mouse-position"></div>
   <div style="z-index: 99999999" id="form-proj"></div>
@@ -82,8 +71,9 @@ const {
   storeSelectedScan,
   storeSelectedGeom,
   activeTab,
-  urlPhoto,
   storeHoveredScan,
+  deletePhotoAllBool,
+  dicoUrlPhoto,
 } = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -103,17 +93,30 @@ let layers = ref(layers_carto)
 const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
 
+const checkboxAlphanum = ref(false)
+
 const vectorLayers = ref({
   pin: null,
   geom: null,
-  geomMouseOver : null,
+  geomMouseOver: null,
   scan: null,
   emprises: null,
   cross: null,
+  cross_alphanum: null,
   geomPhoto: null,
   geomCouple: null,
   hover: null,
 })
+
+const clearAllLayersTA = () => { 
+  vectorLayers.value.scan.getSource().clear()
+  vectorLayers.value.geomPhoto.getSource().clear()
+  vectorLayers.value.cross.getSource().clear()
+  vectorLayers.value.cross_alphanum.getSource().clear()
+  vectorLayers.value.geomMouseOver.getSource().clear()
+  tab_emprise_photo = [];
+  last_geom = null;
+}
 
 
 const vectorOtherLayers = ref(null)
@@ -163,9 +166,9 @@ function toggleLayerVisibility(isVisible) {
   }
 }
 
-function DrawEmpriseGeometry(geometry){
+function DrawEmpriseGeometry(geometry) {
   //fonction qui affiche la géometry et efface l'ancienne si il y en a
-  if(last_geom != null){
+  if (last_geom != null) {
     vectorLayers.value.geomMouseOver.getSource().clear()
   }
   last_geom = geometry
@@ -179,16 +182,15 @@ function DrawEmpriseGeometry(geometry){
 function isPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
-  let i;
-  for (i = 0; i < emprises.length; i++) {
+  for (let i = 0; i < emprises.length; i++) {
     const polygon = new Feature({
       geometry: new Polygon([emprises[i]]),
     });
     const geometry = polygon.getGeometry();
-    
+
     if (geometry.intersectsCoordinate(point)) {
       DrawEmpriseGeometry(geometry)
-      return ;
+      return;
     }
   }
   vectorLayers.value.geomMouseOver.getSource().clear()
@@ -220,7 +222,7 @@ function updateCoupleVisibility(bool) {
 
 
 
-function addPointToMap(x, y, nom) {
+function addPointToMap(x, y, nom, crossAlpha=false) {
   const coord = [x, y]
 
   // Créer un style avec une icône et un texte
@@ -249,14 +251,36 @@ function addPointToMap(x, y, nom) {
   })
   feature.setStyle(style)
 
-  // Ajouter la Feature à la couche
-  vectorLayers.value.cross.getSource().addFeature(feature)
+  if (crossAlpha) {
+    vectorLayers.value.cross_alphanum.getSource().addFeature(feature)
+  } else {
+    vectorLayers.value.cross.getSource().addFeature(feature)
+  }
+
+  if (checkboxAlphanum.value) {
+    vectorLayers.value.cross.setVisible(false)
+  } else {
+    vectorLayers.value.cross_alphanum.setVisible(false)
+  }
 }
 
-function Add_new_polygone_to_map(tab) {
+function Add_new_polygone_to_map(tab, name) {
   const polygon = new Feature({
     geometry: new Polygon([tab]),
+    name: name,
   })
+
+  const style = new Style({
+    stroke: new Stroke({
+        color: 'blue',
+        width: 2,
+      }),
+    fill: new Fill({
+      color: 'rgba(0, 0, 0, 0)',
+    }),
+  });
+
+  polygon.setStyle(style);
 
   vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
 }
@@ -265,21 +289,26 @@ async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
     console.log('url TA : ', url)
-    const tab_test = await parcour_txt_to_tab(url)
+    const tab_test = await parcour_txt_to_tab(url);
 
     if (!tab_test || tab_test.length === 0) {
       throw new Error('Le tableau récupéré est vide ou invalide.')
     }
 
-    let elem, i, i2, x, y, x_3857, y3857, tab_points_cliche_3857,tab_points_couple_3857, name
+    let elem, i, i2, x, y, x_3857, y3857, tab_points_cliche_3857,tab_points_couple_3857, alphanum, numero;
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
         //"Centre Actif"
         x = tab_test[i][1]
         y = tab_test[i][2]
-        name = tab_test[i][3]
-        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-        //addPointToMap(x_3857, y3857, name)
+
+        alphanum = tab_test[i][3];
+        numero = tab_test[i][4];
+
+        [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+        addPointToMap(x_3857, y3857, numero)
+        addPointToMap(x_3857, y3857, alphanum, true)
+
       } else if (tab_test[i][0] == 'Cliche Actif') {
         elem = tab_test[i]
         tab_points_cliche_3857 = []
@@ -292,7 +321,7 @@ async function parcour_tab_and_map(url) {
         }
 
         tab_emprise_photo.push(tab_points_cliche_3857);
-        Add_new_polygone_to_map(tab_points_cliche_3857);
+        Add_new_polygone_to_map(tab_points_cliche_3857, alphanum);
         
       }
       else if(tab_test[i][0] == 'Couple Actif'){
@@ -378,6 +407,7 @@ onMounted(() => {
       scan: createScanLayer(),
       emprises: createWFSLayer(),
       cross: createPinLayer(crossIcon),
+      cross_alphanum: createPinLayer(crossIcon),
       geomPhoto: createGeomLayer(),
       geomCouple: createGeomCoupleLayer(),
       hover: createScanLayer(),
@@ -417,6 +447,7 @@ onMounted(() => {
         vectorLayers.value.scan,
         vectorLayers.value.hover,
         vectorLayers.value.cross,
+        vectorLayers.value.cross_alphanum,
         vectorLayers.value.geomPhoto,
         vectorLayers.value.geomCouple,
         ...Object.values(vectorOtherLayers.value),
@@ -441,13 +472,12 @@ onMounted(() => {
       projection: olMap.value.getView().getProjection().getCode(),
       target: document.getElementById('mouse-position'),
     });
-    console.log(mousePositionControl);
 
-        olMap.value.on('pointermove', (event) => {
+    olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
-      const formattedCoordinate = createStringXY(2)(coordinate); 
+      const formattedCoordinate = createStringXY(2)(coordinate);
 
-      isPointOnEmprise(coordinate,tab_emprise_photo)
+      isPointOnEmprise(coordinate, tab_emprise_photo)
 
       const mousePositionElement = document.getElementById('mouse-position');
       if (mousePositionElement) {
@@ -476,6 +506,16 @@ onMounted(() => {
         y: clickedCoord[1],
         projection: projection.value,
       })
+
+      if (vectorLayers.value.geomPhoto) {
+        olMap.value.forEachFeatureAtPixel(event.pixel, function (feature) {
+          const name = feature.get('name');
+          if (name) {
+            console.log('Nom du polygone :', name);
+            scanStore.updateSelectedPhotos(name)
+          }
+        });
+      }
     })
 
     eventBus.on('toggle-pin', (isVisible) => {
@@ -518,7 +558,8 @@ onMounted(() => {
       if (newValue === null && olMap.value) {
         Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
         vectorLayers.value.emprises.getSource().setUrl('')
-        scanStore.resetCriteria()
+        scanStore.resetCriteria();
+        clearAllLayersTA();
       }
     })
 
@@ -531,16 +572,10 @@ onMounted(() => {
       vectorLayers.value.geomPhoto.getSource().clear()
 
       if (storeSelectedGeom.value.length !== 0) {
-        let polygon = null
-        if (storeSelectedGeom.value[0].length === 2) {
-          polygon = new Feature({
-            geometry: new Polygon([storeSelectedGeom.value]),
-          })
-        } else {
-          polygon = new Feature({
-            geometry: new MultiPolygon([storeSelectedGeom.value]),
-          })
-        }
+
+        const polygon = new Feature({
+          geometry: new MultiPolygon([storeSelectedGeom.value]),
+        })
 
         vectorLayers.value.geom.getSource().addFeature(polygon)
 
@@ -571,7 +606,7 @@ onMounted(() => {
         storeHoveredScan.value.geom.length > 0
       ) {
         const polygon = new Feature({
-          geometry: new Polygon([storeHoveredScan.value.geom[0]]),
+          geometry: new MultiPolygon(storeHoveredScan.value.geom),
         })
 
         vectorLayers.value.hover.getSource().addFeature(polygon)
@@ -588,50 +623,36 @@ onMounted(() => {
         storeSelectedScan.value.geom.length > 0
       ) {
         const polygon = new Feature({
-          geometry: new Polygon([storeSelectedScan.value.geom[0]]),
+          geometry: new MultiPolygon(storeSelectedScan.value.geom),
         })
 
         vectorLayers.value.scan.getSource().addFeature(polygon)
       }
     })
 
-    watch(urlPhoto, () => {
-      if (urlPhoto.value) {
-        vectorLayers.value.geomPhoto.getSource().clear()
-        vectorLayers.value.cross.getSource().clear()
-        parcour_tab_and_map(urlPhoto.value)
+    watch(dicoUrlPhoto, () => {
+      clearAllLayersTA();
+      if (dicoUrlPhoto.value.length > 0) {
+        dicoUrlPhoto.value.forEach((url) => {
+          parcour_tab_and_map(url)
+        })
       }
+    },
+      { deep: true }
+    )
+
+    watch(deletePhotoAllBool, () => {
+        clearAllLayersTA()
     })
 
     eventBus.on('criteria-reset', () => {
-      if (vectorLayers.value.pin) {
-        vectorLayers.value.pin.getSource().clear()
-      }
-      if (vectorLayers.value.emprises.getSource()) {
-        vectorLayers.value.emprises.getSource().clear()
-        vectorLayers.value.emprises.getSource().setUrl('')
-      }
-      if (vectorLayers.value.geomMouseOver) {
-        vectorLayers.value.geomMouseOver.getSource().clear()
-        tab_emprise_photo = [];
-        last_geom = null;
-
-      }
+      Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
+      vectorLayers.value.emprises.getSource().setUrl('')
+      clearAllLayersTA()
       if (vectorLayers.value.geomCouple) {
          vectorLayers.value.geomCouple.getSource().clear()
          tab_couples_photo = [];
       }
-
-      if (vectorLayers.value.geom) {
-        vectorLayers.value.geom.getSource().clear()
-      }
-      if (vectorLayers.value.cross) {
-        vectorLayers.value.cross.getSource().clear()
-      }
-      if (vectorLayers.value.geomPhoto) {
-        vectorLayers.value.geomPhoto.getSource().clear()
-      }
-
       clearIntersection()
     })
 
@@ -640,22 +661,36 @@ onMounted(() => {
 })
 
 function handleDisplayOptionChange({ option, value }) {
+
+  if (option === 'alphanumerique') {
+
+    const currentLayer = value ? vectorLayers.value.cross_alphanum : vectorLayers.value.cross;
+    const previousLayer = value ? vectorLayers.value.cross : vectorLayers.value.cross_alphanum;
+
+    const isVisible = previousLayer.getVisible();
+
+    if (isVisible) {
+      previousLayer.setVisible(false)
+      currentLayer.setVisible(true)
+    }
+
+    checkboxAlphanum.value = value
+
+  }
+
   if (option === 'numDepartement') {
     const currentLayerId = value ? 'departements' : 'departements_with_no_name';
     const previousLayerId = value ? 'departements_with_no_name' : 'departements';
-    
+
     if (vectorOtherLayers.value) {
       const isVisible = vectorOtherLayers.value[previousLayerId]?.getVisible();
       if (isVisible) {
         vectorOtherLayers.value[previousLayerId].setVisible(false);
         vectorOtherLayers.value[currentLayerId].setVisible(true);
       }
-      
-      const departmentLayer = otherLayers.value.find(layer =>
-        layer.id === previousLayerId ||
-        layer.id === 'departements' ||
-        layer.id === 'departements_with_no_name');
-      
+
+      const departmentLayer = otherLayers.value.find(layer => layer.id === previousLayerId);
+
       if (departmentLayer) {
         departmentLayer.id = currentLayerId;
       }
@@ -673,23 +708,20 @@ function handleDisplayOptionChange({ option, value }) {
       { base: 'feuilles_france', withoutName: 'feuilles_france_with_no_name' },
       { base: 'feuilles_monde', withoutName: 'feuilles_monde_with_no_name' }
     ];
-    
+
     layerTypes.forEach(type => {
       const currentLayerId = value ? type.base : type.withoutName;
       const previousLayerId = value ? type.withoutName : type.base;
-      
+
       if (vectorOtherLayers.value && vectorOtherLayers.value[previousLayerId]) {
         const isVisible = vectorOtherLayers.value[previousLayerId].getVisible();
         if (isVisible) {
           vectorOtherLayers.value[previousLayerId].setVisible(false);
           vectorOtherLayers.value[currentLayerId].setVisible(true);
         }
-        
-        const feuilleLayer = otherLayers.value.find(layer =>
-          layer.id === previousLayerId ||
-          layer.id === type.base ||
-          layer.id === type.withoutName);
-        
+
+        const feuilleLayer = otherLayers.value.find(layer => layer.id === previousLayerId);
+
         if (feuilleLayer) {
           feuilleLayer.id = currentLayerId;
         }
@@ -720,29 +752,38 @@ provide('eventBus', eventBus)
 #mouse-position {
   position: absolute;
   bottom: 10px;
-  right: 40%; /* À 10px du côté gauche */
-  background-color: rgba(
-    255,
-    255,
-    255,
-    0.8
-  ); /* Fond semi-transparent pour améliorer la lisibilité */
-  padding: 5px; /* Un peu de padding */
-  font-size: 14px; /* Taille du texte */
-  border-radius: 5px; /* Coins arrondis pour une meilleure esthétique */
+  right: 40%;
+  /* À 10px du côté gauche */
+  background-color: rgba(255,
+      255,
+      255,
+      0.8);
+  /* Fond semi-transparent pour améliorer la lisibilité */
+  padding: 5px;
+  /* Un peu de padding */
+  font-size: 14px;
+  /* Taille du texte */
+  border-radius: 5px;
+  /* Coins arrondis pour une meilleure esthétique */
   color: black;
 }
 
 #form-proj {
-  position: absolute; /* Positionner de manière absolue par rapport au conteneur parent */
+  position: absolute;
+  /* Positionner de manière absolue par rapport au conteneur parent */
   bottom: 10px;
   right: 24%;
-  z-index: 99999999; /* Priorité sur les autres éléments */
-  background-color: rgba(255, 255, 255, 0.8); /* Fond légèrement transparent pour le formulaire */
-  padding: 5px; /* Un peu de padding autour du formulaire */
+  z-index: 99999999;
+  /* Priorité sur les autres éléments */
+  background-color: rgba(255, 255, 255, 0.8);
+  /* Fond légèrement transparent pour le formulaire */
+  padding: 5px;
+  /* Un peu de padding autour du formulaire */
   font-size: 14px;
-  border-radius: 5px; /* Coins arrondis pour le formulaire */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre douce pour faire ressortir le formulaire */
+  border-radius: 5px;
+  /* Coins arrondis pour le formulaire */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* Ombre douce pour faire ressortir le formulaire */
   color: black;
 }
 </style>

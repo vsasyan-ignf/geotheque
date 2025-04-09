@@ -78,10 +78,10 @@ const textDisableOption = computed(() => {
 })
 
 function generateImageUrl(info) {
-  const lieu = findSectionScan(info.COLLECTION)
   let name = ''
   let url = ''
   if (info) {
+    const lieu = findSectionScan(info.COLLECTION)
     if (info.SOUS_COLL !== '') {
       url = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2`
       name = info.ID_CARTE
@@ -94,9 +94,9 @@ function generateImageUrl(info) {
 }
 
 function getImageIppsrv(info) {
-  const lieu = findSectionScan(info.COLLECTION)
   let url = ''
   if (info) {
+    const lieu = findSectionScan(info.COLLECTION)
     if (info.SOUS_COLL !== '') {
       url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
     } else {
