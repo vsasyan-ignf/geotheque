@@ -74,6 +74,7 @@ const {
   storeHoveredScan,
   deletePhotoAllBool,
   dicoUrlPhoto,
+  SelectedPhotos,
 } = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -180,8 +181,21 @@ function DrawEmpriseGeometry(geometry) {
   vectorLayers.value.geomMouseOver.getSource().addFeature(feature);
 }
 
+function isPointOnEmprise(point,emprises){
+  for (let i = 0; i < emprises.length; i++) {
+    const polygon = new Feature({
+      geometry: new Polygon([emprises[i]]),
+    });
+    const geometry = polygon.getGeometry();
 
-function isPointOnEmprise(point, emprises) {
+    if (geometry.intersectsCoordinate(point)) {
+      return true;
+    }
+  }
+  return false
+}
+
+function showPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
   for (let i = 0; i < emprises.length; i++) {
@@ -213,8 +227,6 @@ function updateCoupleVisibility(bool) {
   let i;
   vectorLayers.value.geomCouple.getSource().clear()
 
-  console.log("oui")
-  console.log(bool)
   if ( bool && tab_couples_photo.length > 0) {
     for(i=0;i<tab_couples_photo.length;i++){
       Add_new_couple_to_map(tab_couples_photo[i])
@@ -340,7 +352,7 @@ async function parcour_tab_and_map(url) {
           tab_points_couple_3857.push([x_3857, y3857])
         }
         //Tableau de couples
-      tab_couples_photo.push(tab_points_couple_3857);
+        tab_couples_photo.push(tab_points_couple_3857);
 
 
       }
@@ -468,11 +480,14 @@ onMounted(() => {
       target: document.getElementById('mouse-position'),
     });
 
+
+
+
     olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
       const formattedCoordinate = createStringXY(2)(coordinate);
 
-      isPointOnEmprise(coordinate, tab_emprise_photo)
+      showPointOnEmprise(coordinate, tab_emprise_photo)
 
       const mousePositionElement = document.getElementById('mouse-position');
       if (mousePositionElement) {
@@ -510,6 +525,15 @@ onMounted(() => {
           }
         });
       }
+
+      if(isPointOnEmprise(clickedCoord,tab_emprise_photo)){
+        console.log("oui on");
+        for (const [key, value] of Object.entries(SelectedPhotos.value[0])) {
+          console.log(`${key}: ${value}`);
+        }
+      }
+      
+
     })
 
     eventBus.on('toggle-pin', (isVisible) => {
@@ -692,7 +716,6 @@ function handleDisplayOptionChange({ option, value }) {
   }
 
   if(option ==='couplesStero' ){ 
-    console.log("change")
     updateCoupleVisibility(value)
   } 
 
