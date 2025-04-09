@@ -36,14 +36,29 @@ export async function parcour_txt_to_tab(url) {
       taille_ligne = mots.length
       tab2 = []
       if (mots.length > 3 && mots[2] == 'Centre Actif') {
-        centre_x = roundToTwo(parseFloat(mots[taille_ligne - 3]))
-        centre_y = roundToTwo(parseFloat(mots[taille_ligne - 2]))
-        nom_numero_photo = mots[3]
-        numero = mots[9]
-        tab2.push('Centre Actif')
-        tab2.push(centre_x, centre_y, nom_numero_photo, numero)
-
-        tab_fin.push(tab2)
+        centre_x = roundToTwo(parseFloat(mots[taille_ligne - 3]));
+        centre_y = roundToTwo(parseFloat(mots[taille_ligne - 2]));
+        nom_numero_photo = mots[3];
+        numero = mots[9];
+        const infos = {
+          nom: nom_numero_photo,
+          chantier: mots[5],
+          date_vol: mots[7],
+          numero: mots[9],
+          heure: mots[10],
+          res_min: mots[13],
+          res_moy: mots[14],
+          res_max: mots[15],
+          altitude: mots[16],
+          zicad: mots[17],
+          conditions_pdv: mots[18],
+          dispo: mots[19],
+          focale: mots[20],
+          format: mots[21]
+        }
+        tab2.push('Centre Actif');
+        tab2.push(centre_x, centre_y, nom_numero_photo, numero, infos);
+        tab_fin.push(tab2);
       } else if (mots.length > 3 && mots[2] == 'Cliche Actif') {
         if (mots.length < 28) {
           console.error('Problème longueur Cliche Actif')
