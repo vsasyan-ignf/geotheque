@@ -29,6 +29,9 @@ export function createGeomLayer() {
       stroke: new Stroke({
         color: 'blue',
         width: 2,
+        fill: new Fill({
+          color: 'rgba(83, 149, 236, 0.29)',
+        }),
       })
     }),
   })
@@ -50,6 +53,25 @@ export function createGeomMouseOverLayer() {
     }),
   })
 }
+
+export function createGeomCoupleLayer() {
+  const source = new VectorSource()
+
+  return new VectorLayer({
+    source,
+    style: new Style({
+      stroke: new Stroke({
+        color: 'black',
+        width: 2,
+      }),
+      fill: new Fill({
+        color: 'rgba(43, 243, 127, 0.88)',
+      }),
+    }),
+  })
+}
+
+
 
 
 

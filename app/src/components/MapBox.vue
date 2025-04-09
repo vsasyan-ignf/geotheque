@@ -45,6 +45,7 @@ import {
   createPinLayer,
   createGeomLayer,
   createGeomMouseOverLayer,
+  createGeomCoupleLayer,
   createScanLayer,
   createWFSLayer,
   initOtherVectorLayers,
@@ -103,6 +104,7 @@ const vectorLayers = ref({
   cross: null,
   cross_alphanum: null,
   geomPhoto: null,
+  geomCouple: null,
   hover: null,
 })
 
@@ -120,6 +122,7 @@ const clearAllLayersTA = () => {
 const vectorOtherLayers = ref(null)
 
 let tab_emprise_photo = [];
+let  tab_couples_photo = [];
 let last_geom = null;
 
 function hideOtherLayers() {
@@ -137,6 +140,14 @@ watch(activeTab, (newValue) => {
   updateWMTSLayers(olMap.value, newLayers)
   scanStore.resetCriteria()
   activeLayerIndex.value = 0
+  //faire une fonction pour pas dupliquer avec reset
+  tab_emprise_photo = [];
+  tab_couples_photo = [];
+  last_geom = null;
+  vectorLayers.value.geomMouseOver.getSource().clear()
+  vectorLayers.value.geomCouple.getSource().clear()
+
+  
 })
 
 const activeLayerIndex = ref(0)
@@ -183,6 +194,30 @@ function isPointOnEmprise(point, emprises) {
     }
   }
   vectorLayers.value.geomMouseOver.getSource().clear()
+}
+
+
+function Add_new_couple_to_map(tab) {
+  const feature = new Feature({
+    geometry: new Polygon([tab]),
+  })
+
+  vectorLayers.value.geomCouple.getSource().addFeature(feature)
+}
+
+
+
+function updateCoupleVisibility(bool) {
+  let i;
+  vectorLayers.value.geomCouple.getSource().clear()
+
+  console.log("oui")
+  console.log(bool)
+  if ( bool && tab_couples_photo.length > 0) {
+    for(i=0;i<tab_couples_photo.length;i++){
+      Add_new_couple_to_map(tab_couples_photo[i])
+    }
+  }
 }
 
 
@@ -260,34 +295,53 @@ async function parcour_tab_and_map(url) {
       throw new Error('Le tableau récupéré est vide ou invalide.')
     }
 
-    let elem, i, i2, x, y, x_3857, y3857, tab_points_3857, alphanum, numero;
+    let elem, i, i2, x, y, x_3857, y3857, tab_points_cliche_3857,tab_points_couple_3857, alphanum, numero;
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
         //"Centre Actif"
-        x = tab_test[i][1];
-        y = tab_test[i][2];
+        x = tab_test[i][1]
+        y = tab_test[i][2]
+
         alphanum = tab_test[i][3];
         numero = tab_test[i][4];
 
         [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
         addPointToMap(x_3857, y3857, numero)
         addPointToMap(x_3857, y3857, alphanum, true)
-      } else {
-        //"Cliche Actif"
-        elem = tab_test[i];
-        tab_points_3857 = [];
+
+      } else if (tab_test[i][0] == 'Cliche Actif') {
+        elem = tab_test[i]
+        tab_points_cliche_3857 = []
         for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
           //Commence a 1 car en 0 il y a le type d'image
-          x = elem[i2];
-          y = elem[i2 + 1];
-          [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
-          //addPointToMap(x_3857, y3857);
-          tab_points_3857.push([x_3857, y3857]);
+          x = elem[i2]
+          y = elem[i2 + 1]
+          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          tab_points_cliche_3857.push([x_3857, y3857])
         }
 
-        tab_emprise_photo.push(tab_points_3857);
-        Add_new_polygone_to_map(tab_points_3857, alphanum);
+        tab_emprise_photo.push(tab_points_cliche_3857);
+        Add_new_polygone_to_map(tab_points_cliche_3857, alphanum);
+        
+      }
+      else if(tab_test[i][0] == 'Couple Actif'){
+        elem = tab_test[i]
+        tab_points_couple_3857 = []
+        for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
+          //Commence a 1 car en 0 il y a le type d'image
+          x = elem[i2]
+          y = elem[i2 + 1]
+          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          addPointToMap(x_3857, y3857);
+          tab_points_couple_3857.push([x_3857, y3857])
+        }
+        //Tableau de couples
+      tab_couples_photo.push(tab_points_couple_3857);
 
+
+      }
+      else{
+        console.error("probleme dans parcour tab")
       }
     }
   } catch (error) {
@@ -355,6 +409,7 @@ onMounted(() => {
       cross: createPinLayer(crossIcon),
       cross_alphanum: createPinLayer(crossIcon),
       geomPhoto: createGeomLayer(),
+      geomCouple: createGeomCoupleLayer(),
       hover: createScanLayer(),
     }
 
@@ -394,6 +449,7 @@ onMounted(() => {
         vectorLayers.value.cross,
         vectorLayers.value.cross_alphanum,
         vectorLayers.value.geomPhoto,
+        vectorLayers.value.geomCouple,
         ...Object.values(vectorOtherLayers.value),
       ],
       view: view,
@@ -432,6 +488,7 @@ onMounted(() => {
     initializeIntersectionLayer(olMap)
 
     olMap.value.on('click', (event) => {
+      parcour_tab_and_map('./2021_FD 01_C_20.txt')
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
       if (showPin.value) {
         vectorLayers.value.pin.getSource().clear()
@@ -511,6 +568,7 @@ onMounted(() => {
       console.log('NEW URL:', newValue)
       vectorLayers.value.geom.getSource().clear()
       vectorLayers.value.geomMouseOver.getSource().clear()
+      vectorLayers.value.geomCouple.getSource().clear()
       vectorLayers.value.geomPhoto.getSource().clear()
 
       if (storeSelectedGeom.value.length !== 0) {
@@ -591,6 +649,10 @@ onMounted(() => {
       Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
       vectorLayers.value.emprises.getSource().setUrl('')
       clearAllLayersTA()
+      if (vectorLayers.value.geomCouple) {
+         vectorLayers.value.geomCouple.getSource().clear()
+         tab_couples_photo = [];
+      }
       clearIntersection()
     })
 
@@ -635,6 +697,12 @@ function handleDisplayOptionChange({ option, value }) {
     }
   }
 
+  if(option ==='couplesStero' ){ 
+    console.log("change")
+    updateCoupleVisibility(value)
+  } 
+
+  
   if (option === 'numFeuille') {
     const layerTypes = [
       { base: 'feuilles_france', withoutName: 'feuilles_france_with_no_name' },

@@ -153,6 +153,7 @@ export const useScanStore = defineStore('scan', () => {
     storeScansData.value = []
     storeSelectedScan.value = null
     urlPhoto.value = null
+    dicoUrlPhoto.value = []
   }
 
   function updateSelectedGeom(newVal) {
