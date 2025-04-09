@@ -95,6 +95,8 @@ const otherLayers = ref(otherLayersCartoFrance)
 
 const checkboxAlphanum = ref(false)
 
+const infosPva = ref({})
+
 const vectorLayers = ref({
   pin: null,
   geom: null,
@@ -295,19 +297,21 @@ async function parcour_tab_and_map(url) {
       throw new Error('Le tableau récupéré est vide ou invalide.')
     }
 
-    let elem, i, i2, x, y, x_3857, y3857, tab_points_cliche_3857,tab_points_couple_3857, alphanum, numero;
+    let elem, i, i2, x, y, x_3857, y3857, tab_points_cliche_3857,tab_points_couple_3857, alphanum, numero, infos;
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
         //"Centre Actif"
         x = tab_test[i][1]
         y = tab_test[i][2]
-
         alphanum = tab_test[i][3];
         numero = tab_test[i][4];
+        infos = tab_test[i][5];
 
-        [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-        addPointToMap(x_3857, y3857, numero)
-        addPointToMap(x_3857, y3857, alphanum, true)
+        [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
+        addPointToMap(x_3857, y3857, numero);
+        addPointToMap(x_3857, y3857, alphanum, true);
+
+        infosPva.value[alphanum] = infos;
 
       } else if (tab_test[i][0] == 'Cliche Actif') {
         elem = tab_test[i]
@@ -440,16 +444,7 @@ onMounted(() => {
       target: mapElement.value,
       layers: [
         ...wmtsLayers,
-        vectorLayers.value.emprises,
-        vectorLayers.value.pin,
-        vectorLayers.value.geom,
-        vectorLayers.value.geomMouseOver,
-        vectorLayers.value.scan,
-        vectorLayers.value.hover,
-        vectorLayers.value.cross,
-        vectorLayers.value.cross_alphanum,
-        vectorLayers.value.geomPhoto,
-        vectorLayers.value.geomCouple,
+        ...Object.values(vectorLayers.value),
         ...Object.values(vectorOtherLayers.value),
       ],
       view: view,
@@ -488,6 +483,7 @@ onMounted(() => {
     initializeIntersectionLayer(olMap)
 
     olMap.value.on('click', (event) => {
+
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
       if (showPin.value) {
         vectorLayers.value.pin.getSource().clear()
@@ -510,8 +506,7 @@ onMounted(() => {
         olMap.value.forEachFeatureAtPixel(event.pixel, function (feature) {
           const name = feature.get('name');
           if (name) {
-            console.log('Nom du polygone :', name);
-            scanStore.updateSelectedPhotos(name)
+            scanStore.updateSelectedPhotos(infosPva.value[name])
           }
         });
       }
