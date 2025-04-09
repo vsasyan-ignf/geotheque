@@ -1,13 +1,16 @@
 // config.js
 const env = process.env.NODE_ENV || 'development'
 
+const params = new URLSearchParams(window.location.search);
+console.log(params.get('apikey'))
+
 const config = {
   // environnement de dev
   development: {
     COMMUNE_URL: 'https://geo.api.gouv.fr/communes',
     DEPARTEMENT_URL: 'https://geo.api.gouv.fr/departements',
     NOMINATIM_URL: 'https://nominatim.openstreetmap.org',
-    GEOSERVER_URL: 'http://localhost:8088/geoserver',
+    GEOSERVER_URL: 'https://data.geopf.fr/private/wfs/?service=WFS&version=2.0.0/',
     MTD_FRANCE_URL: 'http://localhost:8081/Misphot/',
     MTD_MONDE_URL: 'http://localhost:8081/Misphot_ETRANGER/',
     IMG_FRANCE_URL: 'http://localhost:8082/Misphot_Image',
@@ -17,6 +20,7 @@ const config = {
     IIPSRV_PREFIX_CARTE: '/Cartes/',
     IIPSRV_PREFIX_FRANCE: '/Misphot_Image/',
     IIPSRV_PREFIX_MONDE: '/Misphot_Image_Etranger/',
+    APIKEY: params.get('apikey')
   },
 
   // environnement de prod
@@ -34,7 +38,9 @@ const config = {
     IIPSRV_PREFIX_CARTE: '/Carto/Patrimoine/Cartes/',
     IIPSRV_PREFIX_FRANCE: '/Misphot_Image/',
     IIPSRV_PREFIX_MONDE: '/Misphot_Image_Etranger/',
+    APIKEY: params.get('apikey')
   },
 }
 
 export default config[env]
+
