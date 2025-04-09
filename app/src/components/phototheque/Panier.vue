@@ -112,6 +112,7 @@ import {
 import { downloadCSV } from '../composable/download'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
+import config from '@/config'
 
 const scanStore = useScanStore()
 const { SelectedPhotos, removeSelectedPhoto } = storeToRefs(scanStore)
@@ -119,14 +120,15 @@ const { SelectedPhotos, removeSelectedPhoto } = storeToRefs(scanStore)
 const cartItems = ref([])
 const isCartModalOpen = ref(false)
 
-const baseImageUrl = "http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Misphot_Image/Lambert93/2021/2021_FD%2001_C_20/21FD0120x00001_03343.jp2&RGN=0.45,0.45,0.1,0.1&CVT=jpeg"
-
-
 // doit retourner les éléments du panier
 const cartItemsCount = computed(() => cartItems.value.length)
 
 const getImageUrl = (item) => {
-  return baseImageUrl
+  if (item) {
+  const year = item.chantier.substring(0, 4)
+  let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2&CVT=jpeg`
+  return imageUrl
+  }
 }
 
 const openCartModal = () => {
@@ -137,18 +139,6 @@ const openCartModal = () => {
 const closeCartModal = () => {
   isCartModalOpen.value = false
   document.body.style.overflow = ''
-}
-
-const addToCart = (item) => {
-  // verif pannier si exist
-  const exists = cartItems.value.some(cartItem => 
-    cartItem.properties.IDENTIFIAN === item.properties.IDENTIFIAN
-  )
-  
-  if (!exists) {
-    cartItems.value.push(item)
-    // localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
-  }
 }
 
 const removeFromCart = (index) => {
@@ -168,14 +158,29 @@ const clearCart = () => {
 
 const downloadCartItems = () => {
   if (cartItems.value.length > 0) {
-    downloadCSV(cartItems.value)
+    const formattedData = cartItems.value.map(item => {
+      return { properties: item };
+    });
+    
+    downloadCSV(formattedData);
   }
 }
-
 const viewMission = (item) => {
     // ajouter le lien ippsrv
-  console.log('visu ippsrv:', item)
- 
+  if (item) {
+    const year = item.chantier.substring(0, 4)
+    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2`
+    const urlParams = new URLSearchParams(new URL(imageUrl).search)
+    const imageUrlServ = urlParams.get('FIF')
+
+    localStorage.setItem('imageUrl', imageUrlServ)
+    window.open(
+      `/geotheque/iipmooviewer/index.html?server=${config.IIPSRV_URL}&image=${encodeURIComponent(imageUrlServ)}`,
+      '_blank',
+    )
+  } else {
+    console.error("L'URL de l'image est indéfinie.")
+  }
 }
 
 const initCart = () => {
