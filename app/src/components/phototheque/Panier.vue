@@ -35,7 +35,7 @@
                   </div>
                   <div class="item-info">
                     <div class="item-header">
-                      <div class="item-name">{{ item.name }}</div>
+                      <div class="item-name">{{ item.nom }}</div>
                       <div class="item-actions">
                         <button class="view-button" @click="viewMission(item)" title="Visualiser">
                           <SvgIcon type="mdi" :path="mdiEyeOutline" class="view-icon" />
@@ -48,25 +48,25 @@
                     
                     <div class="item-details">
                       <div class="item-row">
-                        <div class="property-label">Année:</div>
-                        <div class="property-value">{{ item.properties.ANNÉE }}</div>
+                        <div class="property-label">Date de vol:</div>
+                        <div class="property-value">{{ item.date_vol }}</div>
                       </div>
                       <div class="item-row">
                         <div class="property-label">Format:</div>
-                        <div class="property-value">{{ item.properties.FORMAT }}</div>
+                        <div class="property-value">{{ item.format }}</div>
                       </div>
                       <div class="item-row">
                         <div class="property-label">Chantier:</div>
-                        <div class="property-value long-text">{{ item.properties.CHANTIER || 'Non spécifié' }}</div>
+                        <div class="property-value long-text">{{ item.chantier || 'Non spécifié' }}</div>
                       </div>
                       <div class="item-row">
                         <div class="property-label">Nom:</div>
-                        <div class="property-value long-text">{{ item.properties.NOM || 'Non spécifié' }}</div>
+                        <div class="property-value long-text">{{ item.nom || 'Non spécifié' }}</div>
                       </div>
                       <div class="item-row">
                         <div class="property-label">Disponibilité:</div>
                         <div class="property-value long-text">
-                          {{ item.properties.DISPONIBILITE || 'Non spécifiée' }}
+                          {{ item.dispo || 'Non spécifiée' }}
                         </div>
                       </div>
                     </div>
@@ -92,13 +92,6 @@
               <SvgIcon type="mdi" :path="mdiDownloadCircle" class="download-icon" />
               Télécharger CSV
             </button>
-            <button 
-              class="sample-button" 
-              @click="addSampleItems"
-              :disabled="cartItemsCount > 0"
-            >
-              exemple
-            </button>
           </div>
         </div>
       </div>
@@ -106,7 +99,7 @@
 </template>
   
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import SvgIcon from '@jamescoyle/vue-icon'
 import { 
   mdiCartOutline, 
@@ -121,7 +114,7 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { storeSelectedScan } = storeToRefs(scanStore)
+const { SelectedPhotos } = storeToRefs(scanStore)
 
 const cartItems = ref([])
 const isCartModalOpen = ref(false)
@@ -180,51 +173,6 @@ const viewMission = (item) => {
  
 }
 
-const generateSampleItems = () => {
-  return [
-    {
-      name: "1982_F2320-2420_0016",
-      properties: {
-        IDENTIFIAN: "MP001",
-        ANNÉE: "2023",
-        FORMAT: "JPEG",
-        CHANTIER: "1982_F_2320-2420_P_30000",
-        NOM: "1982_F2320-2420_0016",
-        DISPONIBILITE: "Image prétraitée compressée avec perte 26460 x 17004 (Photothèque)"
-      }
-    },
-    {
-      name: "Thomas Boutonne",
-      properties: {
-        IDENTIFIAN: "MR002",
-        ANNÉE: "2022",
-        FORMAT: "RAW",
-        CHANTIER: "1982_F_2320-2420_P_30000",
-        NOM: "Thomas Boutonne",
-        DISPONIBILITE: "Image prétraitée compressée avec perte 26460 x 17004 (Photothèque)"
-      }
-    },
-    {
-      name: "1982_F2320-2420_0016",
-      properties: {
-        IDENTIFIAN: "PA003",
-        ANNÉE: "2024",
-        FORMAT: "TIFF",
-        CHANTIER: "Studio Photo",
-        NOM: "Pierre Martin",
-        DISPONIBILITE: "Image prétraitée compressée avec perte 26460 x 17004 (Photothèque)"
-      }
-    }
-  ]
-}
-
-const addSampleItems = () => {
-  if (cartItems.value.length === 0) {
-    cartItems.value = generateSampleItems()
-    localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
-  }
-}
-
 const initCart = () => {
   const savedCart = localStorage.getItem('phototheque-cart')
   if (savedCart) {
@@ -232,11 +180,22 @@ const initCart = () => {
   }
 }
 
-defineExpose({
-  addToCart
-})
-
-initCart()
+watch(SelectedPhotos, (newVal) => {
+  console.log('SelectedPhotos changed:', newVal)
+  if (newVal && newVal.length > 0) {
+    cartItems.value = newVal.map(item => {
+      return {
+        nom: item.properties?.nom || item.nom || 'Sans nom',
+        date_vol: item.properties?.date_vol || item.date_vol || 'Non spécifiée',
+        format: item.properties?.format || item.format || 'Non spécifié',
+        chantier: item.properties?.chantier || item.chantier || 'Non spécifié',
+        dispo: item.properties?.dispo || item.dispo || 'Non spécifiée',
+        properties: item.properties || item
+      }
+    })
+    localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
+  }
+}, { deep: true })
 </script>
 
 <style scoped>
