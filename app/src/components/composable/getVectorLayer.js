@@ -65,7 +65,7 @@ export function createGeomCoupleLayer() {
         width: 2,
       }),
       fill: new Fill({
-        color: 'rgba(100, 97, 100, 0.88)',
+        color: 'rgba(43, 243, 127, 0.88)',
       }),
     }),
   })

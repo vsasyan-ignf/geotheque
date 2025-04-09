@@ -196,26 +196,25 @@ function isPointOnEmprise(point, emprises) {
 
 
 function Add_new_couple_to_map(tab) {
-  const polygon = new Feature({
+  const feature = new Feature({
     geometry: new Polygon([tab]),
   })
 
-  vectorLayers.value.geomCouple.getSource().addFeature(polygon)
+  vectorLayers.value.geomCouple.getSource().addFeature(feature)
 }
 
 
 
-function updateCoupleVisibility() {
-  // D'abord, on efface les couples existants
+function updateCoupleVisibility(bool) {
+  let i;
   vectorLayers.value.geomCouple.getSource().clear()
-  
-  // Si l'option 'couplesStero' est activée, on affiche les couples
-  const couplesActive = otherLayers.value.find(layer => layer.id === 'couplesStero')?.visible || false
-  
-  if (couplesActive && tab_couples_photo.length > 0) {
-    tab_couples_photo.forEach(coupleCoords => {
-      Add_new_couple_to_map(coupleCoords)
-    })
+
+  console.log("oui")
+  console.log(bool)
+  if ( bool && tab_couples_photo.length > 0) {
+    for(i=0;i<tab_couples_photo.length;i++){
+      Add_new_couple_to_map(tab_couples_photo[i])
+    }
   }
 }
 
@@ -280,7 +279,7 @@ async function parcour_tab_and_map(url) {
         y = tab_test[i][2]
         name = tab_test[i][3]
         ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-        addPointToMap(x_3857, y3857, name)
+        //addPointToMap(x_3857, y3857, name)
       } else if (tab_test[i][0] == 'Cliche Actif') {
         elem = tab_test[i]
         tab_points_cliche_3857 = []
@@ -304,13 +303,12 @@ async function parcour_tab_and_map(url) {
           x = elem[i2]
           y = elem[i2 + 1]
           ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-          //addPointToMap(x_3857, y3857);
+          addPointToMap(x_3857, y3857);
           tab_points_couple_3857.push([x_3857, y3857])
         }
-      console.log(tab_points_couple_3857);
-      // a changer soit le sotcker soit directement l'afficher
-
+        //Tableau de couples
       tab_couples_photo.push(tab_points_couple_3857);
+
 
       }
       else{
@@ -420,6 +418,7 @@ onMounted(() => {
         vectorLayers.value.hover,
         vectorLayers.value.cross,
         vectorLayers.value.geomPhoto,
+        vectorLayers.value.geomCouple,
         ...Object.values(vectorOtherLayers.value),
       ],
       view: view,
@@ -528,6 +527,7 @@ onMounted(() => {
       console.log('NEW URL:', newValue)
       vectorLayers.value.geom.getSource().clear()
       vectorLayers.value.geomMouseOver.getSource().clear()
+      vectorLayers.value.geomCouple.getSource().clear()
       vectorLayers.value.geomPhoto.getSource().clear()
 
       if (storeSelectedGeom.value.length !== 0) {
@@ -619,6 +619,7 @@ onMounted(() => {
       }
       if (vectorLayers.value.geomCouple) {
          vectorLayers.value.geomCouple.getSource().clear()
+         tab_couples_photo = [];
       }
 
       if (vectorLayers.value.geom) {
@@ -661,13 +662,9 @@ function handleDisplayOptionChange({ option, value }) {
     }
   }
 
-  if(option ==='couplesStero' ){
-    const coupleLayer = otherLayers.value.find(layer => layer.id === 'couplesStero')
-    if (coupleLayer) {
-      coupleLayer.visible = value
-    }
-    
-    updateCoupleVisibility()
+  if(option ==='couplesStero' ){ 
+    console.log("change")
+    updateCoupleVisibility(value)
   } 
 
   
