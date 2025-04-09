@@ -56,6 +56,7 @@ import {
   createPinLayer,
   createGeomLayer,
   createGeomMouseOverLayer,
+  createGeomCoupleLayer,
   createScanLayer,
   createWFSLayer,
   initOtherVectorLayers,
@@ -110,6 +111,7 @@ const vectorLayers = ref({
   emprises: null,
   cross: null,
   geomPhoto: null,
+  geomCouple: null,
   hover: null,
 })
 
@@ -117,6 +119,7 @@ const vectorLayers = ref({
 const vectorOtherLayers = ref(null)
 
 let tab_emprise_photo = [];
+let  tab_couples_photo = [];
 let last_geom = null;
 
 function hideOtherLayers() {
@@ -136,8 +139,11 @@ watch(activeTab, (newValue) => {
   activeLayerIndex.value = 0
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = [];
+  tab_couples_photo = [];
   last_geom = null;
   vectorLayers.value.geomMouseOver.getSource().clear()
+  vectorLayers.value.geomCouple.getSource().clear()
+
   
 })
 
@@ -186,6 +192,31 @@ function isPointOnEmprise(point, emprises) {
     }
   }
   vectorLayers.value.geomMouseOver.getSource().clear()
+}
+
+
+function Add_new_couple_to_map(tab) {
+  const polygon = new Feature({
+    geometry: new Polygon([tab]),
+  })
+
+  vectorLayers.value.geomCouple.getSource().addFeature(polygon)
+}
+
+
+
+function updateCoupleVisibility() {
+  // D'abord, on efface les couples existants
+  vectorLayers.value.geomCouple.getSource().clear()
+  
+  // Si l'option 'couplesStero' est activée, on affiche les couples
+  const couplesActive = otherLayers.value.find(layer => layer.id === 'couplesStero')?.visible || false
+  
+  if (couplesActive && tab_couples_photo.length > 0) {
+    tab_couples_photo.forEach(coupleCoords => {
+      Add_new_couple_to_map(coupleCoords)
+    })
+  }
 }
 
 
@@ -278,6 +309,9 @@ async function parcour_tab_and_map(url) {
         }
       console.log(tab_points_couple_3857);
       // a changer soit le sotcker soit directement l'afficher
+
+      tab_couples_photo.push(tab_points_couple_3857);
+
       }
       else{
         console.error("probleme dans parcour tab")
@@ -347,6 +381,7 @@ onMounted(() => {
       emprises: createWFSLayer(),
       cross: createPinLayer(crossIcon),
       geomPhoto: createGeomLayer(),
+      geomCouple: createGeomCoupleLayer(),
       hover: createScanLayer(),
     }
 
@@ -582,6 +617,10 @@ onMounted(() => {
         last_geom = null;
 
       }
+      if (vectorLayers.value.geomCouple) {
+         vectorLayers.value.geomCouple.getSource().clear()
+      }
+
       if (vectorLayers.value.geom) {
         vectorLayers.value.geom.getSource().clear()
       }
@@ -623,15 +662,14 @@ function handleDisplayOptionChange({ option, value }) {
   }
 
   if(option ==='couplesStero' ){
-    if(value){
-      console.log('on')
-      //afficher les emprises de couples
+    const coupleLayer = otherLayers.value.find(layer => layer.id === 'couplesStero')
+    if (coupleLayer) {
+      coupleLayer.visible = value
     }
-    else{
-      console.log('off')
-      //enlever les emprises de couples
-    }
+    
+    updateCoupleVisibility()
   } 
+
   
   if (option === 'numFeuille') {
     const layerTypes = [
