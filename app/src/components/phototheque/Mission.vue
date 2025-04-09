@@ -33,6 +33,10 @@
           <SvgIcon type="mdi" :path="mdiDownloadCircle" class="mdicon" />
         </template>
       </ShakingButton>
+
+      <ShakingButton nameButton="XML" @click="downloadxml" :disabled="!storeSelectedScan">
+        <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
+      </ShakingButton>
     </div>
 
     <div v-if="selectedMission" class="mission-preview slide-in">
@@ -68,7 +72,7 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { downloadCSV } from '../composable/download'
 import ShakingButton from '@/components/material/ShakingButton.vue'
-import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle } from '@mdi/js'
+import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle, mdiXml } from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -170,6 +174,19 @@ function DeleteSelectedPhoto() {
   const index = dicoUrlPhoto.value.indexOf(deleteUrl);
   if (index > -1) {
     dicoUrlPhoto.value.splice(index, 1);
+  }
+}
+
+let url_xml = ref(``)
+
+function downloadxml() {
+  if (storeSelectedScan.value) {
+    const info = storeSelectedScan.value?.properties
+    console.log('info : ', info)
+    const lieu = 'Lambert93'
+    url_xml = `${config.MTD_FRANCE_URL}${lieu}/${info.ANNÉE}/${info.CHANTIER}/${info.CHANTIER}.xml`
+    console.log('URL_XML : ', url_xml)
+    window.open(url_xml, 'xml')
   }
 }
 
