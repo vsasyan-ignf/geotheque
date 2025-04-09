@@ -57,17 +57,16 @@
         @close="closeModal" @download="downloadDetails" />
     </div>
   </div>
+
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, computed } from 'vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 import MissionDetailsModal from './MissionDetailsModal.vue'
-import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { downloadCSV } from '../composable/download'
-
 import ShakingButton from '@/components/material/ShakingButton.vue'
 import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle } from '@mdi/js'
 import config from '@/config'
@@ -284,6 +283,7 @@ function DeleteSelectedPhoto() {
   border: 1px solid #ddd;
   overflow: hidden;
   transition: all 0.3s ease;
+  margin-bottom: 100px;
 }
 
 .mission-header {
