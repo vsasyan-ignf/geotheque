@@ -40,6 +40,7 @@ export async function parcour_txt_to_tab(url) {
         centre_y = roundToTwo(parseFloat(mots[taille_ligne - 2]));
         nom_numero_photo = mots[3];
         numero = mots[9];
+
         const infos = {
           nom: nom_numero_photo,
           chantier: mots[5],
@@ -51,11 +52,12 @@ export async function parcour_txt_to_tab(url) {
           res_max: mots[15],
           altitude: mots[16],
           zicad: mots[17],
-          conditions_pdv: mots[18],
-          dispo: mots[19],
-          focale: mots[20],
-          format: mots[21]
+          conditions_pdv: mots[19],
+          dispo: mots[20],
+          focale: mots[21],
+          format: mots[22]
         }
+
         tab2.push('Centre Actif');
         tab2.push(centre_x, centre_y, nom_numero_photo, numero, infos);
         tab_fin.push(tab2);
