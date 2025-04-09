@@ -114,7 +114,7 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
-const { SelectedPhotos } = storeToRefs(scanStore)
+const { SelectedPhotos, removeSelectedPhoto } = storeToRefs(scanStore)
 
 const cartItems = ref([])
 const isCartModalOpen = ref(false)
@@ -147,18 +147,23 @@ const addToCart = (item) => {
   
   if (!exists) {
     cartItems.value.push(item)
-    localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
+    // localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
   }
 }
 
 const removeFromCart = (index) => {
+  const itemToRemove = cartItems.value[index]
   cartItems.value.splice(index, 1)
-  localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
+  
+  scanStore.removeSelectedPhoto(itemToRemove)
+  
+  // localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
 }
 
 const clearCart = () => {
   cartItems.value = []
-  localStorage.setItem('phototheque-cart', JSON.stringify([]))
+  SelectedPhotos.value = []
+  // localStorage.setItem('phototheque-cart', JSON.stringify([]))
 }
 
 const downloadCartItems = () => {
@@ -174,28 +179,24 @@ const viewMission = (item) => {
 }
 
 const initCart = () => {
-  const savedCart = localStorage.getItem('phototheque-cart')
+  // const savedCart = localStorage.getItem('phototheque-cart')
   if (savedCart) {
     cartItems.value = JSON.parse(savedCart)
   }
 }
 
 watch(SelectedPhotos, (newVal) => {
-  console.log('SelectedPhotos changed:', newVal)
   if (newVal && newVal.length > 0) {
-    cartItems.value = newVal.map(item => {
-      return {
-        nom: item.properties?.nom || item.nom || 'Sans nom',
-        date_vol: item.properties?.date_vol || item.date_vol || 'Non spécifiée',
-        format: item.properties?.format || item.format || 'Non spécifié',
-        chantier: item.properties?.chantier || item.chantier || 'Non spécifié',
-        dispo: item.properties?.dispo || item.dispo || 'Non spécifiée',
-        properties: item.properties || item
-      }
-    })
-    localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
+    cartItems.value = newVal
+    // localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
   }
 }, { deep: true })
+
+// defineExpose({
+//   addToCart
+// })
+
+// initCart()
 </script>
 
 <style scoped>
