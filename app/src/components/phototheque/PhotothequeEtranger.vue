@@ -1,90 +1,58 @@
 <!-- faudra changer la logique de goToPoint dans ce composant pour les submits des résultats -->
 <template>
-  <div>
-    <div v-if="!activeSubCategory" class="sub-categories">
-      <div
-        v-for="sub in subCategories"
-        :key="sub.id"
-        class="sub-category"
-        @click="$emit('select-sub-category', sub.id)"
-      >
-        <SvgIcon v-if="mdiIcons[sub.icon]" :path="mdiIcons[sub.icon]" type="mdi" class="icon" />
-        <span>{{ sub.title }}</span>
+    <div>
+      <div v-if="!activeSubCategory" class="sub-categories">
+        <div
+          v-for="sub in subCategories"
+          :key="sub.id"
+          class="sub-category"
+          @click="$emit('select-sub-category', sub.id)"
+        >
+          <SvgIcon v-if="mdiIcons[sub.icon]" :path="mdiIcons[sub.icon]" type="mdi" class="icon" />
+          <span>{{ sub.title }}</span>
+        </div>
       </div>
+      
+      <div v-if="!activeSubCategory">
+        <div class="search-header">
+            Cliquer sur l'un des onglets pour effectuer une recherche :
+        </div>
+            <div class="search-options">
+                <div class="search-option">
+                <SvgIcon :path="mdiIcons.feuille" type="mdi" class="icon" />
+                <span>par feuille(s) au 1:50 000</span>
+                </div>
+                <div class="search-option">
+                <SvgIcon :path="mdiIcons.point" type="mdi" class="icon" />
+                <span>par pointé sur la carte</span>
+                </div>
+            </div>
+        </div>
+
+      <FeuilleSearch v-if="activeSubCategory === 'feuilles'" @close="$emit('close-sub-category')" />
+  
+      <PointSearch
+        v-if="activeSubCategory === 'point'"
+        @go-to-point="goToPoint"
+        @close="$emit('close-sub-category')"
+      />
     </div>
-
-    <div v-if="!activeSubCategory">
-      <div class="search-header">
-        Cliquer sur l'un des onglets pour effectuer une recherche :
-      </div>
-      <div class="search-options">
-        <div class="search-option">
-          <SvgIcon :path="mdiIcons.feuille" type="mdi" class="icon" />
-          <span>par commune(s)</span>
-        </div>
-        <div class="search-option">
-          <SvgIcon :path="mdiIcons.departement" type="mdi" class="icon" />
-          <span>par département(s)</span>
-        </div>
-        <div class="search-option">
-          <SvgIcon :path="mdiIcons.feuille" type="mdi" class="icon" />
-          <span>par feuille(s) au 1:50 000</span>
-        </div>
-        <div class="search-option">
-          <SvgIcon :path="mdiIcons.point" type="mdi" class="icon" />
-          <span>par pointé sur la carte</span>
-        </div>
-        <div class="search-option">
-          <SvgIcon :path="mdiIcons.autre" type="mdi" class="icon" />
-          <span>par nom de mission(s)</span>
-        </div>
-      </div>
-    </div>
-
-    <CommuneSearch
-      v-if="activeSubCategory === 'commune'"
-      @close="$emit('close-sub-category')"
-      @select-commune="goToPoint"
-    />
-
-    <DepartementSearch
-      v-if="activeSubCategory === 'departement'"
-      @close="$emit('close-sub-category')"
-      @select-departement="goToPoint"
-    />
-
-    <FeuilleSearch v-if="activeSubCategory === 'feuilles'" @close="$emit('close-sub-category')" />
-
-    <PointSearch
-      v-if="activeSubCategory === 'point'"
-      @go-to-point="goToPoint"
-      @close="$emit('close-sub-category')"
-    />
-
-    <PvaSearch v-if="activeSubCategory === 'autre'" @close="$emit('close-sub-category')" />
-  </div>
 </template>
-
+  
 <script setup>
 import { watch } from 'vue'
 import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
-import { mdiCity, mdiMap, mdiCrosshairsGps, mdiLeaf } from '@mdi/js'
+import { mdiCrosshairsGps, mdiLeaf } from '@mdi/js'
 
-import CommuneSearch from '@/components/material/CommuneSearch.vue'
-import DepartementSearch from '@/components/material/DepartementSearch.vue'
 import FeuilleSearch from '@/components/material/FeuilleSearch.vue'
 import PointSearch from '@/components/material/PointSearch.vue'
-import PvaSearch from '../material/PvaSearch.vue'
 
 const scanStore = useScanStore()
 
 const mdiIcons = {
-  commune: mdiCity,
-  departement: mdiMap,
   feuille: mdiLeaf,
   point: mdiCrosshairsGps,
-  autre: mdiCrosshairsGps,
 }
 
 const props = defineProps({
