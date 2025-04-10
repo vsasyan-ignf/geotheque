@@ -219,13 +219,15 @@ export const useScanStore = defineStore('scan', () => {
       }
 
       const wfsUrl = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json&apikey=${config.APIKEY}`
-
+      console.log(wfsUrl)
       const response = await fetch(wfsUrl)
       if (!response.ok) throw new Error(response.status)
 
       const data = await response.json()
       const values = data.features.map((f) => f.properties[propertyName]).filter(Boolean)
       const unique = [...new Set(values)].sort()
+
+      console.log(unique)
 
       const defaultOption = { id: '0', name: `Tous les ${propertyName.toLowerCase()}s` }
 

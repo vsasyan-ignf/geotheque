@@ -157,12 +157,12 @@ function validateCommune() {
   if (repCommune) {
     const bbox = repCommune.bbox.coordinates[0]
     const bboxWGS84 = [bbox[0], bbox[2]]
-    const bboxLambert93 = bboxWGS84.map((point) =>
-      useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:2154'),
+    const bboxMercator = bboxWGS84.map((point) =>
+      useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:3857'),
     )
 
     const point = {
-      bboxLambert93: bboxLambert93.flat(),
+      bboxLambert93: bboxMercator.flat(),
     }
 
     // Array(number) [ (2)[...] (2)[...] ... ]
