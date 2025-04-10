@@ -140,12 +140,10 @@ function searchDepartements() {
 function selectDepartement(departement) {
   getDepartementBbox(departement)
     .then((contour) => {
-      let bbox3857 = create_bbox(contour)
-      const bbox2154 = convertBbox(bbox3857, proj3857, proj2154)
+      let rawBbox = create_bbox(contour)
+      const bbox3857 = [rawBbox.minX, rawBbox.minY, rawBbox.maxX, rawBbox.maxY]
       const point = {
-        x: 0,
-        y: 0,
-        bboxLambert93: bbox2154,
+        bboxLambert93: bbox3857,
       }
 
       const coordinates = contour[0].map((point) => [point[0], point[1]])

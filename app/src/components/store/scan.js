@@ -227,8 +227,6 @@ export const useScanStore = defineStore('scan', () => {
       const values = data.features.map((f) => f.properties[propertyName]).filter(Boolean)
       const unique = [...new Set(values)].sort()
 
-      console.log(unique)
-
       const defaultOption = { id: '0', name: `Tous les ${propertyName.toLowerCase()}s` }
 
       return [defaultOption, ...unique.map((val, i) => ({ id: String(i + 1), name: val }))]
