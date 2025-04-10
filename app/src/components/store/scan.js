@@ -179,7 +179,7 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateActiveTab(newVal) {
     activeTab.value = newVal
-    fetchAllOptions()
+    // fetchAllOptions()
     console.log('tab selected : ', activeTab.value)
   }
 
@@ -260,15 +260,23 @@ export const useScanStore = defineStore('scan', () => {
     }
   }
 
+
   async function fetchOptionsComboBox(propertyName) {
-    if (optionsCache.value[propertyName]) {
-      return optionsCache.value[propertyName]
-    }
-
     try {
-      const typeNames = getCurrentTypeNames()
-      const wfsUrl = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json&apikey=${config.APIKEY}`
+      let typeNames = getCurrentTypeNames()
+      let cqlFilter = ""
 
+      if (storeBbox.value.length > 0) {
+        cqlFilter = createCqlFilter()
+      }
+
+      let wfsUrl = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json&apikey=${config.APIKEY}`
+
+      if (cqlFilter) {
+        wfsUrl += `&cql_filter=${cqlFilter}`
+      }
+
+      console.log(wfsUrl)
       const response = await fetch(wfsUrl)
 
       const data = await response.json()
@@ -303,13 +311,14 @@ export const useScanStore = defineStore('scan', () => {
   async function getCommanditaireOptions(searchTerm = '') {
     const options = await fetchOptionsComboBox('commandita')
     const filteredOptions = getFilteredOptions(options, searchTerm)
-    return filteredOptions.map((option) => option.name)
+    return filteredOptions && filteredOptions.map((option) => option.name)
   }
 
   async function getProducteurOptions(searchTerm = '') {
     const options = await fetchOptionsComboBox('producteur')
+    console.log()
     const filteredOptions = getFilteredOptions(options, searchTerm)
-    return filteredOptions.map((option) => option.name)
+    return filteredOptions && filteredOptions.map((option) => option.name)
   }
 
   async function storeGet(url) {
