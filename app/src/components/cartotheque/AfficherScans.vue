@@ -81,13 +81,13 @@ function generateImageUrl(info) {
   let name = ''
   let url = ''
   if (info) {
-    const lieu = findSectionScan(info.COLLECTION)
-    if (info.SOUS_COLL !== '') {
-      url = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2`
-      name = info.ID_CARTE
+    const lieu = findSectionScan(info.collection)
+    if (info.sous_coll !== '') {
+      url = `${config.IMG_CARTE_URL}${lieu}/${info.collection}/${info.sous_coll}/${info.id_carte}.JP2`
+      name = info.id_carte
     } else {
-      url = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2`
-      name = info.SOUS_COLL
+      url = `${config.IMG_CARTE_URL}${lieu}/${info.collection}/${info.id_carte}.JP2`
+      name = info.sous_coll
     }
   }
   return { url, name }
@@ -96,11 +96,11 @@ function generateImageUrl(info) {
 function getImageIppsrv(info) {
   let url = ''
   if (info) {
-    const lieu = findSectionScan(info.COLLECTION)
-    if (info.SOUS_COLL !== '') {
-      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/${info.ID_CARTE}.JP2&CVT=jpeg`
+    const lieu = findSectionScan(info.collection)
+    if (info.sous_coll !== '') {
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.collection}/${info.sous_coll}/${info.id_carte}.JP2&CVT=jpeg`
     } else {
-      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.COLLECTION}/${info.ID_CARTE}.JP2&CVT=jpeg`
+      url = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_CARTE}${lieu}/${info.collection}/${info.id_carte}.JP2&CVT=jpeg`
     }
   }
   return url
@@ -156,10 +156,10 @@ function downloadxml() {
   if (storeSelectedScan.value) {
     const info = storeSelectedScan.value?.properties
     const lieu = 'METROPOLE'
-    if (info.SOUS_COLL !== '') {
-      url_xml = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/${info.SOUS_COLL}/Fiches/${info.ID_CARTE}.xml`
+    if (info.sous_coll !== '') {
+      url_xml = `${config.IMG_CARTE_URL}${lieu}/${info.collection}/${info.sous_coll}/Fiches/${info.id_carte}.xml`
     } else {
-      url_xml = `${config.IMG_CARTE_URL}${lieu}/${info.COLLECTION}/Fiches/${info.ID_CARTE}.xml`
+      url_xml = `${config.IMG_CARTE_URL}${lieu}/${info.collection}/Fiches/${info.id_carte}.xml`
     }
     console.log('URL_XML : ', url_xml)
     window.open(url_xml, 'xml')
