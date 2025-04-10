@@ -73,6 +73,7 @@ import { storeToRefs } from 'pinia'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 import { create_bbox, useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import config from '@/config'
+import { getFeatureInfoUrl } from 'ol/source/wms'
 
 const scanStore = useScanStore()
 const { activeTab } = storeToRefs(scanStore)
@@ -91,10 +92,6 @@ const coucheGeoserverName = computed(() => {
   } else {
     return 'geotheque_mtd:monde_feuilles'
   }
-})
-
-const proj = computed(() => {
-  return coucheGeoserverName.value === 'monde_feuilles' ? 'EPSG:4326' : 'EPSG:2154' // maybe problem ici
 })
 
 const handleClickOutside = (event) => {
@@ -137,9 +134,10 @@ function searchFeuille() {
       .then((response) => response.json())
       .then((data) => {
         const newResults = data.features.map((feuille) => ({
-          nom: feuille.properties.nom, // mb à changer
-          numero: feuille.properties.numero, // mb à changer
-          geometry: feuille.geometry.coordinates[0][0], 
+          nom: feuille.properties.nom,
+          numero: feuille.properties.numero,
+          geometry: feuille.geometry.coordinates[0],
+          bbox: feuille.bbox
         }))
         feuilleResults.value = newResults
 
@@ -160,14 +158,11 @@ function selectFeuille(feuille) {
 
 function validateFeuille() {
   if (repFeuille) {
-    const bbox = create_bbox([repFeuille.value.geometry])
-    const bboxLonLat = [bbox.minX, bbox.minY, bbox.maxX, bbox.maxY]
-    scanStore.updateBbox(bboxLonLat)
 
-    const contourMercator = repFeuille.value.geometry.map((coord) =>
-      useConvertCoordinates(coord[0], coord[1], proj.value, 'EPSG:3857'),
-    )
+    const bboxMercator = repFeuille.value.bbox;
+    scanStore.updateBbox(bboxMercator)
 
+    const contourMercator = repFeuille.value.geometry
     scanStore.updateSelectedGeom([contourMercator])
   }
 }

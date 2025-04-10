@@ -59,12 +59,6 @@ export const useScanStore = defineStore('scan', () => {
       let empriseURL = getCurrentTypeNames()
       let [minX, minY, maxX, maxY] = storeBbox.value
 
-      if (activeTab.value === 'cartotheque_etranger') {
-        // inverse les coordonnées : lon/lat to lat/lon
-        ;[minX, minY] = [minY, minX]
-          ;[maxX, maxY] = [maxY, maxX]
-      }
-
       const {
         yearMin,
         yearMax,
