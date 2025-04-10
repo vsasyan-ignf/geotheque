@@ -553,17 +553,6 @@ onMounted(() => {
         });
       }
 
-      if(isPointOnEmprise(clickedCoord, tab_emprise_photo)){
-        console.log("oui on");
-        if (SelectedPhotos.value && SelectedPhotos.value.length > 0) {
-          showCardPva.value = true;
-          selectedPhotoInfo.value = SelectedPhotos.value[0];
-        }
-      } else {
-        // Close card when clicking outside of emprise
-        showCardPva.value = false;
-      }
-
     })
 
     eventBus.on('toggle-pin', (isVisible) => {

@@ -79,7 +79,7 @@ function selectOption(option) {
 
 const debouncedHoverUpdate = debounce((option) => {
   scanStore.updateHoverScan(option)
-}, 100)
+}, 0)
 
 function handleOptionHover(option) {
   debouncedHoverUpdate(option)
