@@ -60,6 +60,27 @@
           </div>
         </div>
       </div>
+
+      <div class="layer-switcher__display-options">
+        <div class="layer-switcher__options-title">Options d'affichage</div>
+        <div class="checkbox-group">
+          <label 
+            v-for="option in checkboxOptions" 
+            :key="option.key" 
+            class="checkbox-label"
+          >
+            <input 
+              type="checkbox" 
+              v-model="displayOptions[option.modelKey]" 
+              class="checkbox-input"
+              @change="handleOptionChange(option.modelKey)"
+            />
+            <span class="custom-checkbox"></span>
+            {{ option.label }}
+          </label>
+        </div>
+      </div>
+      
     </div>
   </div>
 </template>
@@ -81,11 +102,33 @@ const props = defineProps({
     default: 0,
   },
   currentZoom: Number,
+  initialDisplayOptions: {
+    type: Object,
+    default: () => ({
+      couplesStero: false,
+      alphanumerique: false,
+      numFeuille: true,
+      numDepartement: true
+    })
+  }
 })
 
-const emit = defineEmits(['layer-change', 'other-layer-toggle'])
+const emit = defineEmits(['layer-change', 'other-layer-toggle', 'display-option-change'])
 
 const isExpanded = ref(false)
+const displayOptions = ref({
+  couplesStero: props.initialDisplayOptions.couplesStero,
+  alphanumerique: props.initialDisplayOptions.alphanumerique,
+  numFeuille: props.initialDisplayOptions.numFeuille,
+  numDepartement: props.initialDisplayOptions.numDepartement
+})
+
+const checkboxOptions = [
+  { key: 'couplesStereo', modelKey: 'couplesStero', label: 'Couples Stéréo' },
+  { key: 'alphanumeric', modelKey: 'alphanumerique', label: 'Alphanumérique' },
+  { key: 'feuilles', modelKey: 'numFeuille', label: 'N° Feuille' },
+  { key: 'departements', modelKey: 'numDepartement', label: 'N° Département' },
+]
 
 const hasOtherLayers = computed(() => props.otherLayers.length > 0)
 
@@ -94,6 +137,13 @@ function handleLayerToggle(index) {
   layer.visible = !layer.visible
 
   emit('other-layer-toggle', { ...layer })
+}
+
+function handleOptionChange(option) {
+  emit('display-option-change', {
+    option,
+    value: displayOptions.value[option]
+  })
 }
 
 function toggleExpand() {
@@ -128,7 +178,7 @@ onUnmounted(() => {
   position: absolute;
   bottom: 30px;
   right: 30px;
-  width: 190px;
+  width: 230px;
   background-color: white;
   border-radius: 10px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
@@ -175,7 +225,7 @@ onUnmounted(() => {
 }
 
 .layer-switcher__options {
-  /* max-height: 240px; */
+  max-height: 500px;
   overflow-y: auto;
   border-top: 1px solid #eee;
 }
@@ -194,6 +244,66 @@ onUnmounted(() => {
 
 .layer-switcher__option--active {
   background-color: #e3f2fd;
+}
+
+.layer-switcher__display-options {
+  padding: 16px 20px;
+  border-top: 1px solid #eaeaea;
+  background-color: #f9f9f9;
+}
+
+.layer-switcher__options-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #444;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-input {
+  display: none;
+}
+
+.custom-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.checkbox-input:checked + .custom-checkbox {
+  background-color: #4caf50;
+  border-color: #4caf50;
+}
+
+.checkbox-input:checked + .custom-checkbox::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .layer-switcher__other-layers-section {

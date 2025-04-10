@@ -10,32 +10,40 @@
     </div>
 
     <div class="group-button">
-      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiPlus" class="mdicon" /></template>
+      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan" v-if="!urlInDico">
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiPlus" class="mdicon" />
+        </template>
       </ShakingButton>
 
-      <ShakingButton nameButton="" @click="" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" /></template>
+      <ShakingButton nameButton="" @click="DeleteSelectedPhoto" :disabled="!storeSelectedScan" v-if="urlInDico">
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiMinus" class="mdicon" />
+        </template>
       </ShakingButton>
 
-      <ShakingButton
-        nameButton="CSV"
-        @click="downloadCSV(storeScansData)"
-        :disabled="!isDataAvailable > 0"
-      >
-        <template #icon><SvgIcon type="mdi" :path="mdiDownloadCircle" class="mdicon" /></template>
+      <ShakingButton nameButton="" @click="DeletePhotoAll" :disabled="!storeSelectedScan">
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" />
+        </template>
+      </ShakingButton>
+
+      <ShakingButton nameButton="CSV" @click="downloadCSV(storeScansData)" :disabled="!isDataAvailable > 0">
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiDownloadCircle" class="mdicon" />
+        </template>
+      </ShakingButton>
+
+      <ShakingButton nameButton="XML" @click="downloadxml" :disabled="!storeSelectedScan">
+        <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
       </ShakingButton>
     </div>
 
     <div v-if="selectedMission" class="mission-preview slide-in">
       <div class="mission-card">
         <div class="preview-details">
-          <div
-            v-for="(val, key, index) in essentialDetails"
-            :key="key"
-            class="detail-item"
-            :style="{ 'animation-delay': `${index * 0.05}s` }"
-          >
+          <div v-for="(val, key, index) in essentialDetails" :key="key" class="detail-item"
+            :style="{ 'animation-delay': `${index * 0.05}s` }">
             <div class="detail-label">{{ key }}</div>
             <div class="detail-value">{{ val }}</div>
           </div>
@@ -47,49 +55,28 @@
       </div>
     </div>
 
-    <div class="mission-options">
-      <div class="options-label">Options de sélection</div>
-      <div class="checkbox-group">
-        <label v-for="(option, index) in checkboxOptions" :key="index" class="checkbox-label">
-          <input
-            type="checkbox"
-            v-model="selectedOptions[option.key]"
-            class="checkbox-input"
-            @change="handleCheckboxChange(option.key)"
-          />
-          <span class="custom-checkbox"></span>
-          {{ option.label }}
-        </label>
-      </div>
-    </div>
 
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-      <MissionDetailsModal
-        :isOpen="isModalOpen"
-        :title="`${missionName} - Détails complets`"
-        :details="allDetails"
-        @close="closeModal"
-        @download="downloadDetails"
-      />
+      <MissionDetailsModal :isOpen="isModalOpen" :title="`${missionName} - Détails complets`" :details="allDetails"
+        @close="closeModal" @download="downloadDetails" />
     </div>
   </div>
+
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, computed } from 'vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 import MissionDetailsModal from './MissionDetailsModal.vue'
-import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { downloadCSV } from '../composable/download'
-
 import ShakingButton from '@/components/material/ShakingButton.vue'
-import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle } from '@mdi/js'
+import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle, mdiXml } from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto } = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
@@ -157,46 +144,52 @@ const closeModal = () => {
 }
 
 function setUrl() {
-  const annee = storeSelectedScan.value.properties['ANNÉE']
-  const nom = storeSelectedScan.value.properties['CHANTIER']
-  const url = `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
-  console.log('URL MISSION : ', url)
-  scanStore.updateUrlPhoto(url)
-}
-
-/********************** CHECKBOX ************************* */
-
-const selectedOptions = reactive({
-  couplesStereo: false,
-  alphanumeric: false,
-  popup: false,
-  feuilles: true,
-  departements: true,
-})
-
-const checkboxOptions = [
-  { key: 'couplesStereo', label: 'Couples Stéréo' },
-  { key: 'alphanumeric', label: 'Alphanumérique' },
-  { key: 'feuilles', label: 'N° Feuille' },
-  { key: 'departements', label: 'N° Département' },
-]
-
-// Fonction qui gère l'activation/désactivation des cases
-const handleCheckboxChange = (optionKey) => {
-  const isChecked = selectedOptions[optionKey]
-
-  if (optionKey === 'couplesStereo') {
-    console.log('click couplesStereo')
-  } else if (optionKey === 'alphanumeric') {
-    console.log('click alpha')
-  } else if (optionKey === 'popup') {
-    console.log('click popup')
-  } else if (optionKey === 'feuilles') {
-    eventBus.emit('feuilles', isChecked)
-  } else if (optionKey === 'departements') {
-    eventBus.emit('departements', isChecked)
+  if (storeSelectedScan.value) {
+    const url = createUrlPhoto()
+    scanStore.updateUrlPhoto(url)
+    scanStore.updateDicoUrlPhoto(url)
   }
 }
+
+
+function DeletePhotoAll() {
+  scanStore.updateDeletePhotoAllBool(!deletePhotoAllBool.value)
+  dicoUrlPhoto.value = []
+}
+
+const urlInDico = computed(() => {
+  if (!storeSelectedScan.value) return false;
+  const url = createUrlPhoto();
+  return dicoUrlPhoto.value.includes(url);
+});
+
+function createUrlPhoto() {
+  const annee = storeSelectedScan.value.properties['ANNÉE']
+  const nom = storeSelectedScan.value.properties['CHANTIER']
+  return `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
+}
+
+function DeleteSelectedPhoto() {
+  const deleteUrl = createUrlPhoto()
+  const index = dicoUrlPhoto.value.indexOf(deleteUrl);
+  if (index > -1) {
+    dicoUrlPhoto.value.splice(index, 1);
+  }
+}
+
+let url_xml = ref(``)
+
+function downloadxml() {
+  if (storeSelectedScan.value) {
+    const info = storeSelectedScan.value?.properties
+    console.log('info : ', info)
+    const lieu = 'Lambert93'
+    url_xml = `${config.MTD_FRANCE_URL}${lieu}/${info.ANNÉE}/${info.CHANTIER}/${info.CHANTIER}.xml`
+    console.log('URL_XML : ', url_xml)
+    window.open(url_xml, 'xml')
+  }
+}
+
 </script>
 
 <style scoped>
@@ -205,6 +198,7 @@ const handleCheckboxChange = (optionKey) => {
     opacity: 0;
     transform: translateX(30px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -215,6 +209,7 @@ const handleCheckboxChange = (optionKey) => {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -225,6 +220,7 @@ const handleCheckboxChange = (optionKey) => {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -304,6 +300,7 @@ const handleCheckboxChange = (optionKey) => {
   border: 1px solid #ddd;
   overflow: hidden;
   transition: all 0.3s ease;
+  margin-bottom: 100px;
 }
 
 .mission-header {
@@ -328,8 +325,8 @@ const handleCheckboxChange = (optionKey) => {
 
 .detail-item {
   display: flex;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #f0f0f0;
   opacity: 0;
   animation: slideInRight 0.5s forwards;
@@ -345,19 +342,19 @@ const handleCheckboxChange = (optionKey) => {
   flex: 0 0 50%;
   font-weight: 500;
   color: #555;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .detail-value {
   flex: 0 0 60%;
   color: #333;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .action-buttons {
   display: flex;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 10px 20px;
   border-top: 1px solid #eaeaea;
 }
 
@@ -367,7 +364,7 @@ const handleCheckboxChange = (optionKey) => {
   border: 1px solid #ddd;
   padding: 10px 16px;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -376,23 +373,6 @@ const handleCheckboxChange = (optionKey) => {
 .view-details-button:hover {
   background-color: #edf2f7;
   border-color: #c4c4c4;
-}
-
-.download-button {
-  background-color: #739614;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  box-shadow: 0 2px 4px rgba(115, 150, 20, 0.2);
-}
-
-.download-button:hover {
-  background-color: #658612;
 }
 
 .mission-options {
@@ -437,12 +417,12 @@ const handleCheckboxChange = (optionKey) => {
   transition: all 0.2s;
 }
 
-.checkbox-input:checked + .custom-checkbox {
+.checkbox-input:checked+.custom-checkbox {
   background-color: #739614;
   border-color: #739614;
 }
 
-.checkbox-input:checked + .custom-checkbox::after {
+.checkbox-input:checked+.custom-checkbox::after {
   content: '';
   position: absolute;
   left: 5px;

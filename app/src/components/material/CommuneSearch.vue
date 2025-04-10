@@ -135,9 +135,8 @@ function searchCommunes() {
           code: commune.codesPostaux[0],
           departement: commune.departement.nom,
           bbox: commune.bbox,
-          contour: commune.contour,
+          contour: commune.contour, // type polygon Array(1) [ [...] ]
         }))
-
         communeResults.value = newResults
       })
       .catch((error) => {
@@ -166,11 +165,12 @@ function validateCommune() {
       bboxLambert93: bboxLambert93.flat(),
     }
 
+    // Array(number) [ (2)[...] (2)[...] ... ]
     const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
       useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
     )
 
-    scanStore.updateSelectedGeom(contourMercator)
+    scanStore.updateSelectedGeom([contourMercator])
 
     emit('select-commune', point)
   }

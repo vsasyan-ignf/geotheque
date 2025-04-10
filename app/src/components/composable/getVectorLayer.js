@@ -29,13 +29,52 @@ export function createGeomLayer() {
       stroke: new Stroke({
         color: 'blue',
         width: 2,
+        fill: new Fill({
+          color: 'rgba(83, 149, 236, 0.29)',
+        }),
+      })
+    }),
+  })
+}
+
+export function createGeomMouseOverLayer() {
+  const source = new VectorSource()
+
+  return new VectorLayer({
+    source,
+    style: new Style({
+      stroke: new Stroke({
+        color: 'black',
+        width: 2,
       }),
       fill: new Fill({
-        color: 'rgba(0, 0, 255, 0.1)',
+        color: 'rgba(255, 145, 0, 0.5)',
       }),
     }),
   })
 }
+
+export function createGeomCoupleLayer() {
+  const source = new VectorSource()
+
+  return new VectorLayer({
+    source,
+    style: new Style({
+      stroke: new Stroke({
+        color: 'black',
+        width: 2,
+      }),
+      fill: new Fill({
+        color: 'rgba(43, 243, 127, 0.88)',
+      }),
+    }),
+  })
+}
+
+
+
+
+
 
 export function createScanLayer() {
   const source = new VectorSource()
@@ -166,6 +205,19 @@ export const layersConfig = [
         }),
       })
     },
+  },
+  {
+    name: 'feuilles_monde_with_no_name',
+    url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`,
+    style: new Style({
+      stroke: new Stroke({
+        color: 'rgba(  17, 209, 197  , 0.5)',
+        width: 2,
+      }),
+      fill: new Fill({
+        color: 'rgba(  17, 209, 197  , 0.2)',
+      }),
+    }),
   },
   {
     name: 'feuilles_france',
