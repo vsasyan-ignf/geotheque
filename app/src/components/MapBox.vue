@@ -10,6 +10,12 @@
     <DrawControl v-if="activeTab === 'phototheque'" :map="olMap" :isDrawModeActive="drawModeActive"
       @draw-complete="handleDrawComplete" @draw-mode-activated="handleDrawModeActivated"
       @deactivate-draw-mode="handleDeactivateDrawMode" />
+    <!-- Add CardPva component here -->
+    <CardPva 
+      v-if="showCardPva" 
+      :photoInfo="selectedPhotoInfo" 
+      @close="closeCardPva" 
+    />
   </div>
   <div style="z-index: 99999999" id="mouse-position"></div>
   <div style="z-index: 99999999" id="form-proj"></div>
@@ -21,6 +27,7 @@ import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
 import ZoomControl from './ZoomControl.vue'
+import CardPva from './phototheque/CardPva.vue' // Import the new CardPva component
 import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 import crossIcon from '@/assets/red-cross.svg'
@@ -63,6 +70,15 @@ import Icon from 'ol/style/Icon'
 
 import MousePosition from 'ol/control/MousePosition.js'
 import { createStringXY } from 'ol/coordinate.js'
+
+// Added new refs for card component
+const showCardPva = ref(false)
+const selectedPhotoInfo = ref({})
+
+// Function to close card
+function closeCardPva() {
+  showCardPva.value = false
+}
 
 const scanStore = useScanStore()
 const {
@@ -119,13 +135,15 @@ const clearAllLayersTA = () => {
   vectorLayers.value.geomMouseOver.getSource().clear()
   tab_emprise_photo = [];
   last_geom = null;
+  // Close card when clearing layers
+  showCardPva.value = false;
 }
 
 
 const vectorOtherLayers = ref(null)
 
 let tab_emprise_photo = [];
-let  tab_couples_photo = [];
+let tab_couples_photo = [];
 let last_geom = null;
 
 function hideOtherLayers() {
@@ -140,7 +158,6 @@ watch(activeTab, (newValue) => {
   layers.value = newLayers
   otherLayers.value = getOtherLayersForActiveTab(activeTab.value)
   hideOtherLayers()
-  updateWMTSLayers(olMap.value, newLayers)
   scanStore.resetCriteria()
   activeLayerIndex.value = 0
   //faire une fonction pour pas dupliquer avec reset
@@ -149,8 +166,9 @@ watch(activeTab, (newValue) => {
   last_geom = null;
   vectorLayers.value.geomMouseOver.getSource().clear()
   vectorLayers.value.geomCouple.getSource().clear()
-
   
+  // Close card when changing tabs
+  showCardPva.value = false;
 })
 
 const activeLayerIndex = ref(0)
@@ -526,13 +544,16 @@ onMounted(() => {
         });
       }
 
-      if(isPointOnEmprise(clickedCoord,tab_emprise_photo)){
+      if(isPointOnEmprise(clickedCoord, tab_emprise_photo)){
         console.log("oui on");
-        for (const [key, value] of Object.entries(SelectedPhotos.value[0])) {
-          console.log(`${key}: ${value}`);
+        if (SelectedPhotos.value && SelectedPhotos.value.length > 0) {
+          showCardPva.value = true;
+          selectedPhotoInfo.value = SelectedPhotos.value[0];
         }
+      } else {
+        // Close card when clicking outside of emprise
+        showCardPva.value = false;
       }
-      
 
     })
 
