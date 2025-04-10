@@ -56,14 +56,8 @@ export const useScanStore = defineStore('scan', () => {
 
   function createCqlFilter() {
     if (storeBbox.value.length === 0) return ''
-    
-    let [minX, minY, maxX, maxY] = storeBbox.value
 
-    if (activeTab.value === 'cartotheque_etranger') {
-      // inverse les coordonnées : lon/lat to lat/lon
-      [minX, minY] = [minY, minX]
-      [maxX, maxY] = [maxY, maxX]
-    }
+    let [minX, minY, maxX, maxY] = storeBbox.value
 
     let cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
 
@@ -111,7 +105,7 @@ export const useScanStore = defineStore('scan', () => {
     if (storeBbox.value.length > 0) {
       let empriseURL = getCurrentTypeNames()
       let cqlFilter = createCqlFilter()
-      
+
       fetchAllOptions()
 
       return (
@@ -211,40 +205,40 @@ export const useScanStore = defineStore('scan', () => {
     }
     console.log('SelectedPhotos', SelectedPhotos.value)
   }
-  
-  
+
+
   async function fetchOptionsDropDown(propertyName) {
     try {
       let typeNames = getCurrentTypeNames()
       let cqlFilter = ""
-  
+
       if (storeBbox.value.length > 0) {
         cqlFilter = createCqlFilter()
       }
-  
+
       let wfsUrl = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json&apikey=${config.APIKEY}`
-  
+
       if (cqlFilter) {
         wfsUrl += `&cql_filter=${cqlFilter}`
       }
-  
+
       console.log(wfsUrl)
       const response = await fetch(wfsUrl)
       if (!response.ok) throw new Error(response.status)
-  
+
       const data = await response.json()
       const values = data.features.map((f) => f.properties[propertyName]).filter(Boolean)
       const unique = [...new Set(values)].sort()
-  
+
       const defaultOption = { id: '0', name: `Tous les ${propertyName.toLowerCase()}s` }
-  
+
       return [defaultOption, ...unique.map((val, i) => ({ id: String(i + 1), name: val }))]
     } catch (error) {
       console.error(`${propertyName} :`, error)
       return []
     }
   }
-  
+
 
   async function fetchAllOptions() {
     if (activeTab.value === 'cartotheque' || activeTab.value === 'cartotheque_etranger') {
