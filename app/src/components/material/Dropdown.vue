@@ -1,29 +1,30 @@
 <template>
   <div class="custom-dropdown" v-click-outside="closeDropdown" ref="dropdownRef">
-     <label v-if="nameDropdown">{{ nameDropdown }}</label>
-     <div class="dropdown-selected" @click="toggleDropdown">
-       <span class="selected-text">{{
-         selected ? selected.name : disableOption || 'Sélectionner'
-       }}</span>
-       <span class="dropdown-arrow" :class="{ open: isOpen }">▼</span>
-     </div>
-     <div class="dropdown-options"
-       :class="{ show: isOpen, 'dropdown-up': shouldShowAbove }"
-       @mouseleave="resetHover"
-     >
-       <div
-         v-for="option in options"
-         :key="option.id"
-         class="dropdown-option"
-         @click="selectOption(option)"
-         @mouseenter="handleOptionHover(option)"
-       >
-         {{ option.name }}
-       </div>
-     </div>
-   </div>
+    <label v-if="nameDropdown">{{ nameDropdown }}</label>
+    <div class="dropdown-selected" @click="toggleDropdown">
+      <span class="selected-text">{{
+        selected ? selected.name : disableOption || 'Sélectionner'
+      }}</span>
+      <span class="dropdown-arrow" :class="{ open: isOpen }">▼</span>
+    </div>
+    <div
+      class="dropdown-options"
+      :class="{ show: isOpen, 'dropdown-up': shouldShowAbove }"
+      @mouseleave="resetHover"
+    >
+      <div
+        v-for="option in options"
+        :key="option.id"
+        class="dropdown-option"
+        @click="selectOption(option)"
+        @mouseenter="handleOptionHover(option)"
+      >
+        {{ option.name }}
+      </div>
+    </div>
+  </div>
 </template>
- 
+
 <script setup>
 import { ref, watchEffect, onMounted, nextTick } from 'vue'
 import { eventBus } from '../composable/eventBus'
@@ -67,7 +68,7 @@ function checkPosition() {
     const dropdownHeight = 250
     const windowHeight = window.innerHeight
     const bottomSpace = windowHeight - dropdownRect.bottom
-    
+
     shouldShowAbove.value = bottomSpace < dropdownHeight && dropdownRect.top > dropdownHeight
   })
 }

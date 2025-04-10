@@ -1,20 +1,24 @@
 <template>
   <div class="card-pva-container" :class="{ visible: true }">
     <button class="close-button" @click="$emit('close')">×</button>
-    
+
     <div class="card-header">
       <h2>Informations PVA</h2>
     </div>
-    
+
     <div class="card-content">
       <div class="preview-details">
         <div v-if="!hasPhotoInfo" class="no-data">
           <p>Aucune information disponible pour cette zone.</p>
         </div>
-        
+
         <template v-else>
-          <div v-for="(val, key) in photoInfo" :key="key" class="detail-item"
-              :style="{ 'animation-delay': `${index * 0.05}s` }">
+          <div
+            v-for="(val, key) in photoInfo"
+            :key="key"
+            class="detail-item"
+            :style="{ 'animation-delay': `${index * 0.05}s` }"
+          >
             <div class="detail-label">{{ formatLabel(key) }}</div>
             <div class="detail-value">{{ val }}</div>
           </div>
@@ -25,24 +29,24 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed } from 'vue'
 
 const props = defineProps({
   photoInfo: {
     type: Object,
-    default: () => ({})
-  }
-});
+    default: () => ({}),
+  },
+})
 
 const hasPhotoInfo = computed(() => {
-  return Object.keys(props.photoInfo).length > 0;
-});
+  return Object.keys(props.photoInfo).length > 0
+})
 
 function formatLabel(key) {
   return key
     .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
 }
 </script>
 

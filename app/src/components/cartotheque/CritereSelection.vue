@@ -113,8 +113,14 @@ import { storeToRefs } from 'pinia'
 import { mdiRefresh, mdiMagnify } from '@mdi/js'
 
 const scanStore = useScanStore()
-const { storeURL, storeCritereSelection, activeTab, collectionsOptions, supportOptions, emulsionOptions } =
-  storeToRefs(scanStore)
+const {
+  storeURL,
+  storeCritereSelection,
+  activeTab,
+  collectionsOptions,
+  supportOptions,
+  emulsionOptions,
+} = storeToRefs(scanStore)
 
 const isCartotheque = computed(() =>
   ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value),
@@ -161,7 +167,6 @@ const showScaleMaxOptions = ref(false)
 const showCommanditaireOptions = ref(false)
 const showProducteurOptions = ref(false)
 
-
 watch(storeURL, async () => {
   await loadInitialOptions()
 })
@@ -169,7 +174,7 @@ watch(storeURL, async () => {
 async function loadInitialOptions() {
   console.log(isPhototheque.value)
   if (isPhototheque.value) {
-    console.log("eee")
+    console.log('eee')
     const [commanditaireOpts, producteurOpts] = await Promise.all([
       scanStore.getCommanditaireOptions(),
       scanStore.getProducteurOptions(),

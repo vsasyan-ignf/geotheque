@@ -124,13 +124,12 @@ function searchFeuille() {
 
   showResults.value = true
 
-
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   let search_url = ''
   searchTimeout = setTimeout(() => {
     search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=nom%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
     console.log(search_url)
-    
+
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
@@ -138,10 +137,9 @@ function searchFeuille() {
           nom: feuille.properties.nom,
           numero: feuille.properties.numero,
           geometry: feuille.geometry.coordinates[0],
-          bbox: feuille.bbox
+          bbox: feuille.bbox,
         }))
         feuilleResults.value = newResults
-
       })
       .catch((error) => {
         console.error('Erreur lors de la récupération des feuilles:', error)
@@ -159,8 +157,7 @@ function selectFeuille(feuille) {
 
 function validateFeuille() {
   if (repFeuille) {
-
-    const bboxMercator = repFeuille.value.bbox;
+    const bboxMercator = repFeuille.value.bbox
     scanStore.updateBbox(bboxMercator)
 
     const contourMercator = repFeuille.value.geometry

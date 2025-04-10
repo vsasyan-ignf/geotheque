@@ -161,7 +161,6 @@ export const useScanStore = defineStore('scan', () => {
     urlPhoto.value = null
     dicoUrlPhoto.value = []
     SelectedPhotos.value = []
-
   }
 
   function updateSelectedGeom(newVal) {
@@ -206,20 +205,17 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function removeSelectedPhoto(item) {
-    const index = SelectedPhotos.value.findIndex(
-      photo => (photo.nom === item.nom)
-    )
+    const index = SelectedPhotos.value.findIndex((photo) => photo.nom === item.nom)
 
     if (index !== -1) {
       SelectedPhotos.value.splice(index, 1)
     }
   }
 
-
   async function fetchOptionsDropDown(propertyName) {
     try {
       let typeNames = getCurrentTypeNames()
-      let cqlFilter = ""
+      let cqlFilter = ''
 
       if (storeBbox.value.length > 0) {
         cqlFilter = createCqlFilter()
@@ -248,7 +244,6 @@ export const useScanStore = defineStore('scan', () => {
     }
   }
 
-
   async function fetchAllOptions() {
     if (activeTab.value === 'cartotheque' || activeTab.value === 'cartotheque_etranger') {
       collectionsOptions.value = await fetchOptionsDropDown('collection')
@@ -260,11 +255,10 @@ export const useScanStore = defineStore('scan', () => {
     }
   }
 
-
   async function fetchOptionsComboBox(propertyName) {
     try {
       let typeNames = getCurrentTypeNames()
-      let cqlFilter = ""
+      let cqlFilter = ''
 
       if (storeBbox.value.length > 0) {
         cqlFilter = createCqlFilter()
@@ -411,6 +405,6 @@ export const useScanStore = defineStore('scan', () => {
     updateHoverScan,
     SelectedPhotos,
     updateSelectedPhotos,
-    removeSelectedPhoto
+    removeSelectedPhoto,
   }
 })

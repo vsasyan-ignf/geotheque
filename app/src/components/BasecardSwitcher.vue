@@ -64,14 +64,10 @@
       <div class="layer-switcher__display-options">
         <div class="layer-switcher__options-title">Options d'affichage</div>
         <div class="checkbox-group">
-          <label 
-            v-for="option in checkboxOptions" 
-            :key="option.key" 
-            class="checkbox-label"
-          >
-            <input 
-              type="checkbox" 
-              v-model="displayOptions[option.modelKey]" 
+          <label v-for="option in checkboxOptions" :key="option.key" class="checkbox-label">
+            <input
+              type="checkbox"
+              v-model="displayOptions[option.modelKey]"
               class="checkbox-input"
               @change="handleOptionChange(option.modelKey)"
             />
@@ -80,7 +76,6 @@
           </label>
         </div>
       </div>
-      
     </div>
   </div>
 </template>
@@ -108,9 +103,9 @@ const props = defineProps({
       couplesStero: false,
       alphanumerique: false,
       numFeuille: true,
-      numDepartement: true
-    })
-  }
+      numDepartement: true,
+    }),
+  },
 })
 
 const emit = defineEmits(['layer-change', 'other-layer-toggle', 'display-option-change'])
@@ -120,7 +115,7 @@ const displayOptions = ref({
   couplesStero: props.initialDisplayOptions.couplesStero,
   alphanumerique: props.initialDisplayOptions.alphanumerique,
   numFeuille: props.initialDisplayOptions.numFeuille,
-  numDepartement: props.initialDisplayOptions.numDepartement
+  numDepartement: props.initialDisplayOptions.numDepartement,
 })
 
 const checkboxOptions = [
@@ -142,7 +137,7 @@ function handleLayerToggle(index) {
 function handleOptionChange(option) {
   emit('display-option-change', {
     option,
-    value: displayOptions.value[option]
+    value: displayOptions.value[option],
   })
 }
 

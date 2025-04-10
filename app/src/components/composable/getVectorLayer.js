@@ -32,7 +32,7 @@ export function createGeomLayer() {
         fill: new Fill({
           color: 'rgba(83, 149, 236, 0.29)',
         }),
-      })
+      }),
     }),
   })
 }
@@ -70,11 +70,6 @@ export function createGeomCoupleLayer() {
     }),
   })
 }
-
-
-
-
-
 
 export function createScanLayer() {
   const source = new VectorSource()

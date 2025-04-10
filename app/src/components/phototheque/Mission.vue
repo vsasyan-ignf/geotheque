@@ -16,7 +16,12 @@
         </template>
       </ShakingButton>
 
-      <ShakingButton nameButton="" @click="DeleteSelectedPhoto" :disabled="!storeSelectedScan" v-if="urlInDico">
+      <ShakingButton
+        nameButton=""
+        @click="DeleteSelectedPhoto"
+        :disabled="!storeSelectedScan"
+        v-if="urlInDico"
+      >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiMinus" class="mdicon" />
         </template>
@@ -28,7 +33,11 @@
         </template>
       </ShakingButton>
 
-      <ShakingButton nameButton="CSV" @click="downloadCSV(storeScansData)" :disabled="!isDataAvailable > 0">
+      <ShakingButton
+        nameButton="CSV"
+        @click="downloadCSV(storeScansData)"
+        :disabled="!isDataAvailable > 0"
+      >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiDownloadCircle" class="mdicon" />
         </template>
@@ -42,8 +51,12 @@
     <div v-if="selectedMission" class="mission-preview slide-in">
       <div class="mission-card">
         <div class="preview-details">
-          <div v-for="(val, key, index) in essentialDetails" :key="key" class="detail-item"
-            :style="{ 'animation-delay': `${index * 0.05}s` }">
+          <div
+            v-for="(val, key, index) in essentialDetails"
+            :key="key"
+            class="detail-item"
+            :style="{ 'animation-delay': `${index * 0.05}s` }"
+          >
             <div class="detail-label">{{ key }}</div>
             <div class="detail-value">{{ val }}</div>
           </div>
@@ -55,13 +68,16 @@
       </div>
     </div>
 
-
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-      <MissionDetailsModal :isOpen="isModalOpen" :title="`${missionName} - Détails complets`" :details="allDetails"
-        @close="closeModal" @download="downloadDetails" />
+      <MissionDetailsModal
+        :isOpen="isModalOpen"
+        :title="`${missionName} - Détails complets`"
+        :details="allDetails"
+        @close="closeModal"
+        @download="downloadDetails"
+      />
     </div>
   </div>
-
 </template>
 
 <script setup>
@@ -76,7 +92,8 @@ import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle, mdiXml } from '@mdi/
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto } = storeToRefs(scanStore)
+const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto } =
+  storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
@@ -151,17 +168,16 @@ function setUrl() {
   }
 }
 
-
 function DeletePhotoAll() {
   scanStore.updateDeletePhotoAllBool(!deletePhotoAllBool.value)
   dicoUrlPhoto.value = []
 }
 
 const urlInDico = computed(() => {
-  if (!storeSelectedScan.value) return false;
-  const url = createUrlPhoto();
-  return dicoUrlPhoto.value.includes(url);
-});
+  if (!storeSelectedScan.value) return false
+  const url = createUrlPhoto()
+  return dicoUrlPhoto.value.includes(url)
+})
 
 function createUrlPhoto() {
   const annee = storeSelectedScan.value.properties.annee
@@ -171,9 +187,9 @@ function createUrlPhoto() {
 
 function DeleteSelectedPhoto() {
   const deleteUrl = createUrlPhoto()
-  const index = dicoUrlPhoto.value.indexOf(deleteUrl);
+  const index = dicoUrlPhoto.value.indexOf(deleteUrl)
   if (index > -1) {
-    dicoUrlPhoto.value.splice(index, 1);
+    dicoUrlPhoto.value.splice(index, 1)
   }
 }
 
@@ -189,7 +205,6 @@ function downloadxml() {
     window.open(url_xml, 'xml')
   }
 }
-
 </script>
 
 <style scoped>
@@ -417,12 +432,12 @@ function downloadxml() {
   transition: all 0.2s;
 }
 
-.checkbox-input:checked+.custom-checkbox {
+.checkbox-input:checked + .custom-checkbox {
   background-color: #739614;
   border-color: #739614;
 }
 
-.checkbox-input:checked+.custom-checkbox::after {
+.checkbox-input:checked + .custom-checkbox::after {
   content: '';
   position: absolute;
   left: 5px;

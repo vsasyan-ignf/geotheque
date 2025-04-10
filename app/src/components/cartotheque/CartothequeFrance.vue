@@ -12,29 +12,24 @@
       </div>
     </div>
     <div v-if="!activeSubCategory">
-      
-    <div class="search-header">
-      Cliquer sur l'un des onglets pour effectuer une recherche :
-    </div>
+      <div class="search-header">Cliquer sur l'un des onglets pour effectuer une recherche :</div>
 
-    <div class="search-options">
+      <div class="search-options">
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.commune" type="mdi" class="icon" />
+          <span>par commune(s)</span>
+        </div>
 
-      <div class="search-option">
-        <SvgIcon :path="mdiIcons.commune" type="mdi" class="icon" />
-        <span>par commune(s)</span>
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.departement" type="mdi" class="icon" />
+          <span>par département(s)</span>
+        </div>
+
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.point" type="mdi" class="icon" />
+          <span>par pointé sur la carte</span>
+        </div>
       </div>
-
-      <div class="search-option">
-        <SvgIcon :path="mdiIcons.departement" type="mdi" class="icon" />
-        <span>par département(s)</span>
-      </div>
-     
-      <div class="search-option">
-        <SvgIcon :path="mdiIcons.point" type="mdi" class="icon" />
-        <span>par pointé sur la carte</span>
-      </div>
-
-    </div>
     </div>
 
     <CommuneSearch

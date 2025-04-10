@@ -50,7 +50,7 @@
           <Aide />
         </template>
       </component>
-      <Panier v-if="activeTab === 'phototheque' || activeTab === 'phototheque_etranger'"/>
+      <Panier v-if="activeTab === 'phototheque' || activeTab === 'phototheque_etranger'" />
     </div>
   </div>
 </template>

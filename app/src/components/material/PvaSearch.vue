@@ -156,7 +156,6 @@ function selectPVA(pva) {
 
 async function validatePVA() {
   if (repPVA) {
-
     /** Il faut modifier l'url dans le store mais comme c'est un computed avec une bbox il faut modifier pleins de trucs
      * Donc on n'affiche pas encore le selectedGeom cad la zone de travail comme dans les autres menu
      */

@@ -13,9 +13,7 @@
     </div>
 
     <div v-if="!activeSubCategory">
-      <div class="search-header">
-        Cliquer sur l'un des onglets pour effectuer une recherche :
-      </div>
+      <div class="search-header">Cliquer sur l'un des onglets pour effectuer une recherche :</div>
       <div class="search-options">
         <div class="search-option">
           <SvgIcon :path="mdiIcons.feuille" type="mdi" class="icon" />

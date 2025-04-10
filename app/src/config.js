@@ -1,7 +1,7 @@
 // config.js
 const env = process.env.NODE_ENV || 'development'
 
-const params = new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.search)
 console.log(params.get('apikey'))
 
 const config = {
@@ -20,7 +20,7 @@ const config = {
     IIPSRV_PREFIX_CARTE: '/Cartes/',
     IIPSRV_PREFIX_FRANCE: '/Misphot_Image/',
     IIPSRV_PREFIX_MONDE: '/Misphot_Image_Etranger/',
-    APIKEY: params.get('apikey')
+    APIKEY: params.get('apikey'),
   },
 
   // environnement de prod
@@ -38,7 +38,7 @@ const config = {
     IIPSRV_PREFIX_CARTE: '/Carto/Patrimoine/Cartes/',
     IIPSRV_PREFIX_FRANCE: '/Misphot_Image/',
     IIPSRV_PREFIX_MONDE: '/Misphot_Image_Etranger/',
-    APIKEY: params.get('apikey')
+    APIKEY: params.get('apikey'),
   },
 }
 
