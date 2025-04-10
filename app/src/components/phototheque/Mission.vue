@@ -164,8 +164,8 @@ const urlInDico = computed(() => {
 });
 
 function createUrlPhoto() {
-  const annee = storeSelectedScan.value.properties['ANNÉE']
-  const nom = storeSelectedScan.value.properties['CHANTIER']
+  const annee = storeSelectedScan.value.properties.annee
+  const nom = storeSelectedScan.value.properties.chantier
   return `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
 }
 

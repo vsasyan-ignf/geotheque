@@ -247,7 +247,7 @@ export const useScanStore = defineStore('scan', () => {
 
     if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
       supportOptions.value = await fetchOptionsDropDown('support')
-      emulsionOptions.value = await fetchOptionsDropDown('emultion')
+      emulsionOptions.value = await fetchOptionsDropDown('emulsion')
     }
   }
 
@@ -337,7 +337,7 @@ export const useScanStore = defineStore('scan', () => {
       if (response.ok) {
         const data = await response.json()
         storeScansData.value = data.features.map((feature, index) => {
-          feature.properties['ECHELLE'] = getEchellePhoto(feature)
+          feature.properties['echelle'] = getEchellePhoto(feature)
           const name = feature.properties.chantier + getSuffixPhoto(feature)
           return {
             id: index,
