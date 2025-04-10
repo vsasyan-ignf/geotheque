@@ -145,6 +145,7 @@ const vectorOtherLayers = ref(null)
 let tab_emprise_photo = [];
 let tab_couples_photo = [];
 let last_geom = null;
+let tab_i_to_alpha = [];
 
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
@@ -155,7 +156,7 @@ function hideOtherLayers() {
 
 watch(activeTab, (newValue) => {
   const newLayers = getLayersForActiveTab(activeTab.value)
-  layers.value = newLayers
+  layers.value = newLayers;
   otherLayers.value = getOtherLayersForActiveTab(activeTab.value)
   hideOtherLayers()
   scanStore.resetCriteria()
@@ -216,17 +217,24 @@ function isPointOnEmprise(point,emprises){
 function showPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
-  for (let i = 0; i < emprises.length; i++) {
+  let i;
+  for ( i = 0; i < emprises.length; i++) {
     const polygon = new Feature({
       geometry: new Polygon([emprises[i]]),
     });
     const geometry = polygon.getGeometry();
+    //ici
 
     if (geometry.intersectsCoordinate(point)) {
+      const alpha_selec = tab_i_to_alpha[i];
+      console.log(infosPva.value[alpha_selec])
+      showCardPva.value = true;
+      selectedPhotoInfo.value = infosPva.value[alpha_selec];
       DrawEmpriseGeometry(geometry)
       return;
     }
   }
+  showCardPva.value = false;
   vectorLayers.value.geomMouseOver.getSource().clear()
 }
 
@@ -341,6 +349,7 @@ async function parcour_tab_and_map(url) {
         addPointToMap(x_3857, y3857, numero);
         addPointToMap(x_3857, y3857, alphanum, true);
 
+        tab_i_to_alpha.push(alphanum);
         infosPva.value[alphanum] = infos;
 
       } else if (tab_test[i][0] == 'Cliche Actif') {
