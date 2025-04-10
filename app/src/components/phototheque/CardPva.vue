@@ -14,7 +14,7 @@
 
         <template v-else>
           <div
-            v-for="(val, key) in photoInfo"
+            v-for="(val, key, index) in photoInfo"
             :key="key"
             class="detail-item"
             :style="{ 'animation-delay': `${index * 0.05}s` }"
