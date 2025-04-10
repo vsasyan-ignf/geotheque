@@ -1,5 +1,3 @@
-<!-- contenu specifique a cartothequeFrance -->
-
 <template>
   <div>
     <div v-if="!activeSubCategory" class="sub-categories">
@@ -13,19 +11,42 @@
         <span>{{ sub.title }}</span>
       </div>
     </div>
+    <div v-if="!activeSubCategory">
+      
+    <div class="search-header">
+      Cliquer sur l'un des onglets pour effectuer une recherche :
+    </div>
+
+    <div class="search-options">
+
+      <div class="search-option">
+        <SvgIcon :path="mdiIcons.commune" type="mdi" class="icon" />
+        <span>par commune(s)</span>
+      </div>
+
+      <div class="search-option">
+        <SvgIcon :path="mdiIcons.departement" type="mdi" class="icon" />
+        <span>par département(s)</span>
+      </div>
+     
+      <div class="search-option">
+        <SvgIcon :path="mdiIcons.point" type="mdi" class="icon" />
+        <span>par pointé sur la carte</span>
+      </div>
+
+    </div>
+    </div>
 
     <CommuneSearch
       v-if="activeSubCategory === 'commune'"
       @close="$emit('close-sub-category')"
       @select-commune="goToPoint"
     />
-
     <DepartementSearch
       v-if="activeSubCategory === 'departement'"
       @close="$emit('close-sub-category')"
       @select-departement="goToPoint"
     />
-
     <PointSearch
       v-if="activeSubCategory === 'point'"
       @go-to-point="goToPoint"
@@ -41,10 +62,9 @@ import DepartementSearch from '@/components/material/DepartementSearch.vue'
 import PointSearch from '@/components/material/PointSearch.vue'
 import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
-import { mdiCity, mdiMap, mdiCrosshairsGps } from '@mdi/js'
+import { mdiCity, mdiMap, mdiCrosshairsGps, mdiMagnify } from '@mdi/js'
 
 const scanStore = useScanStore()
-
 const mdiIcons = {
   commune: mdiCity,
   departement: mdiMap,
@@ -104,7 +124,34 @@ watch(
   transform: scale(1.05);
 }
 
+.search-header {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.search-options {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-left: 5px;
+}
+
+.search-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+}
+
 .icon {
+  font-size: 16px;
+  color: #739614;
+}
+
+.sub-category .icon {
   font-size: 24px;
   color: #739614;
   transition:
@@ -125,5 +172,10 @@ watch(
 
 .sub-category:hover span {
   color: #4caf50;
+}
+
+.search-option span {
+  font-size: 14px;
+  color: #444;
 }
 </style>

@@ -325,8 +325,8 @@ function downloadxml() {
 
 .detail-item {
   display: flex;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
   border-bottom: 1px solid #f0f0f0;
   opacity: 0;
   animation: slideInRight 0.5s forwards;
@@ -342,19 +342,19 @@ function downloadxml() {
   flex: 0 0 50%;
   font-weight: 500;
   color: #555;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .detail-value {
   flex: 0 0 60%;
   color: #333;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .action-buttons {
   display: flex;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 10px 20px;
   border-top: 1px solid #eaeaea;
 }
 
@@ -364,7 +364,7 @@ function downloadxml() {
   border: 1px solid #ddd;
   padding: 10px 16px;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -373,23 +373,6 @@ function downloadxml() {
 .view-details-button:hover {
   background-color: #edf2f7;
   border-color: #c4c4c4;
-}
-
-.download-button {
-  background-color: #739614;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  box-shadow: 0 2px 4px rgba(115, 150, 20, 0.2);
-}
-
-.download-button:hover {
-  background-color: #658612;
 }
 
 .mission-options {

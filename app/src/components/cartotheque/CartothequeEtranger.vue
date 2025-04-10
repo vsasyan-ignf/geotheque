@@ -12,6 +12,26 @@
       </div>
     </div>
 
+    <div v-if="!activeSubCategory">
+      <div class="search-header">
+        Cliquer sur l'un des onglets pour effectuer une recherche :
+      </div>
+      <div class="search-options">
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.feuille" type="mdi" class="icon" />
+          <span>par feuille(s) au 1:50 000</span>
+        </div>
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.pays" type="mdi" class="icon" />
+          <span>par pays</span>
+        </div>
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.point" type="mdi" class="icon" />
+          <span>par pointé sur la carte</span>
+        </div>
+      </div>
+    </div>
+
     <FeuilleSearch v-if="activeSubCategory === 'feuilles'" @close="$emit('close-sub-category')" />
 
     <PaysSearch v-if="activeSubCategory === 'pays'" @close="$emit('close-sub-category')" />
@@ -93,6 +113,33 @@ watch(
 .sub-category:hover {
   background-color: #f0f0f0;
   transform: scale(1.05);
+}
+
+.search-header {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.search-options {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-left: 5px;
+}
+
+.search-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+}
+
+.search-option span {
+  font-size: 14px;
+  color: #444;
 }
 
 .icon {

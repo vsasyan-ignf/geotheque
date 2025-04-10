@@ -31,11 +31,18 @@
               <div v-for="(item, index) in cartItems" :key="index" class="cart-item">
                 <div class="item-content">
                   <div class="item-image">
-                    <img :src="getImageUrl(item)" alt="Aperçu de la mission" class="mission-image" />
+                    <img 
+                      :src="getImageUrl(item)" 
+                      alt="Aperçu de la mission" 
+                      class="mission-image" 
+                      @error="
+                        (e) => 
+                          e.target.src = NoImageAvailable"
+                    />
                   </div>
                   <div class="item-info">
                     <div class="item-header">
-                      <div class="item-name">{{ item.name }}</div>
+                      <div class="item-name">{{ item.nom }}</div>
                       <div class="item-actions">
                         <button class="view-button" @click="viewMission(item)" title="Visualiser">
                           <SvgIcon type="mdi" :path="mdiEyeOutline" class="view-icon" />
@@ -48,25 +55,25 @@
                     
                     <div class="item-details">
                       <div class="item-row">
-                        <div class="property-label">Année:</div>
-                        <div class="property-value">{{ item.properties.ANNÉE }}</div>
+                        <div class="property-label">Date de vol:</div>
+                        <div class="property-value">{{ item.date_vol }}</div>
                       </div>
                       <div class="item-row">
                         <div class="property-label">Format:</div>
-                        <div class="property-value">{{ item.properties.FORMAT }}</div>
+                        <div class="property-value">{{ item.format }}</div>
                       </div>
                       <div class="item-row">
                         <div class="property-label">Chantier:</div>
-                        <div class="property-value long-text">{{ item.properties.CHANTIER || 'Non spécifié' }}</div>
+                        <div class="property-value long-text">{{ item.chantier || 'Non spécifié' }}</div>
                       </div>
                       <div class="item-row">
                         <div class="property-label">Nom:</div>
-                        <div class="property-value long-text">{{ item.properties.NOM || 'Non spécifié' }}</div>
+                        <div class="property-value long-text">{{ item.nom || 'Non spécifié' }}</div>
                       </div>
                       <div class="item-row">
                         <div class="property-label">Disponibilité:</div>
                         <div class="property-value long-text">
-                          {{ item.properties.DISPONIBILITE || 'Non spécifiée' }}
+                          {{ item.dispo || 'Non spécifiée' }}
                         </div>
                       </div>
                     </div>
@@ -92,13 +99,6 @@
               <SvgIcon type="mdi" :path="mdiDownloadCircle" class="download-icon" />
               Télécharger CSV
             </button>
-            <button 
-              class="sample-button" 
-              @click="addSampleItems"
-              :disabled="cartItemsCount > 0"
-            >
-              exemple
-            </button>
           </div>
         </div>
       </div>
@@ -106,8 +106,9 @@
 </template>
   
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import SvgIcon from '@jamescoyle/vue-icon'
+import NoImageAvailable from '@/assets/no-image-available.jpg'
 import { 
   mdiCartOutline, 
   mdiCartOff, 
@@ -119,21 +120,23 @@ import {
 import { downloadCSV } from '../composable/download'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
+import config from '@/config'
 
 const scanStore = useScanStore()
-const { storeSelectedScan } = storeToRefs(scanStore)
+const { SelectedPhotos, removeSelectedPhoto } = storeToRefs(scanStore)
 
 const cartItems = ref([])
 const isCartModalOpen = ref(false)
-
-const baseImageUrl = "http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Misphot_Image/Lambert93/2021/2021_FD%2001_C_20/21FD0120x00001_03343.jp2&RGN=0.45,0.45,0.1,0.1&CVT=jpeg"
-
 
 // doit retourner les éléments du panier
 const cartItemsCount = computed(() => cartItems.value.length)
 
 const getImageUrl = (item) => {
-  return baseImageUrl
+  if (item) {
+    const year = item.chantier.substring(0, 4)
+    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2&CVT=jpeg`
+    return imageUrl
+  }
 }
 
 const openCartModal = () => {
@@ -146,97 +149,67 @@ const closeCartModal = () => {
   document.body.style.overflow = ''
 }
 
-const addToCart = (item) => {
-  // verif pannier si exist
-  const exists = cartItems.value.some(cartItem => 
-    cartItem.properties.IDENTIFIAN === item.properties.IDENTIFIAN
-  )
-  
-  if (!exists) {
-    cartItems.value.push(item)
-    localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
-  }
-}
-
 const removeFromCart = (index) => {
+  const itemToRemove = cartItems.value[index]
   cartItems.value.splice(index, 1)
-  localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
+  
+  scanStore.removeSelectedPhoto(itemToRemove)
+  
+  // localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
 }
 
 const clearCart = () => {
   cartItems.value = []
-  localStorage.setItem('phototheque-cart', JSON.stringify([]))
+  SelectedPhotos.value = []
+  // localStorage.setItem('phototheque-cart', JSON.stringify([]))
 }
 
 const downloadCartItems = () => {
   if (cartItems.value.length > 0) {
-    downloadCSV(cartItems.value)
+    const formattedData = cartItems.value.map(item => {
+      return { properties: item };
+    });
+    
+    downloadCSV(formattedData);
   }
 }
-
 const viewMission = (item) => {
     // ajouter le lien ippsrv
-  console.log('visu ippsrv:', item)
- 
-}
+  if (item) {
+    const year = item.chantier.substring(0, 4)
+    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2`
+    const urlParams = new URLSearchParams(new URL(imageUrl).search)
+    const imageUrlServ = urlParams.get('FIF')
 
-const generateSampleItems = () => {
-  return [
-    {
-      name: "1982_F2320-2420_0016",
-      properties: {
-        IDENTIFIAN: "MP001",
-        ANNÉE: "2023",
-        FORMAT: "JPEG",
-        CHANTIER: "1982_F_2320-2420_P_30000",
-        NOM: "1982_F2320-2420_0016",
-        DISPONIBILITE: "Image prétraitée compressée avec perte 26460 x 17004 (Photothèque)"
-      }
-    },
-    {
-      name: "Thomas Boutonne",
-      properties: {
-        IDENTIFIAN: "MR002",
-        ANNÉE: "2022",
-        FORMAT: "RAW",
-        CHANTIER: "1982_F_2320-2420_P_30000",
-        NOM: "Thomas Boutonne",
-        DISPONIBILITE: "Image prétraitée compressée avec perte 26460 x 17004 (Photothèque)"
-      }
-    },
-    {
-      name: "1982_F2320-2420_0016",
-      properties: {
-        IDENTIFIAN: "PA003",
-        ANNÉE: "2024",
-        FORMAT: "TIFF",
-        CHANTIER: "Studio Photo",
-        NOM: "Pierre Martin",
-        DISPONIBILITE: "Image prétraitée compressée avec perte 26460 x 17004 (Photothèque)"
-      }
-    }
-  ]
-}
-
-const addSampleItems = () => {
-  if (cartItems.value.length === 0) {
-    cartItems.value = generateSampleItems()
-    localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
+    localStorage.setItem('imageUrl', imageUrlServ)
+    window.open(
+      `/geotheque/iipmooviewer/index.html?server=${config.IIPSRV_URL}&image=${encodeURIComponent(imageUrlServ)}`,
+      '_blank',
+    )
+  } else {
+    console.error("L'URL de l'image est indéfinie.")
   }
 }
 
 const initCart = () => {
-  const savedCart = localStorage.getItem('phototheque-cart')
+  // const savedCart = localStorage.getItem('phototheque-cart')
   if (savedCart) {
     cartItems.value = JSON.parse(savedCart)
   }
 }
 
-defineExpose({
-  addToCart
-})
+watch(SelectedPhotos, (newVal) => {
+  if (newVal && newVal.length > 0) {
+    cartItems.value = newVal
+    // localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
+  }
+}, { deep: true })
 
-initCart()
+// defineExpose({
+//   addToCart
+// })
+
+// initCart()
 </script>
 
 <style scoped>

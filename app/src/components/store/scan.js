@@ -203,7 +203,16 @@ export const useScanStore = defineStore('scan', () => {
     if (!SelectedPhotos.value.includes(newVal)) {
       SelectedPhotos.value.push(newVal)
     }
-    console.log('SelectedPhotos', SelectedPhotos.value)
+  }
+
+  function removeSelectedPhoto(item) {
+    const index = SelectedPhotos.value.findIndex(
+      photo => (photo.nom === item.nom)
+    )
+
+    if (index !== -1) {
+      SelectedPhotos.value.splice(index, 1)
+    }
   }
 
 
@@ -393,5 +402,6 @@ export const useScanStore = defineStore('scan', () => {
     updateHoverScan,
     SelectedPhotos,
     updateSelectedPhotos,
+    removeSelectedPhoto
   }
 })
