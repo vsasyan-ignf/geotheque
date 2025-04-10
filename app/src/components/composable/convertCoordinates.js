@@ -152,10 +152,23 @@ export function createRealContour(contour) {
 
   const simplePolygon = newcontour.map((polygonCoords) => {
     const polygon = new Polygon([polygonCoords])
-    return polygon.simplify(getDynamicTolerance(polygonCoords))
+    const simplified = polygon.simplify(getDynamicTolerance(polygonCoords))
+
+    const reprojectedCoords = simplified.getCoordinates()[0].map(([lon, lat]) =>
+      proj4('EPSG:4326', 'EPSG:3857', [lat, lon])
+    )
+
+    const roundedCoords = reprojectedCoords.map(([lon, lat]) => [
+      Math.round(lon),
+      Math.round(lat),
+    ])
+
+    return new Polygon([roundedCoords])
   })
 
   const simplified_multipolygon = new MultiPolygon(simplePolygon)
+
+  console.log('simplified_multipolygon', simplified_multipolygon.getCoordinates())
 
   const wktformat = new WKT()
   const wkt = wktformat.writeGeometry(simplified_multipolygon)

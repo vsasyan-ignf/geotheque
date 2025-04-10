@@ -136,10 +136,11 @@ function selectCountry(country) {
     .then((contour) => {
       searchCountry.value = country.nom
 
-      const bbox3857 = create_multibbox(contour)
-      const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
+      const bboxraw = create_multibbox(contour)
+      const bbox3857 = [bboxraw.minX, bboxraw.minY, bboxraw.maxX, bboxraw.maxY]
+      // const bbox4326 = convertBbox(bbox3857, 'EPSG:3857', 'EPSG:4326')
 
-      scanStore.updateBbox(bbox4326)
+      scanStore.updateBbox(bbox3857)
       scanStore.updateSelectedGeom(contour)
 
       // Cas spécial des pays avec trop de petites îles
@@ -163,7 +164,6 @@ function selectCountry(country) {
       let newcontour = contour.map((polygon) =>
         polygon.map(([x, y]) => olProj.transform([x, y], 'EPSG:3857', 'EPSG:4326')),
       )
-
       scanStore.updateWKT(createRealContour(newcontour))
     })
     .catch((error) => {
@@ -184,6 +184,7 @@ async function getCountryBbox(country) {
     `${config.GEOSERVER_URL}` +
     `&request=GetFeature&typeNames=geotheque_mtd:monde_pays&outputFormat=application/json` +
     `&CQL_FILTER=code_pays='${countryCode}'&apikey=${config.APIKEY}`
+  console.log('URL:', urlCountryBbox)
 
   try {
     const response = await fetch(urlCountryBbox)
