@@ -49,7 +49,7 @@ function formatLabel(key) {
 <style scoped>
 .card-pva-container {
   position: absolute;
-  left: 50px; /* Positionné à gauche de la sidebar */
+  left: 55px; /* Positionné à gauche de la sidebar */
   top: 8px;
   background-color: white;
   border-radius: 8px;
@@ -61,6 +61,7 @@ function formatLabel(key) {
   z-index: 999;
   transform: translateX(0);
   transition: transform 0.3s ease-out;
+  color: black;
 }
 
 .card-pva-container.visible {
