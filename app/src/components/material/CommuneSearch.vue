@@ -162,7 +162,7 @@ function validateCommune() {
     )
 
     const point = {
-      bboxLambert93: bboxMercator.flat(),
+      bboxMercator: bboxMercator.flat(),
     }
 
     // Array(number) [ (2)[...] (2)[...] ... ]

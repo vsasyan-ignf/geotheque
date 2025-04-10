@@ -139,12 +139,12 @@ async function fetchAndConvertBbox(longitude, latitude) {
     const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:3857')
     const northEast = useConvertCoordinates(bboxWGS84[2], bboxWGS84[3], 'EPSG:4326', 'EPSG:3857')
 
-    const bboxLambert93 = [southWest[0], southWest[1], northEast[0], northEast[1]]
+    const bboxMercator = [southWest[0], southWest[1], northEast[0], northEast[1]]
 
     return {
       data,
       bboxWGS84,
-      bboxLambert93,
+      bboxMercator,
     }
   } catch (error) {
     console.error('Erreur lors du géocodage inversé:', error)
@@ -173,7 +173,7 @@ async function handleGoToPoint() {
   if (bboxResult) {
     point.locationData = bboxResult.data
     point.bboxWGS84 = bboxResult.bboxWGS84
-    point.bboxLambert93 = bboxResult.bboxLambert93
+    point.bboxMercator = bboxResult.bboxMercator
   }
 
   const mapCoords = useConvertCoordinates(
@@ -223,10 +223,10 @@ async function handleMapClick(coords) {
   if (bboxResult) {
     point.locationData = bboxResult.data
     point.bboxWGS84 = bboxResult.bboxWGS84
-    point.bboxLambert93 = bboxResult.bboxLambert93
+    point.bboxMercator = bboxResult.bboxMercator
   }
 
-  bboxState.value = point.bboxLambert93
+  bboxState.value = point.bboxMercator
 
   emit('go-to-point', point)
 

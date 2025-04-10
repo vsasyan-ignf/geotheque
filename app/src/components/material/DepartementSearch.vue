@@ -73,7 +73,7 @@ import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 
 import { useScanStore } from '@/components/store/scan'
-import { convertBbox, create_bbox } from '@/components/composable/convertCoordinates'
+import { create_bbox } from '@/components/composable/convertCoordinates'
 import config from '@/config'
 import { storeToRefs } from 'pinia'
 
@@ -82,8 +82,6 @@ const searchDepartement = ref('')
 const departementResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-const proj3857 = 'EPSG:3857' // Web Mercator
-const proj2154 = 'EPSG:2154' // Lambert-93
 
 const scanStore = useScanStore()
 const { activeTab } = storeToRefs(scanStore)
@@ -143,7 +141,7 @@ function selectDepartement(departement) {
       let rawBbox = create_bbox(contour)
       const bbox3857 = [rawBbox.minX, rawBbox.minY, rawBbox.maxX, rawBbox.maxY]
       const point = {
-        bboxLambert93: bbox3857,
+        bboxMercator: bbox3857,
       }
 
       const coordinates = contour[0].map((point) => [point[0], point[1]])
