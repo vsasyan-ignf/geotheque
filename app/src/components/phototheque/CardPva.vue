@@ -49,7 +49,7 @@ function formatLabel(key) {
 <style scoped>
 .card-pva-container {
   position: absolute;
-  left: -350px; /* Positionné à gauche de la sidebar */
+  left: 50px; /* Positionné à gauche de la sidebar */
   top: 8px;
   background-color: white;
   border-radius: 8px;
@@ -95,21 +95,22 @@ function formatLabel(key) {
 }
 
 .card-header h2 {
-  font-size: 1.5rem;
-  color: #333;
+  font-size: 14px;
+  font-weight: 500;
   margin: 0;
 }
 
 .preview-details {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 2px;
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: 2px 0;
+  font-size: 12px;
   border-bottom: 1px solid #f0f0f0;
   animation: fade-in 0.5s ease forwards;
   opacity: 0;
