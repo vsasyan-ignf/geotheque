@@ -36,10 +36,10 @@ export async function parcour_txt_to_tab(url) {
       taille_ligne = mots.length
       tab2 = []
       if (mots.length > 3 && mots[2] == 'Centre Actif') {
-        centre_x = roundToTwo(parseFloat(mots[taille_ligne - 3]));
-        centre_y = roundToTwo(parseFloat(mots[taille_ligne - 2]));
-        nom_numero_photo = mots[3];
-        numero = mots[9];
+        centre_x = roundToTwo(parseFloat(mots[taille_ligne - 3]))
+        centre_y = roundToTwo(parseFloat(mots[taille_ligne - 2]))
+        nom_numero_photo = mots[3]
+        numero = mots[9]
 
         const infos = {
           nom: nom_numero_photo,
@@ -55,12 +55,12 @@ export async function parcour_txt_to_tab(url) {
           conditions_pdv: mots[19],
           dispo: mots[20],
           focale: mots[21],
-          format: mots[22]
+          format: mots[22],
         }
 
-        tab2.push('Centre Actif');
-        tab2.push(centre_x, centre_y, nom_numero_photo, numero, infos);
-        tab_fin.push(tab2);
+        tab2.push('Centre Actif')
+        tab2.push(centre_x, centre_y, nom_numero_photo, numero, infos)
+        tab_fin.push(tab2)
       } else if (mots.length > 3 && mots[2] == 'Cliche Actif') {
         if (mots.length < 28) {
           console.error('Problème longueur Cliche Actif')
@@ -86,8 +86,7 @@ export async function parcour_txt_to_tab(url) {
         coord_y = parseFloat(mots[mots.length - 1].split('\r')[0])
         tab2.push(roundToTwo(previous_x + coord_x), roundToTwo(previous_y + coord_y))
         tab_fin.push(tab2)
-      }
-      else if (mots.length > 3 && mots[2] == 'Couple Actif') {
+      } else if (mots.length > 3 && mots[2] == 'Couple Actif') {
         if (mots.length < 18) {
           console.error('Problème longueur Couple Actif')
         }

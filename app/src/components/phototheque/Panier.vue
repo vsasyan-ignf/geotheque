@@ -1,73 +1,88 @@
 <template>
-    <div class="cart-sidebar-container">
-      <div class="cart-banner" @click="openCartModal">
-        <div class="cart-info">
-          <SvgIcon type="mdi" :path="mdiCartOutline" class="cart-icon" />
-          <div class="cart-details">
-            <span class="cart-count">{{ cartItemsCount }} mission(s)</span>
-            <span class="cart-label">Panier de sélection</span>
-          </div>
-        </div>
-        <div class="cart-action">
-          <SvgIcon type="mdi" :path="mdiChevronUp" class="chevron-icon" :class="{ 'rotate': isCartModalOpen }" />
+  <div class="cart-sidebar-container">
+    <div class="cart-banner" @click="openCartModal">
+      <div class="cart-info">
+        <SvgIcon type="mdi" :path="mdiCartOutline" class="cart-icon" />
+        <div class="cart-details">
+          <span class="cart-count">{{ cartItemsCount }} mission(s)</span>
+          <span class="cart-label">Panier de sélection</span>
         </div>
       </div>
-  
-      <div v-if="isCartModalOpen" class="modal-overlay" @click.self="closeCartModal">
-        <div class="modal-container">
-          <div class="modal-header">
-            <h2>Panier de sélection</h2>
-            <button class="close-button" @click="closeCartModal">&times;</button>
+      <div class="cart-action">
+        <SvgIcon
+          type="mdi"
+          :path="mdiChevronUp"
+          class="chevron-icon"
+          :class="{ rotate: isCartModalOpen }"
+        />
+      </div>
+    </div>
+
+    <div v-if="isCartModalOpen" class="modal-overlay" @click.self="closeCartModal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2>Panier de sélection</h2>
+          <button class="close-button" @click="closeCartModal">&times;</button>
+        </div>
+
+        <div class="modal-content">
+          <div v-if="cartItemsCount === 0" class="empty-cart">
+            <SvgIcon type="mdi" :path="mdiCartOff" class="empty-cart-icon" />
+            <p>Votre panier est vide</p>
+            <p class="help-text">Ajoutez des missions avec le bouton + pour les retrouver ici</p>
           </div>
-  
-          <div class="modal-content">
-            <div v-if="cartItemsCount === 0" class="empty-cart">
-              <SvgIcon type="mdi" :path="mdiCartOff" class="empty-cart-icon" />
-              <p>Votre panier est vide</p>
-              <p class="help-text">Ajoutez des missions avec le bouton + pour les retrouver ici</p>
-            </div>
-  
-            <div v-else class="cart-items">
-              <div v-for="(item, index) in cartItems" :key="index" class="cart-item">
-                <div class="item-content">
-                  <div class="item-image">
-                    <img :src="getImageUrl(item)" alt="Aperçu de la mission" class="mission-image" />
+
+          <div v-else class="cart-items">
+            <div v-for="(item, index) in cartItems" :key="index" class="cart-item">
+              <div class="item-content">
+                <div class="item-image">
+                  <img
+                    :src="getImageUrl(item)"
+                    alt="Aperçu de la mission"
+                    class="mission-image"
+                    @error="(e) => (e.target.src = NoImageAvailable)"
+                  />
+                </div>
+                <div class="item-info">
+                  <div class="item-header">
+                    <div class="item-name">{{ item.nom }}</div>
+                    <div class="item-actions">
+                      <button class="view-button" @click="viewMission(item)" title="Visualiser">
+                        <SvgIcon type="mdi" :path="mdiEyeOutline" class="view-icon" />
+                      </button>
+                      <button
+                        class="remove-button"
+                        @click="removeFromCart(index)"
+                        title="Supprimer"
+                      >
+                        <SvgIcon type="mdi" :path="mdiTrashCanOutline" class="trash-icon" />
+                      </button>
+                    </div>
                   </div>
-                  <div class="item-info">
-                    <div class="item-header">
-                      <div class="item-name">{{ item.nom }}</div>
-                      <div class="item-actions">
-                        <button class="view-button" @click="viewMission(item)" title="Visualiser">
-                          <SvgIcon type="mdi" :path="mdiEyeOutline" class="view-icon" />
-                        </button>
-                        <button class="remove-button" @click="removeFromCart(index)" title="Supprimer">
-                          <SvgIcon type="mdi" :path="mdiTrashCanOutline" class="trash-icon" />
-                        </button>
+
+                  <div class="item-details">
+                    <div class="item-row">
+                      <div class="property-label">Date de vol:</div>
+                      <div class="property-value">{{ item.date_vol }}</div>
+                    </div>
+                    <div class="item-row">
+                      <div class="property-label">Format:</div>
+                      <div class="property-value">{{ item.format }}</div>
+                    </div>
+                    <div class="item-row">
+                      <div class="property-label">Chantier:</div>
+                      <div class="property-value long-text">
+                        {{ item.chantier || 'Non spécifié' }}
                       </div>
                     </div>
-                    
-                    <div class="item-details">
-                      <div class="item-row">
-                        <div class="property-label">Date de vol:</div>
-                        <div class="property-value">{{ item.date_vol }}</div>
-                      </div>
-                      <div class="item-row">
-                        <div class="property-label">Format:</div>
-                        <div class="property-value">{{ item.format }}</div>
-                      </div>
-                      <div class="item-row">
-                        <div class="property-label">Chantier:</div>
-                        <div class="property-value long-text">{{ item.chantier || 'Non spécifié' }}</div>
-                      </div>
-                      <div class="item-row">
-                        <div class="property-label">Nom:</div>
-                        <div class="property-value long-text">{{ item.nom || 'Non spécifié' }}</div>
-                      </div>
-                      <div class="item-row">
-                        <div class="property-label">Disponibilité:</div>
-                        <div class="property-value long-text">
-                          {{ item.dispo || 'Non spécifiée' }}
-                        </div>
+                    <div class="item-row">
+                      <div class="property-label">Nom:</div>
+                      <div class="property-value long-text">{{ item.nom || 'Non spécifié' }}</div>
+                    </div>
+                    <div class="item-row">
+                      <div class="property-label">Disponibilité:</div>
+                      <div class="property-value long-text">
+                        {{ item.dispo || 'Non spécifiée' }}
                       </div>
                     </div>
                   </div>
@@ -75,39 +90,37 @@
               </div>
             </div>
           </div>
-  
-          <div class="modal-footer">
-            <button 
-              class="clear-button" 
-              @click="clearCart"
-              :disabled="cartItemsCount === 0"
-            >
-              Vider le panier
-            </button>
-            <button 
-              class="download-button" 
-              @click="downloadCartItems"
-              :disabled="cartItemsCount === 0"
-            >
-              <SvgIcon type="mdi" :path="mdiDownloadCircle" class="download-icon" />
-              Télécharger CSV
-            </button>
-          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="clear-button" @click="clearCart" :disabled="cartItemsCount === 0">
+            Vider le panier
+          </button>
+          <button
+            class="download-button"
+            @click="downloadCartItems"
+            :disabled="cartItemsCount === 0"
+          >
+            <SvgIcon type="mdi" :path="mdiDownloadCircle" class="download-icon" />
+            Télécharger CSV
+          </button>
         </div>
       </div>
     </div>
+  </div>
 </template>
-  
+
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import SvgIcon from '@jamescoyle/vue-icon'
-import { 
-  mdiCartOutline, 
-  mdiCartOff, 
-  mdiChevronUp, 
-  mdiTrashCanOutline, 
+import NoImageAvailable from '@/assets/no-image-available.jpg'
+import {
+  mdiCartOutline,
+  mdiCartOff,
+  mdiChevronUp,
+  mdiTrashCanOutline,
   mdiDownloadCircle,
-  mdiEyeOutline
+  mdiEyeOutline,
 } from '@mdi/js'
 import { downloadCSV } from '../composable/download'
 import { useScanStore } from '@/components/store/scan'
@@ -125,9 +138,9 @@ const cartItemsCount = computed(() => cartItems.value.length)
 
 const getImageUrl = (item) => {
   if (item) {
-  const year = item.chantier.substring(0, 4)
-  let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2&CVT=jpeg`
-  return imageUrl
+    const year = item.chantier.substring(0, 4)
+    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2&CVT=jpeg`
+    return imageUrl
   }
 }
 
@@ -144,9 +157,9 @@ const closeCartModal = () => {
 const removeFromCart = (index) => {
   const itemToRemove = cartItems.value[index]
   cartItems.value.splice(index, 1)
-  
+
   scanStore.removeSelectedPhoto(itemToRemove)
-  
+
   // localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
 }
 
@@ -158,15 +171,15 @@ const clearCart = () => {
 
 const downloadCartItems = () => {
   if (cartItems.value.length > 0) {
-    const formattedData = cartItems.value.map(item => {
-      return { properties: item };
-    });
-    
-    downloadCSV(formattedData);
+    const formattedData = cartItems.value.map((item) => {
+      return { properties: item }
+    })
+
+    downloadCSV(formattedData)
   }
 }
 const viewMission = (item) => {
-    // ajouter le lien ippsrv
+  // ajouter le lien ippsrv
   if (item) {
     const year = item.chantier.substring(0, 4)
     let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2`
@@ -190,12 +203,16 @@ const initCart = () => {
   }
 }
 
-watch(SelectedPhotos, (newVal) => {
-  if (newVal && newVal.length > 0) {
-    cartItems.value = newVal
-    // localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
-  }
-}, { deep: true })
+watch(
+  SelectedPhotos,
+  (newVal) => {
+    if (newVal && newVal.length > 0) {
+      cartItems.value = newVal
+      // localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
+    }
+  },
+  { deep: true },
+)
 
 // defineExpose({
 //   addToCart
@@ -453,7 +470,8 @@ watch(SelectedPhotos, (newVal) => {
   gap: 8px;
 }
 
-.view-button, .remove-button {
+.view-button,
+.remove-button {
   background: none;
   border: none;
   color: #999;
@@ -473,7 +491,8 @@ watch(SelectedPhotos, (newVal) => {
   color: #ef4444;
 }
 
-.view-icon, .trash-icon {
+.view-icon,
+.trash-icon {
   width: 18px;
   height: 18px;
 }
@@ -549,7 +568,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-
 @keyframes slideInUp {
   from {
     opacity: 0;
@@ -565,7 +583,7 @@ button:disabled {
   .item-content {
     flex-direction: column;
   }
-  
+
   .item-image {
     width: 100%;
     height: 180px;

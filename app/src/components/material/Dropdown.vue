@@ -1,5 +1,5 @@
 <template>
-  <div class="custom-dropdown" v-click-outside="closeDropdown">
+  <div class="custom-dropdown" v-click-outside="closeDropdown" ref="dropdownRef">
     <label v-if="nameDropdown">{{ nameDropdown }}</label>
     <div class="dropdown-selected" @click="toggleDropdown">
       <span class="selected-text">{{
@@ -7,9 +7,9 @@
       }}</span>
       <span class="dropdown-arrow" :class="{ open: isOpen }">▼</span>
     </div>
-
-    <div class="dropdown-options" 
-      :class="{ show: isOpen }"
+    <div
+      class="dropdown-options"
+      :class="{ show: isOpen, 'dropdown-up': shouldShowAbove }"
       @mouseleave="resetHover"
     >
       <div
@@ -26,12 +26,15 @@
 </template>
 
 <script setup>
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect, onMounted, nextTick } from 'vue'
 import { eventBus } from '../composable/eventBus'
 import { useScanStore } from '../store/scan'
 import { debounce } from 'lodash'
 
 const scanStore = useScanStore()
+const dropdownRef = ref(null)
+const shouldShowAbove = ref(false)
+
 const props = defineProps({
   nameDropdown: {
     type: String,
@@ -57,8 +60,24 @@ const selected = ref('')
 const isOpen = ref(false)
 const emit = defineEmits(['update:selected', 'option-hover'])
 
+function checkPosition() {
+  if (!dropdownRef.value) return
+
+  nextTick(() => {
+    const dropdownRect = dropdownRef.value.getBoundingClientRect()
+    const dropdownHeight = 250
+    const windowHeight = window.innerHeight
+    const bottomSpace = windowHeight - dropdownRect.bottom
+
+    shouldShowAbove.value = bottomSpace < dropdownHeight && dropdownRect.top > dropdownHeight
+  })
+}
+
 function toggleDropdown() {
   isOpen.value = !isOpen.value
+  if (isOpen.value) {
+    checkPosition()
+  }
 }
 
 function closeDropdown() {
@@ -69,9 +88,7 @@ function selectOption(option) {
   selected.value = option
   isOpen.value = false
   emit('update:selected', option)
-
   scanStore.updateHoverScan(null)
-
   if (props.nameDropdown !== 'Collections') {
     scanStore.updateSelectedScan(option)
   }
@@ -88,7 +105,6 @@ function handleOptionHover(option) {
 
 function resetHover() {
   scanStore.updateHoverScan(null)
-  
   if (selected.value) {
     scanStore.updateSelectedScan(selected.value)
   }
@@ -106,6 +122,10 @@ eventBus.on('criteria-reset', () => {
   } else {
     selected.value = ''
   }
+})
+
+onMounted(() => {
+  window.addEventListener('resize', checkPosition)
 })
 
 const vClickOutside = {
@@ -174,6 +194,7 @@ const vClickOutside = {
   z-index: 10;
   margin-top: 5px;
   font-size: 13px;
+  width: 100%;
 }
 
 .dropdown-options.show {
@@ -183,10 +204,22 @@ const vClickOutside = {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.dropdown-options.dropdown-up {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 5px;
+  border-radius: 6px 6px 0 0;
+}
+
 .dropdown-option {
   padding: 10px;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.3;
+  min-height: 20px;
 }
 
 .dropdown-option:hover {
@@ -197,5 +230,6 @@ const vClickOutside = {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: calc(100% - 20px);
 }
 </style>

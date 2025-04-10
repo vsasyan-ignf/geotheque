@@ -2,14 +2,27 @@
   <div class="map-container">
     <SideMenu @toggle-visibility="toggleLayerVisibility" />
     <div ref="mapElement" class="ol-map"></div>
-    <BasecardSwitcher :layers="layers" :otherLayers="otherLayers" :activeLayerIndex="activeLayerIndex"
-      :currentZoom="currentZoom" @layer-change="changeActiveLayer" @other-layer-toggle="handleOtherLayerToggle"
-      @display-option-change="handleDisplayOptionChange" />
+    <BasecardSwitcher
+      :layers="layers"
+      :otherLayers="otherLayers"
+      :activeLayerIndex="activeLayerIndex"
+      :currentZoom="currentZoom"
+      @layer-change="changeActiveLayer"
+      @other-layer-toggle="handleOtherLayerToggle"
+      @display-option-change="handleDisplayOptionChange"
+    />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
-    <DrawControl v-if="activeTab === 'phototheque'" :map="olMap" :isDrawModeActive="drawModeActive"
-      @draw-complete="handleDrawComplete" @draw-mode-activated="handleDrawModeActivated"
-      @deactivate-draw-mode="handleDeactivateDrawMode" />
+    <DrawControl
+      v-if="activeTab === 'phototheque'"
+      :map="olMap"
+      :isDrawModeActive="drawModeActive"
+      @draw-complete="handleDrawComplete"
+      @draw-mode-activated="handleDrawModeActivated"
+      @deactivate-draw-mode="handleDeactivateDrawMode"
+    />
+    <!-- Add CardPva component here -->
+    <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
   </div>
   <div style="z-index: 99999999" id="mouse-position"></div>
   <div style="z-index: 99999999" id="form-proj"></div>
@@ -21,6 +34,7 @@ import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
 import ZoomControl from './ZoomControl.vue'
+import CardPva from './phototheque/CardPva.vue' // Import the new CardPva component
 import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 import crossIcon from '@/assets/red-cross.svg'
@@ -64,6 +78,15 @@ import Icon from 'ol/style/Icon'
 import MousePosition from 'ol/control/MousePosition.js'
 import { createStringXY } from 'ol/coordinate.js'
 
+// Added new refs for card component
+const showCardPva = ref(false)
+const selectedPhotoInfo = ref({})
+
+// Function to close card
+function closeCardPva() {
+  showCardPva.value = false
+}
+
 const scanStore = useScanStore()
 const {
   storeURL,
@@ -74,6 +97,7 @@ const {
   storeHoveredScan,
   deletePhotoAllBool,
   dicoUrlPhoto,
+  SelectedPhotos,
 } = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -110,22 +134,23 @@ const vectorLayers = ref({
   hover: null,
 })
 
-const clearAllLayersTA = () => { 
+const clearAllLayersTA = () => {
   vectorLayers.value.scan.getSource().clear()
   vectorLayers.value.geomPhoto.getSource().clear()
   vectorLayers.value.cross.getSource().clear()
   vectorLayers.value.cross_alphanum.getSource().clear()
   vectorLayers.value.geomMouseOver.getSource().clear()
-  tab_emprise_photo = [];
-  last_geom = null;
+  tab_emprise_photo = []
+  last_geom = null
+  // Close card when clearing layers
+  showCardPva.value = false
 }
-
 
 const vectorOtherLayers = ref(null)
 
-let tab_emprise_photo = [];
-let  tab_couples_photo = [];
-let last_geom = null;
+let tab_emprise_photo = []
+let tab_couples_photo = []
+let last_geom = null
 
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
@@ -139,17 +164,17 @@ watch(activeTab, (newValue) => {
   layers.value = newLayers
   otherLayers.value = getOtherLayersForActiveTab(activeTab.value)
   hideOtherLayers()
-  updateWMTSLayers(olMap.value, newLayers)
   scanStore.resetCriteria()
   activeLayerIndex.value = 0
   //faire une fonction pour pas dupliquer avec reset
-  tab_emprise_photo = [];
-  tab_couples_photo = [];
-  last_geom = null;
+  tab_emprise_photo = []
+  tab_couples_photo = []
+  last_geom = null
   vectorLayers.value.geomMouseOver.getSource().clear()
   vectorLayers.value.geomCouple.getSource().clear()
 
-  
+  // Close card when changing tabs
+  showCardPva.value = false
 })
 
 const activeLayerIndex = ref(0)
@@ -175,29 +200,47 @@ function DrawEmpriseGeometry(geometry) {
   }
   last_geom = geometry
   const feature = new Feature({
-    geometry: last_geom
-  });
-  vectorLayers.value.geomMouseOver.getSource().addFeature(feature);
+    geometry: last_geom,
+  })
+  vectorLayers.value.geomMouseOver.getSource().addFeature(feature)
 }
 
-
 function isPointOnEmprise(point, emprises) {
-  //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
-  // le point de la souris ,sinon on vide la couche des emprises à afficher
   for (let i = 0; i < emprises.length; i++) {
     const polygon = new Feature({
       geometry: new Polygon([emprises[i]]),
-    });
-    const geometry = polygon.getGeometry();
+    })
+    const geometry = polygon.getGeometry()
 
     if (geometry.intersectsCoordinate(point)) {
-      DrawEmpriseGeometry(geometry)
-      return;
+      return true
     }
   }
-  vectorLayers.value.geomMouseOver.getSource().clear()
+  return false
 }
 
+function showPointOnEmprise(point, emprises) {
+  //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
+  // le point de la souris ,sinon on vide la couche des emprises à afficher
+  let i
+  for (i = 0; i < emprises.length; i++) {
+    const polygon = new Feature({
+      geometry: new Polygon([emprises[i][0]]),
+    })
+    const geometry = polygon.getGeometry()
+    //ici
+
+    if (geometry.intersectsCoordinate(point)) {
+      const alpha_selec = emprises[i][1]
+      showCardPva.value = true
+      selectedPhotoInfo.value = infosPva.value[alpha_selec]
+      DrawEmpriseGeometry(geometry)
+      return
+    }
+  }
+  showCardPva.value = false
+  vectorLayers.value.geomMouseOver.getSource().clear()
+}
 
 function Add_new_couple_to_map(tab) {
   const feature = new Feature({
@@ -207,24 +250,18 @@ function Add_new_couple_to_map(tab) {
   vectorLayers.value.geomCouple.getSource().addFeature(feature)
 }
 
-
-
 function updateCoupleVisibility(bool) {
-  let i;
+  let i
   vectorLayers.value.geomCouple.getSource().clear()
 
-  console.log("oui")
-  console.log(bool)
-  if ( bool && tab_couples_photo.length > 0) {
-    for(i=0;i<tab_couples_photo.length;i++){
+  if (bool && tab_couples_photo.length > 0) {
+    for (i = 0; i < tab_couples_photo.length; i++) {
       Add_new_couple_to_map(tab_couples_photo[i])
     }
   }
 }
 
-
-
-function addPointToMap(x, y, nom, crossAlpha=false) {
+function addPointToMap(x, y, nom, crossAlpha = false) {
   const coord = [x, y]
 
   // Créer un style avec une icône et un texte
@@ -274,15 +311,15 @@ function Add_new_polygone_to_map(tab, name) {
 
   const style = new Style({
     stroke: new Stroke({
-        color: 'blue',
-        width: 2,
-      }),
+      color: 'blue',
+      width: 2,
+    }),
     fill: new Fill({
       color: 'rgba(0, 0, 0, 0)',
     }),
-  });
+  })
 
-  polygon.setStyle(style);
+  polygon.setStyle(style)
 
   vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
 }
@@ -291,28 +328,38 @@ async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
     console.log('url TA : ', url)
-    const tab_test = await parcour_txt_to_tab(url);
+    const tab_test = await parcour_txt_to_tab(url)
 
     if (!tab_test || tab_test.length === 0) {
       throw new Error('Le tableau récupéré est vide ou invalide.')
     }
 
-    let elem, i, i2, x, y, x_3857, y3857, tab_points_cliche_3857,tab_points_couple_3857, alphanum, numero, infos;
+    let elem,
+      i,
+      i2,
+      x,
+      y,
+      x_3857,
+      y3857,
+      tab_points_cliche_3857,
+      tab_points_couple_3857,
+      alphanum,
+      numero,
+      infos
     for (i = 0; i < tab_test.length; i++) {
       if (tab_test[i][0] == 'Centre Actif') {
         //"Centre Actif"
         x = tab_test[i][1]
         y = tab_test[i][2]
-        alphanum = tab_test[i][3];
-        numero = tab_test[i][4];
-        infos = tab_test[i][5];
+        alphanum = tab_test[i][3]
+        numero = tab_test[i][4]
+        infos = tab_test[i][5]
 
-        [x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857');
-        addPointToMap(x_3857, y3857, numero);
-        addPointToMap(x_3857, y3857, alphanum, true);
+        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+        addPointToMap(x_3857, y3857, numero)
+        addPointToMap(x_3857, y3857, alphanum, true)
 
-        infosPva.value[alphanum] = infos;
-
+        infosPva.value[alphanum] = infos
       } else if (tab_test[i][0] == 'Cliche Actif') {
         elem = tab_test[i]
         tab_points_cliche_3857 = []
@@ -324,11 +371,9 @@ async function parcour_tab_and_map(url) {
           tab_points_cliche_3857.push([x_3857, y3857])
         }
 
-        tab_emprise_photo.push(tab_points_cliche_3857);
-        Add_new_polygone_to_map(tab_points_cliche_3857, alphanum);
-        
-      }
-      else if(tab_test[i][0] == 'Couple Actif'){
+        tab_emprise_photo.push([tab_points_cliche_3857, alphanum])
+        Add_new_polygone_to_map(tab_points_cliche_3857, alphanum)
+      } else if (tab_test[i][0] == 'Couple Actif') {
         elem = tab_test[i]
         tab_points_couple_3857 = []
         for (i2 = 1; i2 < elem.length; i2 = i2 + 2) {
@@ -336,16 +381,13 @@ async function parcour_tab_and_map(url) {
           x = elem[i2]
           y = elem[i2 + 1]
           ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-          addPointToMap(x_3857, y3857);
+          addPointToMap(x_3857, y3857)
           tab_points_couple_3857.push([x_3857, y3857])
         }
         //Tableau de couples
-      tab_couples_photo.push(tab_points_couple_3857);
-
-
-      }
-      else{
-        console.error("probleme dans parcour tab")
+        tab_couples_photo.push(tab_points_couple_3857)
+      } else {
+        console.error('probleme dans parcour tab')
       }
     }
   } catch (error) {
@@ -466,15 +508,15 @@ onMounted(() => {
       coordinateFormat: createStringXY(2),
       projection: olMap.value.getView().getProjection().getCode(),
       target: document.getElementById('mouse-position'),
-    });
+    })
 
     olMap.value.on('pointermove', (event) => {
-      const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
-      const formattedCoordinate = createStringXY(2)(coordinate);
+      const coordinate = olMap.value.getEventCoordinate(event.originalEvent)
+      const formattedCoordinate = createStringXY(2)(coordinate)
 
-      isPointOnEmprise(coordinate, tab_emprise_photo)
+      showPointOnEmprise(coordinate, tab_emprise_photo)
 
-      const mousePositionElement = document.getElementById('mouse-position');
+      const mousePositionElement = document.getElementById('mouse-position')
       if (mousePositionElement) {
         mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`
       }
@@ -483,7 +525,6 @@ onMounted(() => {
     initializeIntersectionLayer(olMap)
 
     olMap.value.on('click', (event) => {
-
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
       if (showPin.value) {
         vectorLayers.value.pin.getSource().clear()
@@ -504,11 +545,11 @@ onMounted(() => {
 
       if (vectorLayers.value.geomPhoto) {
         olMap.value.forEachFeatureAtPixel(event.pixel, function (feature) {
-          const name = feature.get('name');
+          const name = feature.get('name')
           if (name) {
             scanStore.updateSelectedPhotos(infosPva.value[name])
           }
-        });
+        })
       }
     })
 
@@ -552,8 +593,8 @@ onMounted(() => {
       if (newValue === null && olMap.value) {
         Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
         vectorLayers.value.emprises.getSource().setUrl('')
-        scanStore.resetCriteria();
-        clearAllLayersTA();
+        scanStore.resetCriteria()
+        clearAllLayersTA()
       }
     })
 
@@ -566,7 +607,6 @@ onMounted(() => {
       vectorLayers.value.geomPhoto.getSource().clear()
 
       if (storeSelectedGeom.value.length !== 0) {
-
         const polygon = new Feature({
           geometry: new MultiPolygon([storeSelectedGeom.value]),
         })
@@ -624,19 +664,21 @@ onMounted(() => {
       }
     })
 
-    watch(dicoUrlPhoto, () => {
-      clearAllLayersTA();
-      if (dicoUrlPhoto.value.length > 0) {
-        dicoUrlPhoto.value.forEach((url) => {
-          parcour_tab_and_map(url)
-        })
-      }
-    },
-      { deep: true }
+    watch(
+      dicoUrlPhoto,
+      () => {
+        clearAllLayersTA()
+        if (dicoUrlPhoto.value.length > 0) {
+          dicoUrlPhoto.value.forEach((url) => {
+            parcour_tab_and_map(url)
+          })
+        }
+      },
+      { deep: true },
     )
 
     watch(deletePhotoAllBool, () => {
-        clearAllLayersTA()
+      clearAllLayersTA()
     })
 
     eventBus.on('criteria-reset', () => {
@@ -644,8 +686,8 @@ onMounted(() => {
       vectorLayers.value.emprises.getSource().setUrl('')
       clearAllLayersTA()
       if (vectorLayers.value.geomCouple) {
-         vectorLayers.value.geomCouple.getSource().clear()
-         tab_couples_photo = [];
+        vectorLayers.value.geomCouple.getSource().clear()
+        tab_couples_photo = []
       }
       clearIntersection()
     })
@@ -655,13 +697,11 @@ onMounted(() => {
 })
 
 function handleDisplayOptionChange({ option, value }) {
-
   if (option === 'alphanumerique') {
+    const currentLayer = value ? vectorLayers.value.cross_alphanum : vectorLayers.value.cross
+    const previousLayer = value ? vectorLayers.value.cross : vectorLayers.value.cross_alphanum
 
-    const currentLayer = value ? vectorLayers.value.cross_alphanum : vectorLayers.value.cross;
-    const previousLayer = value ? vectorLayers.value.cross : vectorLayers.value.cross_alphanum;
-
-    const isVisible = previousLayer.getVisible();
+    const isVisible = previousLayer.getVisible()
 
     if (isVisible) {
       previousLayer.setVisible(false)
@@ -669,62 +709,58 @@ function handleDisplayOptionChange({ option, value }) {
     }
 
     checkboxAlphanum.value = value
-
   }
 
   if (option === 'numDepartement') {
-    const currentLayerId = value ? 'departements' : 'departements_with_no_name';
-    const previousLayerId = value ? 'departements_with_no_name' : 'departements';
+    const currentLayerId = value ? 'departements' : 'departements_with_no_name'
+    const previousLayerId = value ? 'departements_with_no_name' : 'departements'
 
     if (vectorOtherLayers.value) {
-      const isVisible = vectorOtherLayers.value[previousLayerId]?.getVisible();
+      const isVisible = vectorOtherLayers.value[previousLayerId]?.getVisible()
       if (isVisible) {
-        vectorOtherLayers.value[previousLayerId].setVisible(false);
-        vectorOtherLayers.value[currentLayerId].setVisible(true);
+        vectorOtherLayers.value[previousLayerId].setVisible(false)
+        vectorOtherLayers.value[currentLayerId].setVisible(true)
       }
 
-      const departmentLayer = otherLayers.value.find(layer => layer.id === previousLayerId);
+      const departmentLayer = otherLayers.value.find((layer) => layer.id === previousLayerId)
 
       if (departmentLayer) {
-        departmentLayer.id = currentLayerId;
+        departmentLayer.id = currentLayerId
       }
     }
   }
 
-  if(option ==='couplesStero' ){ 
-    console.log("change")
+  if (option === 'couplesStero') {
     updateCoupleVisibility(value)
-  } 
+  }
 
-  
   if (option === 'numFeuille') {
     const layerTypes = [
       { base: 'feuilles_france', withoutName: 'feuilles_france_with_no_name' },
-      { base: 'feuilles_monde', withoutName: 'feuilles_monde_with_no_name' }
-    ];
+      { base: 'feuilles_monde', withoutName: 'feuilles_monde_with_no_name' },
+    ]
 
-    layerTypes.forEach(type => {
-      const currentLayerId = value ? type.base : type.withoutName;
-      const previousLayerId = value ? type.withoutName : type.base;
+    layerTypes.forEach((type) => {
+      const currentLayerId = value ? type.base : type.withoutName
+      const previousLayerId = value ? type.withoutName : type.base
 
       if (vectorOtherLayers.value && vectorOtherLayers.value[previousLayerId]) {
-        const isVisible = vectorOtherLayers.value[previousLayerId].getVisible();
+        const isVisible = vectorOtherLayers.value[previousLayerId].getVisible()
         if (isVisible) {
-          vectorOtherLayers.value[previousLayerId].setVisible(false);
-          vectorOtherLayers.value[currentLayerId].setVisible(true);
+          vectorOtherLayers.value[previousLayerId].setVisible(false)
+          vectorOtherLayers.value[currentLayerId].setVisible(true)
         }
 
-        const feuilleLayer = otherLayers.value.find(layer => layer.id === previousLayerId);
+        const feuilleLayer = otherLayers.value.find((layer) => layer.id === previousLayerId)
 
         if (feuilleLayer) {
-          feuilleLayer.id = currentLayerId;
+          feuilleLayer.id = currentLayerId
         }
       }
-    });
+    })
   }
 }
 provide('eventBus', eventBus)
-
 </script>
 
 <style scoped>
@@ -748,10 +784,7 @@ provide('eventBus', eventBus)
   bottom: 10px;
   right: 40%;
   /* À 10px du côté gauche */
-  background-color: rgba(255,
-      255,
-      255,
-      0.8);
+  background-color: rgba(255, 255, 255, 0.8);
   /* Fond semi-transparent pour améliorer la lisibilité */
   padding: 5px;
   /* Un peu de padding */

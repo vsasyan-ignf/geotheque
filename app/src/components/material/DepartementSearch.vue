@@ -73,7 +73,7 @@ import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 
 import { useScanStore } from '@/components/store/scan'
-import { convertBbox, create_bbox } from '@/components/composable/convertCoordinates'
+import { create_bbox } from '@/components/composable/convertCoordinates'
 import config from '@/config'
 import { storeToRefs } from 'pinia'
 
@@ -82,8 +82,6 @@ const searchDepartement = ref('')
 const departementResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
-const proj3857 = 'EPSG:3857' // Web Mercator
-const proj2154 = 'EPSG:2154' // Lambert-93
 
 const scanStore = useScanStore()
 const { activeTab } = storeToRefs(scanStore)
@@ -140,12 +138,10 @@ function searchDepartements() {
 function selectDepartement(departement) {
   getDepartementBbox(departement)
     .then((contour) => {
-      let bbox3857 = create_bbox(contour)
-      const bbox2154 = convertBbox(bbox3857, proj3857, proj2154)
+      let rawBbox = create_bbox(contour)
+      const bbox3857 = [rawBbox.minX, rawBbox.minY, rawBbox.maxX, rawBbox.maxY]
       const point = {
-        x: 0,
-        y: 0,
-        bboxLambert93: bbox2154,
+        bboxMercator: bbox3857,
       }
 
       const coordinates = contour[0].map((point) => [point[0], point[1]])
@@ -164,9 +160,8 @@ function selectDepartement(departement) {
 async function getDepartementBbox(departement) {
   const depCode = departement.code.toString()
   const urlDepBbox =
-    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0
-  ` +
-    `&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=CODE_DEPT='${depCode}'&srsName=EPSG:3857`
+    `${config.GEOSERVER_URL}` +
+    `&request=GetFeature&typeNames=geotheque_mtd:france_departements&outputFormat=application/json&CQL_FILTER=code_dept='${depCode}'&apikey=${config.APIKEY}`
 
   try {
     const response = await fetch(urlDepBbox)

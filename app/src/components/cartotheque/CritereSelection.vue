@@ -103,7 +103,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Dropdown from '@/components/material/Dropdown.vue'
 import FormInput from '@/components/material/FormInput.vue'
 import ComboInput from '@/components/material/ComboInput.vue'
@@ -113,8 +113,14 @@ import { storeToRefs } from 'pinia'
 import { mdiRefresh, mdiMagnify } from '@mdi/js'
 
 const scanStore = useScanStore()
-const { storeCritereSelection, activeTab, collectionsOptions, supportOptions, emulsionOptions } =
-  storeToRefs(scanStore)
+const {
+  storeURL,
+  storeCritereSelection,
+  activeTab,
+  collectionsOptions,
+  supportOptions,
+  emulsionOptions,
+} = storeToRefs(scanStore)
 
 const isCartotheque = computed(() =>
   ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value),
@@ -161,16 +167,14 @@ const showScaleMaxOptions = ref(false)
 const showCommanditaireOptions = ref(false)
 const showProducteurOptions = ref(false)
 
-onMounted(async () => {
-  await loadInitialOptions()
-})
-
-watch(activeTab, async () => {
+watch(storeURL, async () => {
   await loadInitialOptions()
 })
 
 async function loadInitialOptions() {
+  console.log(isPhototheque.value)
   if (isPhototheque.value) {
+    console.log('eee')
     const [commanditaireOpts, producteurOpts] = await Promise.all([
       scanStore.getCommanditaireOptions(),
       scanStore.getProducteurOptions(),

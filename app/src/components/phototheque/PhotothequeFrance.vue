@@ -13,6 +13,32 @@
       </div>
     </div>
 
+    <div v-if="!activeSubCategory">
+      <div class="search-header">Cliquer sur l'un des onglets pour effectuer une recherche :</div>
+      <div class="search-options">
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.feuille" type="mdi" class="icon" />
+          <span>par commune(s)</span>
+        </div>
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.departement" type="mdi" class="icon" />
+          <span>par département(s)</span>
+        </div>
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.feuille" type="mdi" class="icon" />
+          <span>par feuille(s) au 1:50 000</span>
+        </div>
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.point" type="mdi" class="icon" />
+          <span>par pointé sur la carte</span>
+        </div>
+        <div class="search-option">
+          <SvgIcon :path="mdiIcons.autre" type="mdi" class="icon" />
+          <span>par nom de mission(s)</span>
+        </div>
+      </div>
+    </div>
+
     <CommuneSearch
       v-if="activeSubCategory === 'commune'"
       @close="$emit('close-sub-category')"
@@ -73,8 +99,8 @@ const props = defineProps({
 defineEmits(['select-sub-category', 'close-sub-category'])
 
 function goToPoint(point) {
-  if (point.bboxLambert93) {
-    scanStore.updateBbox(point.bboxLambert93)
+  if (point.bboxMercator) {
+    scanStore.updateBbox(point.bboxMercator)
   }
 }
 
@@ -126,6 +152,33 @@ watch(
 
 .sub-category:nth-child(n + 4):hover {
   transform: scale(1.05);
+}
+
+.search-header {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.search-options {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-left: 5px;
+}
+
+.search-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+}
+
+.search-option span {
+  font-size: 14px;
+  color: #444;
 }
 
 .icon {

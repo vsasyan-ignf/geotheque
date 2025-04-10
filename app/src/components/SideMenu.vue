@@ -38,11 +38,19 @@
           />
         </template>
 
+        <template v-if="activeTab === 'phototheque_etranger'">
+          <PhotothequeEtranger
+            :activeSubCategory="activeSubCategory"
+            :subCategories="subCategoriesPhotothequeEtranger"
+            @select-sub-category="selectSubCategory"
+            @close-sub-category="closeSubCategory"
+          />
+        </template>
         <template v-else-if="activeTab === 'aide'">
           <Aide />
         </template>
       </component>
-      <Panier v-if="activeTab === 'phototheque'"/>
+      <Panier v-if="activeTab === 'phototheque' || activeTab === 'phototheque_etranger'" />
     </div>
   </div>
 </template>
@@ -54,9 +62,12 @@ import TabContent from './TabContent.vue'
 import CartothequeFrance from './cartotheque/CartothequeFrance.vue'
 import CartothequeEtranger from './cartotheque/CartothequeEtranger.vue'
 import PhotothequeFrance from './phototheque/PhotothequeFrance.vue'
+import PhotothequeEtranger from './phototheque/PhotothequeEtranger.vue'
 import Aide from './Aide.vue'
 import { useScanStore } from './store/scan'
 import Panier from './phototheque/Panier.vue'
+import { mdiCity, mdiMap, mdiCrosshairsGps } from '@mdi/js'
+
 const scanStore = useScanStore()
 
 const activeTab = ref('cartotheque')
@@ -89,6 +100,11 @@ const subCategoriesPhototheque = [
   { id: 'feuilles', icon: 'feuille', title: 'Feuilles' },
   { id: 'point', icon: 'point', title: 'Point XY' },
   { id: 'autre', icon: 'autre', title: 'PVA' },
+]
+
+const subCategoriesPhotothequeEtranger = [
+  { id: 'feuilles', icon: 'feuille', title: 'Feuilles' },
+  { id: 'point', icon: 'point', title: 'Point XY' },
 ]
 
 const activeTabTitle = computed(() => {
@@ -150,5 +166,30 @@ function closeSubCategory() {
 
 .sidebar-content.open {
   width: 400px;
+}
+
+.search-header {
+  margin-bottom: 10px;
+  padding: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.search-option span {
+  font-size: 14px;
+  color: #444;
+}
+
+.search-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.icon {
+  font-size: 16px;
+  color: #666;
 }
 </style>
