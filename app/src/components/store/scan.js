@@ -124,7 +124,7 @@ export const useScanStore = defineStore('scan', () => {
       storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000
     } else if (activeTab.value === 'cartotheque_etranger') {
       storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500
-      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 200000
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 10000000
     } else {
       storeCritereSelection.value.scaleMin = null
       storeCritereSelection.value.scaleMax = null
