@@ -164,9 +164,8 @@ function selectDepartement(departement) {
 async function getDepartementBbox(departement) {
   const depCode = departement.code.toString()
   const urlDepBbox =
-    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0
-  ` +
-    `&request=GetFeature&typeNames=departements&outputFormat=application/json&CQL_FILTER=CODE_DEPT='${depCode}'&srsName=EPSG:3857`
+    `${config.GEOSERVER_URL}` +
+    `&request=GetFeature&typeNames=geotheque_mtd:france_departements&outputFormat=application/json&CQL_FILTER=code_dept='${depCode}'&apikey=${config.APIKEY}`
 
   try {
     const response = await fetch(urlDepBbox)

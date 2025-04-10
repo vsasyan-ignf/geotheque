@@ -87,14 +87,14 @@ let repFeuille = ref(null)
 
 const coucheGeoserverName = computed(() => {
   if (activeTab.value === 'phototheque') {
-    return 'feuilles50000'
+    return 'geotheque_mtd:france_feuilles'
   } else {
-    return 'feuillesmonde'
+    return 'geotheque_mtd:monde_feuilles'
   }
 })
 
 const proj = computed(() => {
-  return coucheGeoserverName.value === 'feuillesmonde' ? 'EPSG:4326' : 'EPSG:2154'
+  return coucheGeoserverName.value === 'monde_feuilles' ? 'EPSG:4326' : 'EPSG:2154' // maybe problem ici
 })
 
 const handleClickOutside = (event) => {
@@ -132,13 +132,13 @@ function searchFeuille() {
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NUMERO%20LIKE%20%27${query}%25%27`
+    search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=numero%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
         const newResults = data.features.map((feuille) => ({
-          nom: feuille.properties.NOM,
-          numero: feuille.properties.NUMERO,
+          nom: feuille.properties.nom, // mb à changer
+          numero: feuille.properties.numero, // mb à changer
           geometry: feuille.geometry.coordinates[0][0], 
         }))
         feuilleResults.value = newResults

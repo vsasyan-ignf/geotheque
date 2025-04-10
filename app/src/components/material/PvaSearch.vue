@@ -87,9 +87,9 @@ const url = ref('')
 
 const coucheGeoserverName = computed(() => {
   if (activeTab.value === 'phototheque') {
-    return 'PVALambert93'
+    return 'geotheque_mtd:pva'
   } else {
-    return 'PVALambert93'
+    return 'geotheque_mtd:pva'
   }
 })
 
@@ -128,13 +128,13 @@ function searchPVA() {
   // requete pour l'autocomplétion du nom de la mission
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27&srsName=EPSG:3857`
+    search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=nom%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
         const newResults = data.features.map((pva) => ({
-          nom: pva.properties.NOM,
-          chantier: pva.properties.CHANTIER,
+          nom: pva.properties.nom,
+          chantier: pva.properties.chantier,
           geometry: pva.geometry.coordinates,
         }))
         pvaResults.value = newResults
@@ -148,7 +148,7 @@ function searchPVA() {
 
 function selectPVA(pva) {
   pvaSelected.value = pva.nom
-  url.value = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${pva.nom}%27&srsName=EPSG:3857`
+  url.value = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=nom%20LIKE%20%27${pva.nom}%27&apikey=${config.APIKEY}`
   repPVA.value = pva
   validatePVA()
   showResults.value = false

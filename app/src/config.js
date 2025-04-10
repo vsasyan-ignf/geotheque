@@ -10,7 +10,7 @@ const config = {
     COMMUNE_URL: 'https://geo.api.gouv.fr/communes',
     DEPARTEMENT_URL: 'https://geo.api.gouv.fr/departements',
     NOMINATIM_URL: 'https://nominatim.openstreetmap.org',
-    GEOSERVER_URL: 'https://data.geopf.fr/private/wfs/?service=WFS&version=2.0.0/',
+    GEOSERVER_URL: 'https://data.geopf.fr/private/wfs/?service=WFS&version=2.0.0',
     MTD_FRANCE_URL: 'http://localhost:8081/Misphot/',
     MTD_MONDE_URL: 'http://localhost:8081/Misphot_ETRANGER/',
     IMG_FRANCE_URL: 'http://localhost:8082/Misphot_Image',
@@ -43,4 +43,3 @@ const config = {
 }
 
 export default config[env]
-

@@ -112,15 +112,15 @@ function searchCountries() {
     .replace(/[\u0300-\u036f]/g, '')
     .toUpperCase()
 
-  const url = `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=pays&outputFormat=application/json&CQL_FILTER=NOM%20LIKE%20%27${query}%25%27`
+  const url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:monde_pays&outputFormat=application/json&CQL_FILTER=nom%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
 
   searchTimeout = setTimeout(() => {
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
         const newResults = data.features.map((pays) => ({
-          nom: pays.properties.NOM,
-          code: pays.properties.CODE_PAYS,
+          nom: pays.properties.nom,
+          code: pays.properties.code_pays,
         }))
         countryResults.value = newResults
       })
@@ -181,9 +181,9 @@ async function getCountryBbox(country) {
     .toUpperCase()
 
   const urlCountryBbox =
-    `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
-    `&request=GetFeature&typeNames=pays&outputFormat=application/json` +
-    `&CQL_FILTER=CODE_PAYS='${countryCode}'&srsName=EPSG:3857`
+    `${config.GEOSERVER_URL}` +
+    `&request=GetFeature&typeNames=geotheque_mtd:monde_pays&outputFormat=application/json` +
+    `&CQL_FILTER=code_pays='${countryCode}'&apikey=${config.APIKEY}`
 
   try {
     const response = await fetch(urlCountryBbox)
