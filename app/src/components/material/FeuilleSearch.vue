@@ -10,7 +10,7 @@
             autocomplete="off"
             v-model="feuilleSelected"
             type="text"
-            placeholder="Ex: NE 28 XVIII ou 1911"
+            placeholder="Ex: NH-IV ou POIX"
             @input="searchFeuille"
             @focus="showResults = true"
           />
@@ -38,8 +38,8 @@
                 @click="selectFeuille(feuille)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ feuille.numero }}</div>
-                  <div class="result-secondary">Nom de la feuille : {{ feuille.nom }}</div>
+                  <div class="result-main">{{ feuille.nom }}</div>
+                  <div class="result-secondary">Numero de la feuille : {{ feuille.numero }}</div>
                 </div>
               </div>
             </div>
@@ -71,9 +71,7 @@ import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
-import { create_bbox, useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import config from '@/config'
-import { getFeatureInfoUrl } from 'ol/source/wms'
 
 const scanStore = useScanStore()
 const { activeTab } = storeToRefs(scanStore)
@@ -117,7 +115,7 @@ function searchFeuille() {
     clearTimeout(searchTimeout)
   }
 
-  const query = feuilleSelected.value
+  let query = feuilleSelected.value
 
   if (!query) {
     feuilleResults.value = []
@@ -126,10 +124,13 @@ function searchFeuille() {
 
   showResults.value = true
 
+
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=numero%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
+    search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=nom%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
+    console.log(search_url)
+    
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
@@ -150,7 +151,7 @@ function searchFeuille() {
 }
 
 function selectFeuille(feuille) {
-  feuilleSelected.value = feuille.numero
+  feuilleSelected.value = feuille.nom
   repFeuille.value = feuille
   validateFeuille()
   showResults.value = false

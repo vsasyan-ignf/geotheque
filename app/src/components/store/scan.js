@@ -317,7 +317,7 @@ export const useScanStore = defineStore('scan', () => {
           storeScansData.value = data.features.map((feature, index) => ({
             id: index,
             geom: feature.geometry.coordinates,
-            name: feature.properties.id_carte ?? feature.properties.nom, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
+            name: feature.properties.id_carte,
             properties: feature.properties,
           }))
           storeSelectedScan.value = null

@@ -198,7 +198,7 @@ export const layersConfig = [
           color: 'rgba(  17, 209, 197  , 0.2)',
         }),
         text: new Text({
-          text: feature.get('numero'),
+          text: feature.get('nom'),
           font: '16px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
@@ -232,7 +232,7 @@ export const layersConfig = [
           color: 'rgba(  17, 209, 197  , 0.2)',
         }),
         text: new Text({
-          text: feature.get('numero'),
+          text: feature.get('nom'),
           font: '16px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
