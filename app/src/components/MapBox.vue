@@ -10,6 +10,12 @@
     <DrawControl v-if="activeTab === 'phototheque'" :map="olMap" :isDrawModeActive="drawModeActive"
       @draw-complete="handleDrawComplete" @draw-mode-activated="handleDrawModeActivated"
       @deactivate-draw-mode="handleDeactivateDrawMode" />
+    <!-- Add CardPva component here -->
+    <CardPva 
+      v-if="showCardPva" 
+      :photoInfo="selectedPhotoInfo" 
+      @close="closeCardPva" 
+    />
   </div>
   <div style="z-index: 99999999" id="mouse-position"></div>
   <div style="z-index: 99999999" id="form-proj"></div>
@@ -21,6 +27,7 @@ import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
 import ZoomControl from './ZoomControl.vue'
+import CardPva from './phototheque/CardPva.vue' // Import the new CardPva component
 import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 import crossIcon from '@/assets/red-cross.svg'
@@ -64,6 +71,15 @@ import Icon from 'ol/style/Icon'
 import MousePosition from 'ol/control/MousePosition.js'
 import { createStringXY } from 'ol/coordinate.js'
 
+// Added new refs for card component
+const showCardPva = ref(false)
+const selectedPhotoInfo = ref({})
+
+// Function to close card
+function closeCardPva() {
+  showCardPva.value = false
+}
+
 const scanStore = useScanStore()
 const {
   storeURL,
@@ -74,6 +90,7 @@ const {
   storeHoveredScan,
   deletePhotoAllBool,
   dicoUrlPhoto,
+  SelectedPhotos,
 } = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -118,14 +135,17 @@ const clearAllLayersTA = () => {
   vectorLayers.value.geomMouseOver.getSource().clear()
   tab_emprise_photo = [];
   last_geom = null;
+  // Close card when clearing layers
+  showCardPva.value = false;
 }
 
 
 const vectorOtherLayers = ref(null)
 
 let tab_emprise_photo = [];
-let  tab_couples_photo = [];
+let tab_couples_photo = [];
 let last_geom = null;
+let tab_i_to_alpha = [];
 
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
@@ -136,10 +156,9 @@ function hideOtherLayers() {
 
 watch(activeTab, (newValue) => {
   const newLayers = getLayersForActiveTab(activeTab.value)
-  layers.value = newLayers
+  layers.value = newLayers;
   otherLayers.value = getOtherLayersForActiveTab(activeTab.value)
   hideOtherLayers()
-  updateWMTSLayers(olMap.value, newLayers)
   scanStore.resetCriteria()
   activeLayerIndex.value = 0
   //faire une fonction pour pas dupliquer avec reset
@@ -148,8 +167,9 @@ watch(activeTab, (newValue) => {
   last_geom = null;
   vectorLayers.value.geomMouseOver.getSource().clear()
   vectorLayers.value.geomCouple.getSource().clear()
-
   
+  // Close card when changing tabs
+  showCardPva.value = false;
 })
 
 const activeLayerIndex = ref(0)
@@ -180,10 +200,7 @@ function DrawEmpriseGeometry(geometry) {
   vectorLayers.value.geomMouseOver.getSource().addFeature(feature);
 }
 
-
-function isPointOnEmprise(point, emprises) {
-  //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
-  // le point de la souris ,sinon on vide la couche des emprises à afficher
+function isPointOnEmprise(point,emprises){
   for (let i = 0; i < emprises.length; i++) {
     const polygon = new Feature({
       geometry: new Polygon([emprises[i]]),
@@ -191,10 +208,33 @@ function isPointOnEmprise(point, emprises) {
     const geometry = polygon.getGeometry();
 
     if (geometry.intersectsCoordinate(point)) {
+      return true;
+    }
+  }
+  return false
+}
+
+function showPointOnEmprise(point, emprises) {
+  //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
+  // le point de la souris ,sinon on vide la couche des emprises à afficher
+  let i;
+  for ( i = 0; i < emprises.length; i++) {
+    const polygon = new Feature({
+      geometry: new Polygon([emprises[i]]),
+    });
+    const geometry = polygon.getGeometry();
+    //ici
+
+    if (geometry.intersectsCoordinate(point)) {
+      const alpha_selec = tab_i_to_alpha[i];
+      console.log(infosPva.value[alpha_selec])
+      showCardPva.value = true;
+      selectedPhotoInfo.value = infosPva.value[alpha_selec];
       DrawEmpriseGeometry(geometry)
       return;
     }
   }
+  showCardPva.value = false;
   vectorLayers.value.geomMouseOver.getSource().clear()
 }
 
@@ -213,8 +253,6 @@ function updateCoupleVisibility(bool) {
   let i;
   vectorLayers.value.geomCouple.getSource().clear()
 
-  console.log("oui")
-  console.log(bool)
   if ( bool && tab_couples_photo.length > 0) {
     for(i=0;i<tab_couples_photo.length;i++){
       Add_new_couple_to_map(tab_couples_photo[i])
@@ -311,6 +349,7 @@ async function parcour_tab_and_map(url) {
         addPointToMap(x_3857, y3857, numero);
         addPointToMap(x_3857, y3857, alphanum, true);
 
+        tab_i_to_alpha.push(alphanum);
         infosPva.value[alphanum] = infos;
 
       } else if (tab_test[i][0] == 'Cliche Actif') {
@@ -340,7 +379,7 @@ async function parcour_tab_and_map(url) {
           tab_points_couple_3857.push([x_3857, y3857])
         }
         //Tableau de couples
-      tab_couples_photo.push(tab_points_couple_3857);
+        tab_couples_photo.push(tab_points_couple_3857);
 
 
       }
@@ -468,11 +507,14 @@ onMounted(() => {
       target: document.getElementById('mouse-position'),
     });
 
+
+
+
     olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent);
       const formattedCoordinate = createStringXY(2)(coordinate);
 
-      isPointOnEmprise(coordinate, tab_emprise_photo)
+      showPointOnEmprise(coordinate, tab_emprise_photo)
 
       const mousePositionElement = document.getElementById('mouse-position');
       if (mousePositionElement) {
@@ -510,6 +552,7 @@ onMounted(() => {
           }
         });
       }
+
     })
 
     eventBus.on('toggle-pin', (isVisible) => {
@@ -692,7 +735,6 @@ function handleDisplayOptionChange({ option, value }) {
   }
 
   if(option ==='couplesStero' ){ 
-    console.log("change")
     updateCoupleVisibility(value)
   } 
 
