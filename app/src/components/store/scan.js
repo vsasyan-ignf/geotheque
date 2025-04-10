@@ -32,13 +32,13 @@ export const useScanStore = defineStore('scan', () => {
   const getCurrentTypeNames = () => {
     switch (activeTab.value) {
       case 'cartotheque_etranger':
-        return 'fondcarte:emprisesscansmonde'
+        return 'geotheque_mtd:scans'
       case 'phototheque':
-        return 'fondcarte:PVALambert93'
+        return 'geotheque_mtd:pva'
       case 'phototheque_etranger':
         return '' // à modif pour prendre en compte le bon wfs
       default:
-        return 'fondcarte:emprisesscans'
+        return 'geotheque_mtd:scans'
     }
   }
 
@@ -54,59 +54,65 @@ export const useScanStore = defineStore('scan', () => {
     emulsion: null,
   })
 
+  function createCqlFilter() {
+    if (storeBbox.value.length === 0) return ''
+
+    let [minX, minY, maxX, maxY] = storeBbox.value
+
+    let cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
+
+    if (activeTab.value === 'cartotheque_etranger' && activeSubCategory.value === 'pays') {
+      cqlFilter = `INTERSECTS(geom,${wkt.value})`
+    }
+
+    const {
+      yearMin,
+      yearMax,
+      scaleMin,
+      scaleMax,
+      collection,
+      commanditaire,
+      producteur,
+      support,
+      emulsion,
+    } = storeCritereSelection.value
+
+    if (yearMin) cqlFilter += `%20AND%20date_pub%3E%3D${yearMin}`
+    if (yearMax) cqlFilter += `%20AND%20date_fin%3C%3D${yearMax}`
+
+    if (scaleMin && scaleMax) {
+      cqlFilter += `%20AND%20echelle%20BETWEEN%20${scaleMin}%20AND%20${scaleMax}`
+    } else if (scaleMin && !scaleMax) {
+      cqlFilter += `%20AND%20echelle%3E%3D${scaleMin}`
+    } else if (scaleMax && !scaleMin) {
+      cqlFilter += `%20AND%20echelle%3C%3D${scaleMax}`
+    }
+
+    if (collection) cqlFilter += `%20AND%20collection%3D'${collection}'`
+
+    if (activeTab.value === 'phototheque') {
+      cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
+      if (commanditaire) cqlFilter += `%20AND%20commandita%3D'${commanditaire}'`
+      if (producteur) cqlFilter += `%20AND%20producteur%3D'${producteur}'`
+      if (support) cqlFilter += `%20AND%20support%3D'${support}'`
+      if (emulsion) cqlFilter += `%20AND%20emulsion%3D'${emulsion}'`
+    }
+
+    return cqlFilter
+  }
+
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
       let empriseURL = getCurrentTypeNames()
-      let [minX, minY, maxX, maxY] = storeBbox.value
+      let cqlFilter = createCqlFilter()
 
-      if (activeTab.value === 'cartotheque_etranger') {
-        // inverse les coordonnées : lon/lat to lat/lon
-        ;[minX, minY] = [minY, minX]
-          ;[maxX, maxY] = [maxY, maxX]
-      }
-
-      const {
-        yearMin,
-        yearMax,
-        scaleMin,
-        scaleMax,
-        collection,
-        commanditaire,
-        producteur,
-        support,
-        emulsion,
-      } = storeCritereSelection.value
-
-      let cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
-
-      if (activeTab.value === 'cartotheque_etranger') {
-        if (activeSubCategory.value === 'pays') {
-          cqlFilter = `INTERSECTS(the_geom,${wkt.value})`
-        }
-      }
-
-      if (yearMin) cqlFilter += `%20AND%20DATE_PUB%3E%3D${yearMin}`
-      if (yearMax) cqlFilter += `%20AND%20DATE_FIN%3C%3D${yearMax}`
-      if (scaleMin) cqlFilter += `%20AND%20ECHELLE%3E%3D${scaleMin}`
-      if (scaleMax) cqlFilter += `%20AND%20ECHELLE%3C%3D${scaleMax}`
-
-      if (collection) cqlFilter += `%20AND%20COLLECTION%3D'${collection}'`
-
-      if (activeTab.value === 'phototheque') {
-        // empriseURL = 'PVALambert93'
-        cqlFilter = `BBOX(the_geom,${minX},${minY},${maxX},${maxY})`
-
-        if (commanditaire) cqlFilter += `%20AND%20COMMANDITA%3D'${commanditaire}'`
-        if (producteur) cqlFilter += `%20AND%20PRODUCTEUR%3D'${producteur}'`
-        if (support) cqlFilter += `%20AND%20SUPPORT%3D'${support}'`
-        if (emulsion) cqlFilter += `%20AND%20EMULSION%3D'${emulsion}'`
-      }
+      fetchAllOptions()
 
       return (
-        `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0` +
+        `${config.GEOSERVER_URL}` +
         `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
         `&cql_filter=${cqlFilter}` +
-        `&srsName=EPSG:3857`
+        `&apikey=${config.APIKEY}`
       )
     }
     return ''
@@ -118,7 +124,7 @@ export const useScanStore = defineStore('scan', () => {
       storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 100000
     } else if (activeTab.value === 'cartotheque_etranger') {
       storeCritereSelection.value.scaleMin = storeCritereSelection.value.scaleMin ?? 500
-      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 200000
+      storeCritereSelection.value.scaleMax = storeCritereSelection.value.scaleMax ?? 10000000
     } else {
       storeCritereSelection.value.scaleMin = null
       storeCritereSelection.value.scaleMax = null
@@ -173,7 +179,7 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateActiveTab(newVal) {
     activeTab.value = newVal
-    fetchAllOptions()
+    // fetchAllOptions()
     console.log('tab selected : ', activeTab.value)
   }
 
@@ -209,18 +215,23 @@ export const useScanStore = defineStore('scan', () => {
     }
   }
 
+
   async function fetchOptionsDropDown(propertyName) {
     try {
-      let typeNames = 'fondcarte:emprisesscans'
+      let typeNames = getCurrentTypeNames()
+      let cqlFilter = ""
 
-      if (activeTab.value === 'cartotheque_etranger') {
-        typeNames = 'fondcarte:emprisesscansmonde'
-      } else if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
-        typeNames = 'fondcarte:PVALambert93'
+      if (storeBbox.value.length > 0) {
+        cqlFilter = createCqlFilter()
       }
 
-      const wfsUrl = `${config.GEOSERVER_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json`
+      let wfsUrl = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json&apikey=${config.APIKEY}`
 
+      if (cqlFilter) {
+        wfsUrl += `&cql_filter=${cqlFilter}`
+      }
+
+      console.log(wfsUrl)
       const response = await fetch(wfsUrl)
       if (!response.ok) throw new Error(response.status)
 
@@ -237,26 +248,35 @@ export const useScanStore = defineStore('scan', () => {
     }
   }
 
+
   async function fetchAllOptions() {
     if (activeTab.value === 'cartotheque' || activeTab.value === 'cartotheque_etranger') {
-      collectionsOptions.value = await fetchOptionsDropDown('COLLECTION')
+      collectionsOptions.value = await fetchOptionsDropDown('collection')
     }
 
     if (activeTab.value === 'phototheque' || activeTab.value === 'phototheque_etranger') {
-      supportOptions.value = await fetchOptionsDropDown('SUPPORT')
-      emulsionOptions.value = await fetchOptionsDropDown('EMULSION')
+      supportOptions.value = await fetchOptionsDropDown('support')
+      emulsionOptions.value = await fetchOptionsDropDown('emulsion')
     }
   }
 
+
   async function fetchOptionsComboBox(propertyName) {
-    if (optionsCache.value[propertyName]) {
-      return optionsCache.value[propertyName]
-    }
-
     try {
-      const typeNames = getCurrentTypeNames()
-      const wfsUrl = `${config.GEOSERVER_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json`
+      let typeNames = getCurrentTypeNames()
+      let cqlFilter = ""
 
+      if (storeBbox.value.length > 0) {
+        cqlFilter = createCqlFilter()
+      }
+
+      let wfsUrl = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json&apikey=${config.APIKEY}`
+
+      if (cqlFilter) {
+        wfsUrl += `&cql_filter=${cqlFilter}`
+      }
+
+      console.log(wfsUrl)
       const response = await fetch(wfsUrl)
 
       const data = await response.json()
@@ -289,15 +309,16 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   async function getCommanditaireOptions(searchTerm = '') {
-    const options = await fetchOptionsComboBox('COMMANDITA')
+    const options = await fetchOptionsComboBox('commandita')
     const filteredOptions = getFilteredOptions(options, searchTerm)
-    return filteredOptions.map((option) => option.name)
+    return filteredOptions && filteredOptions.map((option) => option.name)
   }
 
   async function getProducteurOptions(searchTerm = '') {
-    const options = await fetchOptionsComboBox('PRODUCTEUR')
+    const options = await fetchOptionsComboBox('producteur')
+    console.log()
     const filteredOptions = getFilteredOptions(options, searchTerm)
-    return filteredOptions.map((option) => option.name)
+    return filteredOptions && filteredOptions.map((option) => option.name)
   }
 
   async function storeGet(url) {
@@ -314,7 +335,7 @@ export const useScanStore = defineStore('scan', () => {
           storeScansData.value = data.features.map((feature, index) => ({
             id: index,
             geom: feature.geometry.coordinates,
-            name: feature.properties.ID_CARTE ?? feature.properties.NOM, // si ID.CARTE est undefined, on prend la prop NOM qui correspond à la prop des photos
+            name: feature.properties.id_carte,
             properties: feature.properties,
           }))
           storeSelectedScan.value = null
@@ -334,8 +355,8 @@ export const useScanStore = defineStore('scan', () => {
       if (response.ok) {
         const data = await response.json()
         storeScansData.value = data.features.map((feature, index) => {
-          feature.properties['ECHELLE'] = getEchellePhoto(feature)
-          const name = feature.properties.CHANTIER + getSuffixPhoto(feature)
+          feature.properties['echelle'] = getEchellePhoto(feature)
+          const name = feature.properties.chantier + getSuffixPhoto(feature)
           return {
             id: index,
             geom: feature.geometry.coordinates,
@@ -351,8 +372,6 @@ export const useScanStore = defineStore('scan', () => {
       console.error('Error:', error)
     }
   }
-
-  fetchAllOptions()
 
   return {
     storeScansData,

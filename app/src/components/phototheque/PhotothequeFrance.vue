@@ -101,8 +101,8 @@ const props = defineProps({
 defineEmits(['select-sub-category', 'close-sub-category'])
 
 function goToPoint(point) {
-  if (point.bboxLambert93) {
-    scanStore.updateBbox(point.bboxLambert93)
+  if (point.bboxMercator) {
+    scanStore.updateBbox(point.bboxMercator)
   }
 }
 

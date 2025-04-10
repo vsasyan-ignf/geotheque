@@ -132,7 +132,7 @@ function createVectorLayer(source, style, visible = false) {
 export const layersConfig = [
   {
     name: 'communes',
-    url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:COMMUNESLambert93&outputFormat=application/json&srsName=EPSG:3857&bbox={bbox},EPSG:3857`,
+    url: `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_communes&outputFormat=application/json&bbox={bbox}&apikey=${config.APIKEY}`,
     style: function (feature) {
       return new Style({
         stroke: new Stroke({
@@ -143,7 +143,7 @@ export const layersConfig = [
           color: 'rgba(  255, 251, 16  , 0.2)',
         }),
         text: new Text({
-          text: feature.get('NOM_COM'),
+          text: feature.get('nom_com'),
           font: '12px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
@@ -153,7 +153,7 @@ export const layersConfig = [
   },
   {
     name: 'departements',
-    url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox={bbox},EPSG:3857`,
+    url: `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_departements&outputFormat=application/json&bbox={bbox}&apikey=${config.APIKEY}`,
     style: function (feature) {
       return new Style({
         stroke: new Stroke({
@@ -164,7 +164,7 @@ export const layersConfig = [
           color: 'rgba(  228, 22, 169 , 0.2)',
         }),
         text: new Text({
-          text: feature.get('CODE_DEPT'),
+          text: feature.get('code_dept'),
           font: '12px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
@@ -174,7 +174,7 @@ export const layersConfig = [
   },
   {
     name: 'departements_with_no_name',
-    url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:departements&outputFormat=application/json&srsName=EPSG:3857&bbox={bbox},EPSG:3857`,
+    url: `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_departements&outputFormat=application/json&bbox={bbox}&apikey=${config.APIKEY}`,
     style: new Style({
       stroke: new Stroke({
         color: 'rgba(   228, 22, 169 , 0.5)',
@@ -187,7 +187,7 @@ export const layersConfig = [
   },
   {
     name: 'feuilles_monde',
-    url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`,
+    url: `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:monde_feuilles&outputFormat=application/json&apikey=${config.APIKEY}`,
     style: function (feature) {
       return new Style({
         stroke: new Stroke({
@@ -198,7 +198,7 @@ export const layersConfig = [
           color: 'rgba(  17, 209, 197  , 0.2)',
         }),
         text: new Text({
-          text: feature.get('NUMERO'),
+          text: feature.get('nom'),
           font: '16px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
@@ -208,7 +208,7 @@ export const layersConfig = [
   },
   {
     name: 'feuilles_monde_with_no_name',
-    url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuillesmonde&outputFormat=application/json&srsName=EPSG:3857`,
+    url: `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:monde_feuilles&outputFormat=application/json&apikey=${config.APIKEY}`,
     style: new Style({
       stroke: new Stroke({
         color: 'rgba(  17, 209, 197  , 0.5)',
@@ -221,7 +221,7 @@ export const layersConfig = [
   },
   {
     name: 'feuilles_france',
-    url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuilles50000&outputFormat=application/json&srsName=EPSG:3857`,
+    url: `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_feuilles&outputFormat=application/json&apikey=${config.APIKEY}`,
     style: function (feature) {
       return new Style({
         stroke: new Stroke({
@@ -232,7 +232,7 @@ export const layersConfig = [
           color: 'rgba(  17, 209, 197  , 0.2)',
         }),
         text: new Text({
-          text: feature.get('NUMERO'),
+          text: feature.get('nom'),
           font: '16px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
@@ -242,7 +242,7 @@ export const layersConfig = [
   },
   {
     name: 'feuilles_france_with_no_name',
-    url: `${config.GEOSERVER_URL}/wfs?service=wfs&version=2.0.0&request=GetFeature&typeNames=feuilles50000&outputFormat=application/json&srsName=EPSG:3857`,
+    url: `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_feuilles&outputFormat=application/json&apikey=${config.APIKEY}`,
     style: new Style({
       stroke: new Stroke({
         color: 'rgba(  17, 209, 197  , 0.5)',
@@ -255,7 +255,7 @@ export const layersConfig = [
   },
   {
     name: 'pays',
-    url: `${config.GEOSERVER_URL}/fondcarte/wfs?service=WFS&version=1.1.0&request=GetFeature&typeName=fondcarte:pays&outputFormat=application/json&bbox={bbox},EPSG:3857`,
+    url: `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:monde_pays&outputFormat=application/json&bbox={bbox}&apikey=${config.APIKEY}`,
     style: new Style({
       stroke: new Stroke({
         color: 'rgba(0, 0, 0, 0.5)',

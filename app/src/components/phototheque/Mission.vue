@@ -84,32 +84,32 @@ const isDataAvailable = computed(() => storeScansData.value && storeScansData.va
 
 // real key : key bien écrit pour afficher dans modal
 const all_keys = {
-  NOM: 'NOM',
-  CHANTIER: 'CHANTIER',
-  NUMÉRO_SA: 'NUMÉRO_SA',
-  ANNÉE: 'ANNÉE',
-  THÈME: 'THÈME',
-  THÈME_GÉ: 'THÈME GÉNÉRAL',
-  COMMANDITA: 'COMMANDITAIRE',
-  PRODUCTEUR: 'PRODUCTEUR',
-  STYLE: 'STYLE',
-  SUPPORT: 'SUPPORT',
-  EMULSION: 'EMULTION',
-  RÉSOLUTIO: 'RÉSOLUTION',
-  NOMBRE_DE_: 'NOMBRE DE PVA',
-  QUALITÉ_P: 'QUALITÉ P',
-  RÉFÉRENC: 'RÉFÉRENCE',
-  NOTES: 'NOTES',
-  ENVELOPPE_: 'ENVELOPPE',
-  INTERSECTE: 'INTERSECTE',
-  DISPO_PHOT: 'DISPO PHOTO',
-  DISPO_INTE: 'DISPO INTER',
-  DÉSIGNATI: 'DÉSIGNATION',
-  NOM_GÉNÉ: 'NOM GÉNÉ',
-  IDENTIFIAN: 'IDENTIFIANT',
-  FORMAT: 'FORMAT',
-  FOCALE: 'FOCALE',
-  ECHELLE: 'ECHELLE',
+  nom: 'NOM',
+  chantier: 'CHANTIER',
+  numéro_sa: 'NUMÉRO_SA',
+  année: 'ANNÉE',
+  thème: 'THÈME',
+  thème_gé: 'THÈME GÉNÉRAL',
+  commandita: 'COMMANDITAIRE',
+  producteur: 'PRODUCTEUR',
+  style: 'STYLE',
+  support: 'SUPPORT',
+  emulsion: 'EMULTION',
+  résolution: 'RÉSOLUTION',
+  nombre_de_: 'NOMBRE DE PVA',
+  qualité_p: 'QUALITÉ P',
+  référence: 'RÉFÉRENCE',
+  notes: 'NOTES',
+  enveloppe_: 'ENVELOPPE',
+  intersecte: 'INTERSECTE',
+  dispo_phot: 'DISPO PHOTO',
+  dispo_inte: 'DISPO INTER',
+  désignati: 'DÉSIGNATION',
+  nom_géné: 'NOM GÉNÉ',
+  identifian: 'IDENTIFIANT',
+  format: 'FORMAT',
+  focale: 'FOCALE',
+  echelle: 'ECHELLE',
 }
 
 const allDetails = computed(() => {
@@ -164,8 +164,8 @@ const urlInDico = computed(() => {
 });
 
 function createUrlPhoto() {
-  const annee = storeSelectedScan.value.properties['ANNÉE']
-  const nom = storeSelectedScan.value.properties['CHANTIER']
+  const annee = storeSelectedScan.value.properties.annee
+  const nom = storeSelectedScan.value.properties.chantier
   return `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
 }
 

@@ -76,8 +76,8 @@ const props = defineProps({
 defineEmits(['select-sub-category', 'close-sub-category'])
 
 function goToPoint(point) {
-  if (point.bboxWGS84) {
-    scanStore.updateBbox(point.bboxWGS84)
+  if (point.bboxMercator) {
+    scanStore.updateBbox(point.bboxMercator)
   }
 }
 
