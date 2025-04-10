@@ -200,7 +200,7 @@ function downloadxml() {
     const info = storeSelectedScan.value?.properties
     console.log('info : ', info)
     const lieu = 'Lambert93'
-    url_xml = `${config.MTD_FRANCE_URL}${lieu}/${info.ANNÉE}/${info.CHANTIER}/${info.CHANTIER}.xml`
+    url_xml = `${config.MTD_FRANCE_URL}${lieu}/${info.annee}/${info.chantier}/${info.chantier}.xml`
     console.log('URL_XML : ', url_xml)
     window.open(url_xml, 'xml')
   }

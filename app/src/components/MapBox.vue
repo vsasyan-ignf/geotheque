@@ -21,7 +21,6 @@
       @draw-mode-activated="handleDrawModeActivated"
       @deactivate-draw-mode="handleDeactivateDrawMode"
     />
-    <!-- Add CardPva component here -->
     <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
   </div>
   <div style="z-index: 99999999" id="mouse-position"></div>
