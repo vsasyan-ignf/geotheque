@@ -241,7 +241,8 @@ function aplhaOfPointInRange(point,emprises,range){
 function showPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
-  let alphaOrI = aplhaOfPointInRange(point,emprises,50);
+  const rayon = 50;
+  let alphaOrI = aplhaOfPointInRange(point,emprises,rayon);
   if(alphaOrI != null){
     const i = alphaOrI[1];
     const alpha_selec = alphaOrI[0];
