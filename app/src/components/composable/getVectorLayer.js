@@ -261,6 +261,27 @@ export const layersConfig = [
       }),
     }),
   },
+  {
+    name: 'france_zicad',
+    url: `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_zicad&outputFormat=application/json&bbox={bbox}&apikey=${config.APIKEY}`,
+    style: function (feature) {
+      return new Style({
+        stroke: new Stroke({
+          color: 'rgba(235, 23, 23, 0.5)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(209, 30, 17, 0.2)',
+        }),
+        text: new Text({
+          text: feature.get('site'),
+          font: '16px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+        }),
+      })
+    },
+  }
 ]
 
 export function initOtherVectorLayers() {

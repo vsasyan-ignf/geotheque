@@ -164,4 +164,10 @@ export const otherLayersPhotoFrance = [
     thumbnail: ortho1950,
     visible: false,
   },
+  {
+    id: 'france_zicad',
+    name: 'Zicad',
+    thumbnail: ortho1950,
+    visible: false,
+  },
 ]
