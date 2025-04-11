@@ -152,6 +152,7 @@ const vectorOtherLayers = ref(null)
 let tab_emprise_photo = []
 let tab_couples_photo = []
 let last_geom = null
+const rayon_croix_clique = 50;
 
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
@@ -223,6 +224,7 @@ function isPointOnEmprise(point, emprises) {
 
 
 function aplhaOfPointInRange(point,emprises,range){
+  //function that take a point and return the 
   let i,distance,point_emprise_4326,point_souris_4326;
   point_souris_4326 = useConvertCoordinates(point[0], point[1], 'EPSG:3857', 'EPSG:4326')
 
@@ -241,8 +243,7 @@ function aplhaOfPointInRange(point,emprises,range){
 function showPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
-  const rayon = 50;
-  let alphaOrI = aplhaOfPointInRange(point,emprises,rayon);
+  let alphaOrI = aplhaOfPointInRange(point,emprises,rayon_croix_clique);
   if(alphaOrI != null){
     const i = alphaOrI[1];
     const alpha_selec = alphaOrI[0];
@@ -549,6 +550,7 @@ onMounted(() => {
     initializeIntersectionLayer(olMap)
 
     olMap.value.on('click', (event) => {
+      const coordinate3857 = olMap.value.getEventCoordinate(event.originalEvent)
       const clickedCoord = olMap.value.getCoordinateFromPixel(event.pixel)
       if (showPin.value) {
         vectorLayers.value.pin.getSource().clear()
@@ -567,13 +569,12 @@ onMounted(() => {
         projection: projection.value,
       })
 
-      if (vectorLayers.value.geomPhoto) {
-        olMap.value.forEachFeatureAtPixel(event.pixel, function (feature) {
-          const name = feature.get('name')
+      const alaphaOrI = aplhaOfPointInRange(coordinate3857,tab_emprise_photo,rayon_croix_clique);
+      if (alaphaOrI != null) {
+          const name = infosPva.value[alaphaOrI[0]].nom
           if (name) {
-            scanStore.updateSelectedPhotos(infosPva.value[name])
+            scanStore.updateSelectedPhotos(infosPva.value[alaphaOrI[0]])
           }
-        })
       }
     })
 
