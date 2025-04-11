@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, provide, watch, computed } from 'vue'
+import { ref, onMounted, nextTick, provide, watch } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
@@ -298,10 +298,6 @@ function Add_new_polygone_to_map(tab, name) {
   })
 
   const style = new Style({
-    stroke: new Stroke({
-      color: 'blue',
-      width: 2,
-    }),
     fill: new Fill({
       color: 'rgba(0, 0, 0, 0)',
     }),

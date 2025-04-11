@@ -86,11 +86,11 @@ export function createGeomCoupleLayer() {
     source,
     style: new Style({
       stroke: new Stroke({
-        color: 'black',
+        color: 'rgba(15, 96, 47, 0.5)',
         width: 2,
       }),
       fill: new Fill({
-        color: 'rgba(43, 243, 127, 0.88)',
+        color: 'rgba(19, 226, 102, 0.2)',
       }),
     }),
   })
@@ -254,7 +254,7 @@ export const layersConfig = [
           color: 'rgba(  17, 209, 197  , 0.2)',
         }),
         text: new Text({
-          text: feature.get('nom'),
+          text: feature.get('numero'),
           font: '16px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
@@ -288,7 +288,7 @@ export const layersConfig = [
           color: 'rgba(  17, 209, 197  , 0.2)',
         }),
         text: new Text({
-          text: feature.get('nom'),
+          text: feature.get('numero'),
           font: '16px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
@@ -328,11 +328,11 @@ export const layersConfig = [
     style: function (feature) {
       return new Style({
         stroke: new Stroke({
-          color: 'rgba(235, 23, 23, 0.5)',
+          color: 'rgba(0, 0, 0, 0.5)',
           width: 2,
         }),
         fill: new Fill({
-          color: 'rgba(209, 30, 17, 0.2)',
+          color: 'rgba(74, 72, 72, 0.2)',
         }),
         text: new Text({
           text: feature.get('site'),
