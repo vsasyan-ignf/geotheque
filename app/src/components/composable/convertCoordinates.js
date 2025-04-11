@@ -16,10 +16,27 @@ proj4.defs([
   ],
 ])
 
-// converti les x et y en fonction du système de proj en entré et en sortie
+/**
+ * Convertit des coordonnées (x, y) d’un système de projection vers un autre.
+ *
+ * @param {number} x - Coordonnée X à convertir.
+ * @param {number} y - Coordonnée Y à convertir.
+ * @param {string} fromProjection - Code EPSG du système source.
+ * @param {string} toProjection - Code EPSG du système cible.
+ * @returns {number[]} Coordonnées converties sous la forme [x, y].
+ */
 export function useConvertCoordinates(x, y, fromProjection, toProjection) {
   return proj4(fromProjection, toProjection, [x, y])
 }
+
+/**
+ * Convertit une bounding box d’un système de projection à un autre.
+ *
+ * @param {{minX: number, minY: number, maxX: number, maxY: number}} bbox - Bbox à convertir.
+ * @param {string} proj_in - Code EPSG du système source.
+ * @param {string} proj_out - Code EPSG du système cible.
+ * @returns {number[]} Bbox convertie sous la forme [minX, minY, maxX, maxY].
+ */
 
 export function convertBbox(bbox, proj_in, proj_out) {
   //Convertion Bbox de proj_in vers proj_out
@@ -33,6 +50,14 @@ export function convertBbox(bbox, proj_in, proj_out) {
 
   return [minCoord[0], minCoord[1], maxCoord[0], maxCoord[1]]
 }
+
+/**
+ * Calcule la bounding box d’un contour de polygone.
+ *
+ * @param {number[][][]} contour - Tableau de coordonnées [[x, y], ...].
+ * @returns {{minX: number, minY: number, maxX: number, maxY: number}} Bounding box du contour.
+ * @throws {Error} Si le contour est vide ou invalide.
+ */
 
 export function create_bbox(contour) {
   if (!contour || contour.length === 0) {
@@ -60,10 +85,13 @@ export function create_bbox(contour) {
 }
 
 /**
- * retourne la bbox d'un multi polygon
- * @param {*} contours
- * @returns
+ * Calcule la bounding box d’un multipolygone.
+ *
+ * @param {any[][][]} contours - Tableau de polygones (multipolygone).
+ * @returns {{minX: number, minY: number, maxX: number, maxY: number}} Bounding box globale.
+ * @throws {Error} Si aucun point valide n’est trouvé.
  */
+
 export function create_multibbox(contours) {
   if (!contours || contours.length === 0) {
     throw new Error('Contours invalides')
@@ -107,9 +135,10 @@ export function create_multibbox(contours) {
 }
 
 /**
- * retourne la bonne tolérance pour chaque longueur de tableau
- * @param {*} polygon
- * @returns
+ * Calcule une tolérance dynamique en fonction de la taille du polygone.
+ *
+ * @param {number[][]} polygon - Tableau de points [[x, y], ...].
+ * @returns {number} Tolérance adaptée à la taille du polygone.
  */
 export function getDynamicTolerance(polygon) {
   const len = polygon.length
@@ -134,38 +163,30 @@ export function getDynamicTolerance(polygon) {
 }
 
 /**
- * renvoie le sous tableau le plus grand d'un tableau
- * @param {*} arr
- * @returns
+ * Retourne le sous-tableau le plus long d’un tableau de tableaux.
+ *
+ * @param {Array[]} arr - Tableau de sous-tableaux.
+ * @returns {Array} Le sous-tableau ayant le plus d’éléments.
  */
 export function getLongestSubArray(arr) {
   return arr.reduce((longest, current) => (current.length > longest.length ? current : longest), [])
 }
 
 /**
- * crée un wkt à partir d'un contour
- * @param {*} contour
- * @returns
+ * Génère une chaîne WKT à partir d’un contour multipolygone, avec simplification et reprojection.
+ *
+ * @param {Array<Array<Array<number>>>} contour - Tableau représentant un multipolygone [[[x, y]]].
+ * @returns {string} Chaîne WKT du MultiPolygon simplifié et reprojeté.
  */
 export function createRealContour(contour) {
   let newcontour = contour.map((polygon) => polygon.map(([x, y]) => [y, x]))
 
   const simplePolygon = newcontour.map((polygonCoords) => {
     const polygon = new Polygon([polygonCoords])
-    const simplified = polygon.simplify(getDynamicTolerance(polygonCoords))
-
-    const reprojectedCoords = simplified
-      .getCoordinates()[0]
-      .map(([lon, lat]) => proj4('EPSG:4326', 'EPSG:3857', [lat, lon]))
-
-    const roundedCoords = reprojectedCoords.map(([lon, lat]) => [Math.round(lon), Math.round(lat)])
-
-    return new Polygon([roundedCoords])
+    return polygon.simplify(getDynamicTolerance(polygonCoords))
   })
 
   const simplified_multipolygon = new MultiPolygon(simplePolygon)
-
-  console.log('simplified_multipolygon', simplified_multipolygon.getCoordinates())
 
   const wktformat = new WKT()
   const wkt = wktformat.writeGeometry(simplified_multipolygon)
@@ -174,9 +195,10 @@ export function createRealContour(contour) {
 }
 
 /**
- * Transforme un tableau de polygones en un tableau de contours [[[[x,y]]]] en [[[x,y]]]
- * @param {*} contour_country
- * @returns
+ * Transforme un multipolygone avec trous en une liste de contours simples.
+ *
+ * @param {Array<Array<Array<Array<number>>>>} contour_country - Multipolygone [[[exterior, hole1, ...], ...]].
+ * @returns {Array<Array<Array<number>>>} Liste des contours extérieurs uniquement.
  */
 export function transformMultiPolygon(contour_country) {
   let allContours = []

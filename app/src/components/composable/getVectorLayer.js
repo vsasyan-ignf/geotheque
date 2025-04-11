@@ -5,6 +5,14 @@ import { bbox as bboxStrategy } from 'ol/loadingstrategy'
 import { Style, Icon, Stroke, Fill, Text } from 'ol/style'
 import config from '@/config'
 
+/**
+ * Crée une couche vectorielle pour afficher un marqueur personnalisé.
+ *
+ * @param {string} markerIcon - URL de l'icône du marqueur.
+ * @returns {VectorLayer} Couche vectorielle avec style d’icône.
+ */
+
+
 export function createPinLayer(markerIcon) {
   const source = new VectorSource()
 
@@ -19,6 +27,13 @@ export function createPinLayer(markerIcon) {
     }),
   })
 }
+
+/**
+ * Crée une couche vectorielle pour les géométries avec un style bleu.
+ *
+ * @returns {VectorLayer} Couche vectorielle avec style personnalisé.
+ */
+
 
 export function createGeomLayer() {
   const source = new VectorSource()
@@ -37,6 +52,13 @@ export function createGeomLayer() {
   })
 }
 
+/**
+ * Crée une couche vectorielle pour survol de géométrie (hover) avec style orange.
+ *
+ * @returns {VectorLayer} Couche vectorielle avec style de survol.
+ */
+
+
 export function createGeomMouseOverLayer() {
   const source = new VectorSource()
 
@@ -53,6 +75,12 @@ export function createGeomMouseOverLayer() {
     }),
   })
 }
+
+/**
+ * Crée une couche vectorielle pour une "géométrie couple", avec style vert.
+ *
+ * @returns {VectorLayer} Couche vectorielle stylisée.
+ */
 
 export function createGeomCoupleLayer() {
   const source = new VectorSource()
@@ -71,6 +99,12 @@ export function createGeomCoupleLayer() {
   })
 }
 
+/**
+ * Crée une couche vectorielle de type "scan", avec style rouge.
+ *
+ * @returns {VectorLayer} Couche vectorielle.
+ */
+
 export function createScanLayer() {
   const source = new VectorSource()
 
@@ -87,6 +121,13 @@ export function createScanLayer() {
     }),
   })
 }
+
+/**
+ * Crée une couche WFS avec chargement par stratégie de bounding box.
+ *
+ * @returns {VectorLayer} Couche vectorielle WFS.
+ */
+
 
 export function createWFSLayer() {
   const source = new VectorSource({
@@ -105,6 +146,16 @@ export function createWFSLayer() {
   })
 }
 
+/**
+ * Crée une source vectorielle basée sur une URL contenant un placeholder `{bbox}`.
+ *
+ * @param {string} urlTemplate - URL du WFS avec `{bbox}` comme placeholder.
+ * @param {GeoJSON} [format=GeoJSON] - Format de données.
+ * @param {function} [strategy=bboxStrategy] - Stratégie de chargement.
+ * @returns {VectorSource} Source vectorielle OL.
+ */
+
+
 function createVectorSource(urlTemplate, format = new GeoJSON(), strategy = bboxStrategy) {
   return new VectorSource({
     url: (extent) => {
@@ -115,6 +166,15 @@ function createVectorSource(urlTemplate, format = new GeoJSON(), strategy = bbox
     strategy,
   })
 }
+/**
+ * Crée une couche vectorielle OpenLayers avec les options fournies.
+ *
+ * @param {VectorSource} source - Source vectorielle.
+ * @param {Style|function} style - Style ou fonction de style.
+ * @param {boolean} [visible=false] - Visibilité initiale.
+ * @returns {VectorLayer} Couche vectorielle.
+ */
+
 
 function createVectorLayer(source, style, visible = false) {
   return new VectorLayer({
@@ -123,6 +183,13 @@ function createVectorLayer(source, style, visible = false) {
     style,
   })
 }
+
+/**
+ * Configuration des couches supplémentaires, contenant nom, URL et style.
+ *
+ * @constant
+ * @type {Array<{name: string, url: string, style: Style|function}>}
+ */
 
 export const layersConfig = [
   {
@@ -283,6 +350,12 @@ export const layersConfig = [
     },
   }
 ]
+
+/**
+ * Initialise les couches vectorielles supplémentaires à partir de `layersConfig`.
+ *
+ * @returns {Object<string, VectorLayer>} Un objet contenant les couches avec leurs noms en clé.
+ */
 
 export function initOtherVectorLayers() {
   const layers = {}

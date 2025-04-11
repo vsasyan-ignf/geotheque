@@ -1,7 +1,33 @@
+/**
+ * Arrondit un nombre à deux décimales (10^-2).
+ *
+ * @param {number} num - Le nombre à arrondir.
+ * @returns {number} Le nombre arrondi à deux décimales.
+ */
+
 function roundToTwo(num) {
   //function qui arondit a 10 puissance-2
   return Math.round(num * 100) / 100
 }
+
+/**
+ * Fonction asynchrone qui lit un fichier texte à partir d'une URL et transforme son contenu en un tableau structuré.
+ * Le fichier doit être sous un format où chaque ligne est séparée par des tabulations, et contient plusieurs types de données comme :
+ * - "Centre Actif"
+ * - "Cliche Actif"
+ * - "Couple Actif"
+ *
+ * Chaque type de ligne est traité de manière spécifique pour en extraire les coordonnées et autres informations associées.
+ * 
+ * Exemple de structure du tableau retourné :
+ * - Tab[0]: "Centre Actif", coordx, coordy, photoNom, numero, {infos: {nom, chantier, dateVol, ...}}
+ * - Tab[1]: "Cliche Actif", coordx, coordy, et points delta x, y
+ * - Tab[2]: similaire à Tab[0] pour le point suivant.
+ * 
+ * @param {string} url - L'URL du fichier texte à lire.
+ * @returns {Promise<Array>} Un tableau structuré contenant les informations extraites du fichier texte.
+ * @throws {Error} Si une erreur survient lors de la lecture du fichier ou du traitement des données.
+ */
 
 export async function parcour_txt_to_tab(url) {
   //function qui retourne le tab avec tab[0]="Centre Actif",coordx,coordy
