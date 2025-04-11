@@ -44,7 +44,15 @@
       </ShakingButton>
 
       <ShakingButton nameButton="XML" @click="downloadxml" :disabled="!storeSelectedScan">
-        <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiXml" class="mdicon" />
+        </template>
+      </ShakingButton>
+
+      <ShakingButton nameButton="" @click="clickedFlyTo" :disabled="!storeSelectedScan">
+        <template #icon>
+          <SvgIcon type="mdi" :path="mdiEye" class="mdicon" />
+        </template>
       </ShakingButton>
     </div>
 
@@ -88,11 +96,11 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { downloadCSV } from '../composable/download'
 import ShakingButton from '@/components/material/ShakingButton.vue'
-import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle, mdiXml } from '@mdi/js'
+import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle, mdiXml, mdiEye } from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto } =
+const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto, flyTo } =
   storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
@@ -204,6 +212,10 @@ function downloadxml() {
     console.log('URL_XML : ', url_xml)
     window.open(url_xml, 'xml')
   }
+}
+
+function clickedFlyTo() {
+  scanStore.updateFlyTo(!flyTo.value)
 }
 </script>
 

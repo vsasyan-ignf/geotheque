@@ -10,7 +10,7 @@
             autocomplete="off"
             v-model="feuilleSelected"
             type="text"
-            placeholder="Ex: NH-IV ou POIX"
+            placeholder="Ex: NE 28 XVIII ou 1911"
             @input="searchFeuille"
             @focus="showResults = true"
           />
@@ -33,13 +33,13 @@
             <div class="results-list" v-if="feuilleResults.length > 0">
               <div
                 v-for="(feuille, index) in feuilleResults"
-                :key="feuille.nom + '-' + index"
+                :key="feuille.numero + '-' + index"
                 class="result-item"
                 @click="selectFeuille(feuille)"
               >
                 <div class="result-content">
-                  <div class="result-main">{{ feuille.nom }}</div>
-                  <div class="result-secondary">Numero de la feuille : {{ feuille.numero }}</div>
+                  <div class="result-main">{{ feuille.numero }}</div>
+                  <div class="result-secondary">Nom de la feuille : {{ feuille.nom }}</div>
                 </div>
               </div>
             </div>
@@ -59,7 +59,7 @@
     </div>
 
     <CartothequeSubMenu v-if="activeTab === 'cartotheque_etranger'" />
-    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
+    <PhotothequeSubMenu v-else-if="activeTab.includes('phototheque')" />
   </div>
 </template>
 
@@ -127,7 +127,7 @@ function searchFeuille() {
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
   let search_url = ''
   searchTimeout = setTimeout(() => {
-    search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=nom%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
+    search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=numero%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
     console.log(search_url)
 
     fetch(search_url)
@@ -149,7 +149,7 @@ function searchFeuille() {
 }
 
 function selectFeuille(feuille) {
-  feuilleSelected.value = feuille.nom
+  feuilleSelected.value = feuille.numero
   repFeuille.value = feuille
   validateFeuille()
   showResults.value = false

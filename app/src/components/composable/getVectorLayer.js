@@ -12,7 +12,6 @@ import config from '@/config'
  * @returns {VectorLayer} Couche vectorielle avec style d’icône.
  */
 
-
 export function createPinLayer(markerIcon) {
   const source = new VectorSource()
 
@@ -33,7 +32,6 @@ export function createPinLayer(markerIcon) {
  *
  * @returns {VectorLayer} Couche vectorielle avec style personnalisé.
  */
-
 
 export function createGeomLayer() {
   const source = new VectorSource()
@@ -57,7 +55,6 @@ export function createGeomLayer() {
  *
  * @returns {VectorLayer} Couche vectorielle avec style de survol.
  */
-
 
 export function createGeomMouseOverLayer() {
   const source = new VectorSource()
@@ -89,11 +86,11 @@ export function createGeomCoupleLayer() {
     source,
     style: new Style({
       stroke: new Stroke({
-        color: 'black',
+        color: 'rgba(15, 96, 47, 0.5)',
         width: 2,
       }),
       fill: new Fill({
-        color: 'rgba(43, 243, 127, 0.88)',
+        color: 'rgba(19, 226, 102, 0.2)',
       }),
     }),
   })
@@ -128,7 +125,6 @@ export function createScanLayer() {
  * @returns {VectorLayer} Couche vectorielle WFS.
  */
 
-
 export function createWFSLayer() {
   const source = new VectorSource({
     format: new GeoJSON(),
@@ -155,7 +151,6 @@ export function createWFSLayer() {
  * @returns {VectorSource} Source vectorielle OL.
  */
 
-
 function createVectorSource(urlTemplate, format = new GeoJSON(), strategy = bboxStrategy) {
   return new VectorSource({
     url: (extent) => {
@@ -174,7 +169,6 @@ function createVectorSource(urlTemplate, format = new GeoJSON(), strategy = bbox
  * @param {boolean} [visible=false] - Visibilité initiale.
  * @returns {VectorLayer} Couche vectorielle.
  */
-
 
 function createVectorLayer(source, style, visible = false) {
   return new VectorLayer({
@@ -260,7 +254,7 @@ export const layersConfig = [
           color: 'rgba(  17, 209, 197  , 0.2)',
         }),
         text: new Text({
-          text: feature.get('nom'),
+          text: feature.get('numero'),
           font: '16px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
@@ -294,7 +288,7 @@ export const layersConfig = [
           color: 'rgba(  17, 209, 197  , 0.2)',
         }),
         text: new Text({
-          text: feature.get('nom'),
+          text: feature.get('numero'),
           font: '16px Calibri,sans-serif',
           fill: new Fill({ color: '#000' }),
           stroke: new Stroke({ color: '#fff', width: 2 }),
@@ -327,6 +321,27 @@ export const layersConfig = [
         color: 'rgba(0, 255, 0, 0.1)',
       }),
     }),
+  },
+  {
+    name: 'france_zicad',
+    url: `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_zicad&outputFormat=application/json&bbox={bbox}&apikey=${config.APIKEY}`,
+    style: function (feature) {
+      return new Style({
+        stroke: new Stroke({
+          color: 'rgba(0, 0, 0, 0.5)',
+          width: 2,
+        }),
+        fill: new Fill({
+          color: 'rgba(74, 72, 72, 0.2)',
+        }),
+        text: new Text({
+          text: feature.get('site'),
+          font: '16px Calibri,sans-serif',
+          fill: new Fill({ color: '#000' }),
+          stroke: new Stroke({ color: '#fff', width: 2 }),
+        }),
+      })
+    },
   },
 ]
 

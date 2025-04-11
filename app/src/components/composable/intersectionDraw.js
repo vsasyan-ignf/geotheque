@@ -4,7 +4,6 @@ import { Vector as VectorLayer } from 'ol/layer'
 import { Style, Fill, Stroke } from 'ol/style'
 import { intersects } from 'ol/extent'
 
-
 /**
  * Référence à la couche des intersections, utilisée pour afficher les géométries intersectées.
  * @type {import('vue').Ref<import('ol/layer/Vector').default|null>}

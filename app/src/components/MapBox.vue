@@ -28,12 +28,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, provide, watch, computed } from 'vue'
+import { ref, onMounted, nextTick, provide, watch } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
 import ZoomControl from './ZoomControl.vue'
-import CardPva from './phototheque/CardPva.vue' // Import the new CardPva component
+import CardPva from './phototheque/CardPva.vue'
 import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 import crossIcon from '@/assets/red-cross.svg'
@@ -48,8 +48,8 @@ import Point from 'ol/geom/Point'
 import {
   getMaxZoom,
   createInitialWMTSLayers,
-  updateWMTSLayers,
   changeActiveWMTSLayer,
+  updateWMTSLayers
 } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
@@ -98,7 +98,7 @@ const {
   storeHoveredScan,
   deletePhotoAllBool,
   dicoUrlPhoto,
-  SelectedPhotos,
+  flyTo,
 } = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -168,6 +168,9 @@ watch(activeTab, (newValue) => {
   hideOtherLayers()
   scanStore.resetCriteria()
   activeLayerIndex.value = 0
+
+  updateWMTSLayers(olMap.value, newLayers)
+  
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []
   tab_couples_photo = []
@@ -331,10 +334,6 @@ function Add_new_polygone_to_map(tab, name) {
   })
 
   const style = new Style({
-    stroke: new Stroke({
-      color: 'blue',
-      width: 2,
-    }),
     fill: new Fill({
       color: 'rgba(0, 0, 0, 0)',
     }),
@@ -377,7 +376,6 @@ async function parcour_tab_and_map(url) {
         alphanum = tab_test[i][3]
         numero = tab_test[i][4]
         infos = tab_test[i][5]
-
         ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
         centrex_3857 = x_3857;
         centrey_3857 = y3857
@@ -686,6 +684,21 @@ onMounted(() => {
         })
 
         vectorLayers.value.scan.getSource().addFeature(polygon)
+      }
+    })
+
+    watch(flyTo, () => {
+      if (vectorLayers.value.scan.getSource()) {
+        const features = vectorLayers.value.scan.getSource().getFeatures()
+        if (features.length > 0) {
+          const extent = features[0].getGeometry().getExtent()
+
+          olMap.value.getView().fit(extent, {
+            padding: [50, 50, 50, 50 + 400],
+            minResolution: 10,
+            duration: 2000,
+          })
+        }
       }
     })
 
