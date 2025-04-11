@@ -38,6 +38,7 @@ import {
   getMaxZoom,
   createInitialWMTSLayers,
   changeActiveWMTSLayer,
+  updateWMTSLayers
 } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
@@ -153,6 +154,9 @@ watch(activeTab, (newValue) => {
   hideOtherLayers()
   scanStore.resetCriteria()
   activeLayerIndex.value = 0
+
+  updateWMTSLayers(olMap.value, newLayers)
+  
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []
   tab_couples_photo = []

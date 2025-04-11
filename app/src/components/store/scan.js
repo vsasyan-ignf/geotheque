@@ -109,7 +109,10 @@ export const useScanStore = defineStore('scan', () => {
       let cqlFilter = createCqlFilter()
 
       fetchAllOptions()
-
+      console.log(`${config.GEOSERVER_URL}` +
+      `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
+      `&cql_filter=${cqlFilter}` +
+      `&apikey=${config.APIKEY}`)
       return (
         `${config.GEOSERVER_URL}` +
         `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
@@ -232,7 +235,6 @@ export const useScanStore = defineStore('scan', () => {
         wfsUrl += `&cql_filter=${cqlFilter}`
       }
 
-      console.log(wfsUrl)
       const response = await fetch(wfsUrl)
       if (!response.ok) throw new Error(response.status)
 
@@ -275,7 +277,6 @@ export const useScanStore = defineStore('scan', () => {
         wfsUrl += `&cql_filter=${cqlFilter}`
       }
 
-      console.log(wfsUrl)
       const response = await fetch(wfsUrl)
 
       const data = await response.json()
