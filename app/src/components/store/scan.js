@@ -22,11 +22,11 @@ export const useScanStore = defineStore('scan', () => {
   let emulsionOptions = ref([{ id: '0', name: 'Toutes les emulsions' }])
 
   let optionsCache = ref({
-    COLLECTION: null,
-    SUPPORT: null,
-    EMULSION: null,
-    COMMANDITA: null,
-    PRODUCTEUR: null,
+    collection: null,
+    support: null,
+    emulsion: null,
+    commandita: null,
+    producteur: null,
   })
 
   let flyTo = ref(false)
@@ -38,7 +38,7 @@ export const useScanStore = defineStore('scan', () => {
       case 'phototheque':
         return 'geotheque_mtd:pva'
       case 'phototheque_etranger':
-        return '' // à modif pour prendre en compte le bon wfs
+        return 'geotheque_mtd:pva'
       default:
         return 'geotheque_mtd:scans'
     }
@@ -92,7 +92,7 @@ export const useScanStore = defineStore('scan', () => {
 
     if (collection) cqlFilter += `%20AND%20collection%3D'${collection}'`
 
-    if (activeTab.value === 'phototheque') {
+    if (activeTab.value.includes('phototheque')) {
       cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
       if (commanditaire) cqlFilter += `%20AND%20commandita%3D'${commanditaire}'`
       if (producteur) cqlFilter += `%20AND%20producteur%3D'${producteur}'`
@@ -180,7 +180,6 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateActiveTab(newVal) {
     activeTab.value = newVal
-    // fetchAllOptions()
     console.log('tab selected : ', activeTab.value)
   }
 
@@ -316,7 +315,6 @@ export const useScanStore = defineStore('scan', () => {
 
   async function getProducteurOptions(searchTerm = '') {
     const options = await fetchOptionsComboBox('producteur')
-    console.log()
     const filteredOptions = getFilteredOptions(options, searchTerm)
     return filteredOptions && filteredOptions.map((option) => option.name)
   }
@@ -325,7 +323,7 @@ export const useScanStore = defineStore('scan', () => {
     if (!url) {
       return
     }
-    if (activeTab.value === 'phototheque') {
+    if (activeTab.value.includes('phototheque')) {
       await storeGetPhoto(url)
     } else {
       try {

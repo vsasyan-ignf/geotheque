@@ -22,7 +22,7 @@ import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
 import ZoomControl from './ZoomControl.vue'
-import CardPva from './phototheque/CardPva.vue' // Import the new CardPva component
+import CardPva from './phototheque/CardPva.vue'
 import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 import crossIcon from '@/assets/red-cross.svg'
@@ -37,7 +37,6 @@ import Point from 'ol/geom/Point'
 import {
   getMaxZoom,
   createInitialWMTSLayers,
-  updateWMTSLayers,
   changeActiveWMTSLayer,
 } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
@@ -85,7 +84,6 @@ const {
   storeHoveredScan,
   deletePhotoAllBool,
   dicoUrlPhoto,
-  SelectedPhotos,
   flyTo,
 } = storeToRefs(scanStore)
 
@@ -192,20 +190,6 @@ function DrawEmpriseGeometry(geometry) {
     geometry: last_geom,
   })
   vectorLayers.value.geomMouseOver.getSource().addFeature(feature)
-}
-
-function isPointOnEmprise(point, emprises) {
-  for (let i = 0; i < emprises.length; i++) {
-    const polygon = new Feature({
-      geometry: new Polygon([emprises[i]]),
-    })
-    const geometry = polygon.getGeometry()
-
-    if (geometry.intersectsCoordinate(point)) {
-      return true
-    }
-  }
-  return false
 }
 
 function showPointOnEmprise(point, emprises) {

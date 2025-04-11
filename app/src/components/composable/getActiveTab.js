@@ -51,7 +51,7 @@ export function getOtherLayersForActiveTab(activeTab) {
     case 'phototheque':
       return otherLayersPhotoFrance
     default:
-      return otherLayersCartoFrance
+      return otherLayersCartoMonde
   }
 }
 
