@@ -16,7 +16,12 @@
         </template>
       </ShakingButton>
 
-      <ShakingButton nameButton="" @click="DeleteSelectedPhoto" :disabled="!storeSelectedScan" v-if="urlInDico">
+      <ShakingButton
+        nameButton=""
+        @click="DeleteSelectedPhoto"
+        :disabled="!storeSelectedScan"
+        v-if="urlInDico"
+      >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiMinus" class="mdicon" />
         </template>
@@ -28,7 +33,11 @@
         </template>
       </ShakingButton>
 
-      <ShakingButton nameButton="CSV" @click="downloadCSV(storeScansData)" :disabled="!isDataAvailable > 0">
+      <ShakingButton
+        nameButton="CSV"
+        @click="downloadCSV(storeScansData)"
+        :disabled="!isDataAvailable > 0"
+      >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiDownloadCircle" class="mdicon" />
         </template>
@@ -50,8 +59,12 @@
     <div v-if="selectedMission" class="mission-preview slide-in">
       <div class="mission-card">
         <div class="preview-details">
-          <div v-for="(val, key, index) in essentialDetails" :key="key" class="detail-item"
-            :style="{ 'animation-delay': `${index * 0.05}s` }">
+          <div
+            v-for="(val, key, index) in essentialDetails"
+            :key="key"
+            class="detail-item"
+            :style="{ 'animation-delay': `${index * 0.05}s` }"
+          >
             <div class="detail-label">{{ key }}</div>
             <div class="detail-value">{{ val }}</div>
           </div>
@@ -64,8 +77,13 @@
     </div>
 
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-      <MissionDetailsModal :isOpen="isModalOpen" :title="`${missionName} - Détails complets`" :details="allDetails"
-        @close="closeModal" @download="downloadDetails" />
+      <MissionDetailsModal
+        :isOpen="isModalOpen"
+        :title="`${missionName} - Détails complets`"
+        :details="allDetails"
+        @close="closeModal"
+        @download="downloadDetails"
+      />
     </div>
   </div>
 </template>
@@ -426,12 +444,12 @@ function clickedFlyTo() {
   transition: all 0.2s;
 }
 
-.checkbox-input:checked+.custom-checkbox {
+.checkbox-input:checked + .custom-checkbox {
   background-color: #739614;
   border-color: #739614;
 }
 
-.checkbox-input:checked+.custom-checkbox::after {
+.checkbox-input:checked + .custom-checkbox::after {
   content: '';
   position: absolute;
   left: 5px;

@@ -18,12 +18,12 @@ function roundToTwo(num) {
  * - "Couple Actif"
  *
  * Chaque type de ligne est traité de manière spécifique pour en extraire les coordonnées et autres informations associées.
- * 
+ *
  * Exemple de structure du tableau retourné :
  * - Tab[0]: "Centre Actif", coordx, coordy, photoNom, numero, {infos: {nom, chantier, dateVol, ...}}
  * - Tab[1]: "Cliche Actif", coordx, coordy, et points delta x, y
  * - Tab[2]: similaire à Tab[0] pour le point suivant.
- * 
+ *
  * @param {string} url - L'URL du fichier texte à lire.
  * @returns {Promise<Array>} Un tableau structuré contenant les informations extraites du fichier texte.
  * @throws {Error} Si une erreur survient lors de la lecture du fichier ou du traitement des données.

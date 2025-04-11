@@ -12,7 +12,6 @@ import config from '@/config'
  * @returns {VectorLayer} Couche vectorielle avec style d’icône.
  */
 
-
 export function createPinLayer(markerIcon) {
   const source = new VectorSource()
 
@@ -33,7 +32,6 @@ export function createPinLayer(markerIcon) {
  *
  * @returns {VectorLayer} Couche vectorielle avec style personnalisé.
  */
-
 
 export function createGeomLayer() {
   const source = new VectorSource()
@@ -57,7 +55,6 @@ export function createGeomLayer() {
  *
  * @returns {VectorLayer} Couche vectorielle avec style de survol.
  */
-
 
 export function createGeomMouseOverLayer() {
   const source = new VectorSource()
@@ -128,7 +125,6 @@ export function createScanLayer() {
  * @returns {VectorLayer} Couche vectorielle WFS.
  */
 
-
 export function createWFSLayer() {
   const source = new VectorSource({
     format: new GeoJSON(),
@@ -155,7 +151,6 @@ export function createWFSLayer() {
  * @returns {VectorSource} Source vectorielle OL.
  */
 
-
 function createVectorSource(urlTemplate, format = new GeoJSON(), strategy = bboxStrategy) {
   return new VectorSource({
     url: (extent) => {
@@ -174,7 +169,6 @@ function createVectorSource(urlTemplate, format = new GeoJSON(), strategy = bbox
  * @param {boolean} [visible=false] - Visibilité initiale.
  * @returns {VectorLayer} Couche vectorielle.
  */
-
 
 function createVectorLayer(source, style, visible = false) {
   return new VectorLayer({
@@ -348,7 +342,7 @@ export const layersConfig = [
         }),
       })
     },
-  }
+  },
 ]
 
 /**
