@@ -76,6 +76,8 @@ import Icon from 'ol/style/Icon'
 
 import MousePosition from 'ol/control/MousePosition.js'
 import { createStringXY } from 'ol/coordinate.js'
+import { getDistance } from 'ol/sphere';
+
 
 // Added new refs for card component
 const showCardPva = ref(false)
@@ -218,16 +220,37 @@ function isPointOnEmprise(point, emprises) {
   return false
 }
 
+
+
+function aplhaOfPointInRange(point,emprises,range){
+  let i,distance;
+  for (i = 0; i < emprises.length;i++){
+    distance = getDistance(point, emprises[i][2]);
+    console.log(point,emprises[i][2])
+    console.log("distance : ",distance)
+    if(distance<range){
+      return emprises[i][1]
+    }
+  }
+  return null
+}
+
+
 function showPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
-  let i
+  let i;
+  let aff = aplhaOfPointInRange(point,emprises,100);
+  if(aff != null){
+    console.log("oui")
+  }
+  
   for (i = 0; i < emprises.length; i++) {
     const polygon = new Feature({
       geometry: new Polygon([emprises[i][0]]),
     })
     const geometry = polygon.getGeometry()
-    //ici
+    
 
     if (geometry.intersectsCoordinate(point)) {
       const alpha_selec = emprises[i][1]
@@ -340,6 +363,8 @@ async function parcour_tab_and_map(url) {
       y,
       x_3857,
       y3857,
+      centrex_3857,
+      centrey_3857,
       tab_points_cliche_3857,
       tab_points_couple_3857,
       alphanum,
@@ -355,6 +380,8 @@ async function parcour_tab_and_map(url) {
         infos = tab_test[i][5]
 
         ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+        centrex_3857 = x_3857;
+        centrey_3857 = y3857
         addPointToMap(x_3857, y3857, numero)
         addPointToMap(x_3857, y3857, alphanum, true)
 
@@ -370,7 +397,7 @@ async function parcour_tab_and_map(url) {
           tab_points_cliche_3857.push([x_3857, y3857])
         }
 
-        tab_emprise_photo.push([tab_points_cliche_3857, alphanum])
+        tab_emprise_photo.push([tab_points_cliche_3857, alphanum,[centrex_3857,centrey_3857]])
         Add_new_polygone_to_map(tab_points_cliche_3857, alphanum)
       } else if (tab_test[i][0] == 'Couple Actif') {
         elem = tab_test[i]
