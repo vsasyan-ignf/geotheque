@@ -54,4 +54,3 @@ export function getOtherLayersForActiveTab(activeTab) {
       return otherLayersCartoFrance
   }
 }
-
