@@ -29,6 +29,8 @@ export const useScanStore = defineStore('scan', () => {
     PRODUCTEUR: null,
   })
 
+  let flyTo = ref(false)
+
   const getCurrentTypeNames = () => {
     switch (activeTab.value) {
       case 'cartotheque_etranger':
@@ -202,6 +204,10 @@ export const useScanStore = defineStore('scan', () => {
     if (!SelectedPhotos.value.includes(newVal)) {
       SelectedPhotos.value.push(newVal)
     }
+  }
+
+  function updateFlyTo(newVal) {
+    flyTo.value = newVal
   }
 
   function removeSelectedPhoto(item) {
@@ -406,5 +412,7 @@ export const useScanStore = defineStore('scan', () => {
     SelectedPhotos,
     updateSelectedPhotos,
     removeSelectedPhoto,
+    flyTo,
+    updateFlyTo,
   }
 })

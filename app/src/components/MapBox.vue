@@ -2,25 +2,14 @@
   <div class="map-container">
     <SideMenu @toggle-visibility="toggleLayerVisibility" />
     <div ref="mapElement" class="ol-map"></div>
-    <BasecardSwitcher
-      :layers="layers"
-      :otherLayers="otherLayers"
-      :activeLayerIndex="activeLayerIndex"
-      :currentZoom="currentZoom"
-      @layer-change="changeActiveLayer"
-      @other-layer-toggle="handleOtherLayerToggle"
-      @display-option-change="handleDisplayOptionChange"
-    />
+    <BasecardSwitcher :layers="layers" :otherLayers="otherLayers" :activeLayerIndex="activeLayerIndex"
+      :currentZoom="currentZoom" @layer-change="changeActiveLayer" @other-layer-toggle="handleOtherLayerToggle"
+      @display-option-change="handleDisplayOptionChange" />
     <ZoomControl />
     <VisibilitySwitch @toggle-visibility="toggleLayerVisibility" />
-    <DrawControl
-      v-if="activeTab === 'phototheque'"
-      :map="olMap"
-      :isDrawModeActive="drawModeActive"
-      @draw-complete="handleDrawComplete"
-      @draw-mode-activated="handleDrawModeActivated"
-      @deactivate-draw-mode="handleDeactivateDrawMode"
-    />
+    <DrawControl v-if="activeTab === 'phototheque'" :map="olMap" :isDrawModeActive="drawModeActive"
+      @draw-complete="handleDrawComplete" @draw-mode-activated="handleDrawModeActivated"
+      @deactivate-draw-mode="handleDeactivateDrawMode" />
     <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
   </div>
   <div style="z-index: 99999999" id="mouse-position"></div>
@@ -97,6 +86,7 @@ const {
   deletePhotoAllBool,
   dicoUrlPhoto,
   SelectedPhotos,
+  flyTo,
 } = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -354,7 +344,7 @@ async function parcour_tab_and_map(url) {
         numero = tab_test[i][4]
         infos = tab_test[i][5]
 
-        ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
         addPointToMap(x_3857, y3857, numero)
         addPointToMap(x_3857, y3857, alphanum, true)
 
@@ -366,7 +356,7 @@ async function parcour_tab_and_map(url) {
           //Commence a 1 car en 0 il y a le type d'image
           x = elem[i2]
           y = elem[i2 + 1]
-          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+            ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
           tab_points_cliche_3857.push([x_3857, y3857])
         }
 
@@ -379,7 +369,7 @@ async function parcour_tab_and_map(url) {
           //Commence a 1 car en 0 il y a le type d'image
           x = elem[i2]
           y = elem[i2 + 1]
-          ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
+            ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
           addPointToMap(x_3857, y3857)
           tab_points_couple_3857.push([x_3857, y3857])
         }
@@ -662,6 +652,21 @@ onMounted(() => {
         vectorLayers.value.scan.getSource().addFeature(polygon)
       }
     })
+
+    watch(flyTo, () => {
+      if (vectorLayers.value.scan.getSource()) {
+        const features = vectorLayers.value.scan.getSource().getFeatures();
+        if (features.length > 0) {
+          const extent = features[0].getGeometry().getExtent();
+
+          olMap.value.getView().fit(extent, {
+            padding: [50, 50, 50, 50 + 400],
+            minResolution: 10,
+            duration: 2000,
+          });
+        }
+      }
+    });
 
     watch(
       dicoUrlPhoto,
