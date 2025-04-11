@@ -89,11 +89,11 @@ export function createGeomCoupleLayer() {
     source,
     style: new Style({
       stroke: new Stroke({
-        color: 'black',
+        color: 'rgba(15, 96, 47, 0.5)',
         width: 2,
       }),
       fill: new Fill({
-        color: 'rgba(43, 243, 127, 0.88)',
+        color: 'rgba(19, 226, 102, 0.2)',
       }),
     }),
   })

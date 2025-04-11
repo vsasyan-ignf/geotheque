@@ -17,12 +17,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, provide, watch, computed } from 'vue'
+import { ref, onMounted, nextTick, provide, watch } from 'vue'
 import SideMenu from './SideMenu.vue'
 import BasecardSwitcher from './BasecardSwitcher.vue'
 import VisibilitySwitch from './VisibilitySwitch.vue'
 import ZoomControl from './ZoomControl.vue'
-import CardPva from './phototheque/CardPva.vue' // Import the new CardPva component
+import CardPva from './phototheque/CardPva.vue'
 import { eventBus } from './composable/eventBus'
 import markerIcon from '@/assets/blue-marker.svg'
 import crossIcon from '@/assets/red-cross.svg'
@@ -85,7 +85,6 @@ const {
   storeHoveredScan,
   deletePhotoAllBool,
   dicoUrlPhoto,
-  SelectedPhotos,
   flyTo,
 } = storeToRefs(scanStore)
 
@@ -194,20 +193,6 @@ function DrawEmpriseGeometry(geometry) {
   vectorLayers.value.geomMouseOver.getSource().addFeature(feature)
 }
 
-function isPointOnEmprise(point, emprises) {
-  for (let i = 0; i < emprises.length; i++) {
-    const polygon = new Feature({
-      geometry: new Polygon([emprises[i]]),
-    })
-    const geometry = polygon.getGeometry()
-
-    if (geometry.intersectsCoordinate(point)) {
-      return true
-    }
-  }
-  return false
-}
-
 function showPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
@@ -299,10 +284,6 @@ function Add_new_polygone_to_map(tab, name) {
   })
 
   const style = new Style({
-    stroke: new Stroke({
-      color: 'blue',
-      width: 2,
-    }),
     fill: new Fill({
       color: 'rgba(0, 0, 0, 0)',
     }),
