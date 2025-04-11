@@ -63,11 +63,11 @@ export function createGeomMouseOverLayer() {
     source,
     style: new Style({
       stroke: new Stroke({
-        color: 'black',
+        color: 'rgba(255, 145, 0, 0.8)',
         width: 2,
       }),
       fill: new Fill({
-        color: 'rgba(255, 145, 0, 0.5)',
+        color: 'rgba(255, 145, 0, 0.4)',
       }),
     }),
   })
