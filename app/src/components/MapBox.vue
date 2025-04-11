@@ -223,13 +223,15 @@ function isPointOnEmprise(point, emprises) {
 
 
 function aplhaOfPointInRange(point,emprises,range){
-  let i,distance;
+  let i,distance,point_emprise_4326,point_souris_4326;
+  point_souris_4326 = useConvertCoordinates(point[0], point[1], 'EPSG:3857', 'EPSG:4326')
+
   for (i = 0; i < emprises.length;i++){
-    distance = getDistance(point, emprises[i][2]);
-    console.log(point,emprises[i][2])
-    console.log("distance : ",distance)
+    point_emprise_4326 = useConvertCoordinates(emprises[i][2][0], emprises[i][2][1], 'EPSG:3857', 'EPSG:4326')
+    distance = getDistance(point_souris_4326, point_emprise_4326);
+
     if(distance<range){
-      return emprises[i][1]
+      return [emprises[i][1],i]
     }
   }
   return null
@@ -239,29 +241,24 @@ function aplhaOfPointInRange(point,emprises,range){
 function showPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
-  let i;
-  let aff = aplhaOfPointInRange(point,emprises,100);
-  if(aff != null){
-    console.log("oui")
-  }
-  
-  for (i = 0; i < emprises.length; i++) {
+  let alphaOrI = aplhaOfPointInRange(point,emprises,50);
+  if(alphaOrI != null){
+    const i = alphaOrI[1];
+    const alpha_selec = alphaOrI[0];
+
     const polygon = new Feature({
       geometry: new Polygon([emprises[i][0]]),
     })
-    const geometry = polygon.getGeometry()
-    
 
-    if (geometry.intersectsCoordinate(point)) {
-      const alpha_selec = emprises[i][1]
-      showCardPva.value = true
-      selectedPhotoInfo.value = infosPva.value[alpha_selec]
-      DrawEmpriseGeometry(geometry)
-      return
-    }
+    const geometry = polygon.getGeometry()
+    showCardPva.value = true
+    selectedPhotoInfo.value = infosPva.value[alpha_selec]
+    DrawEmpriseGeometry(geometry)
   }
-  showCardPva.value = false
-  vectorLayers.value.geomMouseOver.getSource().clear()
+  else{
+    showCardPva.value = false
+    vectorLayers.value.geomMouseOver.getSource().clear()
+  }
 }
 
 function Add_new_couple_to_map(tab) {
