@@ -70,8 +70,8 @@
       </Accordeon>
     </div>
 
-    <CartothequeSubMenu v-if="['cartotheque', 'cartotheque_etranger'].includes(activeTab)" />
-    <PhotothequeSubMenu v-else-if="activeTab === 'phototheque'" />
+    <CartothequeSubMenu v-if="activeTab.includes('cartotheque')" />
+    <PhotothequeSubMenu v-else-if="activeTab.includes('phototheque')" />
   </div>
 </template>
 
@@ -118,7 +118,7 @@ async function fetchAndConvertBbox(longitude, latitude) {
     let url
 
     url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
-
+    console.log(url)
     const response = await fetch(url)
 
     if (!response.ok) {
