@@ -82,7 +82,6 @@
         :title="`${missionName} - Détails complets`"
         :details="allDetails"
         @close="closeModal"
-        @download="downloadDetails"
       />
     </div>
   </div>
@@ -118,26 +117,26 @@ const isDataAvailable = computed(() => storeScansData.value && storeScansData.va
 const all_keys = {
   nom: 'NOM',
   chantier: 'CHANTIER',
-  numéro_sa: 'NUMÉRO_SA',
-  année: 'ANNÉE',
-  thème: 'THÈME',
-  thème_gé: 'THÈME GÉNÉRAL',
+  numero_sa: 'NUMÉRO_SA',
+  annee: 'ANNÉE',
+  theme: 'THÈME',
+  theme_ge: 'THÈME GÉNÉRAL',
   commandita: 'COMMANDITAIRE',
   producteur: 'PRODUCTEUR',
   style: 'STYLE',
   support: 'SUPPORT',
   emulsion: 'EMULTION',
-  résolution: 'RÉSOLUTION',
+  resolution: 'RÉSOLUTION',
   nombre_de_: 'NOMBRE DE PVA',
-  qualité_p: 'QUALITÉ P',
-  référence: 'RÉFÉRENCE',
+  qualite_p: 'QUALITÉ P',
+  reference: 'RÉFÉRENCE',
   notes: 'NOTES',
   enveloppe_: 'ENVELOPPE',
   intersecte: 'INTERSECTE',
   dispo_phot: 'DISPO PHOTO',
   dispo_inte: 'DISPO INTER',
-  désignati: 'DÉSIGNATION',
-  nom_géné: 'NOM GÉNÉ',
+  designati: 'DÉSIGNATION',
+  nom_gene: 'NOM GÉNÉ',
   identifian: 'IDENTIFIANT',
   format: 'FORMAT',
   focale: 'FOCALE',
@@ -148,7 +147,7 @@ const allDetails = computed(() => {
   const details = {}
   for (const key of Object.keys(all_keys)) {
     details[all_keys[key]] =
-      selectedMission.value?.[key] === '' ? 'No data' : selectedMission.value?.[key]
+      selectedMission.value?.[key] === '' ? 'Pas de données' : selectedMission.value?.[key]
   }
   return details
 })
