@@ -67,7 +67,7 @@
 import { watch } from 'vue'
 import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
-import { mdiCity, mdiMap, mdiCrosshairsGps, mdiLeaf } from '@mdi/js'
+import { mdiCity, mdiMap, mdiCrosshairsGps, mdiLeaf, mdiMagnifyExpand } from '@mdi/js'
 
 import CommuneSearch from '@/components/material/CommuneSearch.vue'
 import DepartementSearch from '@/components/material/DepartementSearch.vue'
@@ -82,7 +82,7 @@ const mdiIcons = {
   departement: mdiMap,
   feuille: mdiLeaf,
   point: mdiCrosshairsGps,
-  autre: mdiCrosshairsGps,
+  autre: mdiMagnifyExpand,
 }
 
 const props = defineProps({
