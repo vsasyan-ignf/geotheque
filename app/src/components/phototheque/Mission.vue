@@ -51,7 +51,7 @@
 
       <ShakingButton nameButton="" @click="clickedFlyTo" :disabled="!storeSelectedScan">
         <template #icon>
-          <SvgIcon type="mdi" :path="mdiEye" class="mdicon" />
+          <SvgIcon type="mdi" :path="mdiCrosshairsGps" class="mdicon" />
         </template>
       </ShakingButton>
     </div>
@@ -96,7 +96,14 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { downloadCSV } from '../composable/download'
 import ShakingButton from '@/components/material/ShakingButton.vue'
-import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle, mdiXml, mdiEye } from '@mdi/js'
+import {
+  mdiPlus,
+  mdiMinus,
+  mdiTrashCan,
+  mdiDownloadCircle,
+  mdiXml,
+  mdiCrosshairsGps,
+} from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -258,7 +265,7 @@ function clickedFlyTo() {
   display: flex;
   flex-direction: row;
   gap: 10px;
-  margin-left: 10px;
+  margin-left: 5px;
   margin-bottom: 20px;
 }
 
@@ -323,7 +330,6 @@ function clickedFlyTo() {
 .mission-card {
   background-color: white;
   border-radius: 8px;
-  /* box-shadow: 0 4px 12px rgba(0,0,0,0.08); */
   border: 1px solid #ddd;
   overflow: hidden;
   transition: all 0.3s ease;
