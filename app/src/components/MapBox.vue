@@ -23,8 +23,8 @@
     />
     <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
   </div>
-  <div style="z-index: 99999999" id="mouse-position"></div>
-  <div style="z-index: 99999999" id="form-proj"></div>
+  <div style="z-index: 10" id="mouse-position"></div>
+  <div style="z-index: 10" id="form-proj"></div>
 </template>
 
 <script setup>
