@@ -269,27 +269,25 @@ function updateCoupleVisibility(bool) {
 function addPointToMap(x, y, nom, crossAlpha = false) {
   const coord = [x, y]
 
-  // Créer un style avec une icône et un texte
   const style = new Style({
     image: new Icon({
       src: crossIcon,
-      scale: 0.03, // Ajustez la taille de l'icône si nécessaire
+      scale: 0.03,
     }),
     text: new Text({
       text: nom,
-      offsetY: -20, // Décale le texte au-dessus de l'icône
+      offsetY: -20,
       font: '14px Arial, sans-serif',
       fill: new Fill({
-        color: '#000', // Couleur du texte
+        color: '#000',
       }),
       stroke: new Stroke({
-        color: '#fff', // Contour blanc pour améliorer la lisibilité
+        color: '#fff',
         width: 3,
       }),
     }),
   })
 
-  // Créer une entité Feature avec le style
   const feature = new Feature({
     geometry: new Point(coord),
   })
@@ -360,6 +358,7 @@ async function parcour_tab_and_map(url) {
         ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
         centrex_3857 = x_3857
         centrey_3857 = y3857
+
         addPointToMap(x_3857, y3857, numero)
         addPointToMap(x_3857, y3857, alphanum, true)
 
@@ -385,7 +384,6 @@ async function parcour_tab_and_map(url) {
           x = elem[i2]
           y = elem[i2 + 1]
           ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-          addPointToMap(x_3857, y3857)
           tab_points_couple_3857.push([x_3857, y3857])
         }
         //Tableau de couples
