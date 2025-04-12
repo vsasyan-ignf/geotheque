@@ -49,7 +49,7 @@ import {
   getMaxZoom,
   createInitialWMTSLayers,
   changeActiveWMTSLayer,
-  updateWMTSLayers
+  updateWMTSLayers,
 } from './composable/getWMTS'
 import { defaults as defaultControls } from 'ol/control'
 import { getLayersForActiveTab, getOtherLayersForActiveTab } from './composable/getActiveTab'
@@ -76,14 +76,11 @@ import Icon from 'ol/style/Icon'
 
 import MousePosition from 'ol/control/MousePosition.js'
 import { createStringXY } from 'ol/coordinate.js'
-import { getDistance } from 'ol/sphere';
+import { getDistance } from 'ol/sphere'
 
-
-// Added new refs for card component
 const showCardPva = ref(false)
 const selectedPhotoInfo = ref({})
 
-// Function to close card
 function closeCardPva() {
   showCardPva.value = false
 }
@@ -143,7 +140,6 @@ const clearAllLayersTA = () => {
   vectorLayers.value.geomMouseOver.getSource().clear()
   tab_emprise_photo = []
   last_geom = null
-  // Close card when clearing layers
   showCardPva.value = false
 }
 
@@ -152,7 +148,7 @@ const vectorOtherLayers = ref(null)
 let tab_emprise_photo = []
 let tab_couples_photo = []
 let last_geom = null
-const rayon_croix_clique = 50;
+const rayon_croix_clique = 50
 
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
@@ -170,15 +166,13 @@ watch(activeTab, (newValue) => {
   activeLayerIndex.value = 0
 
   updateWMTSLayers(olMap.value, newLayers)
-  
+
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []
   tab_couples_photo = []
   last_geom = null
   vectorLayers.value.geomMouseOver.getSource().clear()
   vectorLayers.value.geomCouple.getSource().clear()
-
-  // Close card when changing tabs
   showCardPva.value = false
 })
 
@@ -210,46 +204,34 @@ function DrawEmpriseGeometry(geometry) {
   vectorLayers.value.geomMouseOver.getSource().addFeature(feature)
 }
 
-function isPointOnEmprise(point, emprises) {
-  for (let i = 0; i < emprises.length; i++) {
-    const polygon = new Feature({
-      geometry: new Polygon([emprises[i]]),
-    })
-    const geometry = polygon.getGeometry()
-
-    if (geometry.intersectsCoordinate(point)) {
-      return true
-    }
-  }
-  return false
-}
-
-
-
-function aplhaOfPointInRange(point,emprises,range){
-  //function that take a point and return the 
-  let i,distance,point_emprise_4326,point_souris_4326;
+function aplhaOfPointInRange(point, emprises, range) {
+  //function that take a point and return the
+  let i, distance, point_emprise_4326, point_souris_4326
   point_souris_4326 = useConvertCoordinates(point[0], point[1], 'EPSG:3857', 'EPSG:4326')
 
-  for (i = 0; i < emprises.length;i++){
-    point_emprise_4326 = useConvertCoordinates(emprises[i][2][0], emprises[i][2][1], 'EPSG:3857', 'EPSG:4326')
-    distance = getDistance(point_souris_4326, point_emprise_4326);
+  for (i = 0; i < emprises.length; i++) {
+    point_emprise_4326 = useConvertCoordinates(
+      emprises[i][2][0],
+      emprises[i][2][1],
+      'EPSG:3857',
+      'EPSG:4326',
+    )
+    distance = getDistance(point_souris_4326, point_emprise_4326)
 
-    if(distance<range){
-      return [emprises[i][1],i]
+    if (distance < range) {
+      return [emprises[i][1], i]
     }
   }
   return null
 }
 
-
 function showPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
-  let alphaOrI = aplhaOfPointInRange(point,emprises,rayon_croix_clique);
-  if(alphaOrI != null){
-    const i = alphaOrI[1];
-    const alpha_selec = alphaOrI[0];
+  let alphaOrI = aplhaOfPointInRange(point, emprises, rayon_croix_clique)
+  if (alphaOrI != null) {
+    const i = alphaOrI[1]
+    const alpha_selec = alphaOrI[0]
 
     const polygon = new Feature({
       geometry: new Polygon([emprises[i][0]]),
@@ -259,8 +241,7 @@ function showPointOnEmprise(point, emprises) {
     showCardPva.value = true
     selectedPhotoInfo.value = infosPva.value[alpha_selec]
     DrawEmpriseGeometry(geometry)
-  }
-  else{
+  } else {
     showCardPva.value = false
     vectorLayers.value.geomMouseOver.getSource().clear()
   }
@@ -377,7 +358,7 @@ async function parcour_tab_and_map(url) {
         numero = tab_test[i][4]
         infos = tab_test[i][5]
         ;[x_3857, y3857] = useConvertCoordinates(x, y, 'EPSG:2154', 'EPSG:3857')
-        centrex_3857 = x_3857;
+        centrex_3857 = x_3857
         centrey_3857 = y3857
         addPointToMap(x_3857, y3857, numero)
         addPointToMap(x_3857, y3857, alphanum, true)
@@ -394,7 +375,7 @@ async function parcour_tab_and_map(url) {
           tab_points_cliche_3857.push([x_3857, y3857])
         }
 
-        tab_emprise_photo.push([tab_points_cliche_3857, alphanum,[centrex_3857,centrey_3857]])
+        tab_emprise_photo.push([tab_points_cliche_3857, alphanum, [centrex_3857, centrey_3857]])
         Add_new_polygone_to_map(tab_points_cliche_3857, alphanum)
       } else if (tab_test[i][0] == 'Couple Actif') {
         elem = tab_test[i]
@@ -567,12 +548,12 @@ onMounted(() => {
         projection: projection.value,
       })
 
-      const alaphaOrI = aplhaOfPointInRange(coordinate3857,tab_emprise_photo,rayon_croix_clique);
+      const alaphaOrI = aplhaOfPointInRange(coordinate3857, tab_emprise_photo, rayon_croix_clique)
       if (alaphaOrI != null) {
-          const name = infosPva.value[alaphaOrI[0]].nom
-          if (name) {
-            scanStore.updateSelectedPhotos(infosPva.value[alaphaOrI[0]])
-          }
+        const name = infosPva.value[alaphaOrI[0]].nom
+        if (name) {
+          scanStore.updateSelectedPhotos(infosPva.value[alaphaOrI[0]])
+        }
       }
     })
 
