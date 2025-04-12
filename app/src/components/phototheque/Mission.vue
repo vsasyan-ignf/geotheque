@@ -133,10 +133,10 @@ const all_keys = {
   notes: 'NOTES',
   enveloppe_: 'ENVELOPPE',
   intersecte: 'INTERSECTE',
-  dispo_phot: 'DISPO PHOTO',
-  dispo_inte: 'DISPO INTER',
+  dispo_phot: 'DISPO PHOTOTHEQUE',
+  dispo_inte: 'DISPO INTERNET',
   designati: 'DÉSIGNATION',
-  nom_gene: 'NOM GÉNÉ',
+  nom_gene: 'NOM GÉNÉRIQUE',
   identifian: 'IDENTIFIANT',
   format: 'FORMAT',
   focale: 'FOCALE',
@@ -146,13 +146,24 @@ const all_keys = {
 const allDetails = computed(() => {
   const details = {}
   for (const key of Object.keys(all_keys)) {
-    details[all_keys[key]] =
-      selectedMission.value?.[key] === '' ? 'Pas de données' : selectedMission.value?.[key]
+    details[all_keys[key]] = !selectedMission.value?.[key]
+      ? 'Pas de données'
+      : selectedMission.value?.[key]
   }
   return details
 })
 
-const essential_keys = ['DÉSIGNATION', 'FORMAT', 'ANNÉE', 'NOMBRE DE PVA']
+const essential_keys = [
+  'DÉSIGNATION',
+  'DISPO PHOTOTHEQUE',
+  'ECHELLE',
+  'FORMAT',
+  'NOMBRE DE PVA',
+  'SUPPORT',
+  'NOTES',
+  'NOM GÉNÉRIQUE',
+  'ANNÉE',
+]
 
 const essentialDetails = computed(() => {
   const details = {}
@@ -357,8 +368,8 @@ function clickedFlyTo() {
 
 .detail-item {
   display: flex;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
   border-bottom: 1px solid #f0f0f0;
   opacity: 0;
   animation: slideInRight 0.5s forwards;
@@ -374,13 +385,13 @@ function clickedFlyTo() {
   flex: 0 0 50%;
   font-weight: 500;
   color: #555;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .detail-value {
   flex: 0 0 60%;
   color: #333;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .action-buttons {
