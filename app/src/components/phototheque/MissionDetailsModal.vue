@@ -16,9 +16,6 @@
       </div>
 
       <div class="modal-footer">
-        <button class="download-button" @click="downloadDetails">
-          Télécharger les informations
-        </button>
         <button class="close-modal-button" @click="closeModal">Fermer</button>
       </div>
     </div>
@@ -41,14 +38,10 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'download'])
+const emit = defineEmits(['close'])
 
 const closeModal = () => {
   emit('close')
-}
-
-const downloadDetails = () => {
-  emit('download')
 }
 </script>
 
@@ -158,23 +151,6 @@ const downloadDetails = () => {
   gap: 12px;
   padding: 16px 20px;
   border-top: 1px solid #eaeaea;
-}
-
-.download-button {
-  background-color: #739614;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  box-shadow: 0 2px 4px rgba(115, 150, 20, 0.2);
-}
-
-.download-button:hover {
-  background-color: #658612;
 }
 
 .close-modal-button {

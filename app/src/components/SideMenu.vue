@@ -66,7 +66,6 @@ import PhotothequeEtranger from './phototheque/PhotothequeEtranger.vue'
 import Aide from './Aide.vue'
 import { useScanStore } from './store/scan'
 import Panier from './phototheque/Panier.vue'
-import { mdiCity, mdiMap, mdiCrosshairsGps } from '@mdi/js'
 
 const scanStore = useScanStore()
 

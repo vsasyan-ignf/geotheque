@@ -51,7 +51,7 @@
 
       <ShakingButton nameButton="" @click="clickedFlyTo" :disabled="!storeSelectedScan">
         <template #icon>
-          <SvgIcon type="mdi" :path="mdiEye" class="mdicon" />
+          <SvgIcon type="mdi" :path="mdiCrosshairsGps" class="mdicon" />
         </template>
       </ShakingButton>
     </div>
@@ -82,7 +82,6 @@
         :title="`${missionName} - Détails complets`"
         :details="allDetails"
         @close="closeModal"
-        @download="downloadDetails"
       />
     </div>
   </div>
@@ -96,7 +95,14 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { downloadCSV } from '../composable/download'
 import ShakingButton from '@/components/material/ShakingButton.vue'
-import { mdiPlus, mdiMinus, mdiTrashCan, mdiDownloadCircle, mdiXml, mdiEye } from '@mdi/js'
+import {
+  mdiPlus,
+  mdiMinus,
+  mdiTrashCan,
+  mdiDownloadCircle,
+  mdiXml,
+  mdiCrosshairsGps,
+} from '@mdi/js'
 import config from '@/config'
 
 const scanStore = useScanStore()
@@ -111,26 +117,26 @@ const isDataAvailable = computed(() => storeScansData.value && storeScansData.va
 const all_keys = {
   nom: 'NOM',
   chantier: 'CHANTIER',
-  numéro_sa: 'NUMÉRO_SA',
-  année: 'ANNÉE',
-  thème: 'THÈME',
-  thème_gé: 'THÈME GÉNÉRAL',
+  numero_sa: 'NUMÉRO_SA',
+  annee: 'ANNÉE',
+  theme: 'THÈME',
+  theme_ge: 'THÈME GÉNÉRAL',
   commandita: 'COMMANDITAIRE',
   producteur: 'PRODUCTEUR',
   style: 'STYLE',
   support: 'SUPPORT',
   emulsion: 'EMULTION',
-  résolution: 'RÉSOLUTION',
+  resolution: 'RÉSOLUTION',
   nombre_de_: 'NOMBRE DE PVA',
-  qualité_p: 'QUALITÉ P',
-  référence: 'RÉFÉRENCE',
+  qualite_p: 'QUALITÉ P',
+  reference: 'RÉFÉRENCE',
   notes: 'NOTES',
   enveloppe_: 'ENVELOPPE',
   intersecte: 'INTERSECTE',
-  dispo_phot: 'DISPO PHOTO',
-  dispo_inte: 'DISPO INTER',
-  désignati: 'DÉSIGNATION',
-  nom_géné: 'NOM GÉNÉ',
+  dispo_phot: 'DISPO PHOTOTHEQUE',
+  dispo_inte: 'DISPO INTERNET',
+  designati: 'DÉSIGNATION',
+  nom_gene: 'NOM GÉNÉRIQUE',
   identifian: 'IDENTIFIANT',
   format: 'FORMAT',
   focale: 'FOCALE',
@@ -140,13 +146,24 @@ const all_keys = {
 const allDetails = computed(() => {
   const details = {}
   for (const key of Object.keys(all_keys)) {
-    details[all_keys[key]] =
-      selectedMission.value?.[key] === '' ? 'No data' : selectedMission.value?.[key]
+    details[all_keys[key]] = !selectedMission.value?.[key]
+      ? 'Pas de données'
+      : selectedMission.value?.[key]
   }
   return details
 })
 
-const essential_keys = ['DÉSIGNATION', 'FORMAT', 'ANNÉE', 'NOMBRE DE PVA']
+const essential_keys = [
+  'DÉSIGNATION',
+  'DISPO PHOTOTHEQUE',
+  'ECHELLE',
+  'FORMAT',
+  'NOMBRE DE PVA',
+  'SUPPORT',
+  'NOTES',
+  'NOM GÉNÉRIQUE',
+  'ANNÉE',
+]
 
 const essentialDetails = computed(() => {
   const details = {}
@@ -258,7 +275,7 @@ function clickedFlyTo() {
   display: flex;
   flex-direction: row;
   gap: 10px;
-  margin-left: 10px;
+  margin-left: 5px;
   margin-bottom: 20px;
 }
 
@@ -323,7 +340,6 @@ function clickedFlyTo() {
 .mission-card {
   background-color: white;
   border-radius: 8px;
-  /* box-shadow: 0 4px 12px rgba(0,0,0,0.08); */
   border: 1px solid #ddd;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -352,8 +368,8 @@ function clickedFlyTo() {
 
 .detail-item {
   display: flex;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
   border-bottom: 1px solid #f0f0f0;
   opacity: 0;
   animation: slideInRight 0.5s forwards;
@@ -369,13 +385,13 @@ function clickedFlyTo() {
   flex: 0 0 50%;
   font-weight: 500;
   color: #555;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .detail-value {
   flex: 0 0 60%;
   color: #333;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .action-buttons {

@@ -128,7 +128,7 @@ import { storeToRefs } from 'pinia'
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { SelectedPhotos, removeSelectedPhoto } = storeToRefs(scanStore)
+const { selectedPhotos, removeSelectedPhoto } = storeToRefs(scanStore)
 
 const cartItems = ref([])
 const isCartModalOpen = ref(false)
@@ -165,7 +165,7 @@ const removeFromCart = (index) => {
 
 const clearCart = () => {
   cartItems.value = []
-  SelectedPhotos.value = []
+  selectedPhotos.value = []
   // localStorage.setItem('phototheque-cart', JSON.stringify([]))
 }
 
@@ -204,7 +204,7 @@ const initCart = () => {
 }
 
 watch(
-  SelectedPhotos,
+  selectedPhotos,
   (newVal) => {
     if (newVal && newVal.length > 0) {
       cartItems.value = newVal

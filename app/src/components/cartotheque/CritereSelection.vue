@@ -172,9 +172,7 @@ watch(storeURL, async () => {
 })
 
 async function loadInitialOptions() {
-  console.log(isPhototheque.value)
   if (isPhototheque.value) {
-    console.log('eee')
     const [commanditaireOpts, producteurOpts] = await Promise.all([
       scanStore.getCommanditaireOptions(),
       scanStore.getProducteurOptions(),
@@ -255,7 +253,6 @@ const handleSubmit = () => {
         : formData.value.emulsion.name,
   }
 
-  console.log(criteria)
   scanStore.updateCriteria(criteria)
 }
 

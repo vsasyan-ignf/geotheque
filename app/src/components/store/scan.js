@@ -15,7 +15,7 @@ export const useScanStore = defineStore('scan', () => {
   let urlPhoto = ref(null)
   let deletePhotoAllBool = ref(false)
   let dicoUrlPhoto = ref([])
-  let SelectedPhotos = ref([])
+  let selectedPhotos = ref([])
 
   let collectionsOptions = ref([{ id: '0', name: 'Tous les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
@@ -109,10 +109,6 @@ export const useScanStore = defineStore('scan', () => {
       let cqlFilter = createCqlFilter()
 
       fetchAllOptions()
-      console.log(`${config.GEOSERVER_URL}` +
-      `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
-      `&cql_filter=${cqlFilter}` +
-      `&apikey=${config.APIKEY}`)
       return (
         `${config.GEOSERVER_URL}` +
         `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
@@ -142,7 +138,6 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateCriteria(newCriteria) {
     storeCritereSelection.value = { ...newCriteria }
-    console.log('Updated criteria:', storeCritereSelection.value)
   }
 
   function updateActiveSubCategory(subCategory) {
@@ -165,7 +160,7 @@ export const useScanStore = defineStore('scan', () => {
     storeSelectedScan.value = null
     urlPhoto.value = null
     dicoUrlPhoto.value = []
-    SelectedPhotos.value = []
+    selectedPhotos.value = []
   }
 
   function updateSelectedGeom(newVal) {
@@ -173,7 +168,6 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateSelectedScan(newVal) {
-    console.log('updateSelectedScan', newVal)
     storeSelectedScan.value = newVal
   }
 
@@ -183,7 +177,6 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateActiveTab(newVal) {
     activeTab.value = newVal
-    console.log('tab selected : ', activeTab.value)
   }
 
   function updateWKT(newVal) {
@@ -203,8 +196,8 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateSelectedPhotos(newVal) {
-    if (!SelectedPhotos.value.includes(newVal)) {
-      SelectedPhotos.value.push(newVal)
+    if (!selectedPhotos.value.includes(newVal)) {
+      selectedPhotos.value.push(newVal)
     }
   }
 
@@ -213,10 +206,10 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function removeSelectedPhoto(item) {
-    const index = SelectedPhotos.value.findIndex((photo) => photo.nom === item.nom)
+    const index = selectedPhotos.value.findIndex((photo) => photo.nom === item.nom)
 
     if (index !== -1) {
-      SelectedPhotos.value.splice(index, 1)
+      selectedPhotos.value.splice(index, 1)
     }
   }
 
@@ -408,7 +401,7 @@ export const useScanStore = defineStore('scan', () => {
     getFilteredOptions,
     storeHoveredScan,
     updateHoverScan,
-    SelectedPhotos,
+    selectedPhotos,
     updateSelectedPhotos,
     removeSelectedPhoto,
     flyTo,
