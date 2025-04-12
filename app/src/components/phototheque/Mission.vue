@@ -141,6 +141,7 @@ const all_keys = {
   format: 'FORMAT',
   focale: 'FOCALE',
   echelle: 'ECHELLE',
+  territoire: 'TERRITOIRE',
 }
 
 const allDetails = computed(() => {
