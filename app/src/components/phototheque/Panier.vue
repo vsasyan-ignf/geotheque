@@ -132,7 +132,7 @@ import { storeToRefs } from 'pinia'
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { selectedPhotos } = storeToRefs(scanStore)
+const { selectedPhotos, activeTab } = storeToRefs(scanStore)
 
 const cartItems = ref([])
 const isCartModalOpen = ref(false)
@@ -140,10 +140,18 @@ const isCartModalOpen = ref(false)
 // doit retourner les éléments du panier
 const cartItemsCount = computed(() => cartItems.value.length)
 
+const misphotURL = computed(() =>
+  activeTab.value === 'phototheque' ? config.IIPSRV_PREFIX_FRANCE : config.IIPSRV_PREFIX_MONDE,
+)
+
+const apacheURL = computed(() =>
+  activeTab.value === 'phototheque' ? config.IMG_FRANCE_URL : config.IMG_MONDE_URL,
+)
+
 const getImageUrl = (item) => {
   if (item) {
     const year = item.chantier.substring(0, 4)
-    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}${item.territoire}/${year}/${item.chantier}/${item.nom}.jp2&CVT=jpeg`
+    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${misphotURL.value}${item.territoire}/${year}/${item.chantier}/${item.nom}.jp2&CVT=jpeg`
     return imageUrl
   }
 }
@@ -185,7 +193,7 @@ const downloadCartItems = () => {
 const viewMission = (item) => {
   if (item) {
     const year = item.chantier.substring(0, 4)
-    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}${item.territoire}/${year}/${item.chantier}/${item.nom}.jp2`
+    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${misphotURL.value}${item.territoire}/${year}/${item.chantier}/${item.nom}.jp2`
     const urlParams = new URLSearchParams(new URL(imageUrl).search)
     const imageUrlServ = urlParams.get('FIF')
 
@@ -202,7 +210,7 @@ const viewMission = (item) => {
 const downloadPhoto = (item) => {
   if (item) {
     const year = item.chantier.substring(0, 4)
-    const url = `${config.IMG_FRANCE_URL}${item.territoire}/${year}/${item.chantier}/${item.nom}.jp2`
+    const url = `${apacheURL.value}${item.territoire}/${year}/${item.chantier}/${item.nom}.jp2`
     fetch(url)
       .then((response) => response.blob())
       .then((blob) => {
