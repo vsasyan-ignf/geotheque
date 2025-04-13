@@ -362,6 +362,8 @@ async function parcour_tab_and_map(url) {
         addPointToMap(x_3857, y3857, numero)
         addPointToMap(x_3857, y3857, alphanum, true)
 
+        infos['territoire'] = storeSelectedScan.value?.properties?.territoire
+
         infosPva.value[alphanum] = infos
       } else if (tab_test[i][0] == 'Cliche Actif') {
         elem = tab_test[i]

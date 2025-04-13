@@ -141,6 +141,7 @@ const all_keys = {
   format: 'FORMAT',
   focale: 'FOCALE',
   echelle: 'ECHELLE',
+  territoire: 'TERRITOIRE',
 }
 
 const allDetails = computed(() => {
@@ -207,7 +208,8 @@ const urlInDico = computed(() => {
 function createUrlPhoto() {
   const annee = storeSelectedScan.value.properties.annee
   const nom = storeSelectedScan.value.properties.chantier
-  return `${config.MTD_FRANCE_URL}Lambert93/${annee}/${nom}/${nom}.txt`
+  const lieu = storeSelectedScan.value.properties.territoire
+  return `${config.MTD_FRANCE_URL}${lieu}/${annee}/${nom}/${nom}.txt`
 }
 
 function DeleteSelectedPhoto() {
@@ -223,8 +225,7 @@ let url_xml = ref(``)
 function downloadxml() {
   if (storeSelectedScan.value) {
     const info = storeSelectedScan.value?.properties
-    console.log('info : ', info)
-    const lieu = 'Lambert93'
+    const lieu = info.territoire
     url_xml = `${config.MTD_FRANCE_URL}${lieu}/${info.annee}/${info.chantier}/${info.chantier}.xml`
     console.log('URL_XML : ', url_xml)
     window.open(url_xml, 'xml')

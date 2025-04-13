@@ -50,6 +50,9 @@
                       <button class="view-button" @click="viewMission(item)" title="Visualiser">
                         <SvgIcon type="mdi" :path="mdiEyeOutline" class="view-icon" />
                       </button>
+                      <button class="view-button" @click="downloadPhoto(item)" title="Télécharger">
+                        <SvgIcon type="mdi" :path="mdiDownload" class="view-icon" />
+                      </button>
                       <button
                         class="remove-button"
                         @click="removeFromCart(index)"
@@ -121,6 +124,7 @@ import {
   mdiTrashCanOutline,
   mdiDownloadCircle,
   mdiEyeOutline,
+  mdiDownload,
 } from '@mdi/js'
 import { downloadCSV } from '../composable/download'
 import { useScanStore } from '@/components/store/scan'
@@ -128,7 +132,7 @@ import { storeToRefs } from 'pinia'
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { selectedPhotos, removeSelectedPhoto } = storeToRefs(scanStore)
+const { selectedPhotos, activeTab } = storeToRefs(scanStore)
 
 const cartItems = ref([])
 const isCartModalOpen = ref(false)
@@ -136,10 +140,18 @@ const isCartModalOpen = ref(false)
 // doit retourner les éléments du panier
 const cartItemsCount = computed(() => cartItems.value.length)
 
+const misphotURL = computed(() =>
+  activeTab.value === 'phototheque' ? config.IIPSRV_PREFIX_FRANCE : config.IIPSRV_PREFIX_MONDE,
+)
+
+const apacheURL = computed(() =>
+  activeTab.value === 'phototheque' ? config.IMG_FRANCE_URL : config.IMG_MONDE_URL,
+)
+
 const getImageUrl = (item) => {
   if (item) {
     const year = item.chantier.substring(0, 4)
-    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2&CVT=jpeg`
+    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${misphotURL.value}${item.territoire}/${year}/${item.chantier}/${item.nom}.jp2&CVT=jpeg`
     return imageUrl
   }
 }
@@ -179,10 +191,9 @@ const downloadCartItems = () => {
   }
 }
 const viewMission = (item) => {
-  // ajouter le lien ippsrv
   if (item) {
     const year = item.chantier.substring(0, 4)
-    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${config.IIPSRV_PREFIX_FRANCE}Lambert93/${year}/${item.chantier}/${item.nom}.jp2`
+    let imageUrl = `${config.IIPSRV_URL}/fcgi-bin/iipsrv.fcgi?FIF=${misphotURL.value}${item.territoire}/${year}/${item.chantier}/${item.nom}.jp2`
     const urlParams = new URLSearchParams(new URL(imageUrl).search)
     const imageUrlServ = urlParams.get('FIF')
 
@@ -193,6 +204,26 @@ const viewMission = (item) => {
     )
   } else {
     console.error("L'URL de l'image est indéfinie.")
+  }
+}
+
+const downloadPhoto = (item) => {
+  if (item) {
+    const year = item.chantier.substring(0, 4)
+    const url = `${apacheURL.value}${item.territoire}/${year}/${item.chantier}/${item.nom}.jp2`
+    fetch(url)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', item.nom)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      })
+      .catch((error) => console.error('Erreur lors du téléchargement:', error))
   }
 }
 
