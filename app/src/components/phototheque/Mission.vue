@@ -8,9 +8,14 @@
 
       <Dropdown :options="storeScansData" disableOption="Choisissez une mission" />
     </div>
-
     <div class="group-button">
-      <ShakingButton nameButton="" @click="setUrl" :disabled="!storeSelectedScan" v-if="!urlInDico">
+      <ShakingButton 
+        nameButton="" 
+        @click="setUrl" 
+        :disabled="!storeSelectedScan" 
+        v-if="!urlInDico"
+        tooltip="Ajouter cette mission à la sélection"
+      >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiPlus" class="mdicon" />
         </template>
@@ -21,13 +26,19 @@
         @click="DeleteSelectedPhoto"
         :disabled="!storeSelectedScan"
         v-if="urlInDico"
+        tooltip="Retirer cette mission de la sélection"
       >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiMinus" class="mdicon" />
         </template>
       </ShakingButton>
 
-      <ShakingButton nameButton="" @click="DeletePhotoAll" :disabled="!storeSelectedScan">
+      <ShakingButton 
+        nameButton="" 
+        @click="DeletePhotoAll" 
+        :disabled="!storeSelectedScan"
+        tooltip="Effacer toute la sélection"
+      >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" />
         </template>
@@ -37,19 +48,30 @@
         nameButton="CSV"
         @click="downloadCSV(storeScansData)"
         :disabled="!isDataAvailable > 0"
+        tooltip="Télécharger les missions au format CSV"
       >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiDownloadCircle" class="mdicon" />
         </template>
       </ShakingButton>
 
-      <ShakingButton nameButton="XML" @click="downloadxml" :disabled="!storeSelectedScan">
+      <ShakingButton 
+        nameButton="XML" 
+        @click="downloadxml" 
+        :disabled="!storeSelectedScan"
+        tooltip="Télécharger les métadonnées au format XML"
+      >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiXml" class="mdicon" />
         </template>
       </ShakingButton>
 
-      <ShakingButton nameButton="" @click="clickedFlyTo" :disabled="!storeSelectedScan">
+      <ShakingButton 
+        nameButton="" 
+        @click="clickedFlyTo" 
+        :disabled="!storeSelectedScan"
+        tooltip="Centrer la carte sur cette mission"
+      >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiCrosshairsGps" class="mdicon" />
         </template>
