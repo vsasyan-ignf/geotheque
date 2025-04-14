@@ -323,7 +323,18 @@ export const useScanStore = defineStore('scan', () => {
       try {
         const response = await fetch(url)
         if (response.ok) {
-          const data = await response.json()
+          // const data = await response.json()
+
+          const buffer = await response.arrayBuffer();
+          const decoder = new TextDecoder('windows-1252'); // Windows 1272 => iso-8859-1
+          const databrut = decoder.decode(buffer);
+          const data = JSON.parse(databrut);
+
+          console.log(data)
+
+
+
+
           storeScansData.value = data.features.map((feature, index) => ({
             id: index,
             geom: feature.geometry.coordinates,
