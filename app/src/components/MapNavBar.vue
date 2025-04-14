@@ -1,6 +1,6 @@
 <template>
   <div class="map-navbar">
-    <select v-model="selectedTerritory" @change="emitChange">
+    <select v-model="selectedTerritory" @change="handleTerritoryChange">
       <option v-for="(data, territory) in territoires" :key="territory" :value="territory">
         {{ territory }}
       </option>
@@ -35,8 +35,20 @@ const selectedTerritory = ref('Monde')
 const selectedProjection = ref('EPSG:3857')
 
 const emitChange = () => {
-  emit('update:territory', selectedTerritory.value)
   emit('update:projection', selectedProjection.value)
+}
+
+const handleTerritoryChange = () => {
+  const currentTerritory = territoires[selectedTerritory.value]
+  if (currentTerritory) {
+    selectedProjection.value = currentTerritory.projection || selectedProjection.value
+    emit('update:territory', {
+      name: selectedTerritory.value,
+      lon: currentTerritory.lon,
+      lat: currentTerritory.lat,
+      zoom: currentTerritory.zoomLevel,
+    })
+  }
 }
 
 watch(selectedTerritory, (newTerritory) => {

@@ -23,9 +23,8 @@
     />
     <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
 
-    <MapNavBar :coordinates="mouseCoordinates" />
+    <MapNavBar :coordinates="mouseCoordinates" @update:territory="handleTerritoryUpdate" />
   </div>
-  <div style="z-index: 10" id="form-proj"></div>
 </template>
 
 <script setup>
@@ -105,6 +104,7 @@ const {
 
 const center = ref([territoires.Metropole.lon, territoires.Metropole.lat])
 const zoom = ref(territoires.Metropole.zoomLevel)
+const territoryData = ref({ name: '', lon: 0, lat: 0 })
 
 const projection = ref('EPSG:3857')
 const rotation = ref(0)
@@ -162,6 +162,18 @@ function hideOtherLayers() {
     layer.setVisible(false)
   })
   otherLayers.value.forEach((layers) => (layers.visible = false))
+}
+
+const handleTerritoryUpdate = (data) => {
+  territoryData.value = data
+
+  if (olMap.value && olView.value) {
+    olView.value.animate({
+      center: [data.lon, data.lat],
+      zoom: data.zoom,
+    })
+  }
+  console.log('Territoire sélectionné:', data.name)
 }
 
 watch(activeTab, (newValue) => {
