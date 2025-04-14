@@ -97,6 +97,7 @@ const {
   deletePhotoAllBool,
   dicoUrlPhoto,
   flyTo,
+  selectedPhotos
 } = storeToRefs(scanStore)
 
 const center = ref([260000, 6000000])
@@ -464,6 +465,18 @@ function handleDeactivateDrawMode() {
   drawModeActive.value = false
   clearIntersection()
 }
+
+watch(selectedPhotos, () => {
+  const names = selectedPhotos.value.map(pva => pva.nom)
+  Object.keys(dic_affiche_photos_clique).forEach(nom => {
+    if (!names.includes(nom)) {
+      removeEmpriseClique(nom)
+    }
+  })
+}, 
+{deep:true}
+)
+
 
 onMounted(() => {
   nextTick(() => {

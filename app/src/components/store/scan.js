@@ -207,12 +207,10 @@ export const useScanStore = defineStore('scan', () => {
 
   function removeSelectedPhoto(item) {
     const index = selectedPhotos.value.findIndex((photo) => photo.nom === item.nom)
-  
+
     if (index !== -1) {
       selectedPhotos.value.splice(index, 1)
-      return item.nom
     }
-    return null
   }
 
   async function fetchOptionsDropDown(propertyName) {
