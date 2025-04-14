@@ -1,5 +1,5 @@
-const territoires = {
-    "Métropole": {
+export const territoires = {
+    "Metropole": {
         lon: 427571,
         lat: 5903772,
         zoomLevel: 6,
@@ -178,5 +178,9 @@ const territoires = {
         lat: -11942543,
         zoomLevel: 2,
         projection: "IGNF:TERA50SPTA",
+    },
+    "Monde": {
+        lon: 2387918,
+        lat: 1033713,
     }
 };
