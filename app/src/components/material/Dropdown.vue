@@ -99,8 +99,10 @@ const debouncedHoverUpdate = debounce((option) => {
 }, 0)
 
 function handleOptionHover(option) {
-  debouncedHoverUpdate(option)
-  scanStore.updateSelectedScan(null)
+  if (props.nameDropdown !== 'Support' || props.nameDropdown !== 'Emulsion') {
+    debouncedHoverUpdate(option)
+    scanStore.updateSelectedScan(null)
+  }
 }
 
 function resetHover() {

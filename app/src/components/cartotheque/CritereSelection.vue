@@ -136,7 +136,7 @@ const formData = ref({
   scaleMax: String(storeCritereSelection.value.scaleMax || '100000'),
   commanditaire: storeCritereSelection.value.commanditaire || '',
   producteur: storeCritereSelection.value.producteur || '',
-  collection: { id: '0', name: 'Tous les collections' },
+  collection: { id: '0', name: 'Toutes les collections' },
   support: { id: '0', name: 'Tous les supports' },
   emulsion: { id: '0', name: 'Tous les emulsions' },
 })
@@ -264,7 +264,7 @@ const resetForm = () => {
     scaleMax: '100000',
     commanditaire: '',
     producteur: '',
-    collection: { id: '0', name: 'Tous les collections' },
+    collection: { id: '0', name: 'Toutes les collections' },
     support: { id: '0', name: 'Tous les supports' },
     emulsion: { id: '0', name: 'Tous les emulsions' },
   }

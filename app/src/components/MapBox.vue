@@ -77,7 +77,7 @@ import Icon from 'ol/style/Icon'
 import MousePosition from 'ol/control/MousePosition.js'
 import { createStringXY } from 'ol/coordinate.js'
 import { getDistance } from 'ol/sphere'
-import { remove } from 'ol/array'
+import { territoires } from './composable/getTerritoires'
 
 const showCardPva = ref(false)
 const selectedPhotoInfo = ref({})
@@ -100,9 +100,11 @@ const {
   selectedPhotos
 } = storeToRefs(scanStore)
 
-const center = ref([260000, 6000000])
+const center = ref([territoires.Metropole.lon, territoires.Metropole.lat])
+const zoom = ref(territoires.Metropole.zoomLevel)
+
+
 const projection = ref('EPSG:3857')
-const zoom = ref(6)
 const rotation = ref(0)
 
 const mapElement = ref(null)
@@ -169,6 +171,22 @@ watch(activeTab, (newValue) => {
   activeLayerIndex.value = 0
 
   updateWMTSLayers(olMap.value, newLayers)
+
+  if (activeTab.value.includes('etranger')) {
+    console.log('here')
+    zoom.value = 0
+    center.value = [territoires.Monde.lon, territoires.Monde.lat]
+  } else {
+    zoom.value = territoires.Metropole.zoomLevel
+    center.value = [territoires.Metropole.lon, territoires.Metropole.lat]
+  }
+
+  if (olMap.value && olView.value) {
+        olView.value.animate({
+          center: center.value,
+          zoom: zoom.value,
+        })
+      }
 
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []
@@ -676,8 +694,8 @@ onMounted(() => {
         })
         scanStore.updateSelectedGeom([])
       }
-      // Pour ne pas afficher toutes les emprises
-      if (activeTab.value != 'phototheque') {
+      // Pour afficher les emprises de scans
+      if (activeTab.value.includes('cartotheque')) {
         vectorLayers.value.emprises.getSource().setUrl(newValue)
       }
 
