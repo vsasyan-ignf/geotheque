@@ -77,6 +77,7 @@ import Icon from 'ol/style/Icon'
 import MousePosition from 'ol/control/MousePosition.js'
 import { createStringXY } from 'ol/coordinate.js'
 import { getDistance } from 'ol/sphere'
+import { remove } from 'ol/array'
 
 const showCardPva = ref(false)
 const selectedPhotoInfo = ref({})
@@ -147,7 +148,7 @@ const vectorOtherLayers = ref(null)
 
 let tab_emprise_photo = []
 let tab_couples_photo = []
-let tab_affiche_photos_clique = []
+let dic_affiche_photos_clique = {}
 let last_geom = null
 const rayon_croix_clique = 50
 
@@ -307,20 +308,28 @@ function addPointToMap(x, y, nom, crossAlpha = false) {
   }
 }
 
+function removeEmpriseClique(name){
+  //fonction pour retirer une emprise de l'affichage
+  vectorLayers.value.geomPhoto.getSource().removeFeature(dic_affiche_photos_clique[name])
+  delete dic_affiche_photos_clique[name]
+}
+
+
+
+
 function afficheMasuqeEmpriseClique(name,i){
-  for(let y =0;y<tab_affiche_photos_clique.length;y++){
-    if(tab_affiche_photos_clique[y] == name){
-      delete tab_affiche_photos_clique[y]
-      console.log(tab_affiche_photos_clique)
+  //function qui gere l'ajout et la suppression de l'emprise au clique
+    if(dic_affiche_photos_clique[name]){
+      removeEmpriseClique(name)
       return
-    }
+    
   }
-    console.log(tab_affiche_photos_clique)
-    tab_affiche_photos_clique.push(name)
     const polygon = new Feature({
       geometry: new Polygon([tab_emprise_photo[i][0]]),
-
+      name : name,
     })
+    dic_affiche_photos_clique[name] = polygon
+    vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
 
 }
 
