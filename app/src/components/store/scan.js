@@ -64,49 +64,49 @@ export const useScanStore = defineStore('scan', () => {
     let cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
 
     if (activeTab.value === 'cartotheque_etranger' && activeSubCategory.value === 'pays') {
-        cqlFilter = `INTERSECTS(geom,${wkt.value})`
+      cqlFilter = `INTERSECTS(geom,${wkt.value})`
     }
 
     const {
-        yearMin,
-        yearMax,
-        scaleMin,
-        scaleMax,
-        collection,
-        commanditaire,
-        producteur,
-        support,
-        emulsion,
+      yearMin,
+      yearMax,
+      scaleMin,
+      scaleMax,
+      collection,
+      commanditaire,
+      producteur,
+      support,
+      emulsion,
     } = storeCritereSelection.value
 
     if (yearMin) cqlFilter += `%20AND%20date_pub%3E%3D${yearMin}`
     if (yearMax) cqlFilter += `%20AND%20date_fin%3C%3D${yearMax}`
 
     if (scaleMin && scaleMax) {
-        cqlFilter += `%20AND%20echelle%20BETWEEN%20${scaleMin}%20AND%20${scaleMax}`
+      cqlFilter += `%20AND%20echelle%20BETWEEN%20${scaleMin}%20AND%20${scaleMax}`
     } else if (scaleMin && !scaleMax) {
-        cqlFilter += `%20AND%20echelle%3E%3D${scaleMin}`
+      cqlFilter += `%20AND%20echelle%3E%3D${scaleMin}`
     } else if (scaleMax && !scaleMin) {
-        cqlFilter += `%20AND%20echelle%3C%3D${scaleMax}`
+      cqlFilter += `%20AND%20echelle%3C%3D${scaleMax}`
     }
 
-    if (collection && !excludeFields.includes('collection')) 
-        cqlFilter += `%20AND%20collection%3D'${collection}'`
+    if (collection && !excludeFields.includes('collection'))
+      cqlFilter += `%20AND%20collection%3D'${collection}'`
 
     if (activeTab.value.includes('phototheque')) {
-        cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
-        if (commanditaire && !excludeFields.includes('commandita')) 
-            cqlFilter += `%20AND%20commandita%3D'${commanditaire}'`
-        if (producteur && !excludeFields.includes('producteur')) 
-            cqlFilter += `%20AND%20producteur%3D'${producteur}'`
-        if (support && !excludeFields.includes('support')) 
-            cqlFilter += `%20AND%20support%3D'${support}'`
-        if (emulsion && !excludeFields.includes('emulsion')) 
-            cqlFilter += `%20AND%20emulsion%3D'${emulsion}'`
+      cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
+      if (commanditaire && !excludeFields.includes('commandita'))
+        cqlFilter += `%20AND%20commandita%3D'${commanditaire}'`
+      if (producteur && !excludeFields.includes('producteur'))
+        cqlFilter += `%20AND%20producteur%3D'${producteur}'`
+      if (support && !excludeFields.includes('support'))
+        cqlFilter += `%20AND%20support%3D'${support}'`
+      if (emulsion && !excludeFields.includes('emulsion'))
+        cqlFilter += `%20AND%20emulsion%3D'${emulsion}'`
     }
 
     return cqlFilter
-}
+  }
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
@@ -246,7 +246,10 @@ export const useScanStore = defineStore('scan', () => {
       const values = data.features.map((f) => f.properties[propertyName]).filter(Boolean)
       const unique = [...new Set(values)].sort()
 
-      const defaultOption = { id: '0', name: `Tous les ${propertyName.toLowerCase()}s` }
+      const property = propertyName.toLowerCase()
+      const tousOrToutes = property === 'collection' ? 'Toutes' : 'Tous'
+
+      const defaultOption = { id: '0', name: `${tousOrToutes} les ${property}s` }
 
       return [defaultOption, ...unique.map((val, i) => ({ id: String(i + 1), name: val }))]
     } catch (error) {
