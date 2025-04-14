@@ -35,7 +35,9 @@ export async function parcour_txt_to_tab(url) {
   // Tab 2 meme que Tab0 mais pour le point suivnat
   try {
     const reponse = await fetch(url)
-    const data = await reponse.text()
+    const buffer = await reponse.arrayBuffer();
+    const decoder = new TextDecoder('iso-8859-1'); // Windows 1272 => iso-8859-1
+    const data = decoder.decode(buffer);
 
     let lignes = data.split('\n')
     let taille_file = lignes.length
