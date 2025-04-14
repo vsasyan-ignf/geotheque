@@ -34,6 +34,7 @@
           nameButton="Visualiser"
           @click="openIipmooviewer"
           :disabled="!storeSelectedScan"
+          tooltip="Visualiser le scan"
         >
           <template #icon><SvgIcon type="mdi" :path="mdiMonitorEye" class="mdicon" /></template>
         </ShakingButton>
@@ -41,12 +42,18 @@
           nameButton="Télécharger"
           @click="downloadScans"
           :disabled="!storeSelectedScan"
+          tooltip="Télécharger l'image du scan"
         >
           <template #icon
             ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
           /></template>
         </ShakingButton>
-        <ShakingButton nameButton="XML" @click="downloadxml" :disabled="!storeSelectedScan">
+        <ShakingButton
+          nameButton="XML"
+          @click="downloadxml"
+          :disabled="!storeSelectedScan"
+          tooltip="Télécharger le scan aux format XML"
+        >
           <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
         </ShakingButton>
       </div>

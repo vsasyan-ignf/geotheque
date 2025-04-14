@@ -15,19 +15,21 @@ export const useScanStore = defineStore('scan', () => {
   let urlPhoto = ref(null)
   let deletePhotoAllBool = ref(false)
   let dicoUrlPhoto = ref([])
-  let SelectedPhotos = ref([])
+  let selectedPhotos = ref([])
 
-  let collectionsOptions = ref([{ id: '0', name: 'Tous les collections' }])
+  let collectionsOptions = ref([{ id: '0', name: 'Toutes les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
-  let emulsionOptions = ref([{ id: '0', name: 'Toutes les emulsions' }])
+  let emulsionOptions = ref([{ id: '0', name: 'Tous les emulsions' }])
 
   let optionsCache = ref({
-    COLLECTION: null,
-    SUPPORT: null,
-    EMULSION: null,
-    COMMANDITA: null,
-    PRODUCTEUR: null,
+    collection: null,
+    support: null,
+    emulsion: null,
+    commandita: null,
+    producteur: null,
   })
+
+  let flyTo = ref(false)
 
   const getCurrentTypeNames = () => {
     switch (activeTab.value) {
@@ -36,7 +38,7 @@ export const useScanStore = defineStore('scan', () => {
       case 'phototheque':
         return 'geotheque_mtd:pva'
       case 'phototheque_etranger':
-        return '' // à modif pour prendre en compte le bon wfs
+        return 'geotheque_mtd:pva'
       default:
         return 'geotheque_mtd:scans'
     }
@@ -54,7 +56,7 @@ export const useScanStore = defineStore('scan', () => {
     emulsion: null,
   })
 
-  function createCqlFilter() {
+  function createCqlFilter(excludeFields = []) {
     if (storeBbox.value.length === 0) return ''
 
     let [minX, minY, maxX, maxY] = storeBbox.value
@@ -88,14 +90,19 @@ export const useScanStore = defineStore('scan', () => {
       cqlFilter += `%20AND%20echelle%3C%3D${scaleMax}`
     }
 
-    if (collection) cqlFilter += `%20AND%20collection%3D'${collection}'`
+    if (collection && !excludeFields.includes('collection'))
+      cqlFilter += `%20AND%20collection%3D'${collection}'`
 
-    if (activeTab.value === 'phototheque') {
+    if (activeTab.value.includes('phototheque')) {
       cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
-      if (commanditaire) cqlFilter += `%20AND%20commandita%3D'${commanditaire}'`
-      if (producteur) cqlFilter += `%20AND%20producteur%3D'${producteur}'`
-      if (support) cqlFilter += `%20AND%20support%3D'${support}'`
-      if (emulsion) cqlFilter += `%20AND%20emulsion%3D'${emulsion}'`
+      if (commanditaire && !excludeFields.includes('commandita'))
+        cqlFilter += `%20AND%20commandita%3D'${commanditaire}'`
+      if (producteur && !excludeFields.includes('producteur'))
+        cqlFilter += `%20AND%20producteur%3D'${producteur}'`
+      if (support && !excludeFields.includes('support'))
+        cqlFilter += `%20AND%20support%3D'${support}'`
+      if (emulsion && !excludeFields.includes('emulsion'))
+        cqlFilter += `%20AND%20emulsion%3D'${emulsion}'`
     }
 
     return cqlFilter
@@ -105,8 +112,6 @@ export const useScanStore = defineStore('scan', () => {
     if (storeBbox.value.length > 0) {
       let empriseURL = getCurrentTypeNames()
       let cqlFilter = createCqlFilter()
-
-      fetchAllOptions()
 
       return (
         `${config.GEOSERVER_URL}` +
@@ -133,11 +138,11 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateBbox(newBbox) {
     storeBbox.value = newBbox
+    fetchAllOptions()
   }
 
   function updateCriteria(newCriteria) {
     storeCritereSelection.value = { ...newCriteria }
-    console.log('Updated criteria:', storeCritereSelection.value)
   }
 
   function updateActiveSubCategory(subCategory) {
@@ -154,13 +159,19 @@ export const useScanStore = defineStore('scan', () => {
       collection: null,
     }
 
+    updateScaleRange()
+
     storeSelectedGeom.value = []
     storeBbox.value = []
     storeScansData.value = []
     storeSelectedScan.value = null
     urlPhoto.value = null
     dicoUrlPhoto.value = []
-    SelectedPhotos.value = []
+    selectedPhotos.value = []
+
+    collectionsOptions.value = [{ id: '0', name: 'Toutes les collections' }]
+    supportOptions.value = [{ id: '0', name: 'Tous les supports' }]
+    emulsionOptions.value = [{ id: '0', name: 'Tous les emulsions' }]
   }
 
   function updateSelectedGeom(newVal) {
@@ -168,7 +179,6 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateSelectedScan(newVal) {
-    console.log('updateSelectedScan', newVal)
     storeSelectedScan.value = newVal
   }
 
@@ -178,8 +188,6 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateActiveTab(newVal) {
     activeTab.value = newVal
-    // fetchAllOptions()
-    console.log('tab selected : ', activeTab.value)
   }
 
   function updateWKT(newVal) {
@@ -199,16 +207,20 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   function updateSelectedPhotos(newVal) {
-    if (!SelectedPhotos.value.includes(newVal)) {
-      SelectedPhotos.value.push(newVal)
+    if (!selectedPhotos.value.includes(newVal)) {
+      selectedPhotos.value.push(newVal)
     }
   }
 
+  function updateFlyTo(newVal) {
+    flyTo.value = newVal
+  }
+
   function removeSelectedPhoto(item) {
-    const index = SelectedPhotos.value.findIndex((photo) => photo.nom === item.nom)
+    const index = selectedPhotos.value.findIndex((photo) => photo.nom === item.nom)
 
     if (index !== -1) {
-      SelectedPhotos.value.splice(index, 1)
+      selectedPhotos.value.splice(index, 1)
     }
   }
 
@@ -227,7 +239,6 @@ export const useScanStore = defineStore('scan', () => {
         wfsUrl += `&cql_filter=${cqlFilter}`
       }
 
-      console.log(wfsUrl)
       const response = await fetch(wfsUrl)
       if (!response.ok) throw new Error(response.status)
 
@@ -235,7 +246,10 @@ export const useScanStore = defineStore('scan', () => {
       const values = data.features.map((f) => f.properties[propertyName]).filter(Boolean)
       const unique = [...new Set(values)].sort()
 
-      const defaultOption = { id: '0', name: `Tous les ${propertyName.toLowerCase()}s` }
+      const property = propertyName.toLowerCase()
+      const tousOrToutes = property === 'collection' ? 'Toutes' : 'Tous'
+
+      const defaultOption = { id: '0', name: `${tousOrToutes} les ${property}s` }
 
       return [defaultOption, ...unique.map((val, i) => ({ id: String(i + 1), name: val }))]
     } catch (error) {
@@ -261,7 +275,7 @@ export const useScanStore = defineStore('scan', () => {
       let cqlFilter = ''
 
       if (storeBbox.value.length > 0) {
-        cqlFilter = createCqlFilter()
+        cqlFilter = createCqlFilter([propertyName])
       }
 
       let wfsUrl = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json&apikey=${config.APIKEY}`
@@ -270,7 +284,6 @@ export const useScanStore = defineStore('scan', () => {
         wfsUrl += `&cql_filter=${cqlFilter}`
       }
 
-      console.log(wfsUrl)
       const response = await fetch(wfsUrl)
 
       const data = await response.json()
@@ -310,7 +323,6 @@ export const useScanStore = defineStore('scan', () => {
 
   async function getProducteurOptions(searchTerm = '') {
     const options = await fetchOptionsComboBox('producteur')
-    console.log()
     const filteredOptions = getFilteredOptions(options, searchTerm)
     return filteredOptions && filteredOptions.map((option) => option.name)
   }
@@ -319,7 +331,7 @@ export const useScanStore = defineStore('scan', () => {
     if (!url) {
       return
     }
-    if (activeTab.value === 'phototheque') {
+    if (activeTab.value.includes('phototheque')) {
       await storeGetPhoto(url)
     } else {
       try {
@@ -403,8 +415,10 @@ export const useScanStore = defineStore('scan', () => {
     getFilteredOptions,
     storeHoveredScan,
     updateHoverScan,
-    SelectedPhotos,
+    selectedPhotos,
     updateSelectedPhotos,
     removeSelectedPhoto,
+    flyTo,
+    updateFlyTo,
   }
 })

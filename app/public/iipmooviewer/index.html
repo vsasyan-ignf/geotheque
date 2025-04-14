@@ -1,86 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8" />
-  <meta name="DC.creator" content="Ruven Pillay &lt;ruven@users.sourceforge.netm&gt;"/>
-  <meta name="DC.title" content="IIPMooViewer 2.0: HTML5 High Resolution Image Viewer"/>
-  <meta name="DC.subject" content="IIPMooViewer; IIPImage; Visualization; HTML5; Ajax; High Resolution; Internet Imaging Protocol; IIP"/>
-  <meta name="DC.description" content="IIPMooViewer is an advanced javascript HTML5 image viewer for streaming high resolution scientific images"/>
-  <meta name="DC.rights" content="Copyright &copy; 2003-2016 Ruven Pillay"/>
-  <meta name="DC.source" content="http://iipimage.sourceforge.net"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta http-equiv="X-UA-Compatible" content="IE=9" />
+<meta charset="utf-8" />
+<meta name="DC.creator" content="Ruven Pillay &lt;ruven@users.sourceforge.netm&gt;"/>
+<meta name="DC.title" content="IIPMooViewer 2.0: HTML5 High Resolution Image Viewer"/>
+<meta name="DC.subject" content="IIPMooViewer; IIPImage; Visualization; HTML5; Ajax; High Resolution; Internet Imaging Protocol; IIP"/>
+<meta name="DC.description" content="IIPMooViewer is an advanced javascript HTML5 image viewer for streaming high resolution scientific images"/>
+<meta name="DC.rights" content="Copyright &copy; 2003-2016 Ruven Pillay"/>
+<meta name="DC.source" content="http://iipimage.sourceforge.net"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta http-equiv="X-UA-Compatible" content="IE=9" />
+<link rel="stylesheet" type="text/css" media="all" href="css/iip.min.css" />
+<!--[if lt IE 10]>
+<meta http-equiv="X-UA-Compatible" content="IE=9" >
+<link rel="stylesheet" type="text/css" media="all" href="css/ie.min.css" />
+<![endif]-->
+<!-- Basic example style for a 100% view -->
+<style>
+body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+div#viewer {
+  height: 100%;
+  min-height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+}
+#custom-controls {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0,0,0,0.6);
+  padding: 10px;
+  border-radius: 5px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+#rotation-input {
+  width: 60px;
+  margin: 0 10px;
+}
+button {
+  background-color: #444;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #666;
+}
 
-  <link rel="stylesheet" type="text/css" media="all" href="css/iip.min.css" />
-  <!--[if lt IE 10]>
-    <meta http-equiv="X-UA-Compatible" content="IE=9" >
-    <link rel="stylesheet" type="text/css" media="all" href="css/ie.min.css" />
-  <![endif]-->
+.gtoolbar {
+    position: fixed;
+    top: 0;
+    height: 100%;
+    max-width: 300px;
+    background-color: rgba(28, 28, 28, 0.8);
+    color: #fff;
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    box-shadow: 0 -2px 5px rgba(91, 91, 91, 0.3);
+    z-index: 1000;
+    overflow-y: auto;
+    opacity: 0.2;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
 
-  <!-- Basic example style for a 100% view -->
-  <style>
-    body{
-      height: 100%;
-      padding: 0;
-      margin: 0;
-    }
-    div#viewer{
-      height: 100%;
-      min-height: 100%;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      margin: 0;
-      padding: 0;
-    }	
-  </style>
+.gtoolbar:hover {
+    opacity: 1;
+    visibility: visible;
+}
 
-  <link rel="shortcut icon" href="images/iip-favicon.png" />
-  <link rel="apple-touch-icon" href="images/iip.png" />
+.gtools-group {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+}
 
-  <title>IIPMooViewer 2.0 :: HTML5 High Resolution Image Viewer</title>
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
 
-  <script src="js/mootools-core-1.6.0-compressed.js"></script>
-  <script src="js/iipmooviewer-2.0-min.js"></script>
+.input-group label {
+    margin-bottom: 5px;
+    font-size: 1.6em;
+}
 
-  <script type="module">
-    // IIPMooViewer options: See documentation at http://iipimage.sourceforge.net for more details
-    // Server path: set if not using default path
-    const params = new URLSearchParams(window.location.search);
+.input-group input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
 
-    // mettre en param de l'url le serv iipsrv
-    var server = `${params.get('server')}/fcgi-bin/iipsrv.fcgi`; // Chemin du serveur iipsrv
+.input-group button {
+    background-color: #555;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.gallery div.viewer {
+    height: 100%;
+}
+
+.thumbnails {
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.thumbnails:hover {
+    opacity: 1;
+    visibility: visible;
+}
+
+.credit {
+    z-index: 1001;
+}
+</style>
+<link rel="shortcut icon" href="images/iip-favicon.png" />
+<link rel="apple-touch-icon" href="images/iip.png" />
+<title>IIPMooViewer 2.0 :: HTML5 High Resolution Image Viewer</title>
+<script src="js/mootools-core-1.6.0-compressed.js"></script>
+<script src="js/iipmooviewer-2.0-min.js"></script>
+<script type="module">
+// IIPMooViewer options: See documentation at http://iipimage.sourceforge.net for more details
+// Server path: set if not using default path
+const params = new URLSearchParams(window.location.search);
+// mettre en param de l'url le serv iipsrv
+var server = `${params.get('server')}/fcgi-bin/iipsrv.fcgi`;
+
+var image = localStorage.getItem('imageUrl')
+if (image) {
+  var imageName = image.split('/').pop();
+  document.title = imageName;
+}
+
+var viewer
+
+// Créer l'objet IIPMooViewer
+window.onload = function() {
+  if (image) {
+    viewer = new IIPMooViewer("viewer", {
+      server: server,
+      image: image,
+      navigation: {
+        buttons: ['zoomIn','zoomOut','reset','rotateLeft','rotateRight'],
+        showCoords: true,
+        showNavWindow: true,
+        showNavButtons: true
+      },
+      rotation: 0
+    });
     
-    // L'image complète sur le serveur, ici l'URL de votre image JPEG2000
-    var image = localStorage.getItem('imageUrl')
-    if (image) {
-      var imageName = image.split('/').pop();
-      document.title = imageName;
+    setTimeout(initializeControls, 500);
+  } else {
+    document.getElementById('viewer').innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial;color:#333">Aucune image spécifiée</div>';
+  }
+};
+
+function initializeControls() {
+  const viewerElement = document.getElementById('viewer');
+  const contrastRange = document.getElementById('input_contrast');
+  const brightnessRange = document.getElementById('input_brightness');
+  const autoOrientationBtn = document.getElementById('btn-orientation-auto');
+  
+  contrastRange.value = 100;
+  brightnessRange.value = 100;
+  
+  function updateImageStyle() {
+    const contrastValue = contrastRange.value;
+    const brightnessValue = brightnessRange.value;
+    
+    const imageContainer = viewerElement.querySelector('.iipmooviewer') || 
+                           viewerElement.querySelector('.iip') || 
+                           viewerElement.querySelector('.viewer') ||
+                           viewerElement;
+                           
+    if (imageContainer) {
+      imageContainer.style.filter = `contrast(${contrastValue}%) brightness(${brightnessValue}%)`;
     }
-    // Créer l'objet IIPMooViewer
-    window.onload = function() {
-            if (image) {
-                new IIPMooViewer("viewer", {
-                    server: server,
-                    image: image,
-                    navigation: {
-                      buttons: ['zoomIn','zoomOut','reset','rotateLeft','rotateRight']
-                    }
-                });
-            } else {
-                document.getElementById('viewer').innerHTML = '<div style="text-align:center;padding:50px;font-family:Arial;color:#333">Aucune image spécifiée</div>';
-            }
-        };
-  </script>
-
+  }
+  
+  contrastRange.addEventListener('input', updateImageStyle);
+  brightnessRange.addEventListener('input', updateImageStyle);
+  
+  if (autoOrientationBtn) {
+    autoOrientationBtn.addEventListener('click', function() {
+      
+      if (viewer && typeof viewer.rotate === 'function') {
+        viewer.rotate(0);
+      }
+      
+      contrastRange.value = 100;
+      brightnessRange.value = 100;
+      updateImageStyle();
+    });
+  }
+  
+  updateImageStyle();
+}
+</script>
 </head>
-
 <body>
-  <div id="viewer"></div> <!-- Conteneur du visualiseur -->
-</body>
+<div id="viewer"></div> <!-- Conteneur du visualiseur -->
 
+<div class="gtoolbar">
+  <div class="gtools-group">
+      <div class="input-group">
+          <label for="input_contrast">Contraste</label>
+          <input type="range" name="input_contrast" id="input_contrast" min="0" max="200" step="1" value="100" />
+      </div>
+      <div class="input-group">
+          <label for="input_brightness">Luminosité</label>
+          <input type="range" name="input_brightness" id="input_brightness" min="0" max="200" step="1" value="100" />
+      </div>
+      <div class="input-group">
+          <button id="btn-orientation-auto">Orientation auto</button>
+      </div>
+  </div>
+</div>
+
+</body>
 </html>

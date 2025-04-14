@@ -1,3 +1,10 @@
+/**
+ * Dictionnaire regroupant les différentes collections de scans
+ * par grandes zones géographiques ou thématiques.
+ *
+ * @constant
+ * @type {Object<string, string[]>}
+ */
 const SECTION_SCANS = {
   METROPOLE: [
     'CADASTRE',
@@ -16,35 +23,6 @@ const SECTION_SCANS = {
     'TOPO_DIVERS',
     'URBANISME',
   ],
-  // 'MONDE': [
-  //     "AEF_AOF_TOPOGRAPHIQUE",
-  //     "AFRIQUE_PAYS",
-  //     "ALGERIE_THEMATIQUE",
-  //     "ALGERIE_TOPOGRAPHIQUE",
-  //     "AMERIQUE_CENTRALE",
-  //     "AMERIQUE_SUD",
-  //     "ANTARCTIQUE",
-  //     "BENELUX",
-  //     "BENIN",
-  //     "CAMEROUN",
-  //     "COMORES_MAURICE",
-  //     "DJIBOUTI",
-  //     "DOM_COM",
-  //     "GRECE",
-  //     "HISTORIQUE",
-  //     "INDOCHINE",
-  //     "INDOCHINE_TOPOGRAPHIQUE",
-  //     "ITALIE",
-  //     "LEVANT",
-  //     "MADAGASCAR",
-  //     "MALI",
-  //     "MANUSCRITS",
-  //     "MAROC_TOPOGRAPHIQUE",
-  //     "REPUBLIQUE_CENTRAFRICAINE",
-  //     "SENEGAL",
-  //     "TCHAD",
-  //     "TOGO"
-  // ],
   AFRIQUE: [
     'AEF_AOF_TOPOGRAPHIQUE',
     'AFRIQUE_PAYS',
@@ -79,6 +57,13 @@ const SECTION_SCANS = {
   ],
 }
 
+/**
+ * Détermine à quelle section appartient une collection de scans donnée.
+ *
+ * @param {string} collection - Nom de la collection à rechercher.
+ * @returns {string} Nom de la section dans laquelle la collection est classée (ex : 'METROPOLE', 'AFRIQUE', etc.).
+ *                   Retourne 'AUTRES' si la collection n'est pas trouvée dans les sections listées.
+ */
 export const findSectionScan = (collection) => {
   for (const [key, values] of Object.entries(SECTION_SCANS)) {
     if (values.includes(collection)) {

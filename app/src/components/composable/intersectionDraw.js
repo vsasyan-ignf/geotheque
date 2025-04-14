@@ -4,7 +4,17 @@ import { Vector as VectorLayer } from 'ol/layer'
 import { Style, Fill, Stroke } from 'ol/style'
 import { intersects } from 'ol/extent'
 
+/**
+ * Référence à la couche des intersections, utilisée pour afficher les géométries intersectées.
+ * @type {import('vue').Ref<import('ol/layer/Vector').default|null>}
+ */
 const intersectionLayer = ref(null)
+
+/**
+ * Initialise une couche OpenLayers dédiée à l'affichage des intersections.
+ *
+ * @param {import('vue').Ref<import('ol/Map').default>} olMap - Carte OpenLayers (référence réactive).
+ */
 
 export function initializeIntersectionLayer(olMap) {
   const intersectionSource = new VectorSource()
@@ -22,6 +32,14 @@ export function initializeIntersectionLayer(olMap) {
 
   intersectionLayer.value = layer
 }
+
+/**
+ * Recherche les entités intersectées entre une géométrie dessinée et un ensemble de couches vecteur.
+ *
+ * @param {import('ol/geom/Geometry').default} drawGeometry - Géométrie utilisée pour tester les intersections.
+ * @param {Object<string, import('ol/layer/Vector').default>} vectorOtherLayers - Couches vecteur à tester.
+ * @returns {import('ol/extent').Extent|null} Étendue (bounding box) des entités intersectées, ou null si aucune intersection.
+ */
 
 export function findIntersections(drawGeometry, vectorOtherLayers) {
   const intersectedFeatures = ref([])
@@ -66,6 +84,12 @@ export function findIntersections(drawGeometry, vectorOtherLayers) {
 
   return null
 }
+
+/**
+ * Efface toutes les entités présentes dans la couche d’intersection.
+ *
+ * @returns {[]} Retourne un tableau vide (utile pour les appels de reset).
+ */
 
 export function clearIntersection() {
   if (intersectionLayer.value) {

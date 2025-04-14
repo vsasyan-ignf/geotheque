@@ -6,6 +6,13 @@ import { get as getProjection } from 'ol/proj'
 import { getTopLeft } from 'ol/extent'
 import TileLayer from 'ol/layer/Tile'
 
+/**
+ * Récupère l'URL du service WMTS/WMS en fonction de l'identifiant de la couche.
+ *
+ * @param {string} layerId - Identifiant de la couche.
+ * @returns {string} URL du service.
+ */
+
 function getWmtsUrl(layerId) {
   if (layerId === 'cartesign' || layerId === 'scan25') {
     return `https://data.geopf.fr/private/wmts?apikey=ign_scan_ws&SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
@@ -14,6 +21,13 @@ function getWmtsUrl(layerId) {
   }
   return `https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&style=normal`
 }
+
+/**
+ * Récupère le nom de la couche WMTS/WMS correspondant à un identifiant.
+ *
+ * @param {string} layerId - Identifiant de la couche.
+ * @returns {string} Nom de la couche.
+ */
 
 function getWmtsLayerName(layerId) {
   switch (layerId) {
@@ -34,6 +48,13 @@ function getWmtsLayerName(layerId) {
   }
 }
 
+/**
+ * Détermine le niveau de zoom maximum autorisé pour une couche donnée.
+ *
+ * @param {string} layerId - Identifiant de la couche.
+ * @returns {number} Niveau de zoom maximum.
+ */
+
 export function getMaxZoom(layerId) {
   switch (layerId) {
     case 'plan':
@@ -53,6 +74,13 @@ export function getMaxZoom(layerId) {
   }
 }
 
+/**
+ * Détermine le format de rendu utilisé pour la couche.
+ *
+ * @param {string} layerId - Identifiant de la couche.
+ * @returns {string} Format MIME de la couche.
+ */
+
 function getFormatWmtsLayer(layerId) {
   switch (layerId) {
     case 'cartesign':
@@ -68,6 +96,13 @@ function getFormatWmtsLayer(layerId) {
       return 'image/jpeg'
   }
 }
+
+/**
+ * Crée une source WMTS ou WMS en fonction de l'identifiant de la couche.
+ *
+ * @param {string} layerId - Identifiant de la couche.
+ * @returns {OSM|WMTS|TileWMS} Source correspondante.
+ */
 
 export function createWmtsSource(layerId) {
   if (layerId === 'osm') {
@@ -126,6 +161,14 @@ export function createWmtsSource(layerId) {
   }
 }
 
+/**
+ * Crée une liste de couches WMTS prêtes à être ajoutées à la carte.
+ *
+ * @param {Array<{id: string}>} layers - Liste des couches à créer.
+ * @param {number} activeLayerIndex - Index de la couche active.
+ * @returns {TileLayer[]} Liste des couches WMTS.
+ */
+
 export function createInitialWMTSLayers(layers, activeLayerIndex) {
   return layers.map((layer, index) => {
     const wmtsSource = createWmtsSource(layer.id)
@@ -135,6 +178,13 @@ export function createInitialWMTSLayers(layers, activeLayerIndex) {
     })
   })
 }
+
+/**
+ * Met à jour les sources WMTS existantes dans la carte avec de nouvelles couches.
+ *
+ * @param {import('ol/Map').default} olMap - Carte OpenLayers.
+ * @param {Array<{id: string}>} newLayers - Nouvelles couches à appliquer.
+ */
 
 export function updateWMTSLayers(olMap, newLayers) {
   if (!olMap) return
@@ -161,6 +211,15 @@ export function updateWMTSLayers(olMap, newLayers) {
     layersToAdd.forEach((layer) => olMap.addLayer(layer))
   }
 }
+
+/**
+ * Change la couche WMTS active et ajuste le zoom maximal si besoin.
+ *
+ * @param {import('ol/Map').default} olMap - Carte OpenLayers.
+ * @param {import('ol/View').default} olView - Vue associée à la carte.
+ * @param {Array<{id: string}>} layers - Liste des couches disponibles.
+ * @param {number} newIndex - Index de la couche à activer.
+ */
 
 export function changeActiveWMTSLayer(olMap, olView, layers, newIndex) {
   if (!olMap) return

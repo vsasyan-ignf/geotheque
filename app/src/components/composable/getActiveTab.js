@@ -8,6 +8,16 @@ import {
   otherLayersPhotoFrance,
 } from './baseMap'
 
+/**
+ * Retourne les couches de fond (layers) principales à afficher en fonction de l'onglet actif.
+ *
+ * @param {string} activeTab - Identifiant de l'onglet actif. Valeurs possibles :
+ *   - 'cartotheque'
+ *   - 'cartotheque_etranger'
+ *   - 'phototheque'
+ *   - 'phototheque_etranger'
+ * @returns {Array<Object>} Liste des couches correspondantes à l'onglet actif.
+ */
 export function getLayersForActiveTab(activeTab) {
   switch (activeTab) {
     case 'cartotheque':
@@ -23,6 +33,15 @@ export function getLayersForActiveTab(activeTab) {
   }
 }
 
+/**
+ * Retourne les couches additionnelles (autres layers) à afficher en fonction de l'onglet actif.
+ *
+ * @param {string} activeTab - Identifiant de l'onglet actif. Valeurs possibles :
+ *   - 'cartotheque'
+ *   - 'cartotheque_etranger'
+ *   - 'phototheque'
+ * @returns {Array<Object>} Liste des couches supplémentaires associées à l'onglet actif.
+ */
 export function getOtherLayersForActiveTab(activeTab) {
   switch (activeTab) {
     case 'cartotheque':
@@ -32,6 +51,6 @@ export function getOtherLayersForActiveTab(activeTab) {
     case 'phototheque':
       return otherLayersPhotoFrance
     default:
-      return otherLayersCartoFrance
+      return otherLayersCartoMonde
   }
 }

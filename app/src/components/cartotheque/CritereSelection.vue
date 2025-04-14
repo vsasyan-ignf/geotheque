@@ -136,7 +136,7 @@ const formData = ref({
   scaleMax: String(storeCritereSelection.value.scaleMax || '100000'),
   commanditaire: storeCritereSelection.value.commanditaire || '',
   producteur: storeCritereSelection.value.producteur || '',
-  collection: { id: '0', name: 'Tous les collections' },
+  collection: { id: '0', name: 'Toutes les collections' },
   support: { id: '0', name: 'Tous les supports' },
   emulsion: { id: '0', name: 'Tous les emulsions' },
 })
@@ -172,9 +172,7 @@ watch(storeURL, async () => {
 })
 
 async function loadInitialOptions() {
-  console.log(isPhototheque.value)
   if (isPhototheque.value) {
-    console.log('eee')
     const [commanditaireOpts, producteurOpts] = await Promise.all([
       scanStore.getCommanditaireOptions(),
       scanStore.getProducteurOptions(),
@@ -255,7 +253,6 @@ const handleSubmit = () => {
         : formData.value.emulsion.name,
   }
 
-  console.log(criteria)
   scanStore.updateCriteria(criteria)
 }
 
@@ -267,7 +264,7 @@ const resetForm = () => {
     scaleMax: '100000',
     commanditaire: '',
     producteur: '',
-    collection: { id: '0', name: 'Tous les collections' },
+    collection: { id: '0', name: 'Toutes les collections' },
     support: { id: '0', name: 'Tous les supports' },
     emulsion: { id: '0', name: 'Tous les emulsions' },
   }
