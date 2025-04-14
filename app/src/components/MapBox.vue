@@ -645,7 +645,7 @@ onMounted(() => {
         })
         scanStore.updateSelectedGeom([])
       }
-      // Pour ne pas afficher toutes les emprises
+      // Pour afficher les emprises de scans
       if (activeTab.value.includes('cartotheque')) {
         vectorLayers.value.emprises.getSource().setUrl(newValue)
       }

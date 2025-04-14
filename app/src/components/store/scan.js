@@ -17,9 +17,9 @@ export const useScanStore = defineStore('scan', () => {
   let dicoUrlPhoto = ref([])
   let selectedPhotos = ref([])
 
-  let collectionsOptions = ref([{ id: '0', name: 'Tous les collections' }])
+  let collectionsOptions = ref([{ id: '0', name: 'Toutes les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
-  let emulsionOptions = ref([{ id: '0', name: 'Toutes les emulsions' }])
+  let emulsionOptions = ref([{ id: '0', name: 'Tous les emulsions' }])
 
   let optionsCache = ref({
     collection: null,
@@ -56,7 +56,7 @@ export const useScanStore = defineStore('scan', () => {
     emulsion: null,
   })
 
-  function createCqlFilter() {
+  function createCqlFilter(excludeFields = []) {
     if (storeBbox.value.length === 0) return ''
 
     let [minX, minY, maxX, maxY] = storeBbox.value
@@ -64,51 +64,55 @@ export const useScanStore = defineStore('scan', () => {
     let cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
 
     if (activeTab.value === 'cartotheque_etranger' && activeSubCategory.value === 'pays') {
-      cqlFilter = `INTERSECTS(geom,${wkt.value})`
+        cqlFilter = `INTERSECTS(geom,${wkt.value})`
     }
 
     const {
-      yearMin,
-      yearMax,
-      scaleMin,
-      scaleMax,
-      collection,
-      commanditaire,
-      producteur,
-      support,
-      emulsion,
+        yearMin,
+        yearMax,
+        scaleMin,
+        scaleMax,
+        collection,
+        commanditaire,
+        producteur,
+        support,
+        emulsion,
     } = storeCritereSelection.value
 
     if (yearMin) cqlFilter += `%20AND%20date_pub%3E%3D${yearMin}`
     if (yearMax) cqlFilter += `%20AND%20date_fin%3C%3D${yearMax}`
 
     if (scaleMin && scaleMax) {
-      cqlFilter += `%20AND%20echelle%20BETWEEN%20${scaleMin}%20AND%20${scaleMax}`
+        cqlFilter += `%20AND%20echelle%20BETWEEN%20${scaleMin}%20AND%20${scaleMax}`
     } else if (scaleMin && !scaleMax) {
-      cqlFilter += `%20AND%20echelle%3E%3D${scaleMin}`
+        cqlFilter += `%20AND%20echelle%3E%3D${scaleMin}`
     } else if (scaleMax && !scaleMin) {
-      cqlFilter += `%20AND%20echelle%3C%3D${scaleMax}`
+        cqlFilter += `%20AND%20echelle%3C%3D${scaleMax}`
     }
 
-    if (collection) cqlFilter += `%20AND%20collection%3D'${collection}'`
+    if (collection && !excludeFields.includes('collection')) 
+        cqlFilter += `%20AND%20collection%3D'${collection}'`
 
     if (activeTab.value.includes('phototheque')) {
-      cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
-      if (commanditaire) cqlFilter += `%20AND%20commandita%3D'${commanditaire}'`
-      if (producteur) cqlFilter += `%20AND%20producteur%3D'${producteur}'`
-      if (support) cqlFilter += `%20AND%20support%3D'${support}'`
-      if (emulsion) cqlFilter += `%20AND%20emulsion%3D'${emulsion}'`
+        cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
+        if (commanditaire && !excludeFields.includes('commandita')) 
+            cqlFilter += `%20AND%20commandita%3D'${commanditaire}'`
+        if (producteur && !excludeFields.includes('producteur')) 
+            cqlFilter += `%20AND%20producteur%3D'${producteur}'`
+        if (support && !excludeFields.includes('support')) 
+            cqlFilter += `%20AND%20support%3D'${support}'`
+        if (emulsion && !excludeFields.includes('emulsion')) 
+            cqlFilter += `%20AND%20emulsion%3D'${emulsion}'`
     }
 
     return cqlFilter
-  }
+}
 
   let storeURL = computed(() => {
     if (storeBbox.value.length > 0) {
       let empriseURL = getCurrentTypeNames()
       let cqlFilter = createCqlFilter()
 
-      fetchAllOptions()
       return (
         `${config.GEOSERVER_URL}` +
         `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
@@ -134,6 +138,7 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateBbox(newBbox) {
     storeBbox.value = newBbox
+    fetchAllOptions()
   }
 
   function updateCriteria(newCriteria) {
@@ -154,6 +159,8 @@ export const useScanStore = defineStore('scan', () => {
       collection: null,
     }
 
+    updateScaleRange()
+
     storeSelectedGeom.value = []
     storeBbox.value = []
     storeScansData.value = []
@@ -161,6 +168,10 @@ export const useScanStore = defineStore('scan', () => {
     urlPhoto.value = null
     dicoUrlPhoto.value = []
     selectedPhotos.value = []
+
+    collectionsOptions.value = [{ id: '0', name: 'Toutes les collections' }]
+    supportOptions.value = [{ id: '0', name: 'Tous les supports' }]
+    emulsionOptions.value = [{ id: '0', name: 'Tous les emulsions' }]
   }
 
   function updateSelectedGeom(newVal) {
@@ -261,7 +272,7 @@ export const useScanStore = defineStore('scan', () => {
       let cqlFilter = ''
 
       if (storeBbox.value.length > 0) {
-        cqlFilter = createCqlFilter()
+        cqlFilter = createCqlFilter([propertyName])
       }
 
       let wfsUrl = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${typeNames}&propertyName=${propertyName}&outputFormat=application/json&apikey=${config.APIKEY}`
