@@ -86,8 +86,6 @@ import { useConvertCoordinates } from '@/components/composable/convertCoordinate
 import { useScanStore } from '@/components/store/scan'
 import { mdiInformationOutline, mdiCrosshairsGps, mdiMapMarker } from '@mdi/js'
 
-import config from '@/config'
-
 import { storeToRefs } from 'pinia'
 
 const scanStore = useScanStore()
@@ -113,42 +111,22 @@ const projections = [
   { id: 'EPSG:2154', name: 'Lambert 93' },
 ]
 
-async function fetchAndConvertBbox(longitude, latitude) {
-  try {
-    let url
+function getPointBbox(longitude, latitude) {
 
-    // console.log('fetchAndConvertBbox', longitude, latitude)
+  const bboxWGS84 = [longitude - 0.0001, latitude - 0.0001, longitude + 0.0001, latitude + 0.0001]
 
-    url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
-    console.log(url)
-    const response = await fetch(url)
+  const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:3857')
+  const northEast = useConvertCoordinates(bboxWGS84[2], bboxWGS84[3], 'EPSG:4326', 'EPSG:3857')
 
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`)
-    }
+  const bboxMercator = [southWest[0], southWest[1], northEast[0], northEast[1]]
 
-    const data = await response.json()
-
-    const bboxWGS84 = [longitude - 0.0001, latitude - 0.0001, longitude + 0.0001, latitude + 0.0001]
-
-    const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:3857')
-    const northEast = useConvertCoordinates(bboxWGS84[2], bboxWGS84[3], 'EPSG:4326', 'EPSG:3857')
-
-    const bboxMercator = [southWest[0], southWest[1], northEast[0], northEast[1]]
-
-    return {
-      data,
-      bboxWGS84,
-      bboxMercator,
-    }
-  } catch (error) {
-    console.error('Erreur lors du géocodage inversé:', error)
-    return null
+  return {
+    bboxMercator,
   }
 }
 
 // gestion du clique sur le bouton submit
-async function handleGoToPoint() {
+function handleGoToPoint() {
   if (!pointX.value || !pointY.value) return
 
   const convertedCoord = useConvertCoordinates(
@@ -163,13 +141,7 @@ async function handleGoToPoint() {
     y: convertedCoord[1],
   }
 
-  const bboxResult = await fetchAndConvertBbox(point.x, point.y)
-
-  if (bboxResult) {
-    point.locationData = bboxResult.data
-    point.bboxWGS84 = bboxResult.bboxWGS84
-    point.bboxMercator = bboxResult.bboxMercator
-  }
+  point.bboxMercator = getPointBbox(point.x, point.y)
 
   const mapCoords = useConvertCoordinates(
     parseFloat(pointX.value),
@@ -185,7 +157,7 @@ async function handleGoToPoint() {
 }
 
 // gestion du clique sur la carte
-async function handleMapClick(coords) {
+function handleMapClick(coords) {
   // converti le x et y dans le bon système de proj sélectionné
   if (coords.projection !== selectedProjection.value) {
     const convertedCoords = useConvertCoordinates(
@@ -214,10 +186,8 @@ async function handleMapClick(coords) {
     y: convertedCoord[1],
   }
 
-  const bboxResult = await fetchAndConvertBbox(point.x, point.y)
+  const bboxResult = getPointBbox(point.x, point.y)
   if (bboxResult) {
-    point.locationData = bboxResult.data
-    point.bboxWGS84 = bboxResult.bboxWGS84
     point.bboxMercator = bboxResult.bboxMercator
   }
 
