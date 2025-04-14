@@ -147,6 +147,7 @@ const vectorOtherLayers = ref(null)
 
 let tab_emprise_photo = []
 let tab_couples_photo = []
+let tab_affiche_photos_clique = []
 let last_geom = null
 const rayon_croix_clique = 50
 
@@ -306,22 +307,31 @@ function addPointToMap(x, y, nom, crossAlpha = false) {
   }
 }
 
-function Add_new_polygone_to_map(tab, name) {
-  const polygon = new Feature({
-    geometry: new Polygon([tab]),
+function afficheMasuqeEmpriseClique(name,i){
+  for(let y =0;y<tab_affiche_photos_clique.length;y++){
+    if(tab_affiche_photos_clique[y] == name){
+      delete tab_affiche_photos_clique[y]
+      console.log(tab_affiche_photos_clique)
+      return
+    }
+  }
+    console.log(tab_affiche_photos_clique)
+    tab_affiche_photos_clique.push(name)
+    const polygon = new Feature({
+      geometry: new Polygon([tab_emprise_photo[i][0]]),
+
+    })
+
+}
+
+function Add_new_name_to_map(name) {
+  const feature_name = new Feature({
     name: name,
   })
 
-  const style = new Style({
-    fill: new Fill({
-      color: 'rgba(0, 0, 0, 0)',
-    }),
-  })
-
-  polygon.setStyle(style)
-
-  vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
+  vectorLayers.value.geomPhoto.getSource().addFeature(feature_name)
 }
+
 
 async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
@@ -377,7 +387,7 @@ async function parcour_tab_and_map(url) {
         }
 
         tab_emprise_photo.push([tab_points_cliche_3857, alphanum, [centrex_3857, centrey_3857]])
-        Add_new_polygone_to_map(tab_points_cliche_3857, alphanum)
+        Add_new_name_to_map(alphanum)
       } else if (tab_test[i][0] == 'Couple Actif') {
         elem = tab_test[i]
         tab_points_couple_3857 = []
@@ -551,8 +561,13 @@ onMounted(() => {
       const alaphaOrI = aplhaOfPointInRange(coordinate3857, tab_emprise_photo, rayon_croix_clique)
       if (alaphaOrI != null) {
         const name = infosPva.value[alaphaOrI[0]].nom
+        const i = alaphaOrI[1]
+        
         if (name) {
           scanStore.updateSelectedPhotos(infosPva.value[alaphaOrI[0]])
+          // rajout pour gestion affiche / enlever emprise 
+          afficheMasuqeEmpriseClique(name,i)
+          
         }
       }
     })
