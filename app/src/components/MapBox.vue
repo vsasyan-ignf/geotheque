@@ -576,7 +576,14 @@ onMounted(() => {
           scanStore.updateSelectedPhotos(infosPva.value[alaphaOrI[0]])
           // rajout pour gestion affiche / enlever emprise 
           afficheMasuqeEmpriseClique(name,i)
-          
+
+          const photoItem = infosPva.value[alaphaOrI[0]];
+          const isEmpriseDisplayed = !dic_affiche_photos_clique[name];
+          if (isEmpriseDisplayed) {
+            scanStore.removeSelectedPhoto(photoItem);
+          } else {
+            scanStore.updateSelectedPhotos(photoItem);
+          }
         }
       }
     })
@@ -617,6 +624,12 @@ onMounted(() => {
       pins.value = [[x, y]]
     })
 
+    eventBus.on('clear-cart', () => {
+      for (const name in dic_affiche_photos_clique) {
+        removeEmpriseClique(name)
+      }
+    })
+    
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
         Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())

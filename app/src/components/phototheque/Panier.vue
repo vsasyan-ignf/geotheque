@@ -130,6 +130,7 @@ import { downloadCSV } from '../composable/download'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import config from '@/config'
+import { eventBus } from '../composable/eventBus'
 
 const scanStore = useScanStore()
 const { selectedPhotos, activeTab } = storeToRefs(scanStore)
@@ -179,6 +180,8 @@ const clearCart = () => {
   cartItems.value = []
   selectedPhotos.value = []
   // localStorage.setItem('phototheque-cart', JSON.stringify([]))
+
+  eventBus.emit('clear-cart')
 }
 
 const downloadCartItems = () => {
