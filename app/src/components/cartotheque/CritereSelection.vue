@@ -138,7 +138,7 @@ const formData = ref({
   producteur: storeCritereSelection.value.producteur || '',
   collection: { id: '0', name: 'Toutes les collections' },
   support: { id: '0', name: 'Tous les supports' },
-  emulsion: { id: '0', name: 'Toutes les emulsions' },
+  emulsion: { id: '0', name: 'Tous les emulsions' },
 })
 
 const scaleOptions = [
@@ -266,7 +266,7 @@ const resetForm = () => {
     producteur: '',
     collection: { id: '0', name: 'Toutes les collections' },
     support: { id: '0', name: 'Tous les supports' },
-    emulsion: { id: '0', name: 'Toutes les emulsions' },
+    emulsion: { id: '0', name: 'Tous les emulsions' },
   }
 
   scanStore.resetCriteria()

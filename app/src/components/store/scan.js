@@ -19,7 +19,7 @@ export const useScanStore = defineStore('scan', () => {
 
   let collectionsOptions = ref([{ id: '0', name: 'Toutes les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
-  let emulsionOptions = ref([{ id: '0', name: 'Toutes les emulsions' }])
+  let emulsionOptions = ref([{ id: '0', name: 'Tous les emulsions' }])
 
   let optionsCache = ref({
     collection: null,
@@ -171,7 +171,7 @@ export const useScanStore = defineStore('scan', () => {
 
     collectionsOptions.value = [{ id: '0', name: 'Toutes les collections' }]
     supportOptions.value = [{ id: '0', name: 'Tous les supports' }]
-    emulsionOptions.value = [{ id: '0', name: 'Toutes les emulsions' }]
+    emulsionOptions.value = [{ id: '0', name: 'Tous les emulsions' }]
   }
 
   function updateSelectedGeom(newVal) {
