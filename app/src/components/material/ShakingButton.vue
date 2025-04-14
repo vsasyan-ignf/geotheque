@@ -63,6 +63,8 @@ onBeforeUnmount(() => {
     :disabled="disabled"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
+    @click="$emit('click')"
+
   >
     <slot name="icon"></slot>
     {{ nameButton }}
