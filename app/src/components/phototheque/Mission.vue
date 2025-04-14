@@ -206,10 +206,11 @@ const urlInDico = computed(() => {
 })
 
 function createUrlPhoto() {
-  const annee = storeSelectedScan.value.properties.annee
-  const nom = storeSelectedScan.value.properties.chantier
-  const lieu = storeSelectedScan.value.properties.territoire
-  return `${config.MTD_FRANCE_URL}${lieu}/${annee}/${nom}/${nom}.txt`
+  if (!storeSelectedScan.value?.properties) return '';
+  const annee = storeSelectedScan.value.properties.annee || '';
+  const nom = storeSelectedScan.value.properties.chantier || '';
+  const lieu = storeSelectedScan.value.properties.territoire || '';
+  return `${config.MTD_FRANCE_URL}${lieu}/${annee}/${nom}/${nom}.txt`;
 }
 
 function DeleteSelectedPhoto() {
@@ -223,13 +224,13 @@ function DeleteSelectedPhoto() {
 let url_xml = ref(``)
 
 function downloadxml() {
-  if (storeSelectedScan.value) {
-    const info = storeSelectedScan.value?.properties
-    const lieu = info.territoire
-    url_xml = `${config.MTD_FRANCE_URL}${lieu}/${info.annee}/${info.chantier}/${info.chantier}.xml`
-    console.log('URL_XML : ', url_xml)
-    window.open(url_xml, 'xml')
-  }
+  if (!storeSelectedScan.value?.properties) return;
+
+  const info = storeSelectedScan.value?.properties
+  const lieu = info.territoire
+  url_xml = `${config.MTD_FRANCE_URL}${lieu}/${info.annee}/${info.chantier}/${info.chantier}.xml`
+  console.log('URL_XML : ', url_xml)
+  window.open(url_xml, 'xml')
 }
 
 function clickedFlyTo() {
