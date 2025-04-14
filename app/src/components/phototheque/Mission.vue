@@ -9,10 +9,10 @@
       <Dropdown :options="storeScansData" disableOption="Choisissez une mission" />
     </div>
     <div class="group-button">
-      <ShakingButton 
-        nameButton="" 
-        @click="setUrl" 
-        :disabled="!storeSelectedScan" 
+      <ShakingButton
+        nameButton=""
+        @click="setUrl"
+        :disabled="!storeSelectedScan"
         v-if="!urlInDico"
         tooltip="Ajouter cette mission à la sélection"
       >
@@ -33,9 +33,9 @@
         </template>
       </ShakingButton>
 
-      <ShakingButton 
-        nameButton="" 
-        @click="DeletePhotoAll" 
+      <ShakingButton
+        nameButton=""
+        @click="DeletePhotoAll"
         :disabled="!storeSelectedScan"
         tooltip="Effacer toute la sélection"
       >
@@ -55,9 +55,9 @@
         </template>
       </ShakingButton>
 
-      <ShakingButton 
-        nameButton="XML" 
-        @click="downloadxml" 
+      <ShakingButton
+        nameButton="XML"
+        @click="downloadxml"
         :disabled="!storeSelectedScan"
         tooltip="Télécharger les métadonnées au format XML"
       >
@@ -66,9 +66,9 @@
         </template>
       </ShakingButton>
 
-      <ShakingButton 
-        nameButton="" 
-        @click="clickedFlyTo" 
+      <ShakingButton
+        nameButton=""
+        @click="clickedFlyTo"
         :disabled="!storeSelectedScan"
         tooltip="Centrer la carte sur cette mission"
       >
@@ -228,11 +228,11 @@ const urlInDico = computed(() => {
 })
 
 function createUrlPhoto() {
-  if (!storeSelectedScan.value?.properties) return '';
-  const annee = storeSelectedScan.value.properties.annee || '';
-  const nom = storeSelectedScan.value.properties.chantier || '';
-  const lieu = storeSelectedScan.value.properties.territoire || '';
-  return `${config.MTD_FRANCE_URL}${lieu}/${annee}/${nom}/${nom}.txt`;
+  if (!storeSelectedScan.value?.properties) return ''
+  const annee = storeSelectedScan.value.properties.annee || ''
+  const nom = storeSelectedScan.value.properties.chantier || ''
+  const lieu = storeSelectedScan.value.properties.territoire || ''
+  return `${config.MTD_FRANCE_URL}${lieu}/${annee}/${nom}/${nom}.txt`
 }
 
 function DeleteSelectedPhoto() {
@@ -246,7 +246,7 @@ function DeleteSelectedPhoto() {
 let url_xml = ref(``)
 
 function downloadxml() {
-  if (!storeSelectedScan.value?.properties) return;
+  if (!storeSelectedScan.value?.properties) return
 
   const info = storeSelectedScan.value?.properties
   const lieu = info.territoire

@@ -112,7 +112,6 @@ const projections = [
 ]
 
 function getPointBbox(longitude, latitude) {
-
   const bboxWGS84 = [longitude - 0.0001, latitude - 0.0001, longitude + 0.0001, latitude + 0.0001]
 
   const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:3857')

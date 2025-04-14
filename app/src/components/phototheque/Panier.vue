@@ -179,7 +179,6 @@ const clearCart = () => {
   cartItems.value = []
   selectedPhotos.value = []
   // localStorage.setItem('phototheque-cart', JSON.stringify([]))
-
 }
 
 const downloadCartItems = () => {

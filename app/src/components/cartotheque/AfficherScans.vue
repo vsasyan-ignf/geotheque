@@ -48,11 +48,12 @@
             ><SvgIcon type="mdi" :path="mdiBriefcaseDownload" class="mdicon"
           /></template>
         </ShakingButton>
-        <ShakingButton 
-          nameButton="XML" 
-          @click="downloadxml" 
+        <ShakingButton
+          nameButton="XML"
+          @click="downloadxml"
           :disabled="!storeSelectedScan"
-          tooltip="Télécharger le scan aux format XML">
+          tooltip="Télécharger le scan aux format XML"
+        >
           <template #icon><SvgIcon type="mdi" :path="mdiXml" class="mdicon" /></template>
         </ShakingButton>
       </div>

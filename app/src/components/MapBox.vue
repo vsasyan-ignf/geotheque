@@ -97,12 +97,11 @@ const {
   deletePhotoAllBool,
   dicoUrlPhoto,
   flyTo,
-  selectedPhotos
+  selectedPhotos,
 } = storeToRefs(scanStore)
 
 const center = ref([territoires.Metropole.lon, territoires.Metropole.lat])
 const zoom = ref(territoires.Metropole.zoomLevel)
-
 
 const projection = ref('EPSG:3857')
 const rotation = ref(0)
@@ -182,11 +181,11 @@ watch(activeTab, (newValue) => {
   }
 
   if (olMap.value && olView.value) {
-        olView.value.animate({
-          center: center.value,
-          zoom: zoom.value,
-        })
-      }
+    olView.value.animate({
+      center: center.value,
+      zoom: zoom.value,
+    })
+  }
 
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []
@@ -327,29 +326,24 @@ function addPointToMap(x, y, nom, crossAlpha = false) {
   }
 }
 
-function removeEmpriseClique(name){
+function removeEmpriseClique(name) {
   //fonction pour retirer une emprise de l'affichage
   vectorLayers.value.geomPhoto.getSource().removeFeature(dic_affiche_photos_clique[name])
   delete dic_affiche_photos_clique[name]
 }
 
-
-
-
-function afficheMasuqeEmpriseClique(name,i){
+function afficheMasuqeEmpriseClique(name, i) {
   //function qui gere l'ajout et la suppression de l'emprise au clique
-    if(dic_affiche_photos_clique[name]){
-      removeEmpriseClique(name)
-      return
-    
+  if (dic_affiche_photos_clique[name]) {
+    removeEmpriseClique(name)
+    return
   }
-    const polygon = new Feature({
-      geometry: new Polygon([tab_emprise_photo[i][0]]),
-      name : name,
-    })
-    dic_affiche_photos_clique[name] = polygon
-    vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
-
+  const polygon = new Feature({
+    geometry: new Polygon([tab_emprise_photo[i][0]]),
+    name: name,
+  })
+  dic_affiche_photos_clique[name] = polygon
+  vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
 }
 
 function Add_new_name_to_map(name) {
@@ -359,7 +353,6 @@ function Add_new_name_to_map(name) {
 
   vectorLayers.value.geomPhoto.getSource().addFeature(feature_name)
 }
-
 
 async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
@@ -484,17 +477,18 @@ function handleDeactivateDrawMode() {
   clearIntersection()
 }
 
-watch(selectedPhotos, () => {
-  const names = selectedPhotos.value.map(pva => pva.nom)
-  Object.keys(dic_affiche_photos_clique).forEach(nom => {
-    if (!names.includes(nom)) {
-      removeEmpriseClique(nom)
-    }
-  })
-}, 
-{deep:true}
+watch(
+  selectedPhotos,
+  () => {
+    const names = selectedPhotos.value.map((pva) => pva.nom)
+    Object.keys(dic_affiche_photos_clique).forEach((nom) => {
+      if (!names.includes(nom)) {
+        removeEmpriseClique(nom)
+      }
+    })
+  },
+  { deep: true },
 )
-
 
 onMounted(() => {
   nextTick(() => {
@@ -602,18 +596,18 @@ onMounted(() => {
       if (alaphaOrI != null) {
         const name = infosPva.value[alaphaOrI[0]].nom
         const i = alaphaOrI[1]
-        
+
         if (name) {
           scanStore.updateSelectedPhotos(infosPva.value[alaphaOrI[0]])
-          // rajout pour gestion affiche / enlever emprise 
-          afficheMasuqeEmpriseClique(name,i)
+          // rajout pour gestion affiche / enlever emprise
+          afficheMasuqeEmpriseClique(name, i)
 
-          const photoItem = infosPva.value[alaphaOrI[0]];
-          const isEmpriseDisplayed = !dic_affiche_photos_clique[name];
+          const photoItem = infosPva.value[alaphaOrI[0]]
+          const isEmpriseDisplayed = !dic_affiche_photos_clique[name]
           if (isEmpriseDisplayed) {
-            scanStore.removeSelectedPhoto(photoItem);
+            scanStore.removeSelectedPhoto(photoItem)
           } else {
-            scanStore.updateSelectedPhotos(photoItem);
+            scanStore.updateSelectedPhotos(photoItem)
           }
         }
       }
@@ -660,7 +654,7 @@ onMounted(() => {
         removeEmpriseClique(name)
       }
     })
-    
+
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
         Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
