@@ -120,6 +120,29 @@ export function createScanLayer() {
 }
 
 /**
+ * Crée une couche vectorielle pour le "hover", avec style rouge.
+ *
+ * @returns {VectorLayer} Couche vectorielle.
+ */
+
+export function createHoverLayer() {
+  const source = new VectorSource()
+
+  return new VectorLayer({
+    source,
+    style: new Style({
+      stroke: new Stroke({
+        color: '#1E3A8A',
+        width: 2,
+      }),
+      fill: new Fill({
+        color: 'rgba(96, 165, 250, 0.7)',
+      }),
+    }),
+  })
+}
+
+/**
  * Crée une couche WFS avec chargement par stratégie de bounding box.
  *
  * @returns {VectorLayer} Couche vectorielle WFS.

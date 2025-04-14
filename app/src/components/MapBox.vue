@@ -60,6 +60,7 @@ import {
   createGeomMouseOverLayer,
   createGeomCoupleLayer,
   createScanLayer,
+  createHoverLayer,
   createWFSLayer,
   initOtherVectorLayers,
 } from './composable/getVectorLayer'
@@ -504,7 +505,7 @@ onMounted(() => {
       cross_alphanum: createPinLayer(crossIcon),
       geomPhoto: createGeomLayer(),
       geomCouple: createGeomCoupleLayer(),
-      hover: createScanLayer(),
+      hover: createHoverLayer(),
     }
 
     vectorOtherLayers.value = initOtherVectorLayers()
@@ -541,6 +542,8 @@ onMounted(() => {
       controls: defaultControls({ zoom: false, rotate: false }),
     })
 
+    vectorLayers.value.pin.setZIndex(999);
+    
     function updateProjectionDisplay() {
       const projectionCode = olMap.value.getView().getProjection().getCode()
       const formProjElement = document.getElementById('form-proj')
