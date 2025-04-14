@@ -117,6 +117,8 @@ async function fetchAndConvertBbox(longitude, latitude) {
   try {
     let url
 
+    // console.log('fetchAndConvertBbox', longitude, latitude)
+
     url = `${config.NOMINATIM_URL}/reverse?lat=${latitude}&lon=${longitude}&format=json&polygon_geojson=1&addressdetails=1&limit=1`
     console.log(url)
     const response = await fetch(url)
@@ -127,14 +129,7 @@ async function fetchAndConvertBbox(longitude, latitude) {
 
     const data = await response.json()
 
-    const bbox = data.boundingbox
-
-    const bboxWGS84 = [
-      parseFloat(bbox[2]),
-      parseFloat(bbox[0]),
-      parseFloat(bbox[3]),
-      parseFloat(bbox[1]),
-    ]
+    const bboxWGS84 = [longitude - 0.0001, latitude - 0.0001, longitude + 0.0001, latitude + 0.0001]
 
     const southWest = useConvertCoordinates(bboxWGS84[0], bboxWGS84[1], 'EPSG:4326', 'EPSG:3857')
     const northEast = useConvertCoordinates(bboxWGS84[2], bboxWGS84[3], 'EPSG:4326', 'EPSG:3857')
