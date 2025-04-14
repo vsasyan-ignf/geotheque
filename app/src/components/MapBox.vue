@@ -544,17 +544,6 @@ onMounted(() => {
       controls: defaultControls({ zoom: false, rotate: false }),
     })
 
-    function updateProjectionDisplay() {
-      const projectionCode = olMap.value.getView().getProjection().getCode()
-      const formProjElement = document.getElementById('form-proj')
-      if (formProjElement) {
-        formProjElement.innerHTML = `Projection: ${projectionCode}`
-      }
-    }
-
-    updateProjectionDisplay()
-    olMap.value.getView().on('change:projection', updateProjectionDisplay)
-
     olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent)
 
@@ -852,24 +841,5 @@ provide('eventBus', eventBus)
   width: 100%;
   height: 100%;
   flex: 1;
-}
-
-#form-proj {
-  position: absolute;
-  /* Positionner de manière absolue par rapport au conteneur parent */
-  bottom: 10px;
-  right: 24%;
-  z-index: 99999999;
-  /* Priorité sur les autres éléments */
-  background-color: rgba(255, 255, 255, 0.8);
-  /* Fond légèrement transparent pour le formulaire */
-  padding: 5px;
-  /* Un peu de padding autour du formulaire */
-  font-size: 14px;
-  border-radius: 5px;
-  /* Coins arrondis pour le formulaire */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  /* Ombre douce pour faire ressortir le formulaire */
-  color: black;
 }
 </style>

@@ -182,5 +182,6 @@ export const territoires = {
   Monde: {
     lon: 2387918,
     lat: 1033713,
+    projection: 'EPSG:3857'
   },
 }

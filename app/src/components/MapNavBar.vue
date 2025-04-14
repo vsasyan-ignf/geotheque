@@ -1,11 +1,9 @@
 <template>
   <div class="map-navbar">
     <select v-model="selectedTerritory" @change="emitChange">
-      <option value="france">France</option>
-      <option value="guadeloupe">Guadeloupe</option>
-      <option value="guyane">Guyane</option>
-      <option value="martinique">Martinique</option>
-      <option value="réunion">Réunion</option>
+      <option v-for="(data, territory) in territoires" :key="territory" :value="territory">
+        {{ territory }}
+      </option>
     </select>
 
     <div class="coordinates">
@@ -13,15 +11,16 @@
     </div>
 
     <select v-model="selectedProjection" @change="emitChange">
-      <option value="EPSG:4326">EPSG:4326 (WGS 84)</option>
-      <option value="EPSG:3857">EPSG:3857 (Web Mercator)</option>
-      <option value="EPSG:2154">EPSG:2154 (Lambert 93)</option>
+      <option v-for="projection in uniqueProjections" :key="projection" :value="projection">
+        {{ projection }}
+      </option>
     </select>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { territoires } from './composable/getTerritoires'
 
 const props = defineProps({
   coordinates: {
@@ -32,13 +31,23 @@ const props = defineProps({
 
 const emit = defineEmits(['update:territory', 'update:projection'])
 
-const selectedTerritory = ref('france')
-const selectedProjection = ref('EPSG:4326')
+const selectedTerritory = ref('Monde')
+const selectedProjection = ref('EPSG:3857')
 
 const emitChange = () => {
   emit('update:territory', selectedTerritory.value)
   emit('update:projection', selectedProjection.value)
 }
+
+watch(selectedTerritory, (newTerritory) => {
+  selectedProjection.value = territoires[newTerritory]?.projection || 'EPSG:3857'
+  emitChange()
+})
+
+const uniqueProjections = computed(() => {
+  const allProjections = Object.values(territoires).flatMap((territory) => territory.projection)
+  return [...new Set(allProjections)]
+})
 
 const formattedCoordinates = computed(() => {
   const { x, y } = props.coordinates
@@ -52,10 +61,10 @@ const formattedCoordinates = computed(() => {
   z-index: 10;
   bottom: 0;
   left: 30%;
-  gap: 3rem;
+  gap: 2rem;
   padding: 0.6rem;
-  background: #f8f9fa;
-  border-bottom: 1px solid #ccc;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #ccc;
   display: flex;
   align-items: center;
   border-radius: 15px 15px 0 0;
