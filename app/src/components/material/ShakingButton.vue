@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-const emit = defineEmits(['click']);
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+const emit = defineEmits(['click'])
 
 const props = defineProps({
   nameButton: {
@@ -14,69 +14,68 @@ const props = defineProps({
   tooltip: {
     type: String,
     default: '',
-  }
-});
+  },
+})
 
-const buttonRef = ref(null);
-const showTooltip = ref(false);
-const tooltipPosition = ref({ top: 0, left: 0 });
+const buttonRef = ref(null)
+const showTooltip = ref(false)
+const tooltipPosition = ref({ top: 0, left: 0 })
 
 function handleMouseEnter() {
   if (props.tooltip) {
-    updatePosition();
-    showTooltip.value = true;
+    updatePosition()
+    showTooltip.value = true
   }
 }
 
 function handleMouseLeave() {
-  showTooltip.value = false;
+  showTooltip.value = false
 }
 
 function updatePosition() {
-  if (!buttonRef.value) return;
-  
-  const rect = buttonRef.value.getBoundingClientRect();
+  if (!buttonRef.value) return
+
+  const rect = buttonRef.value.getBoundingClientRect()
   tooltipPosition.value = {
     top: rect.top - 10,
-    left: rect.left + rect.width / 2
-  };
+    left: rect.left + rect.width / 2,
+  }
 }
 
 onMounted(() => {
   if (props.tooltip) {
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
   }
-});
+})
 
 onBeforeUnmount(() => {
   if (props.tooltip) {
-    window.removeEventListener('resize', updatePosition);
-    window.removeEventListener('scroll', updatePosition, true);
+    window.removeEventListener('resize', updatePosition)
+    window.removeEventListener('scroll', updatePosition, true)
   }
-});
+})
 </script>
 
 <template>
-  <button 
-    ref="buttonRef" 
+  <button
+    ref="buttonRef"
     :disabled="disabled"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
     @click="$emit('click')"
-
   >
     <slot name="icon"></slot>
     {{ nameButton }}
   </button>
-  
+
   <Teleport to="body">
-    <div 
-      v-if="tooltip && showTooltip" 
+    <div
+      v-if="tooltip && showTooltip"
       class="shaking-tooltip"
       :style="{
         top: `${tooltipPosition.top}px`,
-        left: `${tooltipPosition.left}px`
+        left: `${tooltipPosition.left}px`,
       }"
     >
       {{ tooltip }}

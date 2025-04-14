@@ -97,11 +97,11 @@ const {
   deletePhotoAllBool,
   dicoUrlPhoto,
   flyTo,
+  selectedPhotos,
 } = storeToRefs(scanStore)
 
 const center = ref([territoires.Metropole.lon, territoires.Metropole.lat])
 const zoom = ref(territoires.Metropole.zoomLevel)
-
 
 const projection = ref('EPSG:3857')
 const rotation = ref(0)
@@ -150,6 +150,7 @@ const vectorOtherLayers = ref(null)
 
 let tab_emprise_photo = []
 let tab_couples_photo = []
+let dic_affiche_photos_clique = {}
 let last_geom = null
 const rayon_croix_clique = 50
 
@@ -180,11 +181,11 @@ watch(activeTab, (newValue) => {
   }
 
   if (olMap.value && olView.value) {
-        olView.value.animate({
-          center: center.value,
-          zoom: zoom.value,
-        })
-      }
+    olView.value.animate({
+      center: center.value,
+      zoom: zoom.value,
+    })
+  }
 
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []
@@ -325,21 +326,32 @@ function addPointToMap(x, y, nom, crossAlpha = false) {
   }
 }
 
-function Add_new_polygone_to_map(tab, name) {
+function removeEmpriseClique(name) {
+  //fonction pour retirer une emprise de l'affichage
+  vectorLayers.value.geomPhoto.getSource().removeFeature(dic_affiche_photos_clique[name])
+  delete dic_affiche_photos_clique[name]
+}
+
+function afficheMasuqeEmpriseClique(name, i) {
+  //function qui gere l'ajout et la suppression de l'emprise au clique
+  if (dic_affiche_photos_clique[name]) {
+    removeEmpriseClique(name)
+    return
+  }
   const polygon = new Feature({
-    geometry: new Polygon([tab]),
+    geometry: new Polygon([tab_emprise_photo[i][0]]),
+    name: name,
+  })
+  dic_affiche_photos_clique[name] = polygon
+  vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
+}
+
+function Add_new_name_to_map(name) {
+  const feature_name = new Feature({
     name: name,
   })
 
-  const style = new Style({
-    fill: new Fill({
-      color: 'rgba(0, 0, 0, 0)',
-    }),
-  })
-
-  polygon.setStyle(style)
-
-  vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
+  vectorLayers.value.geomPhoto.getSource().addFeature(feature_name)
 }
 
 async function parcour_tab_and_map(url) {
@@ -396,7 +408,7 @@ async function parcour_tab_and_map(url) {
         }
 
         tab_emprise_photo.push([tab_points_cliche_3857, alphanum, [centrex_3857, centrey_3857]])
-        Add_new_polygone_to_map(tab_points_cliche_3857, alphanum)
+        Add_new_name_to_map(alphanum)
       } else if (tab_test[i][0] == 'Couple Actif') {
         elem = tab_test[i]
         tab_points_couple_3857 = []
@@ -464,6 +476,19 @@ function handleDeactivateDrawMode() {
   drawModeActive.value = false
   clearIntersection()
 }
+
+watch(
+  selectedPhotos,
+  () => {
+    const names = selectedPhotos.value.map((pva) => pva.nom)
+    Object.keys(dic_affiche_photos_clique).forEach((nom) => {
+      if (!names.includes(nom)) {
+        removeEmpriseClique(nom)
+      }
+    })
+  },
+  { deep: true },
+)
 
 onMounted(() => {
   nextTick(() => {
@@ -570,8 +595,20 @@ onMounted(() => {
       const alaphaOrI = aplhaOfPointInRange(coordinate3857, tab_emprise_photo, rayon_croix_clique)
       if (alaphaOrI != null) {
         const name = infosPva.value[alaphaOrI[0]].nom
+        const i = alaphaOrI[1]
+
         if (name) {
           scanStore.updateSelectedPhotos(infosPva.value[alaphaOrI[0]])
+          // rajout pour gestion affiche / enlever emprise
+          afficheMasuqeEmpriseClique(name, i)
+
+          const photoItem = infosPva.value[alaphaOrI[0]]
+          const isEmpriseDisplayed = !dic_affiche_photos_clique[name]
+          if (isEmpriseDisplayed) {
+            scanStore.removeSelectedPhoto(photoItem)
+          } else {
+            scanStore.updateSelectedPhotos(photoItem)
+          }
         }
       }
     })
@@ -610,6 +647,12 @@ onMounted(() => {
       })
       vectorLayers.value.pin.getSource().addFeature(feature)
       pins.value = [[x, y]]
+    })
+
+    eventBus.on('clear-cart', () => {
+      for (const name in dic_affiche_photos_clique) {
+        removeEmpriseClique(name)
+      }
     })
 
     watch(activeSubCategory, (newValue) => {
