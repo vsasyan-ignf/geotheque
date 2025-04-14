@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+const emit = defineEmits(['click']);
 
 const props = defineProps({
   nameButton: {
