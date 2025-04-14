@@ -22,8 +22,9 @@
       @deactivate-draw-mode="handleDeactivateDrawMode"
     />
     <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
+
+    <MapNavBar :coordinates="mouseCoordinates" />
   </div>
-  <div style="z-index: 10" id="mouse-position"></div>
   <div style="z-index: 10" id="form-proj"></div>
 </template>
 
@@ -74,10 +75,12 @@ import {
 import { Style, Text, Stroke, Fill } from 'ol/style'
 import Icon from 'ol/style/Icon'
 
-import MousePosition from 'ol/control/MousePosition.js'
-import { createStringXY } from 'ol/coordinate.js'
+import MapNavBar from './MapNavBar.vue'
+
 import { getDistance } from 'ol/sphere'
 import { territoires } from './composable/getTerritoires'
+
+const mouseCoordinates = ref({ x: 0, y: 0 })
 
 const showCardPva = ref(false)
 const selectedPhotoInfo = ref({})
@@ -552,22 +555,13 @@ onMounted(() => {
     updateProjectionDisplay()
     olMap.value.getView().on('change:projection', updateProjectionDisplay)
 
-    const mousePositionControl = new MousePosition({
-      coordinateFormat: createStringXY(2),
-      projection: olMap.value.getView().getProjection().getCode(),
-      target: document.getElementById('mouse-position'),
-    })
-
     olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent)
-      const formattedCoordinate = createStringXY(2)(coordinate)
+
+      mouseCoordinates.value.x = coordinate[0]
+      mouseCoordinates.value.y = coordinate[1]
 
       showPointOnEmprise(coordinate, tab_emprise_photo)
-
-      const mousePositionElement = document.getElementById('mouse-position')
-      if (mousePositionElement) {
-        mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`
-      }
     })
 
     initializeIntersectionLayer(olMap)
@@ -858,22 +852,6 @@ provide('eventBus', eventBus)
   width: 100%;
   height: 100%;
   flex: 1;
-}
-
-#mouse-position {
-  position: absolute;
-  bottom: 10px;
-  right: 40%;
-  /* À 10px du côté gauche */
-  background-color: rgba(255, 255, 255, 0.8);
-  /* Fond semi-transparent pour améliorer la lisibilité */
-  padding: 5px;
-  /* Un peu de padding */
-  font-size: 14px;
-  /* Taille du texte */
-  border-radius: 5px;
-  /* Coins arrondis pour une meilleure esthétique */
-  color: black;
 }
 
 #form-proj {
