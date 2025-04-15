@@ -23,7 +23,7 @@
     />
     <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
 
-    <MapNavBar :coordinates="mouseCoordinates" @update:territory="handleTerritoryUpdate" />
+    <MapNavBar :coordinates="mouseCoordinates" @update:territory="handleTerritoryUpdate" :territoryName="territoryData.name"/>
   </div>
 </template>
 
@@ -103,8 +103,9 @@ const {
 } = storeToRefs(scanStore)
 
 const center = ref([territoires.Metropole.lon, territoires.Metropole.lat])
-const zoom = ref(territoires.Metropole.zoomLevel)
-const territoryData = ref({ name: '', lon: 0, lat: 0 })
+const zoom = ref(territoires.Metropole.zoom)
+
+const territoryData = ref({ name: 'Metropole', lon: 0, lat: 0 })
 
 const projection = ref('EPSG:3857')
 const rotation = ref(0)
@@ -167,14 +168,20 @@ function hideOtherLayers() {
 const handleTerritoryUpdate = (data) => {
   territoryData.value = data
 
-  if (olMap.value && olView.value) {
-    olView.value.animate({
-      center: [data.lon, data.lat],
-      zoom: data.zoom,
-    })
-  }
+  zoom.value = data.zoom
+  center.value = [data.lon, data.lat]
+
   console.log('Territoire sélectionné:', data.name)
 }
+
+watch(territoryData, (newVal) => {
+  if (olMap.value && olView.value) {
+    olView.value.animate({
+      center: [newVal.lon, newVal.lat],
+      zoom: newVal.zoom,
+    })
+  }
+})
 
 watch(activeTab, (newValue) => {
   const newLayers = getLayersForActiveTab(activeTab.value)
@@ -186,21 +193,14 @@ watch(activeTab, (newValue) => {
 
   updateWMTSLayers(olMap.value, newLayers)
 
-  if (activeTab.value.includes('etranger')) {
-    console.log('here')
-    zoom.value = 0
-    center.value = [territoires.Monde.lon, territoires.Monde.lat]
-  } else {
-    zoom.value = territoires.Metropole.zoomLevel
-    center.value = [territoires.Metropole.lon, territoires.Metropole.lat]
-  }
+  const name = activeTab.value.includes('etranger') ? 'Monde' : 'Metropole'
 
-  if (olMap.value && olView.value) {
-    olView.value.animate({
-      center: center.value,
-      zoom: zoom.value,
-    })
-  }
+  territoryData.value = {
+      name : name,
+      lat: territoires[name].lat,
+      lon: territoires[name].lon,
+      zoom: territoires[name].zoom
+    }
 
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []

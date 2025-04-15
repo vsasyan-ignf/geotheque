@@ -21,18 +21,32 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { territoires } from './composable/getTerritoires'
+import { useScanStore } from './store/scan'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps({
   coordinates: {
     type: Object,
     default: () => ({ x: 0, y: 0 }),
   },
+  territoryName: {
+    type: String,
+    default: 'Metropole'
+  }
 })
 
 const emit = defineEmits(['update:territory', 'update:projection'])
 
-const selectedTerritory = ref('Monde')
 const selectedProjection = ref('EPSG:3857')
+const selectedTerritory = ref(props.territoryName)
+
+const scanStore = useScanStore()
+const { activeTab } = storeToRefs(scanStore)
+
+
+watch(activeTab, (newVal) => {
+  selectedTerritory.value = newVal.includes('etranger') ? 'Monde' : 'Metropole'
+})
 
 const emitChange = () => {
   emit('update:projection', selectedProjection.value)
@@ -46,7 +60,7 @@ const handleTerritoryChange = () => {
       name: selectedTerritory.value,
       lon: currentTerritory.lon,
       lat: currentTerritory.lat,
-      zoom: currentTerritory.zoomLevel,
+      zoom: currentTerritory.zoom,
     })
   }
 }
