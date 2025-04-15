@@ -14,7 +14,7 @@
         @click="setUrl"
         :disabled="!storeSelectedScan"
         v-if="!urlInDico"
-        tooltip="Ajouter cette mission à la sélection"
+        tooltip="Charger les clichés de la mission"
       >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiPlus" class="mdicon" />
@@ -26,7 +26,7 @@
         @click="DeleteSelectedPhoto"
         :disabled="!storeSelectedScan"
         v-if="urlInDico"
-        tooltip="Retirer cette mission de la sélection"
+        tooltip="Décharger les clichés de la mission"
       >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiMinus" class="mdicon" />
@@ -37,7 +37,7 @@
         nameButton=""
         @click="DeletePhotoAll"
         :disabled="!storeSelectedScan"
-        tooltip="Effacer toute la sélection"
+        tooltip="Décharger tous les clichés"
       >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" />
