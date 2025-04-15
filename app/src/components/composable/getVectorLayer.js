@@ -132,11 +132,11 @@ export function createHoverLayer() {
     source,
     style: new Style({
       stroke: new Stroke({
-        color: '#1E3A8A',
+        color: 'rgba(3, 72, 157, 0.5)',
         width: 2,
       }),
       fill: new Fill({
-        color: 'rgba(96, 165, 250, 0.7)',
+        color: 'rgba(96, 165, 250, 0.3)',
       }),
     }),
   })
