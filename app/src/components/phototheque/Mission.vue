@@ -14,7 +14,7 @@
         @click="setUrl"
         :disabled="!storeSelectedScan"
         v-if="!urlInDico"
-        tooltip="Ajouter cette mission à la sélection"
+        tooltip="Charger les clichés de la mission"
       >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiPlus" class="mdicon" />
@@ -26,7 +26,7 @@
         @click="DeleteSelectedPhoto"
         :disabled="!storeSelectedScan"
         v-if="urlInDico"
-        tooltip="Retirer cette mission de la sélection"
+        tooltip="Décharger les clichés de la mission"
       >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiMinus" class="mdicon" />
@@ -37,7 +37,7 @@
         nameButton=""
         @click="DeletePhotoAll"
         :disabled="!storeSelectedScan"
-        tooltip="Effacer toute la sélection"
+        tooltip="Décharger tous les clichés"
       >
         <template #icon>
           <SvgIcon type="mdi" :path="mdiTrashCan" class="mdicon" />
@@ -128,12 +128,16 @@ import {
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto, flyTo } =
+const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto, flyTo, activeTab} =
   storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
 const isDataAvailable = computed(() => storeScansData.value && storeScansData.value.length > 0)
+
+const mtdURL = computed(() => 
+  activeTab.value.includes('etranger') ? config.MTD_MONDE_URL : config.MTD_FRANCE_URL
+)
 
 // real key : key bien écrit pour afficher dans modal
 const all_keys = {
@@ -232,7 +236,7 @@ function createUrlPhoto() {
   const annee = storeSelectedScan.value.properties.annee || ''
   const nom = storeSelectedScan.value.properties.chantier || ''
   const lieu = storeSelectedScan.value.properties.territoire || ''
-  return `${config.MTD_FRANCE_URL}${lieu}/${annee}/${nom}/${nom}.txt`
+  return `${mtdURL.value}${lieu}/${annee}/${nom}/${nom}.txt`
 }
 
 function DeleteSelectedPhoto() {
@@ -250,7 +254,7 @@ function downloadxml() {
 
   const info = storeSelectedScan.value?.properties
   const lieu = info.territoire
-  url_xml = `${config.MTD_FRANCE_URL}${lieu}/${info.annee}/${info.chantier}/${info.chantier}.xml`
+  url_xml = `${mtdURL.value}${lieu}/${info.annee}/${info.chantier}/${info.chantier}.xml`
   console.log('URL_XML : ', url_xml)
   window.open(url_xml, 'xml')
 }
