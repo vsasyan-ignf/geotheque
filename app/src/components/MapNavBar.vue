@@ -10,11 +10,12 @@
       {{ formattedCoordinates }}
     </div>
 
-    <select v-model="selectedProjection" @change="emitChange">
-      <option v-for="projection in uniqueProjections" :key="projection" :value="projection">
-        {{ projection }}
-      </option>
-    </select>
+
+    <div class="coordinates">
+      {{ formattedProj }}
+    </div>
+
+
   </div>
 </template>
 
@@ -78,6 +79,12 @@ const uniqueProjections = computed(() => {
 const formattedCoordinates = computed(() => {
   const { x, y } = props.coordinates
   return `Position : ${x.toFixed(2)}, ${y.toFixed(2)}`
+})
+
+
+const formattedProj = computed(() => {
+  const proj = territoires[selectedTerritory.value].projection
+  return `Projection : ${proj}`
 })
 </script>
 
