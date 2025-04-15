@@ -1,21 +1,26 @@
 <template>
   <div class="map-navbar">
-    <select v-model="selectedTerritory" @change="handleTerritoryChange">
-      <option v-for="(data, territory) in territoires" :key="territory" :value="territory">
-        {{ territory }}
-      </option>
-    </select>
-
-    <div class="coordinates">
-      {{ formattedCoordinates }}
+    <div class="territory-selector">
+      <select v-model="selectedTerritory" @change="handleTerritoryChange" class="select-input">
+        <option v-for="(data, territory) in territoires" :key="territory" :value="territory">
+          {{ territory }}
+        </option>
+      </select>
     </div>
 
+    <div class="divider"></div>
 
-    <div class="coordinates">
-      {{ formattedProj }}
+    <div class="info-container">
+      <div class="info-box">
+        <span class="info-label">Position</span>
+        <span class="info-value">{{ formattedCoordinates }}</span>
+      </div>
+
+      <div class="info-box">
+        <span class="info-label">Projection</span>
+        <span class="info-value">{{ formattedProj }}</span>
+      </div>
     </div>
-
-
   </div>
 </template>
 
@@ -78,13 +83,13 @@ const uniqueProjections = computed(() => {
 
 const formattedCoordinates = computed(() => {
   const { x, y } = props.coordinates
-  return `Position : ${x.toFixed(2)}, ${y.toFixed(2)}`
+  return `${x.toFixed(2)}, ${y.toFixed(2)}`
 })
 
 
 const formattedProj = computed(() => {
   const proj = territoires[selectedTerritory.value].projection
-  return `Projection : ${proj}`
+  return `${proj}`
 })
 </script>
 
@@ -92,23 +97,84 @@ const formattedProj = computed(() => {
 .map-navbar {
   position: absolute;
   z-index: 10;
-  bottom: 0;
-  left: 30%;
-  gap: 2rem;
-  padding: 0.6rem;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid #ccc;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  border-radius: 15px 15px 0 0;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  padding: 7px 15px;
+  gap: 12px;
+  border: 1px solid rgba(200, 200, 200, 0.5);
 }
 
-select {
-  padding: 0.3rem;
+.territory-selector {
+  position: relative;
 }
 
-.coordinates {
-  font-family: monospace;
-  color: #555;
+.select-input {
+  appearance: none;
+  background-color: white;
+  border: 1px solid #d4d4d4;
+  border-radius: 4px;
+  padding: 5px 26px 5px 10px;
+  font-size: 12px;
+  color: #333;
+  cursor: pointer;
+  min-width: 120px;
+  transition: all 0.2s ease;
+}
+
+.select-input:hover {
+  border-color: #7aa937;
+}
+
+.select-input:focus {
+  outline: none;
+  border-color: #7aa937;
+  box-shadow: 0 0 0 1px rgba(122, 169, 55, 0.25);
+}
+
+.territory-selector::after {
+  content: "▼";
+  font-size: 8px;
+  color: #666;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background-color: #e0e0e0;
+  margin: 0 2px;
+}
+
+.info-container {
+  display: flex;
+  gap: 15px;
+}
+
+.info-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 10px;
+  color: #7aa937;
+  margin-bottom: 2px;
+  font-weight: 500;
+}
+
+.info-value {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 12px;
+  color: #333;
 }
 </style>
