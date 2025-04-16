@@ -86,7 +86,7 @@ Le fonctionnement est similaire à celui de la **cartothèque France**, avec les
 
 ---
 
-## 3. Photographies - France
+## 3. Photothèque - France
 
 ### Sélection de la zone de travail
 
@@ -137,7 +137,9 @@ Une fois la mission choisie, l'utilisateur peut :
 
 - Passer sa souris au dessus d'une croix rouge affiche l'emprise de la photo ainsi que les informations de la photo
 
-- Cliquer sur le **centre des photos** permet de les ajouter au panier
+- Cliquer sur les **centres des photos** permet de les ajouter au panier
+
+- Re-cliquer sur les **centres des photos** permet de les désélectionner et les enlever du panier
 
 <img src="img/clic.png" alt="clic sur photo" style="width:50%;"/>
 
@@ -150,7 +152,7 @@ Une fois la mission choisie, l'utilisateur peut :
 
 ---
 
-## 4. Photographies - Étranger
+## 4. Photothèque - Étranger
 
 Fonctionnement similaire à la **photothèque française**, avec une différence :
 
