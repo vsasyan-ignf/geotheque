@@ -37,8 +37,8 @@ const props = defineProps({
   },
   territoryName: {
     type: String,
-    default: 'Metropole'
-  }
+    default: 'Metropole',
+  },
 })
 
 const emit = defineEmits(['update:territory', 'update:projection'])
@@ -48,7 +48,6 @@ const selectedTerritory = ref(props.territoryName)
 
 const scanStore = useScanStore()
 const { activeTab } = storeToRefs(scanStore)
-
 
 watch(activeTab, (newVal) => {
   selectedTerritory.value = newVal.includes('etranger') ? 'Monde' : 'Metropole'
@@ -85,7 +84,6 @@ const formattedCoordinates = computed(() => {
   const { x, y } = props.coordinates
   return `${x.toFixed(2)}, ${y.toFixed(2)}`
 })
-
 
 const formattedProj = computed(() => {
   const proj = territoires[selectedTerritory.value].projection
@@ -138,7 +136,7 @@ const formattedProj = computed(() => {
 }
 
 .territory-selector::after {
-  content: "▼";
+  content: '▼';
   font-size: 8px;
   color: #666;
   position: absolute;

@@ -173,7 +173,7 @@ async function getDepartementBbox(departement) {
     if (!contour_dep) {
       throw new Error('coordonées non trouvée dans la réponse')
     }
-    console.log('Contour du departement:', contour_dep)
+
     return contour_dep
   } catch (error) {
     console.error('e:', error)
