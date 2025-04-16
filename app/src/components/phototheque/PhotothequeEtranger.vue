@@ -68,7 +68,7 @@ defineEmits(['select-sub-category', 'close-sub-category'])
 
 function goToPoint(point) {
   if (point.bboxMercator) {
-    scanStore.updateBbox(point.bboxMercator)
+    scanStore.updateBbox(point.bboxMercator.bboxMercator)
   }
 }
 
