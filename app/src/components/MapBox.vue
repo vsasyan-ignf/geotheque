@@ -665,12 +665,6 @@ onMounted(() => {
       pins.value = [[x, y]]
     })
 
-    eventBus.on('clear-cart', () => {
-      for (const name in dic_affiche_photos_clique) {
-        removeEmpriseClique(name)
-      }
-    })
-
     watch(activeSubCategory, (newValue) => {
       if (newValue === null && olMap.value) {
         Object.values(vectorLayers.value).forEach((layer) => layer.getSource().clear())
