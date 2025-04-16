@@ -23,7 +23,11 @@
     />
     <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
 
-    <MapNavBar :coordinates="mouseCoordinates" @update:territory="handleTerritoryUpdate" :territoryName="territoryData.name"/>
+    <MapNavBar
+      :coordinates="mouseCoordinates"
+      @update:territory="handleTerritoryUpdate"
+      :territoryName="territoryData.name"
+    />
   </div>
 
   <Alert
@@ -37,7 +41,6 @@
   >
     Les clichés de la mission sont indisponible
   </Alert>
-
 </template>
 
 <script setup>
@@ -189,8 +192,6 @@ const handleTerritoryUpdate = (data) => {
 
   zoom.value = data.zoom
   center.value = [data.lon, data.lat]
-
-  console.log('Territoire sélectionné:', data.name)
 }
 
 watch(territoryData, (newVal) => {
@@ -215,11 +216,11 @@ watch(activeTab, (newValue) => {
   const name = activeTab.value.includes('etranger') ? 'Monde' : 'Metropole'
 
   territoryData.value = {
-      name : name,
-      lat: territoires[name].lat,
-      lon: territoires[name].lon,
-      zoom: territoires[name].zoom
-    }
+    name: name,
+    lat: territoires[name].lat,
+    lon: territoires[name].lon,
+    zoom: territoires[name].zoom,
+  }
 
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []
@@ -241,7 +242,6 @@ function toggleLayerVisibility(isVisible) {
     if (activeLayer) {
       activeLayer.setVisible(isVisible)
       visibility_switch.value = isVisible
-      console.log('Layer', activeLayerIndex.value, 'visibility set to', isVisible)
     }
   }
 }
@@ -388,7 +388,6 @@ function Add_new_name_to_map(name) {
   vectorLayers.value.geomPhoto.getSource().addFeature(feature_name)
 }
 
-
 async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
@@ -497,7 +496,6 @@ function handleDrawComplete(drawData) {
   })
 
   const extent = findIntersections(drawGeometry, vectorOtherLayers.value)
-  console.log(extent)
 }
 
 function handleDrawModeActivated(mode) {
@@ -576,8 +574,8 @@ onMounted(() => {
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
-    
-    vectorLayers.value.pin.setZIndex(999);
+
+    vectorLayers.value.pin.setZIndex(999)
 
     olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent)

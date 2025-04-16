@@ -185,14 +185,11 @@ export function createRealContour(contour) {
     const polygon = new Polygon([polygonCoords])
     const simplified = polygon.simplify(getDynamicTolerance(polygonCoords))
 
-    const reprojectedCoords = simplified.getCoordinates()[0].map(([lon, lat]) =>
-      proj4('EPSG:4326', 'EPSG:3857', [lat, lon])
-    )
+    const reprojectedCoords = simplified
+      .getCoordinates()[0]
+      .map(([lon, lat]) => proj4('EPSG:4326', 'EPSG:3857', [lat, lon]))
 
-    const roundedCoords = reprojectedCoords.map(([lon, lat]) => [
-      Math.round(lon),
-      Math.round(lat),
-    ])
+    const roundedCoords = reprojectedCoords.map(([lon, lat]) => [Math.round(lon), Math.round(lat)])
 
     return new Polygon([roundedCoords])
   })

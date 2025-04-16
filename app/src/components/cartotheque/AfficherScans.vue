@@ -122,7 +122,6 @@ watch(storeSelectedScan, (newVal) => {
 
 function openIipmooviewer() {
   if (imageUrl.value) {
-    console.log(imageUrl.value)
     const urlParams = new URLSearchParams(new URL(imageUrl.value).search)
     const imageUrlServ = urlParams.get('FIF')
 

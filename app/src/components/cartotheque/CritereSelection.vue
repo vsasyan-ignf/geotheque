@@ -87,9 +87,9 @@
         />
       </div>
 
-      <Alert 
-        :show="noResultsFound" 
-        type="warning" 
+      <Alert
+        :show="noResultsFound"
+        type="warning"
         title="Aucun résultat"
         dismissible
         :duration="4000"
@@ -299,7 +299,6 @@ const resetForm = () => {
   eventBus.emit('criteria-reset')
   noResultsFound.value = false
 }
-
 </script>
 
 <style scoped>

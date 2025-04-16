@@ -183,6 +183,6 @@ export const territoires = {
     lon: 2387918,
     lat: 1033713,
     zoom: 0,
-    projection: 'EPSG:3857'
+    projection: 'EPSG:3857',
   },
 }

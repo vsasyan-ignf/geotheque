@@ -1,41 +1,38 @@
 <template>
-    <Teleport to="body">
-      <div class="alert-container" v-if="isVisible">
-        <div 
-          class="alert"
-          :class="{ 
-            'alert-error': type === 'error',
-            'alert-success': type === 'success',
-            'alert-warning': type === 'warning',
-            'alert-info': type === 'info'
-          }"
-        >
-          <div class="alert-icon">
-            <SvgIcon v-if="type === 'error'" :path="mdiAlertCircle" type="mdi" />
-            <SvgIcon v-else-if="type === 'success'" :path="mdiCheckCircle" type="mdi" />
-            <SvgIcon v-else-if="type === 'warning'" :path="mdiAlert" type="mdi" />
-            <SvgIcon v-else-if="type === 'info'" :path="mdiInformation" type="mdi" />
-          </div>
-          <div class="alert-content">
-            <div v-if="title" class="alert-title">{{ title }}</div>
-            <div class="alert-message">
-              <slot></slot>
-            </div>
-          </div>
-          <div v-if="dismissible" class="alert-close" @click="closeAlert">
-            <SvgIcon :path="mdiClose" type="mdi" />
-          </div>
-          <div class="alert-progress-container">
-            <div 
-              class="alert-progress" 
-              :style="{ width: `${progressWidth}%` }"
-            ></div>
+  <Teleport to="body">
+    <div class="alert-container" v-if="isVisible">
+      <div
+        class="alert"
+        :class="{
+          'alert-error': type === 'error',
+          'alert-success': type === 'success',
+          'alert-warning': type === 'warning',
+          'alert-info': type === 'info',
+        }"
+      >
+        <div class="alert-icon">
+          <SvgIcon v-if="type === 'error'" :path="mdiAlertCircle" type="mdi" />
+          <SvgIcon v-else-if="type === 'success'" :path="mdiCheckCircle" type="mdi" />
+          <SvgIcon v-else-if="type === 'warning'" :path="mdiAlert" type="mdi" />
+          <SvgIcon v-else-if="type === 'info'" :path="mdiInformation" type="mdi" />
+        </div>
+        <div class="alert-content">
+          <div v-if="title" class="alert-title">{{ title }}</div>
+          <div class="alert-message">
+            <slot></slot>
           </div>
         </div>
+        <div v-if="dismissible" class="alert-close" @click="closeAlert">
+          <SvgIcon :path="mdiClose" type="mdi" />
+        </div>
+        <div class="alert-progress-container">
+          <div class="alert-progress" :style="{ width: `${progressWidth}%` }"></div>
+        </div>
       </div>
-    </Teleport>
+    </div>
+  </Teleport>
 </template>
-  
+
 <script setup>
 import { mdiAlertCircle, mdiCheckCircle, mdiAlert, mdiInformation, mdiClose } from '@mdi/js'
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
@@ -44,28 +41,28 @@ const props = defineProps({
   type: {
     type: String,
     default: 'info',
-    validator: (value) => ['error', 'success', 'warning', 'info'].includes(value)
+    validator: (value) => ['error', 'success', 'warning', 'info'].includes(value),
   },
   title: {
     type: String,
-    default: ''
+    default: '',
   },
   show: {
     type: Boolean,
-    default: true
+    default: true,
   },
   dismissible: {
     type: Boolean,
-    default: false
+    default: false,
   },
   duration: {
     type: Number,
-    default: 5000
+    default: 5000,
   },
   persistent: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const emit = defineEmits(['close'])
@@ -88,32 +85,35 @@ const clearTimers = () => {
 
 const startTimer = () => {
   if (props.persistent) return
-  
+
   clearTimers()
-  
+
   const intervalDuration = 50
   const iterations = props.duration / intervalDuration
   const decrementValue = 100 / iterations
-  
+
   progressWidth.value = 100
-  
+
   progressInterval = setInterval(() => {
     progressWidth.value = Math.max(0, progressWidth.value - decrementValue)
   }, intervalDuration)
-  
+
   timer = setTimeout(() => {
     closeAlert()
   }, props.duration)
 }
 
-watch(() => props.show, (newVal) => {
-  isVisible.value = newVal
-  if (newVal) {
-    startTimer()
-  } else {
-    clearTimers()
-  }
-})
+watch(
+  () => props.show,
+  (newVal) => {
+    isVisible.value = newVal
+    if (newVal) {
+      startTimer()
+    } else {
+      clearTimers()
+    }
+  },
+)
 
 onMounted(() => {
   if (props.show && !props.persistent) {

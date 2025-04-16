@@ -20,17 +20,16 @@
     :dismissible="true"
     :duration="6000"
   >
-    Votre clé API est invalide ou a expiré.
-    Veuillez vérifier votre clé ou en obtenir une nouvelle.
+    Votre clé API est invalide ou a expiré. Veuillez vérifier votre clé ou en obtenir une nouvelle.
   </Alert>
 </template>
 
 <script setup>
 import HeaderApp from '@/components/HeaderApp.vue'
 import MapBox from '@/components/MapBox.vue'
-import Alert from '@/components/material/Alert.vue';
+import Alert from '@/components/material/Alert.vue'
 import { ref, onMounted } from 'vue'
-import config from '@/config';
+import config from '@/config'
 
 const hasApiKey = ref(false)
 const isApiKeyValid = ref(true)
@@ -40,7 +39,7 @@ onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search)
   apiKey.value = urlParams.get('apikey')
   hasApiKey.value = !!apiKey.value
-  
+
   if (hasApiKey.value) {
     await validateApiKey(apiKey.value)
   }
@@ -49,7 +48,7 @@ onMounted(async () => {
 const validateApiKey = async (key) => {
   try {
     const testUrl = `${config.GEOSERVER_URL}&request=GetCapabilities&apikey=${key}`
-    
+
     const response = await fetch(testUrl)
     if (response.status === 401) {
       isApiKeyValid.value = false
@@ -94,7 +93,8 @@ const validateApiKey = async (key) => {
   scrollbar-color: rgba(115, 150, 20, 0.7) transparent;
 }
 
-html, body {
+html,
+body {
   scrollbar-width: thin;
   scrollbar-color: rgba(115, 150, 20, 0.7) transparent;
 }
