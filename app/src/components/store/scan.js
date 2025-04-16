@@ -58,13 +58,16 @@ export const useScanStore = defineStore('scan', () => {
 
   function createCqlFilter(excludeFields = []) {
     if (storeBbox.value.length === 0) return ''
-
+    console.log(storeBbox.value)
     let [minX, minY, maxX, maxY] = storeBbox.value
 
     let cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
 
     if (activeTab.value === 'cartotheque_etranger' && activeSubCategory.value === 'pays') {
-      cqlFilter = `INTERSECTS(geom,${wkt.value})`
+      if (wkt.value) {
+        cqlFilter = `INTERSECTS(geom,${wkt.value})`
+      }
+
     }
 
     const {
@@ -109,10 +112,15 @@ export const useScanStore = defineStore('scan', () => {
   }
 
   let storeURL = computed(() => {
+    console.log(storeBbox.value.length)
     if (storeBbox.value.length > 0) {
       let empriseURL = getCurrentTypeNames()
       let cqlFilter = createCqlFilter()
 
+      console.log( `${config.GEOSERVER_URL}` +
+        `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
+        `&cql_filter=${cqlFilter}` +
+        `&apikey=${config.APIKEY}`)
       return (
         `${config.GEOSERVER_URL}` +
         `&request=GetFeature&typeNames=${empriseURL}&outputFormat=application/json` +
