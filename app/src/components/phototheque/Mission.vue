@@ -217,6 +217,8 @@ function setUrl() {
     const url = createUrlPhoto()
     scanStore.updateUrlPhoto(url)
     scanStore.updateDicoUrlPhoto(url)
+  } else {
+    console.log("test")
   }
 }
 
