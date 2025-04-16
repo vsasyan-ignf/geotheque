@@ -152,7 +152,7 @@ function handleGoToPoint() {
   eventBus.emit('update-coordinates', { x: mapCoords[0], y: mapCoords[1] })
   eventBus.emit('center-map', { x: mapCoords[0], y: mapCoords[1] })
 
-  emit('go-to-point', point)
+  emit('go-to-point', point.bboxMercator)
 }
 
 // gestion du clique sur la carte
