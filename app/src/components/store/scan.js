@@ -64,7 +64,10 @@ export const useScanStore = defineStore('scan', () => {
     let cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
 
     if (activeTab.value === 'cartotheque_etranger' && activeSubCategory.value === 'pays') {
-      cqlFilter = `INTERSECTS(geom,${wkt.value})`
+      if (wkt.value) {
+        cqlFilter = `INTERSECTS(geom,${wkt.value})`
+      }
+
     }
 
     const {
