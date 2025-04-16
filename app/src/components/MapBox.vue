@@ -25,6 +25,19 @@
 
     <MapNavBar :coordinates="mouseCoordinates" @update:territory="handleTerritoryUpdate" :territoryName="territoryData.name"/>
   </div>
+
+  <Alert
+    v-if="showTAError"
+    type="warning"
+    title="Erreur de données"
+    :show="true"
+    :dismissible="true"
+    :duration="4000"
+    @close="closeAlert"
+  >
+    Les clichés de la mission sont indisponible
+  </Alert>
+
 </template>
 
 <script setup>
@@ -76,7 +89,7 @@ import { Style, Text, Stroke, Fill } from 'ol/style'
 import Icon from 'ol/style/Icon'
 
 import MapNavBar from './MapNavBar.vue'
-
+import Alert from './material/Alert.vue'
 import { getDistance } from 'ol/sphere'
 import { territoires } from './composable/getTerritoires'
 
@@ -124,6 +137,7 @@ const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
 
 const checkboxAlphanum = ref(false)
+const showTAError = ref(false)
 
 const infosPva = ref({})
 
@@ -149,6 +163,10 @@ const clearAllLayersTA = () => {
   tab_emprise_photo = []
   last_geom = null
   showCardPva.value = false
+}
+
+function closeAlert() {
+  showTAError.value = false
 }
 
 const vectorOtherLayers = ref(null)
@@ -370,6 +388,7 @@ function Add_new_name_to_map(name) {
   vectorLayers.value.geomPhoto.getSource().addFeature(feature_name)
 }
 
+
 async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
@@ -443,6 +462,7 @@ async function parcour_tab_and_map(url) {
     }
   } catch (error) {
     console.error('Erreur lors de la récupération des données :', error)
+    showTAError.value = true
   }
 }
 
