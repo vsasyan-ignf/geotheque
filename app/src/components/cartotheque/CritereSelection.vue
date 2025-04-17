@@ -193,6 +193,9 @@ watch(storeURL, async () => {
   await loadInitialOptions()
 })
 
+/**
+ * Charge les options initiales pour le formulaire
+ */
 async function loadInitialOptions() {
   if (isPhototheque.value) {
     const [commanditaireOpts, producteurOpts] = await Promise.all([
@@ -205,6 +208,9 @@ async function loadInitialOptions() {
   }
 }
 
+/**
+ * Met à jour les options de commanditaire en fonction de la sélection actuelle
+ */
 async function updateCommanditaireOptions() {
   if (isPhototheque.value) {
     const options = await scanStore.getCommanditaireOptions(formData.value.commanditaire)
@@ -212,6 +218,9 @@ async function updateCommanditaireOptions() {
   }
 }
 
+/**
+ * Met à jour les options de producteur en fonction de la sélection actuelle
+ */
 async function updateProducteurOptions() {
   if (isPhototheque.value) {
     const options = await scanStore.getProducteurOptions(formData.value.producteur)
