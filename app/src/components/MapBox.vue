@@ -23,24 +23,8 @@
     />
     <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
 
-    <MapNavBar
-      :coordinates="mouseCoordinates"
-      @update:territory="handleTerritoryUpdate"
-      :territoryName="territoryData.name"
-    />
+    <MapNavBar :coordinates="mouseCoordinates" @update:territory="handleTerritoryUpdate" :territoryName="territoryData.name"/>
   </div>
-
-  <Alert
-    v-if="showTAError"
-    type="warning"
-    title="Erreur de données"
-    :show="true"
-    :dismissible="true"
-    :duration="4000"
-    @close="closeAlert"
-  >
-    Les clichés de la mission sont indisponible
-  </Alert>
 </template>
 
 <script setup>
@@ -92,7 +76,7 @@ import { Style, Text, Stroke, Fill } from 'ol/style'
 import Icon from 'ol/style/Icon'
 
 import MapNavBar from './MapNavBar.vue'
-import Alert from './material/Alert.vue'
+
 import { getDistance } from 'ol/sphere'
 import { territoires } from './composable/getTerritoires'
 
@@ -140,7 +124,6 @@ const communesLayerManuallyActivated = ref(false)
 const otherLayers = ref(otherLayersCartoFrance)
 
 const checkboxAlphanum = ref(false)
-const showTAError = ref(false)
 
 const infosPva = ref({})
 
@@ -168,10 +151,6 @@ const clearAllLayersTA = () => {
   showCardPva.value = false
 }
 
-function closeAlert() {
-  showTAError.value = false
-}
-
 const vectorOtherLayers = ref(null)
 
 let tab_emprise_photo = []
@@ -192,6 +171,8 @@ const handleTerritoryUpdate = (data) => {
 
   zoom.value = data.zoom
   center.value = [data.lon, data.lat]
+
+  console.log('Territoire sélectionné:', data.name)
 }
 
 watch(territoryData, (newVal) => {
@@ -216,11 +197,11 @@ watch(activeTab, (newValue) => {
   const name = activeTab.value.includes('etranger') ? 'Monde' : 'Metropole'
 
   territoryData.value = {
-    name: name,
-    lat: territoires[name].lat,
-    lon: territoires[name].lon,
-    zoom: territoires[name].zoom,
-  }
+      name : name,
+      lat: territoires[name].lat,
+      lon: territoires[name].lon,
+      zoom: territoires[name].zoom
+    }
 
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []
@@ -242,6 +223,7 @@ function toggleLayerVisibility(isVisible) {
     if (activeLayer) {
       activeLayer.setVisible(isVisible)
       visibility_switch.value = isVisible
+      console.log('Layer', activeLayerIndex.value, 'visibility set to', isVisible)
     }
   }
 }
@@ -461,7 +443,6 @@ async function parcour_tab_and_map(url) {
     }
   } catch (error) {
     console.error('Erreur lors de la récupération des données :', error)
-    showTAError.value = true
   }
 }
 
@@ -496,6 +477,7 @@ function handleDrawComplete(drawData) {
   })
 
   const extent = findIntersections(drawGeometry, vectorOtherLayers.value)
+  console.log(extent)
 }
 
 function handleDrawModeActivated(mode) {
@@ -574,8 +556,8 @@ onMounted(() => {
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
-
-    vectorLayers.value.pin.setZIndex(999)
+    
+    vectorLayers.value.pin.setZIndex(999);
 
     olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent)
@@ -663,6 +645,12 @@ onMounted(() => {
       })
       vectorLayers.value.pin.getSource().addFeature(feature)
       pins.value = [[x, y]]
+    })
+
+    eventBus.on('clear-cart', () => {
+      for (const name in dic_affiche_photos_clique) {
+        removeEmpriseClique(name)
+      }
     })
 
     watch(activeSubCategory, (newValue) => {
