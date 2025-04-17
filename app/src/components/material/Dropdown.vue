@@ -81,13 +81,17 @@ function toggleDropdown() {
 }
 
 function closeDropdown() {
-  isOpen.value = false
+  if (isOpen.value) {
+    isOpen.value = false
+    resetHover()
+  }
 }
 
 function selectOption(option) {
   selected.value = option
   isOpen.value = false
   emit('update:selected', option)
+
   scanStore.updateHoverScan(null)
   if (props.nameDropdown !== 'Collections') {
     scanStore.updateSelectedScan(option)
@@ -101,7 +105,6 @@ const debouncedHoverUpdate = debounce((option) => {
 function handleOptionHover(option) {
   if (props.nameDropdown !== 'Support' || props.nameDropdown !== 'Emulsion') {
     debouncedHoverUpdate(option)
-    scanStore.updateSelectedScan(null)
   }
 }
 

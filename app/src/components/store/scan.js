@@ -12,7 +12,6 @@ export const useScanStore = defineStore('scan', () => {
   let activeSubCategory = ref(null)
   let activeTab = ref('cartotheque')
   let wkt = ref(null)
-  let urlPhoto = ref(null)
   let deletePhotoAllBool = ref(false)
   let dicoUrlPhoto = ref([])
   let selectedPhotos = ref([])
@@ -64,7 +63,9 @@ export const useScanStore = defineStore('scan', () => {
     let cqlFilter = `BBOX(geom,${minX},${minY},${maxX},${maxY})`
 
     if (activeTab.value === 'cartotheque_etranger' && activeSubCategory.value === 'pays') {
-      cqlFilter = `INTERSECTS(geom,${wkt.value})`
+      if (wkt.value) {
+        cqlFilter = `INTERSECTS(geom,${wkt.value})`
+      }
     }
 
     const {
@@ -165,7 +166,6 @@ export const useScanStore = defineStore('scan', () => {
     storeBbox.value = []
     storeScansData.value = []
     storeSelectedScan.value = null
-    urlPhoto.value = null
     dicoUrlPhoto.value = []
     selectedPhotos.value = []
 
@@ -192,10 +192,6 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateWKT(newVal) {
     wkt.value = newVal
-  }
-
-  function updateUrlPhoto(newVal) {
-    urlPhoto.value = newVal
   }
 
   function updateDeletePhotoAllBool(newVal) {
@@ -399,8 +395,6 @@ export const useScanStore = defineStore('scan', () => {
     updateActiveTab,
     wkt,
     updateWKT,
-    urlPhoto,
-    updateUrlPhoto,
     collectionsOptions,
     fetchOptionsDropDown,
     supportOptions,

@@ -1,69 +1,47 @@
-# Environnement de développement
+# 🚀 Guide d'installation - Géothèque IGN
 
-https://vsasyan-ignf.github.io/geotheque/
+## ⬇️ Cloner le dépôt
 
-## Fichiers
+```bash
+git clone https://github.com/vsasyan-ignf/geotheque.git
+cd geotheque
+```
 
-Récupérer les archives :
+ou télécharger le zip et dézipper.
+
+---
+
+## 📁 Récupérer les archives
 
 - `geoserver.zip` à extraire dans `montages/geoserver` ;
 - `mtd.zip` à extraire dans `montages/mtd` ;
 - `images.zip` à extraire dans `montages/images`.
 
-Lien : [ici](https://francetransfert.numerique.gouv.fr/download/download-info-public?enclosure=de8b65e2-116e-4a61-87b9-ce99efeacbcc&lang=fr), mdp : `ensgTSI2025!!!`
+---
 
-Si vous êtes sous GNU/Linux, lancez depuis ce dossier :
-
-- `unzip geoserver.zip -d montages/geoserver/` ;
-- `unzip mtd.zip -d montages/mtd/` ;
-- `unzip images.zip -d montages/images/` ;
-
-## Lancement de l'environnement de dév
-
-Lancer l'environnement de dev avec :
+## Lancement des services backend
+Aller à la racine du projet et lancer la commande suivante :
 
 ```
-docker compose up -d
+sudo docker compose up -d
 ```
 
-Vérifiez que :
+---
 
-- GeoServer fonctionne via le lien (compte : `admin` / `geoserver`) : ${config.GEOSERVER_URL}/
-- iipsrv fonctionne via le lien : http://localhost:8080/fcgi-bin/iipsrv.fcgi?FIF=Misphot_Image/Lambert93/2021/2021_FD%2001_C_20/21FD0120x00001_03343.jp2&JTL=7,3457
-- apache "mtd" fonctionne via le lien : http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt
-- apache "img" fonctionne via le lien : http://localhost:8082/Misphot_Image/Lambert93/2021/2021_FD%2001_C_20/21FD0120x00001_03343.jp2
+## Lancement du programme
+D'abord aller dans le sous-dossier app.
 
-Le CORS est censé fonctionner... Mais ce n'est pas trop ça !
-
-Pour tester il est possible de lancer depuis une console JS dans Firefox/Chrome :
-
-```js
-// Est censé fonctionner
-fetch(
-  "http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt"
-)
-  .then((x) => x)
-  .then(console.log);
-// Fonctionne (cf. https://stackoverflow.com/a/42518434)
-fetch(
-  "http://localhost:8081/Misphot/Lambert93/1000/1000_AERODROME%20CREIL_C_100/1000_AERODROME%20CREIL_C_100.txt",
-  { cache: "no-cache" }
-)
-  .then((x) => x)
-  .then(console.log);
+- 1. Installer les dépendances avec la commande suivante :
+```
+npm install
 ```
 
-## Développement
+- 2. Pour lancer en mode pour développeur ou en mode production, il faut lancer la commande suivante :
+```
+npm run dev
+```
 
-À partir de là vous pouvez commencer le développement en utilisant les applicatifs comme si vous étiez en prod !
-
-(Il faudra relancer le `docker compose` à chaque redémarrage du PC, sauf à décommenter les `restart: unless-stopped`.)
-
-Il faudra, dans la configuration de votre solution, permettre de définir les points d'entrée suivants :
-
-- GeoServer : permet de connaître les missions/cartes disponibles ;
-- iipsrv : permet de visualiser des JP2 via streaming (avec [iipmooviewer](https://github.com/ruven/iipmooviewer)) ;
-- mtd : permet de récupérer les fichiers de métadonnées (XML, XML archive et TXT) via le web ;
-- images : permet de récupérer les fichiers images via le web.
-
-Pour les deux derniers services, il faudra une entrée "métropole" et une entrée "monde".
+ou 
+```
+npm run prod
+```

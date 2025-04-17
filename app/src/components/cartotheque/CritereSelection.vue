@@ -87,6 +87,17 @@
         />
       </div>
 
+      <Alert
+        :show="noResultsFound"
+        type="warning"
+        title="Aucun résultat"
+        dismissible
+        :duration="4000"
+        @close="noResultsFound = false"
+      >
+        Aucun résultat trouvé. Veuillez modifier vos critères de recherche.
+      </Alert>
+
       <div class="button-group">
         <button type="button" class="button reset-button" @click="resetForm">
           <SvgIcon :path="mdiRefresh" type="mdi" />
@@ -111,6 +122,7 @@ import { eventBus } from '@/components/composable/eventBus'
 import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { mdiRefresh, mdiMagnify } from '@mdi/js'
+import Alert from '../material/Alert.vue'
 
 const scanStore = useScanStore()
 const {
@@ -120,7 +132,17 @@ const {
   collectionsOptions,
   supportOptions,
   emulsionOptions,
+  storeScansData,
 } = storeToRefs(scanStore)
+const noResultsFound = ref(false)
+
+const checkResults = () => {
+  if (!storeScansData.value || storeScansData.value.length === 0) {
+    noResultsFound.value = true
+  } else {
+    noResultsFound.value = false
+  }
+}
 
 const isCartotheque = computed(() =>
   ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value),
@@ -254,6 +276,10 @@ const handleSubmit = () => {
   }
 
   scanStore.updateCriteria(criteria)
+
+  setTimeout(() => {
+    checkResults()
+  }, 100)
 }
 
 const resetForm = () => {
@@ -271,6 +297,7 @@ const resetForm = () => {
 
   scanStore.resetCriteria()
   eventBus.emit('criteria-reset')
+  noResultsFound.value = false
 }
 </script>
 

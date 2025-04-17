@@ -22,9 +22,9 @@
       @deactivate-draw-mode="handleDeactivateDrawMode"
     />
     <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
+
+    <MapNavBar :coordinates="mouseCoordinates" @update:territory="handleTerritoryUpdate" :territoryName="territoryData.name"/>
   </div>
-  <div style="z-index: 10" id="mouse-position"></div>
-  <div style="z-index: 10" id="form-proj"></div>
 </template>
 
 <script setup>
@@ -60,6 +60,7 @@ import {
   createGeomMouseOverLayer,
   createGeomCoupleLayer,
   createScanLayer,
+  createHoverLayer,
   createWFSLayer,
   initOtherVectorLayers,
 } from './composable/getVectorLayer'
@@ -74,10 +75,12 @@ import {
 import { Style, Text, Stroke, Fill } from 'ol/style'
 import Icon from 'ol/style/Icon'
 
-import MousePosition from 'ol/control/MousePosition.js'
-import { createStringXY } from 'ol/coordinate.js'
+import MapNavBar from './MapNavBar.vue'
+
 import { getDistance } from 'ol/sphere'
 import { territoires } from './composable/getTerritoires'
+
+const mouseCoordinates = ref({ x: 0, y: 0 })
 
 const showCardPva = ref(false)
 const selectedPhotoInfo = ref({})
@@ -101,7 +104,9 @@ const {
 } = storeToRefs(scanStore)
 
 const center = ref([territoires.Metropole.lon, territoires.Metropole.lat])
-const zoom = ref(territoires.Metropole.zoomLevel)
+const zoom = ref(territoires.Metropole.zoom)
+
+const territoryData = ref({ name: 'Metropole', lon: 0, lat: 0 })
 
 const projection = ref('EPSG:3857')
 const rotation = ref(0)
@@ -161,6 +166,24 @@ function hideOtherLayers() {
   otherLayers.value.forEach((layers) => (layers.visible = false))
 }
 
+const handleTerritoryUpdate = (data) => {
+  territoryData.value = data
+
+  zoom.value = data.zoom
+  center.value = [data.lon, data.lat]
+
+  console.log('Territoire sélectionné:', data.name)
+}
+
+watch(territoryData, (newVal) => {
+  if (olMap.value && olView.value) {
+    olView.value.animate({
+      center: [newVal.lon, newVal.lat],
+      zoom: newVal.zoom,
+    })
+  }
+})
+
 watch(activeTab, (newValue) => {
   const newLayers = getLayersForActiveTab(activeTab.value)
   layers.value = newLayers
@@ -171,21 +194,14 @@ watch(activeTab, (newValue) => {
 
   updateWMTSLayers(olMap.value, newLayers)
 
-  if (activeTab.value.includes('etranger')) {
-    console.log('here')
-    zoom.value = 0
-    center.value = [territoires.Monde.lon, territoires.Monde.lat]
-  } else {
-    zoom.value = territoires.Metropole.zoomLevel
-    center.value = [territoires.Metropole.lon, territoires.Metropole.lat]
-  }
+  const name = activeTab.value.includes('etranger') ? 'Monde' : 'Metropole'
 
-  if (olMap.value && olView.value) {
-    olView.value.animate({
-      center: center.value,
-      zoom: zoom.value,
-    })
-  }
+  territoryData.value = {
+      name : name,
+      lat: territoires[name].lat,
+      lon: territoires[name].lon,
+      zoom: territoires[name].zoom
+    }
 
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []
@@ -504,7 +520,7 @@ onMounted(() => {
       cross_alphanum: createPinLayer(crossIcon),
       geomPhoto: createGeomLayer(),
       geomCouple: createGeomCoupleLayer(),
-      hover: createScanLayer(),
+      hover: createHoverLayer(),
     }
 
     vectorOtherLayers.value = initOtherVectorLayers()
@@ -540,34 +556,16 @@ onMounted(() => {
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
-
-    function updateProjectionDisplay() {
-      const projectionCode = olMap.value.getView().getProjection().getCode()
-      const formProjElement = document.getElementById('form-proj')
-      if (formProjElement) {
-        formProjElement.innerHTML = `Projection: ${projectionCode}`
-      }
-    }
-
-    updateProjectionDisplay()
-    olMap.value.getView().on('change:projection', updateProjectionDisplay)
-
-    const mousePositionControl = new MousePosition({
-      coordinateFormat: createStringXY(2),
-      projection: olMap.value.getView().getProjection().getCode(),
-      target: document.getElementById('mouse-position'),
-    })
+    
+    vectorLayers.value.pin.setZIndex(999);
 
     olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent)
-      const formattedCoordinate = createStringXY(2)(coordinate)
+
+      mouseCoordinates.value.x = coordinate[0]
+      mouseCoordinates.value.y = coordinate[1]
 
       showPointOnEmprise(coordinate, tab_emprise_photo)
-
-      const mousePositionElement = document.getElementById('mouse-position')
-      if (mousePositionElement) {
-        mousePositionElement.innerHTML = `Position: ${formattedCoordinate}`
-      }
     })
 
     initializeIntersectionLayer(olMap)
@@ -858,40 +856,5 @@ provide('eventBus', eventBus)
   width: 100%;
   height: 100%;
   flex: 1;
-}
-
-#mouse-position {
-  position: absolute;
-  bottom: 10px;
-  right: 40%;
-  /* À 10px du côté gauche */
-  background-color: rgba(255, 255, 255, 0.8);
-  /* Fond semi-transparent pour améliorer la lisibilité */
-  padding: 5px;
-  /* Un peu de padding */
-  font-size: 14px;
-  /* Taille du texte */
-  border-radius: 5px;
-  /* Coins arrondis pour une meilleure esthétique */
-  color: black;
-}
-
-#form-proj {
-  position: absolute;
-  /* Positionner de manière absolue par rapport au conteneur parent */
-  bottom: 10px;
-  right: 24%;
-  z-index: 99999999;
-  /* Priorité sur les autres éléments */
-  background-color: rgba(255, 255, 255, 0.8);
-  /* Fond légèrement transparent pour le formulaire */
-  padding: 5px;
-  /* Un peu de padding autour du formulaire */
-  font-size: 14px;
-  border-radius: 5px;
-  /* Coins arrondis pour le formulaire */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  /* Ombre douce pour faire ressortir le formulaire */
-  color: black;
 }
 </style>

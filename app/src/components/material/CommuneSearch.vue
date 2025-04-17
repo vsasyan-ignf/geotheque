@@ -68,7 +68,6 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from '@/components/material/SubCategoryHeader.vue'
 import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
 import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
-import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 import { storeToRefs } from 'pinia'
@@ -109,7 +108,7 @@ function searchCommunes() {
     clearTimeout(searchTimeout)
   }
 
-  const query = searchCommune.value.toLowerCase().trim()
+  const query = searchCommune.value.toUpperCase().trim()
 
   if (!query) {
     communeResults.value = []
@@ -122,25 +121,25 @@ function searchCommunes() {
   let search_url = ''
   searchTimeout = setTimeout(() => {
     if (parseInt(query)) {
-      search_url = `${config.COMMUNE_URL}?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+      search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_communes&outputFormat=application/json&CQL_FILTER=insee_com%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
     } else {
-      search_url = `${config.COMMUNE_URL}?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
+      search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_communes&outputFormat=application/json&CQL_FILTER=nom_com%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
     }
 
     fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.map((commune) => ({
-          nom: commune.nom,
-          code: commune.codesPostaux[0],
-          departement: commune.departement.nom,
+        const newResults = data.features.map((commune) => ({
+          nom: commune.properties.nom_com,
+          code: commune.properties.insee_com,
+          departement: commune.properties.nom_dept,
+          geometry: commune.geometry.coordinates[0],
           bbox: commune.bbox,
-          contour: commune.contour, // type polygon Array(1) [ [...] ]
         }))
         communeResults.value = newResults
       })
       .catch((error) => {
-        console.error('Erreur lors de la récupération des communes:', error)
+        console.error('Erreur lors de la récupération des feuilles:', error)
         communeResults.value = []
       })
   }, 300)
@@ -155,20 +154,13 @@ function selectCommune(commune) {
 
 function validateCommune() {
   if (repCommune) {
-    const bbox = repCommune.bbox.coordinates[0]
-    const bboxWGS84 = [bbox[0], bbox[2]]
-    const bboxMercator = bboxWGS84.map((point) =>
-      useConvertCoordinates(point[0], point[1], 'EPSG:4326', 'EPSG:3857'),
-    )
+    const bboxMercator = repCommune.bbox
 
     const point = {
       bboxMercator: bboxMercator.flat(),
     }
 
-    // Array(number) [ (2)[...] (2)[...] ... ]
-    const contourMercator = repCommune.contour.coordinates[0].map((coord) =>
-      useConvertCoordinates(coord[0], coord[1], 'EPSG:4326', 'EPSG:3857'),
-    )
+    const contourMercator = repCommune.geometry[0]
 
     scanStore.updateSelectedGeom([contourMercator])
 
