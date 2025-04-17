@@ -215,7 +215,6 @@ const closeModal = () => {
 function setUrl() {
   if (storeSelectedScan.value) {
     const url = createUrlPhoto()
-    scanStore.updateUrlPhoto(url)
     scanStore.updateDicoUrlPhoto(url)
   }
 }

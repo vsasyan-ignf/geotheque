@@ -35,7 +35,7 @@
             <div class="results-list" v-if="departementResults.length > 0">
               <div
                 v-for="dept in departementResults"
-                :key="dept.code"
+                :key="dept.code + '-' + dept.nom"
                 class="result-item"
                 @click="selectDepartement(dept)"
               >
@@ -73,7 +73,6 @@ import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 
 import { useScanStore } from '@/components/store/scan'
-import { create_bbox } from '@/components/composable/convertCoordinates'
 import config from '@/config'
 import { storeToRefs } from 'pinia'
 
@@ -82,6 +81,7 @@ const searchDepartement = ref('')
 const departementResults = ref([])
 const showResults = ref(false)
 let searchTimeout = null
+let repDepartement = ref(null)
 
 const scanStore = useScanStore()
 const { activeTab } = storeToRefs(scanStore)
@@ -107,24 +107,34 @@ function searchDepartements() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
   }
-  let url_dep
-  const query = searchDepartement.value.toLowerCase().trim()
-  const numbner_dep = parseInt(query)
-  if (!isNaN(numbner_dep)) {
-    url_dep = `${config.DEPARTEMENT_URL}?code=${query}&fields=nom,code,region`
-  } else {
-    url_dep = `${config.DEPARTEMENT_URL}?nom=${query}&fields=nom,code,region`
+
+  const query = searchDepartement.value.toUpperCase().trim()
+
+  if (!query) {
+    departementResults.value = []
+    return
   }
 
+  showResults.value = true
+
   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
+  let search_url = ''
   searchTimeout = setTimeout(() => {
-    fetch(url_dep)
+    if (parseInt(query)) {
+      search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_departements&outputFormat=application/json&CQL_FILTER=code_dept%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
+    } else {
+      search_url = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=geotheque_mtd:france_departements&outputFormat=application/json&CQL_FILTER=nom_dept%20LIKE%20%27${query}%25%27&apikey=${config.APIKEY}`
+    }
+
+    fetch(search_url)
       .then((response) => response.json())
       .then((data) => {
-        const newResults = data.map((departement) => ({
-          nom: departement.nom,
-          code: departement.code,
-          region: departement.region.nom,
+        const newResults = data.features.map((commune) => ({
+          nom: commune.properties.nom_dept,
+          code: commune.properties.code_dept,
+          region: commune.properties.nom_region,
+          geometry: commune.geometry.coordinates[0],
+          bbox: commune.bbox,
         }))
         departementResults.value = newResults
       })
@@ -136,48 +146,25 @@ function searchDepartements() {
 }
 
 function selectDepartement(departement) {
-  getDepartementBbox(departement)
-    .then((contour) => {
-      let rawBbox = create_bbox(contour)
-      const bbox3857 = [rawBbox.minX, rawBbox.minY, rawBbox.maxX, rawBbox.maxY]
-      const point = {
-        bboxMercator: bbox3857,
-      }
-
-      const coordinates = contour[0].map((point) => [point[0], point[1]])
-
-      scanStore.updateSelectedGeom([coordinates])
-
-      emit('select-departement', point)
-    })
-    .catch((error) => {
-      console.error('Erreur lors de la récupération des controus du departements:', error)
-    })
   searchDepartement.value = departement.nom
+  repDepartement = departement
+  validateDepartement()
   showResults.value = false
 }
 
-async function getDepartementBbox(departement) {
-  const depCode = departement.code.toString()
-  const urlDepBbox =
-    `${config.GEOSERVER_URL}` +
-    `&request=GetFeature&typeNames=geotheque_mtd:france_departements&outputFormat=application/json&CQL_FILTER=code_dept='${depCode}'&apikey=${config.APIKEY}`
+function validateDepartement() {
+  if (repDepartement) {
+    const bboxMercator = repDepartement.bbox
 
-  try {
-    const response = await fetch(urlDepBbox)
-    if (!response.ok) {
-      throw new Error(`rrreur réseau : ${response.status}`)
-    }
-    const data = await response.json()
-    const contour_dep = data.features[0]?.geometry?.coordinates[0]
-    if (!contour_dep) {
-      throw new Error('coordonées non trouvée dans la réponse')
+    const point = {
+      bboxMercator: bboxMercator.flat(),
     }
 
-    return contour_dep
-  } catch (error) {
-    console.error('e:', error)
-    throw error
+    const contourMercator = repDepartement.geometry[0]
+
+    scanStore.updateSelectedGeom([contourMercator])
+
+    emit('select-departement', point)
   }
 }
 </script>
