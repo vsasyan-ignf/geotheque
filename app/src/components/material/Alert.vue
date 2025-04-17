@@ -72,17 +72,26 @@ const progressWidth = ref(100)
 let timer = null
 let progressInterval = null
 
+/**
+ * Ferme l'alerte
+ */
 const closeAlert = () => {
   isVisible.value = false
   emit('close')
   clearTimers()
 }
 
+/**
+ * Efface les timers
+ */
 const clearTimers = () => {
   if (timer) clearTimeout(timer)
   if (progressInterval) clearInterval(progressInterval)
 }
 
+/**
+ * Démarre le timer pour la barre de progression
+ */
 const startTimer = () => {
   if (props.persistent) return
 

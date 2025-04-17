@@ -148,6 +148,10 @@ const apacheURL = computed(() =>
   activeTab.value === 'phototheque' ? config.IMG_FRANCE_URL : config.IMG_MONDE_URL,
 )
 
+/**
+ * Obtient l'URL de l'image à partir de l'élément
+ * @param item 
+ */
 const getImageUrl = (item) => {
   if (item) {
     const year = item.chantier.substring(0, 4)
@@ -156,16 +160,26 @@ const getImageUrl = (item) => {
   }
 }
 
+/**
+ * Ouvre la modale du panier
+ */
 const openCartModal = () => {
   isCartModalOpen.value = true
   document.body.style.overflow = 'hidden'
 }
 
+/**
+ * Ferme la modale du panier
+ */
 const closeCartModal = () => {
   isCartModalOpen.value = false
   document.body.style.overflow = ''
 }
 
+/**
+ * suppression d'un élément du panier
+ * @param index 
+ */
 const removeFromCart = (index) => {
   const itemToRemove = cartItems.value[index]
   cartItems.value.splice(index, 1)
@@ -175,12 +189,18 @@ const removeFromCart = (index) => {
   // localStorage.setItem('phototheque-cart', JSON.stringify(cartItems.value))
 }
 
+/**
+ * Supprime tous les éléments du panier
+ */
 const clearCart = () => {
   cartItems.value = []
   selectedPhotos.value = []
   // localStorage.setItem('phototheque-cart', JSON.stringify([]))
 }
 
+/**
+ * Télécharge les éléments du panier
+ */
 const downloadCartItems = () => {
   if (cartItems.value.length > 0) {
     const formattedData = cartItems.value.map((item) => {
@@ -190,6 +210,11 @@ const downloadCartItems = () => {
     downloadCSV(formattedData)
   }
 }
+
+/**
+ * Permet de visualiser une mission
+ * @param item 
+ */
 const viewMission = (item) => {
   if (item) {
     const year = item.chantier.substring(0, 4)
@@ -207,6 +232,10 @@ const viewMission = (item) => {
   }
 }
 
+/**
+ * Permet de télécharger une photo
+ * @param item 
+ */
 const downloadPhoto = (item) => {
   if (item) {
     const year = item.chantier.substring(0, 4)

@@ -60,6 +60,9 @@ const selected = ref('')
 const isOpen = ref(false)
 const emit = defineEmits(['update:selected', 'option-hover'])
 
+/**
+ * Vérifie si le dropdown doit s'afficher au-dessus ou en dessous
+ */
 function checkPosition() {
   if (!dropdownRef.value) return
 
@@ -73,6 +76,10 @@ function checkPosition() {
   })
 }
 
+/**
+ * Gère le clic à l'extérieur du dropdown
+ * @param {Event} event
+ */
 function toggleDropdown() {
   isOpen.value = !isOpen.value
   if (isOpen.value) {
@@ -80,6 +87,9 @@ function toggleDropdown() {
   }
 }
 
+/**
+ * Ferme le dropdown
+ */
 function closeDropdown() {
   if (isOpen.value) {
     isOpen.value = false
@@ -87,27 +97,42 @@ function closeDropdown() {
   }
 }
 
+/**
+ * Sélectionne une option dans le dropdown
+ * @param option
+ */
 function selectOption(option) {
   selected.value = option
   isOpen.value = false
   emit('update:selected', option)
 
   scanStore.updateHoverScan(null)
+  scanStore.updateCurrentPhotoInfo({})
   if (props.nameDropdown !== 'Collections') {
     scanStore.updateSelectedScan(option)
   }
 }
 
+/**
+ * Met à jour l'option survolée
+ */
 const debouncedHoverUpdate = debounce((option) => {
   scanStore.updateHoverScan(option)
 }, 0)
 
+/**
+ * Gère le survol d'une option
+ * @param option
+ */
 function handleOptionHover(option) {
   if (props.nameDropdown !== 'Support' || props.nameDropdown !== 'Emulsion') {
     debouncedHoverUpdate(option)
   }
 }
 
+/**
+ * Réinitialise l'option survolée
+ */
 function resetHover() {
   scanStore.updateHoverScan(null)
   if (selected.value) {
@@ -133,6 +158,9 @@ onMounted(() => {
   window.addEventListener('resize', checkPosition)
 })
 
+/**
+ * Nettoie l'écouteur d'événements lors du démontage
+ */
 const vClickOutside = {
   mounted(el, binding) {
     el._clickOutside = (event) => {

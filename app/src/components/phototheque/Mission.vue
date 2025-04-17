@@ -96,6 +96,27 @@
           <button class="view-details-button" @click="openModal">Voir tous les détails</button>
         </div>
       </div>
+
+      <div class="info-pva">
+        <Accordeon title="Infos PVA" defaultOpen>
+          <div class="mission-card" v-if="Object.keys(currentPhotoInfo).length !== 0">
+            <div class="preview-details">
+              <div
+                v-for="(val, key, index) in currentPhotoInfo"
+                :key="key"
+                class="detail-item"
+                :style="{ 'animation-delay': `${index * 0.05}s` }"
+              >
+                <div class="detail-label">{{ key }}</div>
+                <div class="detail-value">{{ val }}</div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="no-data">
+            Veuillez survolée avec la souris un cliché pour voir ses informations
+          </div>
+        </Accordeon>
+      </div>
     </div>
 
     <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
@@ -117,6 +138,7 @@ import { useScanStore } from '@/components/store/scan'
 import { storeToRefs } from 'pinia'
 import { downloadCSV } from '../composable/download'
 import ShakingButton from '@/components/material/ShakingButton.vue'
+import Accordeon from '../material/Accordeon.vue'
 import {
   mdiPlus,
   mdiMinus,
@@ -128,8 +150,15 @@ import {
 import config from '@/config'
 
 const scanStore = useScanStore()
-const { storeScansData, storeSelectedScan, deletePhotoAllBool, dicoUrlPhoto, flyTo, activeTab } =
-  storeToRefs(scanStore)
+const {
+  storeScansData,
+  storeSelectedScan,
+  deletePhotoAllBool,
+  dicoUrlPhoto,
+  flyTo,
+  activeTab,
+  currentPhotoInfo,
+} = storeToRefs(scanStore)
 
 const selectedMission = computed(() => storeSelectedScan.value?.properties)
 const missionName = computed(() => storeSelectedScan.value?.name)
@@ -202,16 +231,25 @@ const essentialDetails = computed(() => {
 
 const isModalOpen = ref(false)
 
+/**
+ * ouvre la modale
+ */
 const openModal = () => {
   isModalOpen.value = true
   document.body.style.overflow = 'hidden'
 }
 
+/**
+ * ferme la modale
+ */
 const closeModal = () => {
   isModalOpen.value = false
   document.body.style.overflow = ''
 }
 
+/**
+ * change l'url de la photo
+ */
 function setUrl() {
   if (storeSelectedScan.value) {
     const url = createUrlPhoto()
@@ -219,17 +257,26 @@ function setUrl() {
   }
 }
 
+/**
+ * Supprime toutes les photos
+ */
 function DeletePhotoAll() {
   scanStore.updateDeletePhotoAllBool(!deletePhotoAllBool.value)
   dicoUrlPhoto.value = []
 }
 
+/**
+ * Vérifie si l'url est dans le dictionnaire
+ */
 const urlInDico = computed(() => {
   if (!storeSelectedScan.value) return false
   const url = createUrlPhoto()
   return dicoUrlPhoto.value.includes(url)
 })
 
+/**
+ * Crée l'url de la photo
+ */
 function createUrlPhoto() {
   if (!storeSelectedScan.value?.properties) return ''
   const annee = storeSelectedScan.value.properties.annee || ''
@@ -238,6 +285,9 @@ function createUrlPhoto() {
   return `${mtdURL.value}${lieu}/${annee}/${nom}/${nom}.txt`
 }
 
+/**
+ * Supprime l'url de la photo
+ */
 function DeleteSelectedPhoto() {
   const deleteUrl = createUrlPhoto()
   const index = dicoUrlPhoto.value.indexOf(deleteUrl)
@@ -248,6 +298,9 @@ function DeleteSelectedPhoto() {
 
 let url_xml = ref(``)
 
+/**
+ * Télécharge le fichier XML
+ */
 function downloadxml() {
   if (!storeSelectedScan.value?.properties) return
 
@@ -258,6 +311,9 @@ function downloadxml() {
   window.open(url_xml, 'xml')
 }
 
+/**
+ * Permet de se déplacer sur l'emprise de la mission
+ */
 function clickedFlyTo() {
   scanStore.updateFlyTo(!flyTo.value)
 }
@@ -296,6 +352,16 @@ function clickedFlyTo() {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.info-pva {
+  padding-bottom: 100px;
 }
 
 .group-button {
@@ -370,7 +436,6 @@ function clickedFlyTo() {
   border: 1px solid #ddd;
   overflow: hidden;
   transition: all 0.3s ease;
-  margin-bottom: 100px;
 }
 
 .mission-header {

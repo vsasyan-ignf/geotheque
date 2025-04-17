@@ -84,6 +84,10 @@ const textDisableOption = computed(() => {
     : 'Veuillez sélectionner un scan'
 })
 
+/**
+ * genère une URL d'image à partir des informations de la carte
+ * @param info 
+ */
 function generateImageUrl(info) {
   let name = ''
   let url = ''
@@ -100,6 +104,10 @@ function generateImageUrl(info) {
   return { url, name }
 }
 
+/**
+ * génère une URL pour l'iipsrv à partir des informations de la carte
+ * @param info 
+ */
 function getImageIppsrv(info) {
   let url = ''
   if (info) {
@@ -119,7 +127,9 @@ watch(storeSelectedScan, (newVal) => {
     imageUrl.value = getImageIppsrv(info)
   }
 })
-
+/**
+ * ouvre l'image dans le visualiseur IIPMoo
+ */
 function openIipmooviewer() {
   if (imageUrl.value) {
     const urlParams = new URLSearchParams(new URL(imageUrl.value).search)
@@ -135,6 +145,9 @@ function openIipmooviewer() {
   }
 }
 
+/**
+ * télécharge l'image du scan
+ */
 function downloadScans() {
   if (storeSelectedScan.value) {
     const info = storeSelectedScan.value?.properties
@@ -158,6 +171,9 @@ function downloadScans() {
 
 let url_xml = ref(``)
 
+/**
+ * Ouvre le fichier XML du scan dans une autre fenêtre
+ */
 function downloadxml() {
   if (storeSelectedScan.value) {
     const info = storeSelectedScan.value?.properties

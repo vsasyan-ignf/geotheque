@@ -110,6 +110,9 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
+/**
+ * Récupère les feuilles en fonction de la recherche
+ */
 function searchFeuille() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
@@ -148,6 +151,10 @@ function searchFeuille() {
   }, 300)
 }
 
+/**
+ * Change la feuille sélectionnée
+ * @param feuille 
+ */
 function selectFeuille(feuille) {
   feuilleSelected.value = feuille.numero
   repFeuille.value = feuille
@@ -155,6 +162,9 @@ function selectFeuille(feuille) {
   showResults.value = false
 }
 
+/**
+ * Valide la feuille sélectionnée
+ */
 function validateFeuille() {
   if (repFeuille) {
     const bboxMercator = repFeuille.value.bbox

@@ -136,6 +136,9 @@ const {
 } = storeToRefs(scanStore)
 const noResultsFound = ref(false)
 
+/**
+ * Vérifie si des résultats ont été trouvés
+ */
 const checkResults = () => {
   if (!storeScansData.value || storeScansData.value.length === 0) {
     noResultsFound.value = true
@@ -144,9 +147,16 @@ const checkResults = () => {
   }
 }
 
+/**
+ * Détermine si l'onglet actif est la cartothèque
+ */
 const isCartotheque = computed(() =>
   ['cartotheque', 'cartotheque_etranger'].includes(activeTab.value),
 )
+
+/**
+ * Détermine si l'onglet actif est la photothèque
+ */
 const isPhototheque = computed(() =>
   ['phototheque', 'phototheque_etranger'].includes(activeTab.value),
 )
@@ -193,6 +203,9 @@ watch(storeURL, async () => {
   await loadInitialOptions()
 })
 
+/**
+ * Charge les options initiales pour le formulaire
+ */
 async function loadInitialOptions() {
   if (isPhototheque.value) {
     const [commanditaireOpts, producteurOpts] = await Promise.all([
@@ -205,6 +218,9 @@ async function loadInitialOptions() {
   }
 }
 
+/**
+ * Met à jour les options de commanditaire en fonction de la sélection actuelle
+ */
 async function updateCommanditaireOptions() {
   if (isPhototheque.value) {
     const options = await scanStore.getCommanditaireOptions(formData.value.commanditaire)
@@ -212,6 +228,9 @@ async function updateCommanditaireOptions() {
   }
 }
 
+/**
+ * Met à jour les options de producteur en fonction de la sélection actuelle
+ */
 async function updateProducteurOptions() {
   if (isPhototheque.value) {
     const options = await scanStore.getProducteurOptions(formData.value.producteur)
@@ -219,38 +238,66 @@ async function updateProducteurOptions() {
   }
 }
 
+/**
+ * Met à jour les options de collection en fonction de la sélection actuelle
+ */
 const selectScaleMin = (scale) => {
   formData.value.scaleMin = scale
   showScaleMinOptions.value = false
 }
 
+/**
+ * Met à jour les options de collection en fonction de la sélection actuelle
+ */
 const selectScaleMax = (scale) => {
   formData.value.scaleMax = scale
   showScaleMaxOptions.value = false
 }
 
+/**
+ * Met à jour les options de collection en fonction de la sélection actuelle
+ */
 const selectCommanditaire = (option) => {
   formData.value.commanditaire = option
   showCommanditaireOptions.value = false
 }
 
+/**
+ * permet de sélectionner un producteur
+ * @param option 
+ */
 const selectProducteur = (option) => {
   formData.value.producteur = option
   showProducteurOptions.value = false
 }
 
+/**
+ * Met à jour la collection sélectionnée
+ * @param selected 
+ */
 const updateSelectedCollection = (selected) => {
   formData.value.collection = selected
 }
 
+/**
+ * Met à jour le support sélectionné
+ * @param selected 
+ */
 const updateSelectedSupport = (selected) => {
   formData.value.support = selected
 }
 
+/**
+ * Met à jour l'émulsion sélectionnée
+ * @param selected 
+ */
 const updateSelectedEmulsion = (selected) => {
   formData.value.emulsion = selected
 }
 
+/**
+ * Gère la soumission du formulaire
+ */
 const handleSubmit = () => {
   eventBus.emit('reset')
 
@@ -282,6 +329,9 @@ const handleSubmit = () => {
   }, 100)
 }
 
+/**
+ * Réinitialise le formulaire
+ */
 const resetForm = () => {
   formData.value = {
     yearMin: '',

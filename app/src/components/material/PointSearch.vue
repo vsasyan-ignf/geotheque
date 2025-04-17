@@ -111,6 +111,11 @@ const projections = [
   { id: 'EPSG:2154', name: 'Lambert 93' },
 ]
 
+/**
+ * Récupère la bbox d'un point
+ * @param longitude 
+ * @param latitude 
+ */
 function getPointBbox(longitude, latitude) {
   const bboxWGS84 = [longitude - 0.0001, latitude - 0.0001, longitude + 0.0001, latitude + 0.0001]
 

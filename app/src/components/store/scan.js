@@ -15,6 +15,7 @@ export const useScanStore = defineStore('scan', () => {
   let deletePhotoAllBool = ref(false)
   let dicoUrlPhoto = ref([])
   let selectedPhotos = ref([])
+  let currentPhotoInfo = ref({})
 
   let collectionsOptions = ref([{ id: '0', name: 'Toutes les collections' }])
   let supportOptions = ref([{ id: '0', name: 'Tous les supports' }])
@@ -180,6 +181,10 @@ export const useScanStore = defineStore('scan', () => {
 
   function updateSelectedScan(newVal) {
     storeSelectedScan.value = newVal
+  }
+
+  function updateCurrentPhotoInfo(newVal) {
+    currentPhotoInfo.value = newVal
   }
 
   function updateHoverScan(newVal) {
@@ -411,6 +416,8 @@ export const useScanStore = defineStore('scan', () => {
     updateHoverScan,
     selectedPhotos,
     updateSelectedPhotos,
+    currentPhotoInfo,
+    updateCurrentPhotoInfo,
     removeSelectedPhoto,
     flyTo,
     updateFlyTo,
