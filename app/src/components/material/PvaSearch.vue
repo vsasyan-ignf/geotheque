@@ -111,6 +111,9 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
+/**
+ * Récupère les missions en fonction de la recherche
+ */
 function searchPVA() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
@@ -146,6 +149,10 @@ function searchPVA() {
   }, 300)
 }
 
+/**
+ * Change la valeur de la mission sélectionnée
+ * @param pva 
+ */
 function selectPVA(pva) {
   pvaSelected.value = pva.nom
   url.value = `${config.GEOSERVER_URL}&request=GetFeature&typeNames=${coucheGeoserverName.value}&outputFormat=application/json&CQL_FILTER=nom%20LIKE%20%27${pva.nom}%27&apikey=${config.APIKEY}`
@@ -154,6 +161,9 @@ function selectPVA(pva) {
   showResults.value = false
 }
 
+/**
+ * Valide la mission sélectionnée
+ */
 async function validatePVA() {
   if (repPVA) {
     /** Il faut modifier l'url dans le store mais comme c'est un computed avec une bbox il faut modifier pleins de trucs

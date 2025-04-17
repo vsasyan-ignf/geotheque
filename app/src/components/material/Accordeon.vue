@@ -27,6 +27,9 @@ const props = defineProps({
 
 const isOpen = ref(props.defaultOpen)
 
+/**
+ * change l'état de l'accordéon
+ */
 function toggleAccordion() {
   isOpen.value = !isOpen.value
 }

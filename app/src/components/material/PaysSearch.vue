@@ -102,6 +102,9 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
+/**
+ * recherche les pays dans le geoserver
+ */
 function searchCountries() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
@@ -131,6 +134,10 @@ function searchCountries() {
   }, 500)
 }
 
+/**
+ * Recupère le pays sélectionné
+ * @param country 
+ */
 function selectCountry(country) {
   getCountryBbox(country)
     .then((contour) => {
@@ -173,6 +180,10 @@ function selectCountry(country) {
   showResults.value = false
 }
 
+/**
+ * Récupère le contour du pays
+ * @param country 
+ */
 async function getCountryBbox(country) {
   const countryCode = country.code
     .split(',')[0]

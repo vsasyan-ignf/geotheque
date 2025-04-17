@@ -103,6 +103,9 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
+/**
+ * Récupère les communes en fonction de la recherche
+ */
 function searchCommunes() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
@@ -145,6 +148,10 @@ function searchCommunes() {
   }, 300)
 }
 
+/**
+ * change la commune sélectionnée
+ * @param commune 
+ */
 function selectCommune(commune) {
   searchCommune.value = commune.nom
   repCommune = commune
@@ -152,6 +159,9 @@ function selectCommune(commune) {
   showResults.value = false
 }
 
+/**
+ * Valide la commune sélectionnée
+ */
 function validateCommune() {
   if (repCommune) {
     const bboxMercator = repCommune.bbox

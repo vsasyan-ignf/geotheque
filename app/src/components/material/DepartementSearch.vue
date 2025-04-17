@@ -103,6 +103,9 @@ onUnmounted(() => {
   if (searchTimeout) clearTimeout(searchTimeout)
 })
 
+/**
+ * Recherche les départements en fonction de la saisie de l'utilisateur
+ */
 function searchDepartements() {
   if (searchTimeout) {
     clearTimeout(searchTimeout)
@@ -145,6 +148,10 @@ function searchDepartements() {
   }, 300)
 }
 
+/**
+ * Change le département sélectionnée
+ * @param departement 
+ */
 function selectDepartement(departement) {
   searchDepartement.value = departement.nom
   repDepartement = departement
@@ -152,6 +159,9 @@ function selectDepartement(departement) {
   showResults.value = false
 }
 
+/**
+ * Valide le département sélectionné
+ */
 function validateDepartement() {
   if (repDepartement) {
     const bboxMercator = repDepartement.bbox

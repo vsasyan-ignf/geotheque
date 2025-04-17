@@ -21,6 +21,9 @@ const buttonRef = ref(null)
 const showTooltip = ref(false)
 const tooltipPosition = ref({ top: 0, left: 0 })
 
+/**
+ * Met à jour la position du tooltip
+ */
 function handleMouseEnter() {
   if (props.tooltip) {
     updatePosition()
@@ -28,10 +31,16 @@ function handleMouseEnter() {
   }
 }
 
+/**
+ * Cache le tooltip
+ */
 function handleMouseLeave() {
   showTooltip.value = false
 }
 
+/**
+ * Met à jour la position du tooltip
+ */
 function updatePosition() {
   if (!buttonRef.value) return
 
