@@ -21,9 +21,13 @@
       @draw-mode-activated="handleDrawModeActivated"
       @deactivate-draw-mode="handleDeactivateDrawMode"
     />
-    <CardPva v-if="showCardPva" :photoInfo="selectedPhotoInfo" @close="closeCardPva" />
+    <CardPva v-if="showCardPva" :photoInfo="currentPhotoInfo" @close="closeCardPva" />
 
-    <MapNavBar :coordinates="mouseCoordinates" @update:territory="handleTerritoryUpdate" :territoryName="territoryData.name"/>
+    <MapNavBar
+      :coordinates="mouseCoordinates"
+      @update:territory="handleTerritoryUpdate"
+      :territoryName="territoryData.name"
+    />
   </div>
 </template>
 
@@ -83,7 +87,6 @@ import { territoires } from './composable/getTerritoires'
 const mouseCoordinates = ref({ x: 0, y: 0 })
 
 const showCardPva = ref(false)
-const selectedPhotoInfo = ref({})
 
 function closeCardPva() {
   showCardPva.value = false
@@ -99,6 +102,7 @@ const {
   storeHoveredScan,
   deletePhotoAllBool,
   dicoUrlPhoto,
+  currentPhotoInfo,
   flyTo,
   selectedPhotos,
 } = storeToRefs(scanStore)
@@ -171,7 +175,7 @@ function hideOtherLayers() {
 
 /**
  * Gère la mise à jour de la carte en fonction du territoire sélectionné
- * @param data 
+ * @param data
  */
 const handleTerritoryUpdate = (data) => {
   territoryData.value = data
@@ -204,11 +208,11 @@ watch(activeTab, (newValue) => {
   const name = activeTab.value.includes('etranger') ? 'Monde' : 'Metropole'
 
   territoryData.value = {
-      name : name,
-      lat: territoires[name].lat,
-      lon: territoires[name].lon,
-      zoom: territoires[name].zoom
-    }
+    name: name,
+    lat: territoires[name].lat,
+    lon: territoires[name].lon,
+    zoom: territoires[name].zoom,
+  }
 
   //faire une fonction pour pas dupliquer avec reset
   tab_emprise_photo = []
@@ -226,7 +230,7 @@ const currentZoom = ref(zoom.value)
 
 /**
  * Change la visibilité de la couche active
- * @param isVisible 
+ * @param isVisible
  */
 function toggleLayerVisibility(isVisible) {
   if (olMap.value) {
@@ -253,9 +257,9 @@ function DrawEmpriseGeometry(geometry) {
 
 /**
  * Fonction qui renvoie l'index de l'emprise la plus proche du point
- * @param point 
- * @param emprises 
- * @param range 
+ * @param point
+ * @param emprises
+ * @param range
  */
 function aplhaOfPointInRange(point, emprises, range) {
   //function that take a point and return the
@@ -280,8 +284,8 @@ function aplhaOfPointInRange(point, emprises, range) {
 
 /**
  * Fonction qui affiche l'emprise sur laquelle on clique
- * @param point 
- * @param emprises 
+ * @param point
+ * @param emprises
  */
 function showPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
@@ -297,7 +301,7 @@ function showPointOnEmprise(point, emprises) {
 
     const geometry = polygon.getGeometry()
     showCardPva.value = true
-    selectedPhotoInfo.value = infosPva.value[alpha_selec]
+    scanStore.updateCurrentPhotoInfo(infosPva.value[alpha_selec])
     DrawEmpriseGeometry(geometry)
   } else {
     showCardPva.value = false
@@ -307,7 +311,7 @@ function showPointOnEmprise(point, emprises) {
 
 /**
  * Ajoute un nouveau couple à la carte
- * @param tab 
+ * @param tab
  */
 function Add_new_couple_to_map(tab) {
   const feature = new Feature({
@@ -318,8 +322,8 @@ function Add_new_couple_to_map(tab) {
 }
 
 /**
- *  
- * @param bool 
+ *
+ * @param bool
  */
 function updateCoupleVisibility(bool) {
   let i
@@ -334,10 +338,10 @@ function updateCoupleVisibility(bool) {
 
 /**
  * Ajoute un point à la carte
- * @param x 
- * @param y 
- * @param nom 
- * @param crossAlpha 
+ * @param x
+ * @param y
+ * @param nom
+ * @param crossAlpha
  */
 function addPointToMap(x, y, nom, crossAlpha = false) {
   const coord = [x, y]
@@ -381,7 +385,7 @@ function addPointToMap(x, y, nom, crossAlpha = false) {
 
 /**
  * Suppression de l'emprise cliquée
- * @param name 
+ * @param name
  */
 function removeEmpriseClique(name) {
   //fonction pour retirer une emprise de l'affichage
@@ -391,8 +395,8 @@ function removeEmpriseClique(name) {
 
 /**
  * Affiche l'emprise cliquée
- * @param name 
- * @param i 
+ * @param name
+ * @param i
  */
 function afficheMasuqeEmpriseClique(name, i) {
   //function qui gere l'ajout et la suppression de l'emprise au clique
@@ -410,7 +414,7 @@ function afficheMasuqeEmpriseClique(name, i) {
 
 /**
  * Ajoute un nouveau nom à la carte
- * @param name 
+ * @param name
  */
 function Add_new_name_to_map(name) {
   const feature_name = new Feature({
@@ -422,7 +426,7 @@ function Add_new_name_to_map(name) {
 
 /**
  * Parcourt le tableau et ajoute les polygones à la carte
- * @param url 
+ * @param url
  */
 async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
@@ -502,7 +506,7 @@ async function parcour_tab_and_map(url) {
 
 /**
  * Gère le changement d'option d'affichage
- * @param layer 
+ * @param layer
  */
 function handleOtherLayerToggle(layer) {
   if (layer.id === 'communes' && vectorOtherLayers.value?.communes) {
@@ -517,7 +521,7 @@ function handleOtherLayerToggle(layer) {
 
 /**
  * Change la couche active
- * @param index 
+ * @param index
  */
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
@@ -526,7 +530,7 @@ function changeActiveLayer(index) {
 
 /**
  * Gère le changement d'option d'affichage
- * @param drawData 
+ * @param drawData
  */
 function handleDrawComplete(drawData) {
   console.log('Dessin terminé:', drawData)
@@ -548,7 +552,7 @@ function handleDrawComplete(drawData) {
 
 /**
  * Gère l'activation du mode de dessin
- * @param mode 
+ * @param mode
  */
 function handleDrawModeActivated(mode) {
   console.log('Mode de dessin activé:', mode)
@@ -629,8 +633,8 @@ onMounted(() => {
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
-    
-    vectorLayers.value.pin.setZIndex(999);
+
+    vectorLayers.value.pin.setZIndex(999)
 
     olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent)
@@ -850,7 +854,7 @@ onMounted(() => {
 
 /**
  * Gère le changement de la couche active
- * @param param0 
+ * @param param0
  */
 function handleDisplayOptionChange({ option, value }) {
   if (option === 'alphanumerique') {

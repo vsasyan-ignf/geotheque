@@ -99,7 +99,7 @@ function closeDropdown() {
 
 /**
  * Sélectionne une option dans le dropdown
- * @param option 
+ * @param option
  */
 function selectOption(option) {
   selected.value = option
@@ -107,21 +107,22 @@ function selectOption(option) {
   emit('update:selected', option)
 
   scanStore.updateHoverScan(null)
+  scanStore.updateCurrentPhotoInfo({})
   if (props.nameDropdown !== 'Collections') {
     scanStore.updateSelectedScan(option)
   }
 }
 
-/** 
+/**
  * Met à jour l'option survolée
-*/
+ */
 const debouncedHoverUpdate = debounce((option) => {
   scanStore.updateHoverScan(option)
 }, 0)
 
 /**
  * Gère le survol d'une option
- * @param option 
+ * @param option
  */
 function handleOptionHover(option) {
   if (props.nameDropdown !== 'Support' || props.nameDropdown !== 'Emulsion') {
