@@ -68,7 +68,6 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import SubCategoryHeader from '@/components/material/SubCategoryHeader.vue'
 import CartothequeSubMenu from '@/components/cartotheque/CartothequeSubMenu.vue'
 import PhotothequeSubMenu from '@/components/phototheque/PhotothequeSubMenu.vue'
-import { useConvertCoordinates } from '@/components/composable/convertCoordinates'
 import { useScanStore } from '@/components/store/scan'
 import { mdiMapSearchOutline, mdiAlertCircleOutline, mdiClose, mdiMagnify } from '@mdi/js'
 import { storeToRefs } from 'pinia'
@@ -103,48 +102,6 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   if (searchTimeout) clearTimeout(searchTimeout)
 })
-
-// function searchCommunes() {
-//   if (searchTimeout) {
-//     clearTimeout(searchTimeout)
-//   }
-
-//   const query = searchCommune.value.toLowerCase().trim()
-
-//   if (!query) {
-//     communeResults.value = []
-//     return
-//   }
-
-//   showResults.value = true
-
-//   // ajout d'un setTimeout pour éviter les bugs de requetes et trop de requetes
-//   let search_url = ''
-//   searchTimeout = setTimeout(() => {
-//     if (parseInt(query)) {
-//       search_url = `${config.COMMUNE_URL}?codePostal=${query}&fields=nom,codesPostaux,departement,bbox,contour`
-//     } else {
-//       search_url = `${config.COMMUNE_URL}?nom=${query}&fields=nom,codesPostaux,departement,bbox,contour`
-//     }
-
-//     fetch(search_url)
-//       .then((response) => response.json())
-//       .then((data) => {
-//         const newResults = data.map((commune) => ({
-//           nom: commune.nom,
-//           code: commune.codesPostaux[0],
-//           departement: commune.departement.nom,
-//           bbox: commune.bbox,
-//           contour: commune.contour, // type polygon Array(1) [ [...] ]
-//         }))
-//         communeResults.value = newResults
-//       })
-//       .catch((error) => {
-//         console.error('Erreur lors de la récupération des communes:', error)
-//         communeResults.value = []
-//       })
-//   }, 300)
-// }
 
 function searchCommunes() {
   if (searchTimeout) {
@@ -187,8 +144,6 @@ function searchCommunes() {
       })
   }, 300)
 }
-
-
 
 function selectCommune(commune) {
   searchCommune.value = commune.nom
