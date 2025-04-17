@@ -42,6 +42,10 @@ const hasPhotoInfo = computed(() => {
   return Object.keys(props.photoInfo).length > 0
 })
 
+/**
+ * renvoie une chaîne formatée à partir de la clé
+ * @param key 
+ */
 function formatLabel(key) {
   return key
     .split('_')

@@ -202,16 +202,25 @@ const essentialDetails = computed(() => {
 
 const isModalOpen = ref(false)
 
+/**
+ * ouvre la modale
+ */
 const openModal = () => {
   isModalOpen.value = true
   document.body.style.overflow = 'hidden'
 }
 
+/**
+ * ferme la modale
+ */
 const closeModal = () => {
   isModalOpen.value = false
   document.body.style.overflow = ''
 }
 
+/**
+ * change l'url de la photo
+ */
 function setUrl() {
   if (storeSelectedScan.value) {
     const url = createUrlPhoto()
@@ -219,17 +228,26 @@ function setUrl() {
   }
 }
 
+/**
+ * Supprime toutes les photos
+ */
 function DeletePhotoAll() {
   scanStore.updateDeletePhotoAllBool(!deletePhotoAllBool.value)
   dicoUrlPhoto.value = []
 }
 
+/**
+ * Vérifie si l'url est dans le dictionnaire
+ */
 const urlInDico = computed(() => {
   if (!storeSelectedScan.value) return false
   const url = createUrlPhoto()
   return dicoUrlPhoto.value.includes(url)
 })
 
+/**
+ * Crée l'url de la photo
+ */
 function createUrlPhoto() {
   if (!storeSelectedScan.value?.properties) return ''
   const annee = storeSelectedScan.value.properties.annee || ''
@@ -238,6 +256,9 @@ function createUrlPhoto() {
   return `${mtdURL.value}${lieu}/${annee}/${nom}/${nom}.txt`
 }
 
+/**
+ * Supprime l'url de la photo
+ */
 function DeleteSelectedPhoto() {
   const deleteUrl = createUrlPhoto()
   const index = dicoUrlPhoto.value.indexOf(deleteUrl)
@@ -248,6 +269,9 @@ function DeleteSelectedPhoto() {
 
 let url_xml = ref(``)
 
+/**
+ * Télécharge le fichier XML
+ */
 function downloadxml() {
   if (!storeSelectedScan.value?.properties) return
 
@@ -258,6 +282,9 @@ function downloadxml() {
   window.open(url_xml, 'xml')
 }
 
+/**
+ * Permet de se déplacer sur l'emprise de la mission
+ */
 function clickedFlyTo() {
   scanStore.updateFlyTo(!flyTo.value)
 }

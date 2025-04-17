@@ -66,6 +66,10 @@ const props = defineProps({
 
 defineEmits(['select-sub-category', 'close-sub-category'])
 
+/**
+ * Change la valeur du bbox dans le store
+ * @param point 
+ */
 function goToPoint(point) {
   if (point.bboxMercator) {
     scanStore.updateBbox(point.bboxMercator)
