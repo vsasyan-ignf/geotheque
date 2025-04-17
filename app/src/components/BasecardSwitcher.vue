@@ -127,6 +127,10 @@ const checkboxOptions = [
 
 const hasOtherLayers = computed(() => props.otherLayers.length > 0)
 
+/**
+ * Gère le changement de la couche active
+ * @param index 
+ */
 function handleLayerToggle(index) {
   const layer = props.otherLayers[index]
   layer.visible = !layer.visible
@@ -134,6 +138,10 @@ function handleLayerToggle(index) {
   emit('other-layer-toggle', { ...layer })
 }
 
+/**
+ * gère le changement d'option d'affichage
+ * @param option 
+ */
 function handleOptionChange(option) {
   emit('display-option-change', {
     option,
@@ -145,6 +153,10 @@ function toggleExpand() {
   isExpanded.value = !isExpanded.value
 }
 
+/**
+ * Sélectionne une couche
+ * @param index 
+ */
 function selectLayer(index) {
   if (index !== props.activeLayerIndex) {
     emit('layer-change', index)
@@ -152,6 +164,10 @@ function selectLayer(index) {
   }
 }
 
+/**
+ * Gère le clic en dehors du sélecteur de couches
+ * @param event 
+ */
 function handleClickOutside(event) {
   const layerSwitcher = document.querySelector('.layer-switcher')
   if (layerSwitcher && !layerSwitcher.contains(event.target) && isExpanded.value) {

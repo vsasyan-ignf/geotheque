@@ -159,6 +159,9 @@ let dic_affiche_photos_clique = {}
 let last_geom = null
 const rayon_croix_clique = 50
 
+/**
+ * Cache les autres couches de la carte
+ */
 function hideOtherLayers() {
   Object.values(vectorOtherLayers.value).forEach((layer) => {
     layer.setVisible(false)
@@ -166,6 +169,10 @@ function hideOtherLayers() {
   otherLayers.value.forEach((layers) => (layers.visible = false))
 }
 
+/**
+ * Gère la mise à jour de la carte en fonction du territoire sélectionné
+ * @param data 
+ */
 const handleTerritoryUpdate = (data) => {
   territoryData.value = data
 
@@ -217,6 +224,10 @@ const olView = ref(null)
 const visibility_switch = ref(true)
 const currentZoom = ref(zoom.value)
 
+/**
+ * Change la visibilité de la couche active
+ * @param isVisible 
+ */
 function toggleLayerVisibility(isVisible) {
   if (olMap.value) {
     const activeLayer = olMap.value.getLayers().getArray()[activeLayerIndex.value]
@@ -240,6 +251,12 @@ function DrawEmpriseGeometry(geometry) {
   vectorLayers.value.geomMouseOver.getSource().addFeature(feature)
 }
 
+/**
+ * Fonction qui renvoie l'index de l'emprise la plus proche du point
+ * @param point 
+ * @param emprises 
+ * @param range 
+ */
 function aplhaOfPointInRange(point, emprises, range) {
   //function that take a point and return the
   let i, distance, point_emprise_4326, point_souris_4326
@@ -261,6 +278,11 @@ function aplhaOfPointInRange(point, emprises, range) {
   return null
 }
 
+/**
+ * Fonction qui affiche l'emprise sur laquelle on clique
+ * @param point 
+ * @param emprises 
+ */
 function showPointOnEmprise(point, emprises) {
   //fonction qui parcours les emprises et appelle DrawEmpriseGeometry quand une de ces emprise intersecte
   // le point de la souris ,sinon on vide la couche des emprises à afficher
@@ -283,6 +305,10 @@ function showPointOnEmprise(point, emprises) {
   }
 }
 
+/**
+ * Ajoute un nouveau couple à la carte
+ * @param tab 
+ */
 function Add_new_couple_to_map(tab) {
   const feature = new Feature({
     geometry: new Polygon([tab]),
@@ -291,6 +317,10 @@ function Add_new_couple_to_map(tab) {
   vectorLayers.value.geomCouple.getSource().addFeature(feature)
 }
 
+/**
+ *  
+ * @param bool 
+ */
 function updateCoupleVisibility(bool) {
   let i
   vectorLayers.value.geomCouple.getSource().clear()
@@ -302,6 +332,13 @@ function updateCoupleVisibility(bool) {
   }
 }
 
+/**
+ * Ajoute un point à la carte
+ * @param x 
+ * @param y 
+ * @param nom 
+ * @param crossAlpha 
+ */
 function addPointToMap(x, y, nom, crossAlpha = false) {
   const coord = [x, y]
 
@@ -342,12 +379,21 @@ function addPointToMap(x, y, nom, crossAlpha = false) {
   }
 }
 
+/**
+ * Suppression de l'emprise cliquée
+ * @param name 
+ */
 function removeEmpriseClique(name) {
   //fonction pour retirer une emprise de l'affichage
   vectorLayers.value.geomPhoto.getSource().removeFeature(dic_affiche_photos_clique[name])
   delete dic_affiche_photos_clique[name]
 }
 
+/**
+ * Affiche l'emprise cliquée
+ * @param name 
+ * @param i 
+ */
 function afficheMasuqeEmpriseClique(name, i) {
   //function qui gere l'ajout et la suppression de l'emprise au clique
   if (dic_affiche_photos_clique[name]) {
@@ -362,6 +408,10 @@ function afficheMasuqeEmpriseClique(name, i) {
   vectorLayers.value.geomPhoto.getSource().addFeature(polygon)
 }
 
+/**
+ * Ajoute un nouveau nom à la carte
+ * @param name 
+ */
 function Add_new_name_to_map(name) {
   const feature_name = new Feature({
     name: name,
@@ -370,6 +420,10 @@ function Add_new_name_to_map(name) {
   vectorLayers.value.geomPhoto.getSource().addFeature(feature_name)
 }
 
+/**
+ * Parcourt le tableau et ajoute les polygones à la carte
+ * @param url 
+ */
 async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
@@ -446,6 +500,10 @@ async function parcour_tab_and_map(url) {
   }
 }
 
+/**
+ * Gère le changement d'option d'affichage
+ * @param layer 
+ */
 function handleOtherLayerToggle(layer) {
   if (layer.id === 'communes' && vectorOtherLayers.value?.communes) {
     communesLayerManuallyActivated.value = !communesLayerManuallyActivated.value
@@ -457,11 +515,19 @@ function handleOtherLayerToggle(layer) {
   }
 }
 
+/**
+ * Change la couche active
+ * @param index 
+ */
 function changeActiveLayer(index) {
   activeLayerIndex.value = index
   changeActiveWMTSLayer(olMap.value, olView.value, layers.value, index)
 }
 
+/**
+ * Gère le changement d'option d'affichage
+ * @param drawData 
+ */
 function handleDrawComplete(drawData) {
   console.log('Dessin terminé:', drawData)
 
@@ -480,6 +546,10 @@ function handleDrawComplete(drawData) {
   console.log(extent)
 }
 
+/**
+ * Gère l'activation du mode de dessin
+ * @param mode 
+ */
 function handleDrawModeActivated(mode) {
   console.log('Mode de dessin activé:', mode)
   drawModeActive.value = true
@@ -487,6 +557,9 @@ function handleDrawModeActivated(mode) {
   clearIntersection()
 }
 
+/**
+ * Désactive le mode de dessin
+ */
 function handleDeactivateDrawMode() {
   console.log('Mode de dessin désactivé')
   drawModeActive.value = false
@@ -775,6 +848,10 @@ onMounted(() => {
   })
 })
 
+/**
+ * Gère le changement de la couche active
+ * @param param0 
+ */
 function handleDisplayOptionChange({ option, value }) {
   if (option === 'alphanumerique') {
     const currentLayer = value ? vectorLayers.value.cross_alphanum : vectorLayers.value.cross
