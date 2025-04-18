@@ -29,6 +29,17 @@
       :territoryName="territoryData.name"
     />
   </div>
+
+  <Alert
+        :show="noResultsFound"
+        type="warning"
+        title="Aucun résultat"
+        dismissible
+        :duration="4000"
+        @close="noResultsFound = false"
+      >
+        Aucun résultat trouvé. Veuillez modifier votre mission.
+      </Alert>
 </template>
 
 <script setup>
@@ -49,6 +60,7 @@ import View from 'ol/View'
 import Polygon from 'ol/geom/Polygon.js'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
+import Alert from './material/Alert.vue'
 import {
   getMaxZoom,
   createInitialWMTSLayers,
@@ -87,6 +99,7 @@ import { territoires } from './composable/getTerritoires'
 const mouseCoordinates = ref({ x: 0, y: 0 })
 
 const showCardPva = ref(false)
+const noResultsFound = ref(false)
 
 function closeCardPva() {
   showCardPva.value = false
@@ -428,6 +441,7 @@ function Add_new_name_to_map(name) {
  * Parcourt le tableau et ajoute les polygones à la carte
  * @param url
  */
+
 async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
@@ -501,6 +515,8 @@ async function parcour_tab_and_map(url) {
     }
   } catch (error) {
     console.error('Erreur lors de la récupération des données :', error)
+    noResultsFound.value = true
+
   }
 }
 
@@ -634,7 +650,7 @@ onMounted(() => {
       controls: defaultControls({ zoom: false, rotate: false }),
     })
 
-    vectorLayers.value.pin.setZIndex(999)
+    vectorLayers.value.pin.setZIndex(999);
 
     olMap.value.on('pointermove', (event) => {
       const coordinate = olMap.value.getEventCoordinate(event.originalEvent)

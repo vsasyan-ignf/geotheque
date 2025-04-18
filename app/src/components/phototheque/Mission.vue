@@ -474,7 +474,7 @@ function clickedFlyTo() {
 }
 
 .detail-label {
-  flex: 0 0 50%;
+  flex: 0 0 45%;
   font-weight: 500;
   color: #555;
   font-size: 11px;
