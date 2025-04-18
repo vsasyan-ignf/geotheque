@@ -25,6 +25,17 @@
 
     <MapNavBar :coordinates="mouseCoordinates" @update:territory="handleTerritoryUpdate" :territoryName="territoryData.name"/>
   </div>
+
+  <Alert
+        :show="noResultsFound"
+        type="warning"
+        title="Aucun résultat"
+        dismissible
+        :duration="4000"
+        @close="noResultsFound = false"
+      >
+        Aucun résultat trouvé. Veuillez modifier votre mission.
+      </Alert>
 </template>
 
 <script setup>
@@ -45,6 +56,7 @@ import View from 'ol/View'
 import Polygon from 'ol/geom/Polygon.js'
 import Feature from 'ol/Feature'
 import Point from 'ol/geom/Point'
+import Alert from './material/Alert.vue'
 import {
   getMaxZoom,
   createInitialWMTSLayers,
@@ -370,6 +382,8 @@ function Add_new_name_to_map(name) {
   vectorLayers.value.geomPhoto.getSource().addFeature(feature_name)
 }
 
+const noResultsFound = ref(false)
+
 async function parcour_tab_and_map(url) {
   //Parcour le tableau et envoie les deltas convertis sous forme de tableau dans Add_new_polygone_to_map
   try {
@@ -443,6 +457,8 @@ async function parcour_tab_and_map(url) {
     }
   } catch (error) {
     console.error('Erreur lors de la récupération des données :', error)
+    noResultsFound.value = true
+
   }
 }
 
@@ -556,7 +572,7 @@ onMounted(() => {
       view: view,
       controls: defaultControls({ zoom: false, rotate: false }),
     })
-    
+
     vectorLayers.value.pin.setZIndex(999);
 
     olMap.value.on('pointermove', (event) => {
